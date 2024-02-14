@@ -18,17 +18,8 @@ BONUS = {
 
 class Player():
 
-    def __init__(self, name: str):
-        self.name = name
-
-        self._stat_map = {
-            "str": self._strength,
-            "dex": self._dexterity,
-            "con": self._constitution,
-            "int": self._intelligence,
-            "wis": self._wisdom,
-            "cha": self._charisma
-        }
+    def __init__(self, name: str=""):
+        self._name = name
 
         #statblock
         self._strength:int = 10
@@ -38,8 +29,18 @@ class Player():
         self._wisdom:int = 10
         self._charisma:int = 10
 
+        #stat-map
+        self._stat_map = {
+            "str": self._strength,
+            "dex": self._dexterity,
+            "con": self._constitution,
+            "int": self._intelligence,
+            "wis": self._wisdom,
+            "cha": self._charisma
+        }
+
         #calculated stats
-        self._max_hp = random.randint(8) + BONUS[self._constitution]
+        self._max_hp = random.randrange(8) + BONUS[self._constitution]
         self._hp = self._max_hp
         self._evasion = 10 + BONUS[self._dexterity]
         self._xp = 0
@@ -77,12 +78,6 @@ class Player():
     def cha(self) -> int:
         return self._charisma
     @property
-    def bonus(self, stat) -> int:
-        if type(stat) == str:
-            return BONUS[self._stat_map[stat]]
-        
-        return BONUS[stat]
-    @property
     def hp(self) -> int:
         return self._hp
     @property
@@ -94,15 +89,26 @@ class Player():
     @property
     def weapon_damage(self) -> int:
         return self._weapon.damage_dice
-    
+    @property
+    def evasion(self):
+        return self._evasion
     @property
     def carrying_capacity(self) -> int:
         return 10 + self.bonus(self.str) + self.bonus(self.con)
     @property
     def gold(self):
         return self._gold
+    @property
+    def name(self):
+        return self._name
 
     #methods
+    def bonus(self, stat):
+        if type(stat) == str:
+            return BONUS[self._stat_map[stat]]
+        
+        return BONUS[stat]
+    
     def roll_attack(self) -> int:
         """
         Returns an attack roll (d20 + dex bonus)
@@ -110,31 +116,38 @@ class Player():
         if self._weapon.broken is True:
             raise ValueError("Weapon is broken")
         
-        return random.randint(20) + self.bonus(self.dex)
+        roll = random.randrange(20)
+        if roll == 1:
+            return 1
+        if roll == 20:
+            return 0
+        
+        return roll + self.bonus(self.dex)
             
     def roll_damage(self) -> int:
         """
         Returns a damage roll (weapon dice + str bonus)
         """
         self._weapon.lose_durability()
-        return random.randint(self.weapon_damage) + self.bonus(self.str)
+        return random.randrange(self.weapon_damage) + self.bonus(self.str)
 
     def roll_a_check(self, stat: str) -> int:
         """
         Returns a check with a given stat (d20 + stat bonus)
         """
-        return random.randint(20) + BONUS[self._stat_map[stat]]
+        return random.randrange(20) + BONUS[self._stat_map[stat]]
     
-    def take_damage(self, damage: int) -> None:
+    def take_damage(self, damage: int) -> int:
         """
         Reduces the players hp by a damage amount, reduced by armor
         """
         if self._armor.broken is False:
             self._armor.lose_durability()
         if damage - self.armor < 0:
-            pass
+            return 0 
         else:
             self._hp -= damage - self.armor
+            return damage - self.armor
 
     def pick_up(self, item) -> None:
         """
@@ -193,6 +206,26 @@ class Player():
         self._inventory = []
         #other stuff to be added
 
+    def change_name(self, name:str) -> None:
+        self._name = name
+
+    def equip_weapon(self, weapon: "Weapon") ->  None:
+        """
+        Equips the player with a given weapon
+        """
+        self._weapon = weapon
+    def equip_armor(self, armor: "Armor") -> None:
+        """
+        Same as above but for armor
+        """
+        self._armor = armor
+
+    def heal(self, healing: int) -> None:
+        """
+        Heals the player for a given amount
+        """
+        self._hp += healing
+
 class Item():
 
     def __init__(self, id, rarity):
@@ -222,19 +255,23 @@ class Item():
     
     #methods
     def lose_durability(self) -> None:
-        prob = random.randint(100)
-
+        prob = random.randrange(100)
+        #weapon only loses durability occasionally, probability decreases with rarity
         if prob < (40 // self.rarity):
             self._durability -= 1
 
     def repair(self) -> None:
+        """
+        Repairs weapon, returning its current durability to max value
+        """
         self._durability = self._max_durability
 
 class Weapon(Item):
 
-    def __init__(self, id, rarity, damage_dice: int):
+    def __init__(self, id, rarity, damage_dice: int, crit_multiplier:int):
         super().__init__(id, rarity)
         self._damage_dice = damage_dice
+        self._crit = crit_multiplier
 
     #properties
     @property
@@ -258,19 +295,54 @@ class Armor(Item):
         """
         return self._armor_value
 
+class Statblock():
+
+    def __init__(self, id, hp, damage, evasion, armor, loot):
+        self._id = id
+        self._hp = hp
+        self._damage = damage
+        self._evasion = evasion
+        self._armor = armor
+        self._loot = loot
+
+    #properties
+    @property
+    def id(self) -> str:
+        return self._id
+    @property
+    def hp(self) -> int:
+        return self._hp
+    @property
+    def damage(self) -> int:
+        return self._damage
+    @property
+    def evasion(self) -> int:
+        return self._evasion
+    @property
+    def armor(self) -> int:
+        return self._armor
+    @property
+    def loot(self):
+        return self._loot
+
 
 class Mob():
 
-    def __init__(self, id, level):
-        self._id = id
+    def __init__(self, level, statblock: Statblock):
+        self._id = statblock.id
         self._level = level
+        #base stats
+        self._stat_block = statblock
 
-        self._damage: int = 0
-        self._evasion: int = 0
-        self._armor:int = 0
-        self._hp = 0
+        #calculated stats
+        self._hp = random.randrange(statblock.hp) * level
+        self._damage: int = statblock.damage * level
+        self._evasion: int = statblock.evasion * level
+        self._armor:int = statblock.armor * level
 
-        self._loot = (0, 0)
+        self._loot = []
+        for item in statblock.loot:
+            self._loot.append(item*level)
 
     #properties
     @property
@@ -294,27 +366,39 @@ class Mob():
     @property
     def loot(self):
         return self._loot
+    @property
+    def id(self) -> str:
+        return self._id
         
     #methods
     def roll_attack(self) -> int:
         """
         Rolls an attack (d20)
         """
-        return random.randint(20)
+        roll = random.randrange(20)
+
+        if roll == 1:
+            return 1
+        if roll == 20:
+            return 0
+        
+        return roll + self.level
     
     def roll_damage(self) -> int:
         """
         Rolls damage (damage dice)
         """
-        return random.randint(self.damage)
+        return random.randrange(self.damage)
     
-    def take_damage(self, damage:int) -> None:
+    def take_damage(self, damage:int) -> int:
         """
         Takes a given amount of damage, reduced by armor
         """
         if damage - self.armor < 0:
-            pass
+            return 0
         else:
             self._hp -= damage - self.armor
+            return damage - self.armor
+
 
     
