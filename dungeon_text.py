@@ -48,15 +48,15 @@ class Player():
         self._inventory = []
 
         #equipment
-        self._weapon: None = None
-        self._armor = None
+        self._weapon: Weapon = None
+        self._armor: Armor = None
     
     #properties
     @property
-    def dead(self):
+    def dead(self) -> bool:
         return self._hp <= 0
     @property
-    def level(self):
+    def level(self) -> int:
         return self.level
     @property
     def str(self) -> int:
@@ -83,12 +83,18 @@ class Player():
         
         return BONUS[stat]
     @property
-    def hp(self):
+    def hp(self) -> int:
         return self._hp
     @property
-    def armor(self):
+    def armor(self) -> int:
         #should return armor value of equipped armor
-        return 3
+        if self._armor.broken is True:
+            return 0
+        return self._armor.armor_value
+    @property
+    def weapon_damage(self) -> int:
+        return self._weapon.damage_dice
+    
     @property
     def carrying_capacity(self) -> int:
         return 10 + self.bonus(self.str) + self.bonus(self.con)
@@ -98,14 +104,18 @@ class Player():
         """
         Returns an attack roll (d20 + dex bonus)
         """
+        if self._weapon.broken is True:
+            raise ValueError("Weapon is broken")
+        
         return random.randint(20) + self.bonus(self.dex)
+            
     
-    def roll_damage(self):
+    def roll_damage(self) -> int:
         """
         Returns a damage roll (weapon dice + str bonus)
         """
-        #should return equipped weapon dmg + str bonus
-        raise NotImplementedError
+        self._weapon.lose_durability()
+        return random.randint(self.weapon_damage) + self.bonus(self.str)
 
     def roll_a_check(self, stat: str) -> int:
         """
@@ -117,6 +127,8 @@ class Player():
         """
         Reduces the players hp by a damage amount, reduced by armor
         """
+        if self._armor.broken is False:
+            self._armor.lose_durability()
         if damage - self.armor < 0:
             pass
         else:
@@ -146,19 +158,38 @@ class Item():
 
     def __init__(self, id, rarity):
 
-        #rarity map
         self._id = id
         self._rarity = rarity
         self._value = 5 * rarity
+        self._max_durability = 10 * self._rarity
+        self._durability = self._max_durability
 
     #properties
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
     @property
-    def value(self):
+    def value(self) -> int:
         return self._value
+    @property
+    def broken(self) -> bool:
+        return self._durability <= 0
+    @property
+    def durability(self) -> tuple[int, int]:
+        return (self._durability, self._max_durability)
+    @property
+    def rarity(self) -> int:
+        return self._rarity
     
+    #methods
+    def lose_durability(self) -> None:
+        prob = random.randint(100)
+
+        if prob < (40 // self.rarity):
+            self._durability -= 1
+
+    def repair(self) -> None:
+        self._durability = self._max_durability
 
 class Weapon(Item):
 
@@ -166,22 +197,24 @@ class Weapon(Item):
         super().__init__(id, rarity)
         self._damage_dice = damage_dice
 
-        self._max_durability = 10 * self._rarity
-        self._durability = self._max_durability
+    #properties
+    @property
+    def damage_dice(self) -> int:
+        """
+        Returns damage dice
+        """
+        return self._damage_dice
+
+class Armor(Item):
+
+    def __init__(self, id, rarity, armor_value):
+        super().__init__(id, rarity)
+        self._armor_value = armor_value
 
     #properties
     @property
-    def broken(self):
-        return self._durability <= 0
-    @property
-    def durability(self):
-        return self._durability
-    
-    def lose_durability(self) -> None:
-        self._durability -= 1 
-
-
-sword = Weapon("weapon", 1, 8)
-
-print(sword.value)
-
+    def armor_value(self) -> int:
+        """
+        Return the value of the armor
+        """
+        return self._armor_value
