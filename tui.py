@@ -45,9 +45,17 @@ while RUNNING:
             print("He critically failed!")
 
         if attack >= PLAYER.evasion:
-            damage = current_enemy.roll_damage()
-            print(f'It hit you for {damage} damage')
-            PLAYER.take_damage(damage)
+            taken = PLAYER.take_damage(current_enemy.roll_damage())
+            print(f'It hit you for {taken} damage')
+            player_turn()
+
+        elif attack < PLAYER.evasion:
+            print("It missed.")
+            player_turn()
+    
+    def next_scene():
+        pass
+            
 
     if command.lower() == 'exit':
         RUNNING = False
@@ -63,12 +71,17 @@ while RUNNING:
             print("Crtical Fail!")
 
         if attack >= current_enemy.evasion:
-            print("A hit")
-            damage = PLAYER.roll_damage()
-            taken = current_enemy.take_damage(damage)
+            print("A hit!")
+            taken = current_enemy.take_damage(PLAYER.roll_damage())
             print(f'You dealt {taken} damage to the {current_enemy.id}!')
+            if current_enemy.dead is False:
+                enemy_turn()
+            elif current_enemy.dead is True:
+                print(f"You killed the {current_enemy.id}!")
+                next_scene()
         elif attack < current_enemy.evasion:
             print("You missed!")
+            enemy_turn()
 
 
 
