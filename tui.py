@@ -1,7 +1,7 @@
 import sys
 import random
 import secrets
-import dungeon_text
+import player, items, mob
 
 #statblock --> id, hp, damage, evasion, armor, loot
 
