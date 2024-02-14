@@ -98,6 +98,9 @@ class Player():
     @property
     def carrying_capacity(self) -> int:
         return 10 + self.bonus(self.str) + self.bonus(self.con)
+    @property
+    def gold(self):
+        return self._gold
 
     #methods
     def roll_attack(self) -> int:
@@ -109,7 +112,6 @@ class Player():
         
         return random.randint(20) + self.bonus(self.dex)
             
-    
     def roll_damage(self) -> int:
         """
         Returns a damage roll (weapon dice + str bonus)
@@ -153,6 +155,43 @@ class Player():
 
         else:
             raise ValueError("Can't drop an item you don't have")
+        
+    def level_up(self, stat: str) -> None:
+        """
+        Levels up a given stat
+        """
+        self._stat_map[stat] += 2
+
+    def gain_xp(self, xp: int) -> None:
+        """
+        Increases player XP by a given amount
+        """
+        self._xp += xp
+    
+    def gain_gold(self, gold:int) -> None:
+        """
+        Increases player gold by a given amount
+        """
+        self._gold += gold
+
+    def spend_gold(self, gold:int) -> None:
+        """
+        Reduces player gold by a given amount
+
+        Throws a value error if the player doesnt have enough gold to spend
+        """
+        if gold > self.gold:   
+            raise ValueError("Not enough gold")
+
+        self._gold -= gold
+
+    def die(self) -> None:
+        """
+        Kils the player. Lose gold and inventory on death
+        """
+        self._gold = 0
+        self._inventory = []
+        #other stuff to be added
 
 class Item():
 
@@ -218,3 +257,64 @@ class Armor(Item):
         Return the value of the armor
         """
         return self._armor_value
+
+
+class Mob():
+
+    def __init__(self, id, level):
+        self._id = id
+        self._level = level
+
+        self._damage: int = 0
+        self._evasion: int = 0
+        self._armor:int = 0
+        self._hp = 0
+
+        self._loot = (0, 0)
+
+    #properties
+    @property
+    def dead(self) -> bool:
+        return self.hp <= 0
+    @property
+    def level(self) -> int:
+        return self._level
+    @property
+    def damage(self) -> int:
+        return self._damage
+    @property
+    def evasion(self) -> int:
+        return self._evasion
+    @property
+    def armor(self) -> int:
+        return self._armor
+    @property
+    def hp(self) -> int:
+        return self._hp
+    @property
+    def loot(self):
+        return self._loot
+        
+    #methods
+    def roll_attack(self) -> int:
+        """
+        Rolls an attack (d20)
+        """
+        return random.randint(20)
+    
+    def roll_damage(self) -> int:
+        """
+        Rolls damage (damage dice)
+        """
+        return random.randint(self.damage)
+    
+    def take_damage(self, damage:int) -> None:
+        """
+        Takes a given amount of damage, reduced by armor
+        """
+        if damage - self.armor < 0:
+            pass
+        else:
+            self._hp -= damage - self.armor
+
+    
