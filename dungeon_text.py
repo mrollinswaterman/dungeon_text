@@ -22,6 +22,17 @@ class Player():
     def __init__(self, name: str):
         self.name = name
 
+        self._xp = 0
+
+        self._stat_map = {
+            "str": self._strength,
+            "dex": self._dexterity,
+            "con": self._constitution,
+            "int": self._intelligence,
+            "wis": self._wisdom,
+            "cha": self._charisma
+        }
+
         #statblock
         self._strength:int = 10
         self._dexterity:int = 10
@@ -43,37 +54,43 @@ class Player():
     def str(self) -> int:
         return self._strength
     @property
-    def str_bonus(self) -> int:
-        return BONUS[self._strength]
-    @property
     def dex(self) -> int:
         return self._dexterity
-    @property
-    def dex_bonus(self) -> int:
-        return BONUS[self._dexterity]
     @property
     def con(self) -> int:
         return self._constitution
     @property
-    def con_bonus(self) -> int:
-        return BONUS[self._constitution]
-    @property
     def int(self) -> int:
         return self._intelligence
-    @property
-    def int_bonus(self) -> int:
-        return BONUS[self._intelligence]
     @property
     def wis(self) -> int:
         return self._wisdom
     @property
-    def wis_bonus(self) -> int:
-        return BONUS[self._wisdom]
-    @property
     def cha(self) -> int:
         return self._charisma
     @property
-    def cha_bonus(self) -> int:
-        return BONUS[self._charisma]
+    def bonus(self, stat) -> int:
+        if type(stat) == str:
+            return BONUS[self._stat_map[stat]]
+        
+        return BONUS[stat]
+
+    #methods
+    def roll_attack(self) -> int:
+        """
+        Returns an attack roll (d20 + dex bonus)
+        """
+        return random.randint(20) + self.bonus(self.dex)
     
-    #
+    def roll_damage(self):
+        """
+        Returns a damage roll (weapon dice + str bonus)
+        """
+        #should return equipped weapon dmg + str bonus
+        raise NotImplementedError
+
+    def roll_a_check(self, stat: str) -> int:
+        """
+        Returns an check (d20 + stat bonus)
+        """
+        return random.randint(20) + BONUS[self._stat_map[stat]]
