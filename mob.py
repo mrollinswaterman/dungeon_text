@@ -1,14 +1,15 @@
 import random
+from typing import Optional, Union
 
 class Statblock():
 
-    def __init__(self, id, hp, damage, evasion, armor, loot):
+    def __init__(self, id):
         self._id = id
-        self._hp = hp
-        self._damage = damage
-        self._evasion = evasion
-        self._armor = armor
-        self._loot = loot
+        self._hp = 0
+        self._damage = 0
+        self._evasion = 0
+        self._armor = 0
+        self._loot = (0, 0)
 
     #properties
     @property
@@ -29,6 +30,18 @@ class Statblock():
     @property
     def loot(self):
         return self._loot
+    
+    #methods
+    def set_hp(self, num:int) -> None:
+        self._hp = num
+    def set_damage(self, num:int) -> None:
+        self._damage = num
+    def set_evasion(self, num:int) -> None:
+        self._evasion = num
+    def set_armor(self, num:int) -> None:
+        self._hp = num
+    def set_loot(self, loot:tuple[int, int]) -> None:
+        self._hp = loot
 
 
 class Mob():
@@ -104,3 +117,12 @@ class Mob():
         else:
             self._hp -= damage - self.armor
             return damage - self.armor
+        
+    def fumble_table(self) -> Union[str, bool]:
+        prob = random.randrange(100)
+
+        if prob > 50:
+            return False
+        
+        else: 
+            return True

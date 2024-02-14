@@ -49,8 +49,8 @@ class Player():
         self._inventory = []
 
         #equipment
-        self._weapon: Weapon = None
-        self._armor: Armor = None
+        self._weapon: items.Weapon = None
+        self._armor: items.Armor = None
     
     #properties
     @property
@@ -209,12 +209,12 @@ class Player():
     def change_name(self, name:str) -> None:
         self._name = name
 
-    def equip_weapon(self, weapon: "Weapon") ->  None:
+    def equip_weapon(self, weapon: "items.Weapon") ->  None:
         """
         Equips the player with a given weapon
         """
         self._weapon = weapon
-    def equip_armor(self, armor: "Armor") -> None:
+    def equip_armor(self, armor: "items.Armor") -> None:
         """
         Same as above but for armor
         """
