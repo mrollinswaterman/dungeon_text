@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import random
+import secrets
 from enum import Enum
 
 BONUS = {
@@ -40,7 +41,7 @@ class Player():
         }
 
         #calculated stats
-        self._max_hp = random.randrange(8) + BONUS[self._constitution]
+        self._max_hp = random.randrange(1,8) + BONUS[self._constitution]
         self._hp = self._max_hp
         self._evasion = 10 + BONUS[self._dexterity]
         self._xp = 0
@@ -116,7 +117,7 @@ class Player():
         if self._weapon.broken is True:
             raise ValueError("Weapon is broken")
         
-        roll = random.randrange(20)
+        roll = random.randrange(1,20)
         if roll == 1:
             return 1
         if roll == 20:
@@ -129,13 +130,13 @@ class Player():
         Returns a damage roll (weapon dice + str bonus)
         """
         self._weapon.lose_durability()
-        return random.randrange(self.weapon_damage) + self.bonus(self.str)
+        return random.randrange(1, self.weapon_damage) + self.bonus(self.str)
 
     def roll_a_check(self, stat: str) -> int:
         """
         Returns a check with a given stat (d20 + stat bonus)
         """
-        return random.randrange(20) + BONUS[self._stat_map[stat]]
+        return random.randrange(1, 20) + BONUS[self._stat_map[stat]]
     
     def take_damage(self, damage: int) -> int:
         """
@@ -335,7 +336,7 @@ class Mob():
         self._stat_block = statblock
 
         #calculated stats
-        self._hp = random.randrange(statblock.hp) * level
+        self._hp = random.randrange(1, statblock.hp) * level
         self._damage: int = statblock.damage * level
         self._evasion: int = statblock.evasion * level
         self._armor:int = statblock.armor * level
@@ -375,7 +376,7 @@ class Mob():
         """
         Rolls an attack (d20)
         """
-        roll = random.randrange(20)
+        roll = random.randrange(1,20)
 
         if roll == 1:
             return 1
@@ -388,7 +389,7 @@ class Mob():
         """
         Rolls damage (damage dice)
         """
-        return random.randrange(self.damage)
+        return random.randrange(1, self.damage)
     
     def take_damage(self, damage:int) -> int:
         """
