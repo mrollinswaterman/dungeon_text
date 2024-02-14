@@ -1,25 +1,24 @@
 import sys
 import random
-import secrets
 import player, items, mob
 
 #statblock --> id, hp, damage, evasion, armor, loot
 
 MOBS = {
-    "Goblin": dungeon_text.Statblock("Goblin", 5, 6, 10, 0, (10, 10)),
+    "Goblin": mob.Statblock("Goblin", 5, 6, 10, 0, (10, 10)),
 
-    "Hobgoblin": dungeon_text.Statblock("Hobgoblin", 8, 8, 12, 3, (15,15)),
+    "Hobgoblin": mob.Statblock("Hobgoblin", 8, 8, 12, 3, (15,15)),
 
-    "Bandit": dungeon_text.Statblock("Bandit", 12, 6, 10, 2, (15, 15))
+    "Bandit": mob.Statblock("Bandit", 12, 6, 10, 2, (15, 15))
 }
 
 MOBS_LIST = ["Goblin", "Hobgoblin", "Bandit"]
 
-PLAYER = dungeon_text.Player()
+PLAYER = player.Player()
 
-starting_weapon = dungeon_text.Weapon("starting-sword", 1, 8, 2)
+starting_weapon = items.Weapon("starting-sword", 1, 8, 2)
 
-starting_armor = dungeon_text.Armor("starting-armor", 1, 2)
+starting_armor = items.Armor("starting-armor", 1, 2)
 
 PLAYER.equip_armor(starting_armor)
 PLAYER.equip_weapon(starting_weapon)
@@ -27,10 +26,10 @@ PLAYER.equip_weapon(starting_weapon)
 print("Would you like to enter the Dungeon? y/n \n")
 
 STARTING_ENEMY_STATS = MOBS[MOBS_LIST[random.randrange(0,2)]]
-STARTING_ENEMY = dungeon_text.Mob(1, STARTING_ENEMY_STATS)
+STARTING_ENEMY = mob.Mob(1, STARTING_ENEMY_STATS)
 
 
-def link_start(enemy:dungeon_text.Mob) -> None:
+def link_start(enemy:mob.Mob) -> None:
     RUNNING = True
 
     def player_turn():
@@ -67,7 +66,7 @@ def link_start(enemy:dungeon_text.Mob) -> None:
         Starts a new scene with a new enemy
         """
         print("You venture deeper into the dungeon... \n")
-        next_enemy = dungeon_text.Mob(random.randrange(1,3), MOBS[MOBS_LIST[random.randrange(0,2)]])
+        next_enemy = mob.Mob(random.randrange(1,3), MOBS[MOBS_LIST[random.randrange(0,2)]])
         RUNNING = False
         link_start(next_enemy)
 
