@@ -165,7 +165,7 @@ def link_start(enemy:mob.Mob) -> None:
                 enemy_turn()
 
         if command.lower() == "hp":
-            print(f'\nYour HP is {PLAYER.hp}/{PLAYER.max_hp}')
+            narrator.display_hp(PLAYER)
             player_turn()
 
         if command.lower() == "i":

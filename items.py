@@ -73,7 +73,7 @@ class Armor(Item):
 
     def __init__(self, id, rarity):
         super().__init__(id, rarity)
-        self._armor_value = 2*self._rarity
+        self._armor_value = 2*self._rarity - 1
 
     #properties
     @property

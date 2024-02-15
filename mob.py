@@ -49,15 +49,19 @@ class Mob():
     def __init__(self, level, statblock: Statblock):
         self._id = statblock.id
         self._level = level
+
         #base stats
         self._stat_block = statblock
 
         #calculated stats
-        self._hp = random.randrange(1, statblock.hp) * level + 1
+        self._hp = statblock.hp
+        for _ in range(level-1):
+            self._hp += random.randrange(1, statblock.hp) + level // 2
         self._damage: int = statblock.damage * (level + 1) // 3
         self._evasion: int = statblock.evasion * (level + 1) // 2
         self._armor:int = statblock.armor * (level + 1) // 2
-
+        
+        #add loot
         self._loot = []
         for item in statblock.loot:
             self._loot.append(item*level // 2)
@@ -106,7 +110,7 @@ class Mob():
         """
         Rolls damage (damage dice)
         """
-        return random.randrange(1, self._damage)
+        return random.randrange(1, self._damage) + 1
     
     def take_damage(self, damage:int) -> int:
         """

@@ -40,7 +40,7 @@ class Player():
         }
 
         #calculated stats
-        self._max_hp = random.randrange(4,8) + BONUS[self._constitution]
+        self._max_hp = 8 + BONUS[self._constitution]
         self._hp = self._max_hp
         self._evasion = 10 + BONUS[self._dexterity]
         self._xp = 0

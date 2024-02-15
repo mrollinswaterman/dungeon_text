@@ -4,7 +4,7 @@ import mob
 GOBLIN = mob.Statblock("Goblin")
 
 GOBLIN.set_hp(5)
-GOBLIN.set_damage(3)
+GOBLIN.set_damage(4)
 GOBLIN.set_evasion(10)
 GOBLIN.set_armor(0)
 GOBLIN.set_loot((15, 5))
