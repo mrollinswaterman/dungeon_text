@@ -8,10 +8,10 @@ MOBS = {
 
     "Hobgoblin": monster_manual.HOBGOBLIN,
 
-    "Bandit": monster_manual.BANDIT
-}
+    "Bandit": monster_manual.BANDIT,
 
-MOBS_LIST = ["Goblin", "Hobgoblin", "Bandit"]
+    "Gang of Goblins": monster_manual.GANG_OF_GOBLINS
+}
 
 PLAYER = player.Player()
 
@@ -24,7 +24,7 @@ PLAYER.equip_weapon(starting_weapon)
 
 print("Would you like to enter the Dungeon? y/n \n")
 
-STARTING_ENEMY_STATS = MOBS[MOBS_LIST[random.randrange(0,2)]]
+STARTING_ENEMY_STATS = MOBS[random.choice(MOBS.keys())]
 STARTING_ENEMY = mob.Mob(1, STARTING_ENEMY_STATS)
 
 
@@ -78,7 +78,7 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         print("You venture deeper into the dungeon... \n")
-        next_enemy = mob.Mob(random.randrange(1,3), MOBS[MOBS_LIST[random.randrange(0,2)]])
+        next_enemy = mob.Mob(random.randrange(1,3), MOBS[random.choice(MOBS.keys())])
         RUNNING = False
         link_start(next_enemy)
 

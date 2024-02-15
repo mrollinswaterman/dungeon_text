@@ -39,9 +39,9 @@ class Statblock():
     def set_evasion(self, num:int) -> None:
         self._evasion = num
     def set_armor(self, num:int) -> None:
-        self._hp = num
+        self._armor = num
     def set_loot(self, loot:tuple[int, int]) -> None:
-        self._hp = loot
+        self._loot = loot
 
 
 class Mob():

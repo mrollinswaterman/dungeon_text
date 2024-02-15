@@ -24,3 +24,11 @@ BANDIT.set_damage(8)
 BANDIT.set_evasion(10)
 BANDIT.set_armor(2)
 BANDIT.set_loot((25, 15))
+
+GANG_OF_GOBLINS = mob.Statblock("Gang of Goblins")
+
+GANG_OF_GOBLINS.set_hp(13)
+GANG_OF_GOBLINS.set_damage(7)
+GANG_OF_GOBLINS.set_evasion(7)
+GANG_OF_GOBLINS.set_armor(0)
+GANG_OF_GOBLINS.set_loot((30, 15))
