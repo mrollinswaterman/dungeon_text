@@ -12,4 +12,11 @@ STRENGTH_LINES = [
     f'The path abruptly ends in a sheer rock wall.'
 ]
 
+EVENTS_LIST = []
 
+check = events.StatCheck_Event(
+    {"str": (10, [], []), "dex": (20, [], [])}
+)
+
+[f"You push the boulder aside and continue on your way",
+                  f"You pummel the boulder to rubble for daring to stand in your way."]

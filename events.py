@@ -61,8 +61,7 @@ END_LIST = [
 
 class StatCheck_Event():
 
-    def __init__(self, difficulties_classes:dict[str, int], tries, failure_text:Optional[dict[str,str]] = False, 
-                 success_text:Optional[dict[str,str]] = False, 
+    def __init__(self, difficulties_classes:dict[str, tuple], tries, 
                  dialogue:str = "", failure_dictionary:dict[str, list[str]] = FAILURE_LINES,
                  success_dictionary: dict[str, list[str]] = SUCCESS_LINES, end_list:list[str] = END_LIST):
 
@@ -74,12 +73,17 @@ class StatCheck_Event():
         self._text:str = dialogue
         self._tries = tries
         self._reward = None
+        self._has_been_passed = False
         self._failure_dictionary = failure_dictionary
         self._success_dictionary = success_dictionary
-
-        self._failure_text = failure_text
-        self._success_text = success_text
-
+        self._failure_text = {}
+        for stat in difficulties_classes:
+            if stat not in self._failure_text:
+                self._failure_text[stat] = difficulties_classes[stat][2]
+        self._success_text = {}
+        for stat in difficulties_classes:
+            if stat not in self._success_text:
+                self._success_text[stat] = difficulties_classes[stat][1]
         self._end_list = end_list
 
     #properties
@@ -98,25 +102,35 @@ class StatCheck_Event():
     @property
     def done(self) -> bool:
         return self._tries <= 0
+    @property
+    def has_been_passed(self) -> bool:
+        return self._has_been_passed
     
     #methods
     def passed(self, stat:str, check:int) -> bool:
+        """
+        Checks if a skill check was high enough to pass the event's difficulty clas
+
+        Returns a string containing the narrator's response, and bool indicating success (True)
+        or failure (False)
+        """
         if self.done:
             return random.choice(self._end_list)
         if stat not in self._stats:
             self._tries -= 1
-            if self._failure_text is not False:
-                return self._failure_text[stat]
+            if len(self._failure_text) > 0:
+                return random.choice(self._failure_text[stat])
             return random.choice(self._failure_dictionary[stat])
 
         if check >= self._difficulty_classes[stat]:
-            if self._success_text is not False:
-                return self._success_text[stat]
+            self._has_been_passed = True
+            if len(self._success_text) > 0:
+                return random.choice(self._success_text[stat])
             return random.choice(self._success_dictionary[stat])
         
-        elif self._failure_text is not False:
+        elif len(self._failure_text):
             self._tries -= 1
-            return self._failure_text[stat]
+            return random.choice(self._failure_text[stat])
 
         self._tries -= 1
         return random.choice(self._failure_dictionary[stat])
@@ -126,3 +140,11 @@ class StatCheck_Event():
         
     def set_reward(self, reward:int | tuple[int,int]) -> None:
         self._reward = reward
+
+    def set_failure_text(self, text:dict[str, str]) -> None:
+        self._failure_text = text
+
+    def set_success_text(self, text:dict[str, str]) -> None:
+        self._success_text = text
+
+    
