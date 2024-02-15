@@ -22,10 +22,10 @@ starting_armor = items.Armor("starting-armor", 1, 2)
 PLAYER.equip_armor(starting_armor)
 PLAYER.equip_weapon(starting_weapon)
 
-print("Would you like to enter the Dungeon? y/n \n")
+print("\nWould you like to enter the Dungeon? y/n\n")
 
-STARTING_ENEMY_STATS = MOBS[random.choice(MOBS.keys())]
-STARTING_ENEMY = mob.Mob(1, STARTING_ENEMY_STATS)
+STARTING_ENEMY_STATS = MOBS[random.choice(list(MOBS.keys()))]
+STARTING_ENEMY = mob.Mob(PLAYER.threat[0], STARTING_ENEMY_STATS)
 
 
 def link_start(enemy:mob.Mob) -> None:
@@ -43,42 +43,44 @@ def link_start(enemy:mob.Mob) -> None:
         """
         print(f'The {enemy.id} attacks you.')
         attack = enemy.roll_attack()
-        print(f'It rolled a {attack}! \n')
+        print(f'It rolled a {attack}!\n')
 
         if attack == 20:
-            print("It rolled a crit. Uh oh. \n")
+            print("It rolled a crit. Uh oh.\n")
             taken = PLAYER.take_damage(enemy.roll_damage() * 2)
-            print(f'The {enemy.id} hit you for {taken} damage! \n')
+            print(f'The {enemy.id} hit you for {taken} damage!\n')
             if PLAYER.dead is False:
                 player_turn()
         elif attack == 1:
             print("It critically failed! \n")
             if enemy.fumble_table() is True:
                 taken = enemy.take_damage(enemy.roll_damage)
-                print(f'The {enemy.id} hit itself for {taken} damage!')
+                print(f'The {enemy.id} hit itself for {taken} damage!\n')
             else:
-                print("It missed.")
-                if enemy.dead is False:
-                    player_turn()
-                else:
-                    end_scene()
+                print("It missed.\n")
+            if enemy.dead is False:
+                player_turn()
+            else:
+                end_scene()
         else:
             if attack >= PLAYER.evasion:
                 taken = PLAYER.take_damage(enemy.roll_damage())
-                print(f'The {enemy.id} hit you for {taken} damage. \n')
+                print(f'The {enemy.id} hit you for {taken} damage.\n')
                 if PLAYER.dead is False:
                     player_turn()
 
             else:
-                print(f"The {enemy.id} missed. \n")
+                print(f"The {enemy.id} missed.\n")
                 player_turn()
 
     def next_scene():
         """
         Starts a new scene with a new enemy
         """
-        print("You venture deeper into the dungeon... \n")
-        next_enemy = mob.Mob(random.randrange(1,3), MOBS[random.choice(MOBS.keys())])
+        print("\nYou venture deeper into the dungeon...")
+        print(" ...")
+        print("     ...")
+        next_enemy = mob.Mob(random.randrange(PLAYER.threat[0], PLAYER.threat[1]), MOBS[random.choice(list(MOBS.keys()))])
         RUNNING = False
         link_start(next_enemy)
 
@@ -86,7 +88,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins an encounter
         """
-        print(f'You encounter a Level {enemy.level} {enemy.id}! \n')
+        print(f'\nYou encounter a Level {enemy.level} {enemy.id}!\n')
 
     def end_scene():
         PLAYER.gain_gold(enemy.loot[0])
@@ -111,9 +113,9 @@ def link_start(enemy:mob.Mob) -> None:
 
         if command.lower() == 'a':
             #PLAYER.roll_attack()
-            print(f'You attack the {enemy.id}.')
+            print(f'\nYou attack the {enemy.id}.\n')
             attack = 100
-            print(f'You rolled a {attack}. \n')
+            print(f'You rolled a {attack}.\n')
 
             if attack == 20:
                 print("Critical Hit! \n")
@@ -133,6 +135,11 @@ def link_start(enemy:mob.Mob) -> None:
             elif attack < enemy.evasion:
                 print("You missed. \n")
                 enemy_turn()
+
+        if command.lower() == "hp":
+            print("\n")
+            print(f'Your HP is {PLAYER.hp}/{PLAYER.max_hp}')
+            player_turn()
         
 if input(">").lower() == "y":
     link_start(STARTING_ENEMY)

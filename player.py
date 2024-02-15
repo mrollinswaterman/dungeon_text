@@ -101,6 +101,15 @@ class Player():
     @property
     def name(self):
         return self._name
+    @property
+    def max_hp(self):
+        return self._max_hp
+    @property
+    def threat(self):
+        """
+        Returns the player's current threat level which effect mob spawns
+        """
+        return (self.level, (self.level * 2 + 1))
 
     #methods
     def bonus(self, stat):
