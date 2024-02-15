@@ -60,7 +60,7 @@ class Mob():
 
         self._loot = []
         for item in statblock.loot:
-            self._loot.append(item*level)
+            self._loot.append(item*level // 2)
 
     #properties
     @property

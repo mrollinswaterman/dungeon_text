@@ -40,7 +40,7 @@ class Player():
         }
 
         #calculated stats
-        self._max_hp = random.randrange(1,8) + BONUS[self._constitution]
+        self._max_hp = random.randrange(4,8) + BONUS[self._constitution]
         self._hp = self._max_hp
         self._evasion = 10 + BONUS[self._dexterity]
         self._xp = 0
@@ -81,8 +81,10 @@ class Player():
     def hp(self) -> int:
         return self._hp
     @property
+    def xp(self):
+        return self._xp
+    @property
     def armor(self) -> int:
-        #should return armor value of equipped armor
         if self._armor.broken is True:
             return 0
         return self._armor.armor_value
@@ -109,7 +111,10 @@ class Player():
         """
         Returns the player's current threat level which effect mob spawns
         """
-        return (self.level, (self.level * 2 + 1))
+        return(self._level, self._level * 2 + 1)
+    @property
+    def level_up(self):
+        return self.xp > (15 * self._level)
 
     #methods
     def bonus(self, stat):
@@ -178,11 +183,18 @@ class Player():
         else:
             raise ValueError("Can't drop an item you don't have")
         
-    def level_up(self, stat: str) -> None:
+    def spend_xp(self, stat: str) -> None:
         """
         Levels up a given stat
         """
         self._stat_map[stat] += 2
+        self._xp -= 15 * self._level
+        self._level += 1
+        prev_max = self._max_hp
+        self._max_hp += random.randrange(1, 8) + BONUS[self.con]
+        if self._hp == prev_max:
+            self._hp = self._max_hp
+        
 
     def gain_xp(self, xp: int) -> None:
         """
@@ -223,14 +235,20 @@ class Player():
         Equips the player with a given weapon
         """
         self._weapon = weapon
+        self._inventory.append(weapon)
     def equip_armor(self, armor: "items.Armor") -> None:
         """
         Same as above but for armor
         """
         self._armor = armor
+        self._inventory.append(armor)
 
     def heal(self, healing: int) -> None:
         """
         Heals the player for a given amount
         """
         self._hp += healing
+
+    def print_inventory(self) -> None:
+        for item in self._inventory:
+            print(f'{item}')

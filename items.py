@@ -31,7 +31,7 @@ class Item():
     def lose_durability(self) -> None:
         prob = random.randrange(100)
         #weapon only loses durability occasionally, probability decreases with rarity
-        if prob < (40 // self.rarity):
+        if prob < (60 // self.rarity):
             self._durability -= 1
 
     def repair(self) -> None:
@@ -40,12 +40,16 @@ class Item():
         """
         self._durability = self._max_durability
 
+    def __str__(self) -> str:
+        return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n'
+
 class Weapon(Item):
 
-    def __init__(self, id, rarity, damage_dice: int, crit_multiplier:int):
+    def __init__(self, id, rarity):
         super().__init__(id, rarity)
-        self._damage_dice = damage_dice
-        self._crit = crit_multiplier
+        self._damage_dice = 0
+        self._num_damage_dice = 0
+        self._crit = 0
 
     #properties
     @property
@@ -54,12 +58,22 @@ class Weapon(Item):
         Returns damage dice
         """
         return self._damage_dice
+    
+    def set_damage_dice(self, num, dice) -> None:
+        self._damage_dice = dice
+        self._num_damage_dice = num
+
+    def Set_crit_multiplier(self, crit)->None:
+        self._crit = crit
+    
+    def __str__(self) -> str:
+        return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n'
 
 class Armor(Item):
 
-    def __init__(self, id, rarity, armor_value):
+    def __init__(self, id, rarity):
         super().__init__(id, rarity)
-        self._armor_value = armor_value
+        self._armor_value = 2*self._rarity
 
     #properties
     @property
@@ -68,3 +82,9 @@ class Armor(Item):
         Return the value of the armor
         """
         return self._armor_value
+    
+    def set_armor_value(self, armor) -> None:
+        self._armor_value = armor
+    
+    def __str__(self) -> str:
+        return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
