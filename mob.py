@@ -53,10 +53,10 @@ class Mob():
         self._stat_block = statblock
 
         #calculated stats
-        self._hp = random.randrange(1, statblock.hp) * level
-        self._damage: int = statblock.damage * level
-        self._evasion: int = statblock.evasion * level
-        self._armor:int = statblock.armor * level
+        self._hp = random.randrange(1, statblock.hp) * level + 1
+        self._damage: int = statblock.damage * (level + 1) // 3
+        self._evasion: int = statblock.evasion * (level + 1) // 2
+        self._armor:int = statblock.armor * (level + 1) // 2
 
         self._loot = []
         for item in statblock.loot:
@@ -100,23 +100,23 @@ class Mob():
         if roll == 20:
             return 0
         
-        return roll + self.level
+        return roll + self._level
     
     def roll_damage(self) -> int:
         """
         Rolls damage (damage dice)
         """
-        return random.randrange(1, self.damage)
+        return random.randrange(1, self._damage)
     
     def take_damage(self, damage:int) -> int:
         """
         Takes a given amount of damage, reduced by armor
         """
-        if damage - self.armor < 0:
+        if damage - self._armor < 0:
             return 0
         else:
-            self._hp -= damage - self.armor
-            return damage - self.armor
+            self._hp -= damage - self._armor
+            return damage - self._armor
         
     def fumble_table(self) -> Union[str, bool]:
         prob = random.randrange(100)

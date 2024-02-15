@@ -1,7 +1,7 @@
 
 
 def player_turn_options():
-    print('What would you like to do? | Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i)\n')
+    print('\nWhat would you like to do? | Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i)\n')
 
 
 def next_scene_options():

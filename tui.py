@@ -16,13 +16,14 @@ MOBS = {
 
 PLAYER = player.Player()
 
+GOD_MODE = False
 iron_sword = items.Weapon("Iron Sword", 1)
 iron_sword.set_damage_dice(1,8)
 iron_sword.Set_crit_multiplier(2)
 
-leather = items.Armor("Leather Armor", 1)
+leather_armor = items.Armor("Leather Armor", 1)
 
-PLAYER.equip_armor(leather)
+PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(iron_sword)
 
 print("\nWould you like to enter the Dungeon? y/n\n")
@@ -39,12 +40,17 @@ def link_start(enemy:mob.Mob) -> None:
         Begins the Player turn
         """
         narrator.player_turn_options()
+    
+    def player_death():
+        #some text probably too
+        RUNNING = False
+        sys.exit()
 
     def enemy_turn():
         """
         Begins the enemy turn
         """
-        print(f'The {enemy.id} attacks you.')
+        print(f'The {enemy.id} attacks you.\n')
         attack = enemy.roll_attack()
         print(f'It rolled a {attack}!\n')
 
@@ -71,6 +77,8 @@ def link_start(enemy:mob.Mob) -> None:
                 print(f'The {enemy.id} hit you for {taken} damage.\n')
                 if PLAYER.dead is False:
                     player_turn()
+                if PLAYER.dead is True:
+                    player_death()
 
             else:
                 print(f"The {enemy.id} missed.\n")
@@ -127,9 +135,12 @@ def link_start(enemy:mob.Mob) -> None:
             sys.exit()
 
         if command.lower() == 'a':
-            #PLAYER.roll_attack()
+            #attack
             print(f'\nYou attack the {enemy.id}.\n')
-            attack = 100
+            if GOD_MODE is True:
+                attack = 1000000
+            else:
+                attack = PLAYER.roll_attack()
             print(f'You rolled a {attack}.\n')
 
             if attack == 20:
@@ -139,9 +150,11 @@ def link_start(enemy:mob.Mob) -> None:
                 print("Crtical Fail!\n")
 
             if attack >= enemy.evasion:
-                #PLAYER.roll_damage()
-
-                taken = enemy.take_damage(1000)
+                if GOD_MODE is True:
+                    taken = enemy.take_damage(1000)
+                else:
+                    taken = enemy.take_damage(PLAYER.roll_damage())
+                
                 print(f'You hit the {enemy.id}, dealing {taken} damage.\n')
                 if enemy.dead is False:
                     enemy_turn()
@@ -152,8 +165,7 @@ def link_start(enemy:mob.Mob) -> None:
                 enemy_turn()
 
         if command.lower() == "hp":
-            print("\n")
-            print(f'Your HP is {PLAYER.hp}/{PLAYER.max_hp}')
+            print(f'\nYour HP is {PLAYER.hp}/{PLAYER.max_hp}')
             player_turn()
 
         if command.lower() == "i":
