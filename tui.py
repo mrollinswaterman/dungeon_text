@@ -4,6 +4,8 @@ import player, items, mob
 import monster_manual
 import narrator
 
+
+
 MOBS = {
     "Goblin": monster_manual.GOBLIN,
 
@@ -30,11 +32,54 @@ print("\nWould you like to enter the Dungeon? y/n\n")
 
 STARTING_ENEMY_STATS = MOBS[random.choice(list(MOBS.keys()))]
 STARTING_ENEMY = mob.Mob(PLAYER.threat[0], STARTING_ENEMY_STATS)
-
-
+    
 def link_start(enemy:mob.Mob) -> None:
     RUNNING = True
 
+    #command functions
+    def exit_game():
+        RUNNING = False
+        sys.exit()
+    def attack(enemy: mob.Mob) -> None:
+
+        print(f'\nYou attack the {enemy.id}.\n')
+        if GOD_MODE is True:
+            attack_roll = 1000000
+        else:
+            attack_roll = PLAYER.roll_attack_roll()
+        print(f'You rolled a {attack_roll}.\n')
+
+        if attack_roll == 20:
+            print("Critical Hit!\n")
+
+        if attack_roll == 1:
+            print("Crtical Fail!\n")
+
+        if attack_roll >= enemy.evasion:
+            if GOD_MODE is True:
+                taken = enemy.take_damage(1000)
+            else:
+                taken = enemy.take_damage(PLAYER.roll_damage())
+            
+            print(f'You hit the {enemy.id}, dealing {taken} damage.\n')
+            if enemy.dead is False:
+                enemy_turn()
+            elif enemy.dead is True:
+                end_scene()
+        elif attack_roll < enemy.evasion:
+            print("You missed.\n")
+            enemy_turn()
+
+    
+    def hp():
+        narrator.display_hp(PLAYER)
+        player_turn()
+
+    def inventory():
+        print(f'\nGold: {PLAYER.gold}\n')
+        PLAYER.print_inventory()
+        player_turn()
+    
     def player_turn():
         """
         Begins the Player turn
@@ -125,53 +170,22 @@ def link_start(enemy:mob.Mob) -> None:
     begin_encounter()
     player_turn()
 
+    COMMANDS = {
+    "exit": exit_game(),
+    "a": attack(enemy),
+    "hp": hp(),
+    "i": inventory()
+}
+
     while RUNNING:
 
         command = input(">")
 
         #command interpretation
-        if command.lower() == 'exit':
-            RUNNING = False
-            sys.exit()
 
-        if command.lower() == 'a':
-            #attack
-            print(f'\nYou attack the {enemy.id}.\n')
-            if GOD_MODE is True:
-                attack = 1000000
-            else:
-                attack = PLAYER.roll_attack()
-            print(f'You rolled a {attack}.\n')
-
-            if attack == 20:
-                print("Critical Hit!\n")
-
-            if attack == 1:
-                print("Crtical Fail!\n")
-
-            if attack >= enemy.evasion:
-                if GOD_MODE is True:
-                    taken = enemy.take_damage(1000)
-                else:
-                    taken = enemy.take_damage(PLAYER.roll_damage())
-                
-                print(f'You hit the {enemy.id}, dealing {taken} damage.\n')
-                if enemy.dead is False:
-                    enemy_turn()
-                elif enemy.dead is True:
-                    end_scene()
-            elif attack < enemy.evasion:
-                print("You missed.\n")
-                enemy_turn()
-
-        if command.lower() == "hp":
-            narrator.display_hp(PLAYER)
-            player_turn()
-
-        if command.lower() == "i":
-            print(f'\nGold: {PLAYER.gold}\n')
-            PLAYER.print_inventory()
-            player_turn()
+        if command.lower() in COMMANDS:
+            COMMANDS[command.lower()]
+            
         
 if input(">").lower() == "y":
     link_start(STARTING_ENEMY)
