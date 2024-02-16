@@ -42,11 +42,11 @@ class Player():
         #calculated stats
         self._max_hp = 8 + BONUS[self._constitution]
         self._hp = self._max_hp
-        self._evasion = 10 + BONUS[self._dexterity]
+        self._evasion = 12 + BONUS[self._dexterity]
         self._xp = 0
         self._level = 1
         self._gold = 0
-        self._inventory = []
+        self._inventory = {}
 
         #equipment
         self._weapon: items.Weapon = None
@@ -163,22 +163,27 @@ class Player():
             self._hp -= damage - self.armor
             return damage - self.armor
 
-    def pick_up(self, item) -> None:
+    def pick_up(self, item: items.Item | items.Consumable, num: int) -> None:
         """
         Picks up an item if the player has inventory space for it
         """
         if len(self._inventory) < self.carrying_capacity:
-            self._inventory.append(item)
+            if item.id in self._inventory:
+                self._inventory[item.id].increase_quantity(num)
+            else:
+                self._inventory[item.id] = item
+                if isinstance(item, items.Consumable):
+                    self._inventory[item.id].increase_quantity(num)
 
         else:
             raise ValueError("Not enough inventory space")
         
-    def drop(self, item) -> None:
+    def drop(self, item: items.Item) -> None:
         """
         Drops an item out of the player's inventory
         """
-        if item in self._inventory:
-            self._inventory.remove(item)
+        if item.id in self._inventory:
+            del self._inventory[item.id]
 
         else:
             raise ValueError("Can't drop an item you don't have")
@@ -194,6 +199,9 @@ class Player():
         self._max_hp += random.randrange(1, 8) + BONUS[self.con]
         if self._hp == prev_max:
             self._hp = self._max_hp
+
+        if self._hp < (prev_max // 2):
+            self.heal(self._max_hp // 2)
         
 
     def gain_xp(self, xp: int) -> None:
@@ -235,20 +243,33 @@ class Player():
         Equips the player with a given weapon
         """
         self._weapon = weapon
-        self._inventory.append(weapon)
+        self._inventory[weapon.id] = weapon
+
     def equip_armor(self, armor: "items.Armor") -> None:
         """
         Same as above but for armor
         """
         self._armor = armor
-        self._inventory.append(armor)
+        self._inventory[armor.id] = armor
 
     def heal(self, healing: int) -> None:
         """
         Heals the player for a given amount
         """
-        self._hp += healing
+        if self._hp <= (self._max_hp - healing):
+            self._hp += healing
+            print(f'\nYou healed {healing} HP.\n')
+        if self._hp + healing > self._max_hp:
+            self._hp = self._max_hp
+            print(f"\nYou healed {self._max_hp - self._hp} HP.\n")
+
+    def has_item(self, item: str) -> items.Consumable | bool | items.Item:
+        if item in self._inventory:
+            if self._inventory[item].quantity > 0:
+                return self._inventory[item]
+        
+        return False
 
     def print_inventory(self) -> None:
         for item in self._inventory:
-            print(f'{item}')
+            print(f'{self._inventory[item]}')

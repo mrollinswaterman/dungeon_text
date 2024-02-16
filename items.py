@@ -1,4 +1,5 @@
 import random
+import player
 
 class Item():
 
@@ -71,7 +72,7 @@ class Weapon(Item):
 
 class Armor(Item):
 
-    def __init__(self, id, rarity):
+    def __init__(self, id, rarity=1):
         super().__init__(id, rarity)
         self._armor_value = 2*self._rarity - 1
 
@@ -88,3 +89,28 @@ class Armor(Item):
     
     def __str__(self) -> str:
         return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
+    
+class Consumable(Item):
+
+    def __init__(self, id, rarity):
+        super().__init__(id, rarity)
+        self._quantity = 0
+        self._strength = rarity * 2
+
+    #properties
+    @property
+    def quantity(self) -> int:
+        return self._quantity
+    
+    #methods
+    def use(self, target):
+        raise ValueError("Unimplemented")
+
+    def increase_quantity(self, num:int) -> None:
+        self._quantity += num
+
+    def __str__(self) -> str:
+        return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Quantity: {self._quantity}'
+    
+
+

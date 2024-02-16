@@ -4,8 +4,9 @@ import player, items, mob
 import monster_manual
 import narrator
 import commands
+import item_compendium
 
-
+print(round(2/3))
 
 MOBS = {
     "Goblin": monster_manual.GOBLIN,
@@ -19,38 +20,27 @@ MOBS = {
 
 PLAYER = player.Player()
 
-GOD_MODE = False
 iron_sword = items.Weapon("Iron Sword", 1)
 iron_sword.set_damage_dice(1,8)
 iron_sword.Set_crit_multiplier(2)
 
 leather_armor = items.Armor("Leather Armor", 1)
+leather_armor.set_armor_value(2)
 
 PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(iron_sword)
+
+PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
 print("\nWould you like to enter the Dungeon? y/n\n")
 
 STARTING_ENEMY_STATS = MOBS[random.choice(list(MOBS.keys()))]
 STARTING_ENEMY = mob.Mob(PLAYER.threat[0], STARTING_ENEMY_STATS)
 
-RUNNING = True
-
-
-    
 def link_start(enemy:mob.Mob) -> None:
     RUNNING = True
 
-    COMMANDS = {
-        "exit": commands.exit_game(),
-
-        "a": commands.attack(enemy),
-
-        "hp": commands.hp(),
-        
-        "i": commands.inventory()
-    }
-
+    #functions
     def player_turn():
         """
         Begins the Player turn
@@ -66,23 +56,28 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
+        print("-" * 110+"\n")
         print(f'The {enemy.id} attacks you.\n')
         attack = enemy.roll_attack()
-        print(f'It rolled a {attack}!\n')
+        print(f'It rolled a {attack}.\n')
 
         if attack == 20:
-            print("It rolled a crit. Uh oh.\n")
+            print("A critical hit! Uh oh.\n")
             taken = PLAYER.take_damage(enemy.roll_damage() * 2)
             print(f'The {enemy.id} hit you for {taken} damage!\n')
+            print("-" * 110+"\n")
             if PLAYER.dead is False:
                 player_turn()
+            else:
+                player_death()
         elif attack == 1:
-            print("It critically failed! \n")
+            print("It critically failed!\n")
             if enemy.fumble_table() is True:
-                taken = enemy.take_damage(enemy.roll_damage)
+                taken = enemy.take_damage(enemy.roll_damage())
                 print(f'The {enemy.id} hit itself for {taken} damage!\n')
             else:
                 print("It missed.\n")
+                print("-" * 110+"\n")
             if enemy.dead is False:
                 player_turn()
             else:
@@ -91,6 +86,7 @@ def link_start(enemy:mob.Mob) -> None:
             if attack >= PLAYER.evasion:
                 taken = PLAYER.take_damage(enemy.roll_damage())
                 print(f'The {enemy.id} hit you for {taken} damage.\n')
+                print("-" * 110+"\n")
                 if PLAYER.dead is False:
                     player_turn()
                 if PLAYER.dead is True:
@@ -98,12 +94,14 @@ def link_start(enemy:mob.Mob) -> None:
 
             else:
                 print(f"The {enemy.id} missed.\n")
+                print("-" * 110+"\n")
                 player_turn()
 
     def next_scene():
         """
         Starts a new scene with a new enemy
         """
+        print('\n')
         narrator.next_scene_options()
         next_enemy = mob.Mob(random.randrange(PLAYER.threat[0], PLAYER.threat[1]), MOBS[random.choice(list(MOBS.keys()))])
         RUNNING = False
@@ -129,6 +127,7 @@ def link_start(enemy:mob.Mob) -> None:
         PLAYER.gain_gold(enemy.loot[0])
         PLAYER.gain_xp(enemy.loot[1])
         print(f"You killed the {enemy.id}!\n")
+        print("-"*110+'\n')
         if PLAYER.level_up is True:
             level_up_player()
         else:
@@ -136,6 +135,8 @@ def link_start(enemy:mob.Mob) -> None:
             command = input(">")
             if command.lower() == "y":
                 next_scene()
+
+    #commands dict
 
     #starting print statements
     begin_encounter()
@@ -146,9 +147,17 @@ def link_start(enemy:mob.Mob) -> None:
         command = input(">")
 
         #command interpretation
-
-        if command.lower() in COMMANDS:
-            COMMANDS[command.lower()]
+        if command.lower() == "exit":
+            RUNNING = False
+            sys.exit()
+        if command.lower() == "a":
+            commands.attack(PLAYER, enemy, enemy_turn, end_scene)
+        if command.lower() == "hp":
+            commands.hp(PLAYER, player_turn)
+        if command.lower() == "i":
+            commands.inventory(PLAYER, player_turn)
+        if command.lower() == "u":
+            commands.use_an_item(PLAYER, "Health Potion", PLAYER, enemy_turn, player_turn)
             
         
 if input(">").lower() == "y":
