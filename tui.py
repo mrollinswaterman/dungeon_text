@@ -5,8 +5,8 @@ import monster_manual
 import narrator
 import commands
 import item_compendium
-
-print(round(2/3))
+import dms_guide
+import events
 
 MOBS = {
     "Goblin": monster_manual.GOBLIN,
@@ -101,11 +101,14 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Starts a new scene with a new enemy
         """
-        print('\n')
         narrator.next_scene_options()
-        next_enemy = mob.Mob(random.randrange(PLAYER.threat[0], PLAYER.threat[1]), MOBS[random.choice(list(MOBS.keys()))])
-        RUNNING = False
-        link_start(next_enemy)
+        if 0 == 1:
+            next_enemy = mob.Mob(random.randrange(PLAYER.threat[0], PLAYER.threat[1]), MOBS[random.choice(list(MOBS.keys()))])
+            RUNNING = False
+            link_start(next_enemy)
+        else:
+            next_event: events.Event = random.choice[dms_guide.EVENT_LIST]
+            run_event(next_event)
 
     def begin_encounter():
         """
@@ -122,6 +125,20 @@ def link_start(enemy:mob.Mob) -> None:
         command = input(">")
         if command.lower() == "y":
             next_scene()
+
+    def run_event(event: events.Event):
+
+        print(event.text)
+        print(f"which stat would you like to roll? Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha) OR Withdraw - (w)\n")
+        command = input(">")
+        if command.lower() != "w":
+            event.run(command, PLAYER.roll_a_check(command))
+            if event.passed is True:
+                next_scene()
+            elif event.tries is True:
+                run_event(event)
+            else: 
+                run_event(event)
 
     def end_scene():
         PLAYER.gain_gold(enemy.loot[0])

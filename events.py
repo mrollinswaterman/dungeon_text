@@ -40,16 +40,22 @@ class Event():
         self._stats = set()
         self._tries = 0
         self._text = ""
-        self._messages: dict[bool, list[tuple[str, str]]] = {True: [], False: []}
+        self._messages: dict[bool, list[tuple[str, list[str]]]] = {True: [], False: []}
+        self._passed = False
 
     #properties
     @property
     def stats(self) -> None:
         return self._stats
     @property
-    def completed(self) -> bool:
-        return self._tries == 0
-    
+    def tries(self) -> bool:
+        return self._tries > 0
+    @property
+    def text(self) -> str:
+        return self._text
+    @property
+    def passed(self) -> bool:
+        return self._passed
     #methods
     def add_stat(self, stat: tuple[str, int]) -> None:
         self._stats.add(stat)
@@ -71,7 +77,7 @@ class Event():
     def add_text(self, text:str) -> None:
         self._text = text
 
-    def add_message(self, message:tuple[bool, str, str]) -> None:
+    def add_message(self, message:tuple[bool, str, list[str]]) -> None:
         msg_type, stat, msg = message
         self._messages[msg_type].append((stat, msg))
 
@@ -90,6 +96,7 @@ class Event():
                     for msg in self._messages[True]:
                         if msg[0] == stat:
                             successes.append(msg[1])
+                    self._passed = True
                     return random.choice(successes)
             failures = []
             for msg in self._messages[False]:
