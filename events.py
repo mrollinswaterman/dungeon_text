@@ -4,33 +4,29 @@ import random
 
 FAILURE_LINES = {
     "str": [
-        f"\nYou're going to need more than brawn to solve this one."
+        f"\nYou're going to need more than brawn to solve this one.\n"
     ],
 
     "dex": [
-        f"\nYou do a sick spin move. Nothing happens."
+        f"\nYou do a sick spin move. Nothing happens.\n"
     ],
 
     "con": [
-        f"\nAfter the 5th consecutive minute of holding your breath, you give up."
+        f"\nAfter the 5th consecutive minute of holding your breath, you give up.\n"
     ],
 
     "int": [
-       f"\nCan't think your way out of this one nerd!"
+       f"\nCan't think your way out of this one nerd!\n"
     ],
 
     "wis": [
-        f"\nYou pause for a while to ponder the forms. The forms are throughly unhelpful."
+        f"\nYou pause for a while to ponder the forms. The forms are throughly unhelpful.\n"
     ],
 
     "cha": [
-        f"\nYou tell a mildly amusing Knock, Knock joke. Nobody laughs."
+        f"\nYou tell a mildly amusing Knock, Knock joke. Nobody laughs.\n"
     ]
 }
-
-END_LIST = [
-    f"\nYou can't try this anymore.", f"\nNo more tries left."
-]
 
 
 class Event():
@@ -42,6 +38,7 @@ class Event():
         self._text = ""
         self._messages: dict[bool, list[tuple[str, list[str]]]] = {True: [], False: []}
         self._passed = False
+        self._end_message = ""
 
     #properties
     @property
@@ -56,6 +53,9 @@ class Event():
     @property
     def passed(self) -> bool:
         return self._passed
+    @property
+    def end_message(self) -> str:
+        return self._end_message
     #methods
     def add_stat(self, stat: tuple[str, int]) -> None:
         self._stats.add(stat)
@@ -81,28 +81,23 @@ class Event():
         msg_type, stat, msg = message
         self._messages[msg_type].append((stat, msg))
 
-    def run(self, stat:str, roll:int) -> None:
+    def add_end_message(self, msg:str) -> None:
+        self._end_message = msg
 
-        if self.completed is True:
-            return random.choice(END_LIST)
-        
+    def run(self, stat:str, roll:int) -> str:
+        if self.tries is False:
+            raise ValueError("No more tries")
         self._tries -= 1
-
         if self.has_stat(stat) is True:
             for item in self._stats:
                 code, check = item
                 if code == stat and roll >= check:
-                    successes = []
                     for msg in self._messages[True]:
                         if msg[0] == stat:
-                            successes.append(msg[1])
-                    self._passed = True
-                    return random.choice(successes)
-            failures = []
+                            self._passed = True
+                            return random.choice(msg[1])
             for msg in self._messages[False]:
                 if msg[0] == stat:
-                    failures.append(msg[1])
-
-            return random.choice(failures)
+                    return random.choice(msg[1])
 
         return random.choice(FAILURE_LINES[stat])

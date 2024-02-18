@@ -57,9 +57,9 @@ class Mob():
         self._hp = statblock.hp
         for _ in range(level-1):
             self._hp += random.randrange(1, statblock.hp) + round(level + 0.1 / 2)
-        self._damage: int = statblock.damage * round((level + 1) / 3)
-        self._evasion: int = statblock.evasion * round((level + 0.1) / 2)
-        self._armor:int = statblock.armor * round((level + 0.1) / 2)
+        self._damage: int = statblock.damage
+        self._evasion: int = statblock.evasion
+        self._armor:int = statblock.armor
         
         #add loot
         self._loot = []

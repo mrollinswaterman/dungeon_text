@@ -7,6 +7,7 @@ import commands
 import item_compendium
 import dms_guide
 import events
+import time
 
 MOBS = {
     "Goblin": monster_manual.GOBLIN,
@@ -15,7 +16,7 @@ MOBS = {
 
     "Bandit": monster_manual.BANDIT,
 
-    "Gang of Goblins": monster_manual.GANG_OF_GOBLINS
+    "Goblin Gang": monster_manual.GOBLIN_GANG
 }
 
 PLAYER = player.Player()
@@ -31,8 +32,7 @@ PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(iron_sword)
 
 PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
-
-print("\nWould you like to enter the Dungeon? y/n\n")
+commands.type_text("\nWould you like to enter the Dungeon? y/n\n")
 
 STARTING_ENEMY_STATS = MOBS[random.choice(list(MOBS.keys()))]
 STARTING_ENEMY = mob.Mob(PLAYER.threat[0], STARTING_ENEMY_STATS)
@@ -57,26 +57,31 @@ def link_start(enemy:mob.Mob) -> None:
         Begins the enemy turn
         """
         print("-" * 110+"\n")
-        print(f'The {enemy.id} attacks you.\n')
-        attack = enemy.roll_attack()
-        print(f'It rolled a {attack}.\n')
 
-        if attack == 20:
-            print("A critical hit! Uh oh.\n")
-            taken = PLAYER.take_damage(enemy.roll_damage() * 2)
-            print(f'The {enemy.id} hit you for {taken} damage!\n')
+        
+        attack = enemy.roll_attack()
+
+        commands.type_text(f'The {enemy.id} attacks you, rolling a {attack}\n')
+
+        if attack == 10:
+            commands.type_text(f"A critical hit! Uh oh.\n")
+            taken = PLAYER.take_damage(enemy.roll_damage() * 1)
+    
+            commands.type_text(f'The {enemy.id} hit you for {taken} damage!\n')
             print("-" * 110+"\n")
             if PLAYER.dead is False:
                 player_turn()
             else:
                 player_death()
         elif attack == 1:
-            print("It critically failed!\n")
+    
+            commands.type_text(f"It critically failed!\n")
             if enemy.fumble_table() is True:
                 taken = enemy.take_damage(enemy.roll_damage())
-                print(f'The {enemy.id} hit itself for {taken} damage!\n')
+        
+                commands.type_text(f'The {enemy.id} hit itself for {taken} damage!\n')
             else:
-                print("It missed.\n")
+                commands.type_text(f"It missed.\n")
                 print("-" * 110+"\n")
             if enemy.dead is False:
                 player_turn()
@@ -85,7 +90,8 @@ def link_start(enemy:mob.Mob) -> None:
         else:
             if attack >= PLAYER.evasion:
                 taken = PLAYER.take_damage(enemy.roll_damage())
-                print(f'The {enemy.id} hit you for {taken} damage.\n')
+        
+                commands.type_text(f'The {enemy.id} hit you for {taken} damage.\n')
                 print("-" * 110+"\n")
                 if PLAYER.dead is False:
                     player_turn()
@@ -93,7 +99,8 @@ def link_start(enemy:mob.Mob) -> None:
                     player_death()
 
             else:
-                print(f"The {enemy.id} missed.\n")
+        
+                commands.type_text(f"The {enemy.id} missed.\n")
                 print("-" * 110+"\n")
                 player_turn()
 
@@ -102,58 +109,58 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        if 0 == 1:
+        if random.randrange(1, 5) > 1:
             next_enemy = mob.Mob(random.randrange(PLAYER.threat[0], PLAYER.threat[1]), MOBS[random.choice(list(MOBS.keys()))])
             RUNNING = False
             link_start(next_enemy)
         else:
-            next_event: events.Event = random.choice[dms_guide.EVENT_LIST]
+            next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
+            next_event.add_tries(2)
+            print(next_event.text)
             run_event(next_event)
 
     def begin_encounter():
         """
         Begins an encounter
         """
-        print(f'\nYou encounter a Level {enemy.level} {enemy.id}!\n')
+
+        commands.type_text(f'\nYou encounter a Level {enemy.level} {enemy.id}!\n')
 
     def level_up_player():
         narrator.level_up_options()
         command = input(">")
         PLAYER.spend_xp(command)
-        print(f'\nYour {command} increased by 2.\n')
-        print("Continue? y/n\n")
-        command = input(">")
-        if command.lower() == "y":
-            next_scene()
+
+        commands.type_text(f'\nYour {command} increased by 2. You are now Level {PLAYER.level}\n')
+        narrator.continue_run(next_scene)
 
     def run_event(event: events.Event):
-
-        print(event.text)
-        print(f"which stat would you like to roll? Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha) OR Withdraw - (w)\n")
+        narrator.event_options()
         command = input(">")
         if command.lower() != "w":
-            event.run(command, PLAYER.roll_a_check(command))
+            print('\n'+"-" * 110)
+    
+            print(event.run(command, PLAYER.roll_a_check(command)))
+            print("-" * 110+'\n')
             if event.passed is True:
+                event.add_tries(2)
                 next_scene()
             elif event.tries is True:
                 run_event(event)
             else: 
-                run_event(event)
+                print(event.end_message)
+                next_scene()
 
     def end_scene():
         PLAYER.gain_gold(enemy.loot[0])
         PLAYER.gain_xp(enemy.loot[1])
-        print(f"You killed the {enemy.id}!\n")
+
+        commands.type_text(f"You killed the {enemy.id}!\n")
         print("-"*110+'\n')
         if PLAYER.level_up is True:
             level_up_player()
         else:
-            print("Continue? y/n\n")
-            command = input(">")
-            if command.lower() == "y":
-                next_scene()
-
-    #commands dict
+            narrator.continue_run(next_scene)
 
     #starting print statements
     begin_encounter()

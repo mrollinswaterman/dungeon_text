@@ -1,7 +1,8 @@
 import random
 import items
 import mob
-
+import commands
+from events import Event
 BONUS = {
     10: 0,
     11: 0,
@@ -22,12 +23,12 @@ class Player():
         self._name = name
 
         #statblock
-        self._strength:int = 10
-        self._dexterity:int = 10
-        self._constitution:int = 10
-        self._intelligence:int = 10
-        self._wisdom:int = 10
-        self._charisma:int = 10
+        self._strength:int = 12
+        self._dexterity:int = 12
+        self._constitution:int = 12
+        self._intelligence:int = 12
+        self._wisdom:int = 12
+        self._charisma:int = 12
 
         #stat-map
         self._stat_map = {
@@ -201,7 +202,7 @@ class Player():
             self._hp = self._max_hp
 
         if self._hp < (prev_max // 2):
-            self.heal(self._max_hp // 2)
+            self._hp = self._max_hp // 2
         
 
     def gain_xp(self, xp: int) -> None:
@@ -258,10 +259,12 @@ class Player():
         """
         if self._hp <= (self._max_hp - healing):
             self._hp += healing
-            print(f'\nYou healed {healing} HP.\n')
+            commands.type_text(f'\nYou healed {healing} HP.\n')
+            return None
         if self._hp + healing > self._max_hp:
             self._hp = self._max_hp
-            print(f"\nYou healed {self._max_hp - self._hp} HP.\n")
+            commands.type_text(f"\nYou only healed {self._max_hp - self._hp} HP.\n")
+            return None
 
     def has_item(self, item: str) -> items.Consumable | bool | items.Item:
         if item in self._inventory:
@@ -272,4 +275,13 @@ class Player():
 
     def print_inventory(self) -> None:
         for item in self._inventory:
-            print(f'{self._inventory[item]}')
+            commands.type_text(str(self._inventory[item]))
+            
+
+# arush wrote this while drunk, he won't let me delete it
+class bitch(Event):
+    def __init__(self, num_bitches: int):
+        var: str = "bitch"
+        self.bitches = num_bitches
+        return f"miles has {self.bitches} {var}s"
+
