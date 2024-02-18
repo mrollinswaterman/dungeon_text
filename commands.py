@@ -6,7 +6,7 @@ import time
 
 GOD_MODE = False
 
-def type_text(text: str, speed: int = .05) -> None:
+def type_text(text: str, speed: int = .03) -> None:
     time.sleep(.2)
     for char in text:
         time.sleep(speed)
@@ -56,9 +56,9 @@ def hp(player, player_turn):
 
 def inventory(player, player_turn):
     print('\n'+"-" * 110)
-    type_text(f'\nGold: {player.gold}\n')
-    type_text(player.__str__())
-    print("-" * 110+'\n')
+    print(f'\nGold: {player.gold}\n')
+    player.print_inventory()
+    print("\n"+"-" * 110+'\n')
     player_turn()
 
 def use_an_item(player, item, target, enemy_turn, player_turn, ):

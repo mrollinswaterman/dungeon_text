@@ -3,6 +3,7 @@ import items
 import mob
 import commands
 from events import Event
+
 BONUS = {
     10: 0,
     11: 0,
@@ -275,7 +276,8 @@ class Player():
 
     def print_inventory(self) -> None:
         for item in self._inventory:
-            commands.type_text(str(self._inventory[item]))
+            #commands.type_text(str(self._inventory[item]), .02)
+            print(self._inventory[item])
             
 
 # arush wrote this while drunk, he won't let me delete it

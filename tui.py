@@ -32,7 +32,8 @@ PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(iron_sword)
 
 PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
-commands.type_text("\nWould you like to enter the Dungeon? y/n\n")
+
+commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
 
 STARTING_ENEMY_STATS = MOBS[random.choice(list(MOBS.keys()))]
 STARTING_ENEMY = mob.Mob(PLAYER.threat[0], STARTING_ENEMY_STATS)
@@ -140,7 +141,7 @@ def link_start(enemy:mob.Mob) -> None:
         if command.lower() != "w":
             print('\n'+"-" * 110)
     
-            print(event.run(command, PLAYER.roll_a_check(command)))
+            commands.type_text(event.run(command, PLAYER.roll_a_check(command)))
             print("-" * 110+'\n')
             if event.passed is True:
                 event.add_tries(2)
@@ -148,7 +149,7 @@ def link_start(enemy:mob.Mob) -> None:
             elif event.tries is True:
                 run_event(event)
             else: 
-                print(event.end_message)
+                commands.type_text(event.end_message)
                 next_scene()
 
     def end_scene():
