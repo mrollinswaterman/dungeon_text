@@ -229,6 +229,15 @@ class Player():
 
         self._gold -= gold
 
+    def lose_gold(self, gold:int) -> None:
+        """
+        Takes a certain amount of gold from the player, if the player doesnt
+        have sufficient gold, sets gold to 0
+        """
+        self._gold -= gold
+        if self._gold < 0:
+            self._gold = 0
+
     def die(self) -> None:
         """
         Kils the player. Lose gold and inventory on death
@@ -268,6 +277,11 @@ class Player():
             return None
 
     def has_item(self, item: str) -> items.Consumable | bool | items.Item:
+        """
+        Checks if a player has an item in their inventory
+
+        Return the item if its there and False if not
+        """
         if item in self._inventory:
             if self._inventory[item].quantity > 0:
                 return self._inventory[item]
@@ -275,8 +289,10 @@ class Player():
         return False
 
     def print_inventory(self) -> None:
+        """
+        Prints the contents of the player's inventory
+        """
         for item in self._inventory:
-            #commands.type_text(str(self._inventory[item]), .02)
             print(self._inventory[item])
             
 

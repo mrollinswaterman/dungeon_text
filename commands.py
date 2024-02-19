@@ -7,6 +7,11 @@ import time
 GOD_MODE = False
 
 def type_text(text: str, speed: int = .03) -> None:
+    """
+    Adds "typing" effect to text
+
+    speed: an integer denoting the delay between characters
+    """
     time.sleep(.2)
     for char in text:
         time.sleep(speed)
@@ -14,6 +19,19 @@ def type_text(text: str, speed: int = .03) -> None:
     print("")
 
 def attack(player, enemy, enemy_turn, end_scene) -> None:
+    """
+    Attacks an enemy. 
+
+    player: a Player object, the attacker
+    enemy: a Mob object, the target
+
+    enemy_turn: a function to run if the enemy is not dead after the
+    player's attack
+
+    end_scene: function to run if the player kills the enemy
+
+    Returns nothing
+    """
 
     if GOD_MODE is True:
         attack_roll = 1000000
@@ -47,21 +65,30 @@ def attack(player, enemy, enemy_turn, end_scene) -> None:
         type_text(f"You missed.\n")
         enemy_turn()
 
-def hp(player, player_turn):
+def hp(player, player_turn) -> None:
+    """
+    Prints the player's HP then runs the given function
+    """
     print('\n'+"-" * 110)
     print(f'\nHP: {player.hp}/{player.max_hp}')
     print("["+"/"*player.hp+" "*(player.max_hp-player.hp)+"]")
     print('\n'+"-" * 110+'\n')
     player_turn()
 
-def inventory(player, player_turn):
+def inventory(player, player_turn) -> None:
+    """
+    Prints the player's inventory then runs the given function
+    """
     print('\n'+"-" * 110)
     print(f'\nGold: {player.gold}\n')
     player.print_inventory()
     print("\n"+"-" * 110+'\n')
     player_turn()
 
-def use_an_item(player, item, target, enemy_turn, player_turn, ):
+def use_an_item(player, item, target, enemy_turn, player_turn) -> None:
+    """
+    Uses an item on the Player, if the player has the item in their inventory
+    """
     print('\n'+"-" * 110)
     if player.has_item(item) is not False and player.has_item(item).quantity > 0:
         if player.has_item(item).use(target) is True:

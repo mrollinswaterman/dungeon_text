@@ -1,13 +1,36 @@
 import mob
+import player
+import commands
+import random
 
 
-GOBLIN = mob.Statblock("Goblin")
+GOBLIN_STATS = mob.Statblock("Goblin")
 
-GOBLIN.set_hp(5)
-GOBLIN.set_damage(4)
-GOBLIN.set_evasion(10)
-GOBLIN.set_armor(0)
-GOBLIN.set_loot((15, 10))
+GOBLIN_STATS.set_hp(5)
+GOBLIN_STATS.set_damage(4)
+GOBLIN_STATS.set_evasion(10)
+GOBLIN_STATS.set_armor(0)
+GOBLIN_STATS.set_loot((15, 10))
+
+def steal(source: mob.Mob, target: player.Player) -> bool:
+    """
+    Steals a random amount of gold from the player if they fail a dex check
+    """
+    commands.type_text(f"The {source.id} makes a grab at your gold pouch.")
+    if target.roll_a_check("dex") >= source.roll_attack():
+        commands.type_text(f"It missed.")
+        return False
+    
+    else:
+        robbed = random.randrange(1,20)
+        source.add_gold(robbed)
+        commands.type_text(f"The {source.id} stole {robbed} gold from you!")
+        target.lose_gold(robbed)
+        return True
+
+GOBLIN = mob.Mob(1, GOBLIN_STATS)
+GOBLIN.add_special_move(steal)
+
 
 HOBGOBLIN = mob.Statblock("Hobgoblin")
 

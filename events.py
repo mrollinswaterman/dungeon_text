@@ -58,33 +58,68 @@ class Event():
         return self._end_message
     #methods
     def add_stat(self, stat: tuple[str, int]) -> None:
+        """
+        Adds a stat to the events stat list
+        """
         self._stats.add(stat)
 
     def add_tries(self, tries:int) -> None:
+        """
+        Sets the number of tries the event has to a given integer
+        """
         self._tries = tries
     
     def has_stat(self, stat:str) -> bool:
+        """
+        Checks to see if the event has a stat in its stat list.
+
+        Return True if it does, False if it does not
+        """
         for pair in self._stats:
             if pair[0] == stat:
                 return True
         return False
 
     def stat_dc(self, stat:str) -> None | tuple[str, int]:
+        """
+        Returns the DC associated with a given stat
+        """
         for pair in self._stats:
             if pair[0] == stat:
                 return self._stats[pair]
             
     def add_text(self, text:str) -> None:
+        """
+        Sets the event's text to a given string
+        """
         self._text = text
 
     def add_message(self, message:tuple[bool, str, list[str]]) -> None:
+        """
+        Adds a message to the event's message list. 
+        
+        message: a tuple containing a bool indicating success or failure message,
+        a str denoting the stat the message is associated with, and a list of strings 
+        containing the messages to be displayed
+
+        Returns nothing
+        """
         msg_type, stat, msg = message
         self._messages[msg_type].append((stat, msg))
 
     def add_end_message(self, msg:str) -> None:
+        """
+        Adds an end message to the event
+        """
         self._end_message = msg
 
     def run(self, stat:str, roll:int) -> str:
+        """
+        Runs the event for a given stat and roll
+
+        Returns an f-string determined by the stat rolled and whether or not
+        the check succeded
+        """
         if self.tries is False:
             raise ValueError("No more tries")
         self._tries -= 1

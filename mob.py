@@ -51,20 +51,20 @@ class Mob():
         self._level = level
 
         #base stats
-        self._stat_block = statblock
+        self._statblock = statblock
 
         #calculated stats
         self._hp = statblock.hp
-        for _ in range(level-1):
-            self._hp += random.randrange(1, statblock.hp) + round(level + 0.1 / 2)
+
         self._damage: int = statblock.damage
         self._evasion: int = statblock.evasion
         self._armor:int = statblock.armor
         
         #add loot
         self._loot = []
-        for item in statblock.loot:
-            self._loot.append(item*level // 2)
+        
+
+        self._special: None | function = None
 
     #properties
     @property
@@ -123,6 +123,9 @@ class Mob():
             return damage - self._armor
         
     def fumble_table(self) -> Union[str, bool]:
+        """
+        Determines if a mob sufferes a negative effect upon rolling a nat 1.
+        """
         prob = random.randrange(100)
 
         if prob > 50:
@@ -130,3 +133,40 @@ class Mob():
         
         else: 
             return True
+        
+    def special_move(self):
+        """
+        Calls the special move function
+        """
+        self._special(self)
+
+    def add_special_move(self, special) -> None:
+        """
+        Adds a function to serve as the mob's "special move".
+        """
+        self._special = special
+
+    def add_gold(self, num:int) -> None:
+        """
+        Adds an integer value to the mob's gold reward
+        """
+        xp, gold = self._loot
+        self._loot = (xp, gold + num)
+
+    def add_xp(self, num:int) -> None:
+        """
+        Adds an integer value to the mob's XP reward
+        """
+        xp, gold = self._loot
+        self._loot = (xp + num, gold)
+
+    def set_level(self, level:int)-> None:
+        """
+        Sets the mobs levels then calculates HP and loot based on level
+        """
+        self._level = level
+        for _ in range(level-1):
+            self._hp += random.randrange(1, self._statblock.hp) + round(level + 0.1 / 2)
+
+        for item in self._statblock.loot:
+            self._loot.append(item*level // 2)
