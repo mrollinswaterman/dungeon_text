@@ -236,9 +236,15 @@ class Player():
         have sufficient gold, sets gold to 0
         """
         
-        if self._gold - amount > 0:
+        if self._gold - amount >= 0:
             self._gold -= amount
             return amount
+
+        else:
+            all_i_have = self._gold
+            self._gold = 0
+            return all_i_have
+            
         
 
 

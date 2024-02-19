@@ -22,11 +22,9 @@ def steal(source: mob.Mob, target: player.Player) -> bool:
         return False
     
     else:
-        robbed = random.randrange(1,20)
-        source.add_gold(robbed)
-        
-        commands.type_text(f"The {source.id} stole {robbed} gold from you!\n")
-        target.lose_gold(robbed)
+        prospective = random.randrange(1,20)
+        actual = target.lose_gold(prospective)
+        commands.type_text(f"The {source.id} stole {actual} gold from you!\n")
         return True
 
 GOBLIN = mob.Mob(1, GOBLIN_STATS)
