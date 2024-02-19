@@ -31,16 +31,6 @@ class Player():
         self._wisdom:int = 12
         self._charisma:int = 12
 
-        #stat-map
-        self._stat_map = {
-            "str": self._strength,
-            "dex": self._dexterity,
-            "con": self._constitution,
-            "int": self._intelligence,
-            "wis": self._wisdom,
-            "cha": self._charisma
-        }
-
         #calculated stats
         self._max_hp = 8 + BONUS[self._constitution]
         self._hp = self._max_hp
@@ -49,11 +39,22 @@ class Player():
         self._level = 1
         self._gold = 0
         self._inventory = {}
-
+        
         #equipment
         self._weapon: items.Weapon = None
         self._armor: items.Armor = None
-    
+
+        #stat-map
+        self._stat_map = {
+            "str": self._strength,
+            "dex": self._dexterity,
+            "con": self._constitution,
+            "int": self._intelligence,
+            "wis": self._wisdom,
+            "cha": self._charisma,
+            "evasion": self._evasion,
+        }
+
     #properties
     @property
     def dead(self) -> bool:
@@ -229,14 +230,18 @@ class Player():
 
         self._gold -= gold
 
-    def lose_gold(self, gold:int) -> None:
+    def lose_gold(self, amount:int) -> None:
         """
         Takes a certain amount of gold from the player, if the player doesnt
         have sufficient gold, sets gold to 0
         """
-        self._gold -= gold
-        if self._gold < 0:
-            self._gold = 0
+        
+        if self._gold - amount > 0:
+            self._gold -= amount
+            return amount
+        
+
+
 
     def die(self) -> None:
         """
@@ -294,7 +299,13 @@ class Player():
         """
         for item in self._inventory:
             print(self._inventory[item])
-            
+
+    def debuff(self, stat: str, num:int) -> None:
+        self._stat_map[stat] -= num
+
+    def buff(self, stat: str, num:int) -> None:
+        self._stat_map[stat] += num
+
 
 # arush wrote this while drunk, he won't let me delete it
 class bitch(Event):

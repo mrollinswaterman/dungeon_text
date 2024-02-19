@@ -13,17 +13,17 @@ MOBS = {
     "Goblin": monster_manual.GOBLIN,
 
     "Hobgoblin": monster_manual.HOBGOBLIN,
-
-    "Bandit": monster_manual.BANDIT,
-
-    "Goblin Gang": monster_manual.GOBLIN_GANG
 }
+
+#    "Bandit": monster_manual.BANDIT,
+
+  #  "Goblin Gang": monster_manual.GOBLIN_GANG
 
 PLAYER = player.Player()
 
 iron_sword = items.Weapon("Iron Sword", 1)
 iron_sword.set_damage_dice(1,8)
-iron_sword.Set_crit_multiplier(2)
+iron_sword.set_crit_multiplier(2)
 
 leather_armor = items.Armor("Leather Armor", 1)
 leather_armor.set_armor_value(2)
@@ -35,7 +35,7 @@ PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
 commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
 
-STARTING_ENEMY: mob.Mob = random.choice(list(MOBS.values()))
+STARTING_ENEMY: mob.Mob = monster_manual.GOBLIN#random.choice(list(MOBS.values()))
 STARTING_ENEMY.set_level(1)
 
 def link_start(enemy:mob.Mob) -> None:
@@ -59,51 +59,8 @@ def link_start(enemy:mob.Mob) -> None:
         """
         print("-" * 110+"\n")
 
-        
-        attack = enemy.roll_attack()
-
-        commands.type_text(f'The {enemy.id} attacks you, rolling a {attack}\n')
-
-        if attack == 10:
-            commands.type_text(f"A critical hit! Uh oh.\n")
-            taken = PLAYER.take_damage(enemy.roll_damage() * 1)
-    
-            commands.type_text(f'The {enemy.id} hit you for {taken} damage!\n')
-            print("-" * 110+"\n")
-            if PLAYER.dead is False:
-                player_turn()
-            else:
-                player_death()
-        elif attack == 1:
-    
-            commands.type_text(f"It critically failed!\n")
-            if enemy.fumble_table() is True:
-                taken = enemy.take_damage(enemy.roll_damage())
-        
-                commands.type_text(f'The {enemy.id} hit itself for {taken} damage!\n')
-            else:
-                commands.type_text(f"It missed.\n")
-                print("-" * 110+"\n")
-            if enemy.dead is False:
-                player_turn()
-            else:
-                end_scene()
-        else:
-            if attack >= PLAYER.evasion:
-                taken = PLAYER.take_damage(enemy.roll_damage())
-        
-                commands.type_text(f'The {enemy.id} hit you for {taken} damage.\n')
-                print("-" * 110+"\n")
-                if PLAYER.dead is False:
-                    player_turn()
-                if PLAYER.dead is True:
-                    player_death()
-
-            else:
-        
-                commands.type_text(f"The {enemy.id} missed.\n")
-                print("-" * 110+"\n")
-                player_turn()
+        enemy.special_move(enemy, PLAYER)
+       
 
     def next_scene():
         """

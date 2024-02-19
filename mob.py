@@ -10,6 +10,7 @@ class Statblock():
         self._evasion = 0
         self._armor = 0
         self._loot = (0, 0)
+        self._dc = 0
 
     #properties
     @property
@@ -30,6 +31,9 @@ class Statblock():
     @property
     def loot(self):
         return self._loot
+    @property
+    def dc(self):
+        return self._dc
     
     #methods
     def set_hp(self, num:int) -> None:
@@ -42,6 +46,8 @@ class Statblock():
         self._armor = num
     def set_loot(self, loot:tuple[int, int]) -> None:
         self._loot = loot
+    def set_dc(self, dc: int) -> None:
+        self._dc = dc
 
 
 class Mob():
@@ -49,21 +55,16 @@ class Mob():
     def __init__(self, level, statblock: Statblock):
         self._id = statblock.id
         self._level = level
-
         #base stats
         self._statblock = statblock
-
         #calculated stats
         self._hp = statblock.hp
-
         self._damage: int = statblock.damage
         self._evasion: int = statblock.evasion
         self._armor:int = statblock.armor
-        
+        self._dc = statblock.dc
         #add loot
         self._loot = []
-        
-
         self._special: None | function = None
 
     #properties
@@ -91,6 +92,9 @@ class Mob():
     @property
     def id(self) -> str:
         return self._id
+    @property
+    def dc(self) -> int:
+        return self._dc
         
     #methods
     def roll_attack(self) -> int:
@@ -134,11 +138,11 @@ class Mob():
         else: 
             return True
         
-    def special_move(self):
+    def special_move(self, source, target):
         """
         Calls the special move function
         """
-        self._special(self)
+        self._special(source, target)
 
     def add_special_move(self, special) -> None:
         """

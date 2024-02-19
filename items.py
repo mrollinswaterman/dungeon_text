@@ -64,7 +64,7 @@ class Weapon(Item):
         self._damage_dice = dice
         self._num_damage_dice = num
 
-    def Set_crit_multiplier(self, crit)->None:
+    def set_crit_multiplier(self, crit)->None:
         self._crit = crit
     
     def __str__(self) -> str:
