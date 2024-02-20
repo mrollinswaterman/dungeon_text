@@ -10,9 +10,9 @@ import events
 import time
 
 MOBS = {
-    "Goblin": monster_manual.GOBLIN,
+    "Goblin": monster_manual.GOBLIN_STATS,
 
-    "Hobgoblin": monster_manual.HOBGOBLIN,
+    "Hobgoblin": monster_manual.HOBGOBLIN_STATS,
 }
 
 #    "Bandit": monster_manual.BANDIT,
@@ -35,8 +35,9 @@ PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
 commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
 
-STARTING_ENEMY: mob.Mob = monster_manual.GOBLIN#random.choice(list(MOBS.values()))
+STARTING_ENEMY: mob.Mob = mob.Mob(1, random.choice(list(MOBS.values())))
 STARTING_ENEMY.set_level(1)
+
 
 def link_start(enemy:mob.Mob) -> None:
     RUNNING = True
@@ -57,8 +58,57 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
-        pass
-       
+
+        if random.randrange(1,100) > 50:
+            attack = enemy.roll_attack()
+
+            commands.type_text(f'The {enemy.id} attacks you, rolling a {attack}\n')
+
+            if attack == 10:
+                commands.type_text(f"A critical hit! Uh oh.\n")
+                taken = PLAYER.take_damage(enemy.roll_damage() * 1)
+        
+                commands.type_text(f'The {enemy.id} hit you for {taken} damage!\n')
+                print("-" * 110+"\n")
+                if PLAYER.dead is False:
+                    player_turn()
+                else:
+                    player_death()
+            elif attack == 1:
+        
+                commands.type_text(f"It critically failed!\n")
+                if enemy.fumble_table() is True:
+                    taken = enemy.take_damage(enemy.roll_damage())
+            
+                    commands.type_text(f'The {enemy.id} hit itself for {taken} damage!\n')
+                else:
+                    commands.type_text(f"It missed.\n")
+                    print("-" * 110+"\n")
+                if enemy.dead is False:
+                    player_turn()
+                else:
+                    end_scene()
+            else:
+                if attack >= PLAYER.evasion:
+                    taken = PLAYER.take_damage(enemy.roll_damage())
+            
+                    commands.type_text(f'The {enemy.id} hit you for {taken} damage.\n')
+                    print("-" * 110+"\n")
+                    if PLAYER.dead is False:
+                        player_turn()
+                    if PLAYER.dead is True:
+                        player_death()
+
+                else:
+            
+                    commands.type_text(f"The {enemy.id} missed.\n")
+                    print("-" * 110+"\n")
+                    player_turn()
+        else:
+            print("-" * 110+"\n")
+            enemy.special_move(enemy, PLAYER)
+            print("\n"+"-" * 110+"\n")
+            player_turn()
 
     def next_scene():
         """
@@ -66,7 +116,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         narrator.next_scene_options()
         if random.randrange(1, 5) > 1:
-            next_enemy: mob.Mob = random.choice(list(MOBS.values()))
+            next_enemy: mob.Mob = mob.Mob(1, random.choice(list(MOBS.values())))
             next_enemy.set_level(random.randrange(PLAYER.threat[0], PLAYER.threat[1]))
             RUNNING = False
             link_start(next_enemy)

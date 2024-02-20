@@ -36,7 +36,7 @@ class Statblock():
     def dc(self):
         return self._dc
     @property
-    def special(self) -> function:
+    def special(self):
         return self._special
     
     #methods
@@ -52,7 +52,7 @@ class Statblock():
         self._loot = loot
     def set_dc(self, dc: int) -> None:
         self._dc = dc
-    def set_special(self, func: function) -> None:
+    def set_special(self, func) -> None:
         self._special = func
 
 
