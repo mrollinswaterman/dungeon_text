@@ -4,6 +4,7 @@ import commands
 import random
 
 
+#GOBLIN stuff
 GOBLIN_STATS = mob.Statblock("Goblin")
 
 GOBLIN_STATS.set_hp(5)
@@ -27,9 +28,11 @@ def steal(source: mob.Mob, target: player.Player) -> bool:
         commands.type_text(f"The {source.id} stole {actual} gold from you!\n")
         return True
 
-GOBLIN = mob.Mob(1, GOBLIN_STATS)
-GOBLIN.add_special_move(steal)
+GOBLIN_STATS.set_special(steal)
 
+
+
+#HOBGOBLIN stuff
 HOBGOBLIN_STATS = mob.Statblock("Hobgoblin")
 
 HOBGOBLIN_STATS.set_hp(6)
@@ -49,8 +52,7 @@ def taunt(source: mob.Mob, target: player.Player) -> bool:
         commands.type_text(f"The {source.id}'s insults distract you, making you an easier target.\n")
         target.debuff("evasion", 2)
 
-HOBGOBLIN = mob.Mob(1, HOBGOBLIN_STATS)
-HOBGOBLIN.add_special_move(taunt)
+HOBGOBLIN_STATS.set_special(taunt)
 
 #BANDIT = mob.Statblock("Bandit")
 

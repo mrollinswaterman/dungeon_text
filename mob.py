@@ -11,6 +11,7 @@ class Statblock():
         self._armor = 0
         self._loot = (0, 0)
         self._dc = 0
+        self._special: None | function = None
 
     #properties
     @property
@@ -34,6 +35,9 @@ class Statblock():
     @property
     def dc(self):
         return self._dc
+    @property
+    def special(self) -> function:
+        return self._special
     
     #methods
     def set_hp(self, num:int) -> None:
@@ -48,6 +52,8 @@ class Statblock():
         self._loot = loot
     def set_dc(self, dc: int) -> None:
         self._dc = dc
+    def set_special(self, func: function) -> None:
+        self._special = func
 
 
 class Mob():
@@ -65,7 +71,8 @@ class Mob():
         self._dc = statblock.dc
         #add loot
         self._loot = []
-        self._special: None | function = None
+        self._special = statblock.special
+        
 
     #properties
     @property

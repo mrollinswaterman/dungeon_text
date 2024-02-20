@@ -57,11 +57,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
-        print("-" * 110+"\n")
-
-        enemy.special_move(enemy, PLAYER)
-        print("\n"+"-" * 110)
-        player_turn()
+        pass
        
 
     def next_scene():
