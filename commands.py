@@ -1,7 +1,3 @@
-import sys
-import mob
-import narrator
-import items
 import time
 
 GOD_MODE = False
@@ -41,9 +37,9 @@ def attack(player, enemy, enemy_turn, end_scene) -> None:
     print('\n'+"-" * 110)
     type_text(f'\nYou attack the {enemy.id}, rolling a {attack_roll}.\n')
 
-    if attack_roll == 20:
-
+    if attack_roll == 0:
         type_text(f"Critical Hit!\n")
+        taken = enemy.take_damage(player.roll_damage() * player.weapon.crit)
 
     if attack_roll == 1:
 
@@ -56,6 +52,7 @@ def attack(player, enemy, enemy_turn, end_scene) -> None:
             taken = enemy.take_damage(player.roll_damage())
         
         type_text(f'You hit the {enemy.id} for {taken} damage.\n')
+        #print("-" * 110+"\n")
         if enemy.dead is False:
             enemy_turn()
         elif enemy.dead is True:
@@ -63,6 +60,7 @@ def attack(player, enemy, enemy_turn, end_scene) -> None:
 
     elif attack_roll < enemy.evasion:
         type_text(f"You missed.\n")
+        print("-" * 110+"\n")
         enemy_turn()
 
 def hp(player, player_turn) -> None:

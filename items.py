@@ -60,6 +60,10 @@ class Weapon(Item):
         """
         return self._damage_dice
     
+    @property
+    def crit(self) -> int:
+        return self._crit
+    
     def set_damage_dice(self, num, dice) -> None:
         self._damage_dice = dice
         self._num_damage_dice = num

@@ -58,15 +58,16 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
+        print("-" * 110+"\n")
 
         if random.randrange(1,100) > 50:
             attack = enemy.roll_attack()
 
             commands.type_text(f'The {enemy.id} attacks you, rolling a {attack}\n')
 
-            if attack == 10:
+            if attack == 0:
                 commands.type_text(f"A critical hit! Uh oh.\n")
-                taken = PLAYER.take_damage(enemy.roll_damage() * 1)
+                taken = PLAYER.take_damage(enemy.roll_damage() * 2)
         
                 commands.type_text(f'The {enemy.id} hit you for {taken} damage!\n')
                 print("-" * 110+"\n")
@@ -105,7 +106,7 @@ def link_start(enemy:mob.Mob) -> None:
                     print("-" * 110+"\n")
                     player_turn()
         else:
-            print("-" * 110+"\n")
+            #print("-" * 110+"\n")
             enemy.special_move(enemy, PLAYER)
             print("\n"+"-" * 110+"\n")
             player_turn()

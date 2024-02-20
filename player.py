@@ -92,8 +92,8 @@ class Player():
             return 0
         return self._armor.armor_value
     @property
-    def weapon_damage(self) -> int:
-        return self._weapon.damage_dice
+    def weapon(self) -> items.Weapon:
+        return self._weapon
     @property
     def evasion(self):
         return self._evasion
@@ -146,7 +146,7 @@ class Player():
         Returns a damage roll (weapon dice + str bonus)
         """
         self._weapon.lose_durability()
-        return random.randrange(1, self.weapon_damage) + self.bonus(self.str)
+        return random.randrange(1, self._weapon.damage_dice) + self.bonus(self.str)
 
     def roll_a_check(self, stat: str) -> int:
         """
