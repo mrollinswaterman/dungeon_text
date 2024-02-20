@@ -1,6 +1,6 @@
 import mob
 import player
-import commands
+import global_commands
 import random
 
 
@@ -17,15 +17,15 @@ def steal(source: mob.Mob, target: player.Player) -> bool:
     """
     Steals a random amount of gold from the player if they fail a dex check
     """
-    commands.type_text(f"The {source.id} makes a grab at your gold pouch.\n")
+    global_commands.type_text(f"The {source.id} makes a grab at your gold pouch.\n")
     if target.roll_a_check("dex") >= source.roll_attack():
-        commands.type_text(f"It missed.")
+        global_commands.type_text(f"It missed.\n")
         return False
     
     else:
         prospective = random.randrange(1,20)
         actual = target.lose_gold(prospective)
-        commands.type_text(f"The {source.id} stole {actual} gold from you!\n")
+        global_commands.type_text(f"The {source.id} stole {actual} gold from you!\n")
         return True
 
 GOBLIN_STATS.set_special(steal)
@@ -43,13 +43,13 @@ HOBGOBLIN_STATS.set_loot((10, 10))
 HOBGOBLIN_STATS.set_dc(14)
 
 def taunt(source: mob.Mob, target: player.Player) -> bool:
-    commands.type_text(f"The {source.id} hurls enraging insults at you.\n")
+    global_commands.type_text(f"The {source.id} hurls enraging insults at you.\n")
 
     if target.roll_a_check("cha") >= source.dc:
-        commands.type_text(f"Your mind is an impenetrable fortess. The {source.id}'s words have no effect.\n")
+        global_commands.type_text(f"Your mind is an impenetrable fortess. The {source.id}'s words have no effect.\n")
 
     else:
-        commands.type_text(f"The {source.id}'s insults distract you, making you an easier target.\n")
+        global_commands.type_text(f"The {source.id}'s insults distract you, making you an easier target.\n")
         target.debuff("evasion", 2)
 
 HOBGOBLIN_STATS.set_special(taunt)

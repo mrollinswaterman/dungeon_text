@@ -1,7 +1,6 @@
 import random
 import items
-import mob
-import commands
+import global_commands
 from events import Event
 
 BONUS = {
@@ -61,7 +60,7 @@ class Player():
         return self._hp <= 0
     @property
     def level(self) -> int:
-        return self.level
+        return self._level
     @property
     def str(self) -> int:
         return self._strength
@@ -280,11 +279,11 @@ class Player():
         """
         if self._hp <= (self._max_hp - healing):
             self._hp += healing
-            commands.type_text(f'\nYou healed {healing} HP.\n')
+            global_commands.type_text(f'\nYou healed {healing} HP.\n')
             return None
         if self._hp + healing > self._max_hp:
             self._hp = self._max_hp
-            commands.type_text(f"\nYou only healed {self._max_hp - self._hp} HP.\n")
+            global_commands.type_text(f"\nYou only healed {self._max_hp - self._hp} HP.\n")
             return None
 
     def has_item(self, item: str) -> items.Consumable | bool | items.Item:

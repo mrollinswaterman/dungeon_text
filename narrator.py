@@ -1,6 +1,5 @@
-import player
 import time
-import commands
+import global_commands
 
 def player_turn_options():
     
@@ -9,7 +8,7 @@ def player_turn_options():
 
 def next_scene_options():
     
-    commands.type_text(f"\nYou venture deeper into the dungeon...\n")
+    global_commands.type_text(f"\nYou venture deeper into the dungeon...\n")
     ominous = f'    ...\n'
     for i in range(5):
         time.sleep(.5)
@@ -17,21 +16,21 @@ def next_scene_options():
 
 def level_up_options():
     
-    commands.type_text(f'You gave gained enough XP to level up! Which stat would you like to level up?\n')
+    global_commands.type_text(f'You have gained enough XP to level up! Which stat would you like to level up?\n')
     print(f'Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n')
 
 def event_options():
     
-    commands.type_text(f"Which stat would you like to roll?\n")
+    global_commands.type_text(f"Which stat would you like to roll?\n")
     print(f"Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n")
 
 def continue_run(next):
-    commands.type_text(f"Continue? y/n\n")
+    global_commands.type_text(f"Continue? y/n\n")
     command = input(">")
     if command.lower() == "y":
         next()
     elif command.lower() == "n":
         pass
     else:
-        commands.type_text(f"\nInvalid command. Please try again.\n")
+        global_commands.type_text(f"\nInvalid command. Please try again.\n")
         continue_run(next)
