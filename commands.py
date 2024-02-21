@@ -88,4 +88,3 @@ def use_an_item(player: player.Player, item: items.Consumable, target:player.Pla
     else:
         global_commands.type_text(f'\nNo {item}(s) avaliable!\n')
         player_turn()
-
