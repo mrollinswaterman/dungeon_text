@@ -38,6 +38,7 @@ class Player():
         self._level = 1
         self._gold = 0
         self._inventory = {}
+        self._status_effects = []
         
         #equipment
         self._weapon: items.Weapon = None
@@ -117,6 +118,9 @@ class Player():
     @property
     def level_up(self):
         return self.xp > (15 * self._level)
+    @property
+    def status_effects(self):
+        return self._status_effects
 
     #methods
     def bonus(self, stat):
@@ -243,10 +247,6 @@ class Player():
             all_i_have = self._gold
             self._gold = 0
             return all_i_have
-            
-        
-
-
 
     def die(self) -> None:
         """
@@ -305,11 +305,17 @@ class Player():
         for item in self._inventory:
             print(self._inventory[item])
 
-    def debuff(self, stat: str, num:int) -> None:
-        self._stat_map[stat] -= num
+    def add_status_effect(self, effect) -> None:
+        self._stat_map[effect.stat] += effect.power
+        self._status_effects.append(effect)
 
-    def buff(self, stat: str, num:int) -> None:
-        self._stat_map[stat] += num
+    def update(self) -> None:
+        for effect in self._status_effects:
+            effect.update()
+            if effect.duration < 0:
+                #removes effect
+                self._stat_map[effect.stat] += -(effect.power)
+                self._status_effects.remove(effect)
 
 
 # arush wrote this while drunk, he won't let me delete it
@@ -319,3 +325,42 @@ class bitch(Event):
         self.bitches = num_bitches
         return f"miles has {self.bitches} {var}s"
 
+
+class Status_Effect():
+
+    def __init__(self, id:str, src, stat: str, target: Player, power:int = 0, duration: int = 0):
+        #SRC is a player or mob object
+        self._id = id
+        self._src = src
+        self._power = power
+        self._duration = duration
+        self._stat = stat
+        self._target = target
+
+    #properties
+    @property
+    def id(self) -> str:
+        return self._id
+    @property
+    def src(self):
+        return self._src
+    @property
+    def power(self) -> int:
+        return self._power
+    @property
+    def duration(self) -> int:
+        return self._duration
+    @property
+    def stat(self) -> str:
+        return self._stat
+    @property
+    def target(self) -> Player:
+        return self._target
+    
+    #methods
+    def update(self) -> None:
+        self._duration -= 1
+    def set_power(self, num:int) -> None:
+        self._power = num
+    def set_duration(self, num:int) -> None:
+        self._duration = num
