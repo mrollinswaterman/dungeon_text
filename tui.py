@@ -13,11 +13,11 @@ MOBS = {
     "Goblin": monster_manual.GOBLIN_STATS,
 
     "Hobgoblin": monster_manual.HOBGOBLIN_STATS,
+
+    "Bandit": monster_manual.BANDIT_STATS,
+
+    "Goblin Gang": monster_manual.GOBLIN_GANG_STATS
 }
-
-#    "Bandit": monster_manual.BANDIT,
-
-  #  "Goblin Gang": monster_manual.GOBLIN_GANG
 
 PLAYER = player.Player()
 
@@ -108,12 +108,12 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        if random.randrange(1, 5) > 1:
+        if random.randrange(0, 100) > 33: #66% chance of an enemy spawning next
             next_enemy: mob.Mob = mob.Mob(1, random.choice(list(MOBS.values())))
             next_enemy.set_level(random.randrange(PLAYER.threat[0], PLAYER.threat[1]))
             RUNNING = False
             link_start(next_enemy)
-        else:
+        else: #remainging 33% chance of an event spawning
             next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
             next_event.add_tries(2)
             print(next_event.text)

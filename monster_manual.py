@@ -13,9 +13,9 @@ GOBLIN_STATS.set_evasion(10)
 GOBLIN_STATS.set_armor(0)
 GOBLIN_STATS.set_loot((15, 10))
 
-def steal(source: mob.Mob, target: player.Player) -> bool:
+def goblin_special(source: mob.Mob, target: player.Player) -> bool:
     """
-    Steals a random amount of gold from the player if they fail a dex check
+    Rob: Steals a random amount of gold from the player if they fail a dex check
     """
     global_commands.type_text(f"The {source.id} makes a grab at your gold pouch.\n")
     if target.roll_a_check("dex") >= source.roll_attack():
@@ -28,8 +28,7 @@ def steal(source: mob.Mob, target: player.Player) -> bool:
         global_commands.type_text(f"The {source.id} stole {actual} gold from you!\n")
         return True
 
-GOBLIN_STATS.set_special(steal)
-
+GOBLIN_STATS.set_special(goblin_special)
 
 
 #HOBGOBLIN stuff
@@ -42,7 +41,10 @@ HOBGOBLIN_STATS.set_armor(1)
 HOBGOBLIN_STATS.set_loot((10, 10))
 HOBGOBLIN_STATS.set_dc(14)
 
-def taunt(source: mob.Mob, target: player.Player) -> bool:
+def hobgoblin_special(source: mob.Mob, target: player.Player) -> bool:
+    """
+    Taunt: Reduces the player's evasion by 2 points for 2 turns if they fail a charisma check
+    """
     global_commands.type_text(f"The {source.id} hurls enraging insults at you.\n")
 
     if target.roll_a_check("cha") >= source.dc:
@@ -52,20 +54,41 @@ def taunt(source: mob.Mob, target: player.Player) -> bool:
         global_commands.type_text(f"The {source.id}'s insults distract you, making you an easier target.\n")
         target.debuff("evasion", 2)
 
-HOBGOBLIN_STATS.set_special(taunt)
+HOBGOBLIN_STATS.set_special(hobgoblin_special)
 
-#BANDIT = mob.Statblock("Bandit")
 
-"""BANDIT.set_hp(8)
-BANDIT.set_damage(5)
-BANDIT.set_evasion(10)
-BANDIT.set_armor(2)
-BANDIT.set_loot((25, 10))
 
-GOBLIN_GANG = mob.Statblock("Goblin Gang")
+#BANDIT stuff
+BANDIT_STATS = mob.Statblock("Bandit")
 
-GOBLIN_GANG.set_hp(6)
-GOBLIN_GANG.set_damage(4)
-GOBLIN_GANG.set_evasion(7)
-GOBLIN_GANG.set_armor(0)
-GOBLIN_GANG.set_loot((30, 10))"""
+BANDIT_STATS.set_hp(8)
+BANDIT_STATS.set_damage(6)
+BANDIT_STATS.set_evasion(10)
+BANDIT_STATS.set_armor(2)
+BANDIT_STATS.set_loot((25, 10))
+
+def bandit_special():
+    """
+    bandit special tbd
+    """
+    pass
+
+BANDIT_STATS.set_special(bandit_special)
+
+GOBLIN_GANG_STATS = mob.Statblock("Goblin Gang")
+
+GOBLIN_GANG_STATS.set_hp(6)
+GOBLIN_GANG_STATS.set_damage(5)
+GOBLIN_GANG_STATS.set_evasion(7)
+GOBLIN_GANG_STATS.set_armor(0)
+GOBLIN_GANG_STATS.set_loot((30, 10))
+
+def goblin_gang_special():
+    """
+    Goblin gang special tbd
+    
+    maybe the gang scatters, rasing evasion but lowering damage??
+    """
+    pass
+
+GOBLIN_GANG_STATS.set_special(goblin_gang_special)

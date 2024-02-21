@@ -1,6 +1,5 @@
 import time
 
-
 def type_text(text: str, speed: int = .03) -> None:
     """
     Adds "typing" effect to text
