@@ -2,6 +2,7 @@ import player
 import global_commands
 import mob
 import items
+import random
 
 GOD_MODE = False
 
@@ -89,6 +90,29 @@ def use_an_item(player: player.Player, item: items.Consumable, target:player.Pla
         global_commands.type_text(f'\nNo {item}(s) avaliable!\n')
         player_turn()
 
+def stop_flee_attempt(source: player.Player | mob.Mob) -> None:
+    enemy_attack = source.roll_attack()
+    if enemy_attack - 2 >= player.evasion:
+        global_commands.type_text(f"The {source.id} attacks you while you attempt to flee. You escape, but not unscathed.")
+        player.fail_to_flee() #to be added
+        #insert a LEAVE DUNGEON command here
+    else:
+        global_commands.type_text(f"The {source.id} tries to stop you from retreating, but fails. You've fled successfully.")
+
 def flee(player: player.Player, enemy: mob.Mob) -> None:
     print('\n'+"-" * 110)
     global_commands.type_text(f"You attempt to flee.")
+    chase_chance = random.randrange(0, 100)
+    if player.hp > player.max_hp * 0.75 and chase_chance < 10: # above 75% hp, 10% chance enemy chases you
+        stop_flee_attempt(enemy)
+        
+    elif player.hp > player.max_hp * 0.5 and chase_chance < 33: #above 50% hp 33% chance enemy chases you
+        enemy_attack = enemy.roll_attack()
+        if enemy_attack - 2 >= player.evasion:
+            stop_flee_attempt(enemy)
+
+    elif player.hp <= player.max_hp * 0.3 and chase_chance < 50: # below 30% hp, 50% chance enemy chases you
+        stop_flee_attempt(enemy)
+
+    else:
+        global_commands.type_text(f"The {enemy.id} lets you go. Your espace goes off without a hitch")
