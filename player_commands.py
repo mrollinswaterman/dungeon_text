@@ -88,14 +88,7 @@ def use_an_item(player: player.Player, item: items.Consumable, target:player.Pla
     else:
         global_commands.type_text(f'\nNo {item}(s) avaliable!\n')
         player_turn()
-<<<<<<< HEAD
-=======
 
 def flee(player: player.Player, enemy: mob.Mob) -> None:
     print('\n'+"-" * 110)
     global_commands.type_text(f"You attempt to flee.")
-
-
-    
-
->>>>>>> b16c306946f2f5882edfc2229808d7f7fd3f5dbf
