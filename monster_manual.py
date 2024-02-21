@@ -52,7 +52,10 @@ def hobgoblin_special(source: mob.Mob, target: player.Player) -> bool:
 
     else:
         global_commands.type_text(f"The {source.id}'s insults distract you, making you an easier target.\n")
-        target.debuff("evasion", 2)
+        taunt = player.Status_Effect("Taunt", source, "evasion", target)
+        taunt.set_duration(2)
+        taunt.set_power(2)
+        target.add_status_effect(taunt)
 
 HOBGOBLIN_STATS.set_special(hobgoblin_special)
 
