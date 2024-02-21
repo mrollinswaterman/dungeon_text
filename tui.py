@@ -47,6 +47,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the Player turn
         """
+        PLAYER.update()
         narrator.player_turn_options()
     
     def player_death():
@@ -182,6 +183,8 @@ def link_start(enemy:mob.Mob) -> None:
             player_commands.inventory(PLAYER, player_turn)
         if command.lower() == "u":
             player_commands.use_an_item(PLAYER, "Health Potion", PLAYER, enemy_turn, player_turn)
+        if command.lower() == "f":
+            player_commands.flee(PLAYER, enemy)
             
         
 if input(">").lower() == "y":
