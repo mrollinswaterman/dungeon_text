@@ -76,7 +76,7 @@ def bandit_special():
     """
     pass
 
-BANDIT_STATS.set_special(bandit_special)
+#BANDIT_STATS.set_special(bandit_special)
 
 GOBLIN_GANG_STATS = mob.Statblock("Goblin Gang")
 
@@ -94,4 +94,4 @@ def goblin_gang_special():
     """
     pass
 
-GOBLIN_GANG_STATS.set_special(goblin_gang_special)
+#GOBLIN_GANG_STATS.set_special(goblin_gang_special)

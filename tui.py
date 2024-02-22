@@ -61,7 +61,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         print("-" * 110+"\n")
 
-        if random.randrange(1,100) > 50:
+        if random.randrange(1,100) > 50 or enemy.statblock.special is None:
             attack = enemy.roll_attack()
             global_commands.type_text(f'The {enemy.id} attacks you, rolling a {attack}\n')
             if attack == 0:

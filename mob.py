@@ -102,6 +102,9 @@ class Mob():
     @property
     def dc(self) -> int:
         return self._dc
+    @property
+    def statblock(self) -> Statblock:
+        return self._statblock
         
     #methods
     def roll_attack(self) -> int:

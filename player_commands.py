@@ -81,7 +81,7 @@ def use_an_item(player: player.Player, item: items.Consumable, target:player.Pla
     print('\n'+"-" * 110)
     if player.has_item(item) is not False and player.has_item(item).quantity > 0:
         if player.has_item(item).use(target) is True:
-            global_commands.type_text(f'\n{item} used. {player.has_item(item).quantity} {item}(s) remaining.\n')
+            global_commands.type_text(f'\n{player.has_item(item).quantity} {item}(s) remaining.\n')
             enemy_turn()
         else:
             global_commands.type_text(f'\nAlready full HP.\n')
@@ -93,15 +93,15 @@ def use_an_item(player: player.Player, item: items.Consumable, target:player.Pla
 def stop_flee_attempt(source: player.Player | mob.Mob) -> None:
     enemy_attack = source.roll_attack()
     if enemy_attack - 2 >= player.evasion:
-        global_commands.type_text(f"The {source.id} attacks you while you attempt to flee. You escape, but not unscathed.")
+        global_commands.type_text(f"The {source.id} attacks you while you attempt to flee. You escape, but not unscathed.\n")
         player.fail_to_flee() #to be added
         #insert a LEAVE DUNGEON command here
     else:
-        global_commands.type_text(f"The {source.id} tries to stop you from retreating, but fails. You've fled successfully.")
+        global_commands.type_text(f"The {source.id} tries to stop you from retreating, but fails. You've fled successfully.\n")
 
 def flee(player: player.Player, enemy: mob.Mob) -> None:
     print('\n'+"-" * 110)
-    global_commands.type_text(f"You attempt to flee.")
+    global_commands.type_text(f"You attempt to flee.\n")
     chase_chance = random.randrange(0, 100)
     if player.hp > player.max_hp * 0.75 and chase_chance < 10: # above 75% hp, 10% chance enemy chases you
         stop_flee_attempt(enemy)
@@ -115,4 +115,4 @@ def flee(player: player.Player, enemy: mob.Mob) -> None:
         stop_flee_attempt(enemy)
 
     else:
-        global_commands.type_text(f"The {enemy.id} lets you go. Your espace goes off without a hitch")
+        global_commands.type_text(f"The {enemy.id} lets you go.\n")
