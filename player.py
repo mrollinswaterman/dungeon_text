@@ -114,7 +114,7 @@ class Player():
         """
         Returns the player's current threat level which effect mob spawns
         """
-        return(self._level, self._level * 2 + 1)
+        return self._level * 2 + 1
     @property
     def level_up(self):
         return self.xp > (15 * self._level)
@@ -312,7 +312,8 @@ class Player():
     def update(self) -> None:
         for effect in self._status_effects:
             effect.update()
-            if effect.duration < 0:
+            print(effect.duration)
+            if effect.duration <= 0:
                 #removes effect
                 self._stat_map[effect.stat] += -(effect.power)
                 self._status_effects.remove(effect)

@@ -10,13 +10,17 @@ import events
 import global_commands
 
 MOBS = {
-    "Goblin": monster_manual.GOBLIN_STATS,
+    1: {
+        "Goblin": monster_manual.GOBLIN_STATS,
 
-    "Hobgoblin": monster_manual.HOBGOBLIN_STATS,
+        "Hobgoblin": monster_manual.HOBGOBLIN_STATS,
 
-    "Bandit": monster_manual.BANDIT_STATS,
+        "Bandit": monster_manual.BANDIT_STATS
+    },
 
-    "Goblin Gang": monster_manual.GOBLIN_GANG_STATS
+    2: {
+        "Goblin Gang": monster_manual.GOBLIN_GANG_STATS
+        }
 }
 
 PLAYER = player.Player()
@@ -35,7 +39,7 @@ PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
 global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
 
-STARTING_ENEMY: mob.Mob = mob.Mob(1, random.choice(list(MOBS.values())))
+STARTING_ENEMY: mob.Mob = mob.Mob(1, random.choice(list(MOBS[1].values())))
 STARTING_ENEMY.set_level(1)
 
 
@@ -110,13 +114,16 @@ def link_start(enemy:mob.Mob) -> None:
         """
         narrator.next_scene_options()
         if random.randrange(0, 100) > 33: #66% chance of an enemy spawning next
-            next_enemy: mob.Mob = mob.Mob(1, random.choice(list(MOBS.values())))
-            next_enemy.set_level(random.randrange(PLAYER.threat[0], PLAYER.threat[1]))
+            next_enemy: mob.Mob = mob.Mob(1, random.choice(list(MOBS[PLAYER.level].values()))) 
+            #^ picks a random mob from the list, wth a min level equal to the players
+            next_enemy.set_level(random.randrange(next_enemy.level_range[0], PLAYER.threat))
+            #^ sets the enemy's level to a random value between its minimum level
+            #and the player's 'threat level'.
             RUNNING = False
             link_start(next_enemy)
         else: #remainging 33% chance of an event spawning
             next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
-            next_event.add_tries(2)
+            next_event.set_tries(2)
             print(next_event.text)
             run_event(next_event)
 
@@ -136,6 +143,7 @@ def link_start(enemy:mob.Mob) -> None:
         narrator.continue_run(next_scene)
 
     def run_event(event: events.Event):
+        print("-" * 110+'\n')
         narrator.event_options()
         command = input(">")
         if command.lower() != "w":
@@ -143,12 +151,12 @@ def link_start(enemy:mob.Mob) -> None:
     
             global_commands.type_text(event.run(command, PLAYER.roll_a_check(command)))
             print("-" * 110+'\n')
-            if event.passed is True:
-                event.add_tries(2)
+            if event.passed is True:# if passed, reset event tries
+                event.set_tries(2)
                 next_scene()
-            elif event.tries is True:
+            elif event.tries is True:# if not passed yet, and still tries, run it again
                 run_event(event)
-            else: 
+            else: # in failed, tell the player
                 global_commands.type_text(event.end_message)
                 next_scene()
 

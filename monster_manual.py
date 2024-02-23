@@ -12,6 +12,7 @@ GOBLIN_STATS.set_damage(4)
 GOBLIN_STATS.set_evasion(10)
 GOBLIN_STATS.set_armor(0)
 GOBLIN_STATS.set_loot((15, 10))
+GOBLIN_STATS.set_min_max((1, 3))
 
 def goblin_special(source: mob.Mob, target: player.Player) -> bool:
     """
@@ -40,6 +41,7 @@ HOBGOBLIN_STATS.set_evasion(9)
 HOBGOBLIN_STATS.set_armor(1)
 HOBGOBLIN_STATS.set_loot((10, 10))
 HOBGOBLIN_STATS.set_dc(14)
+HOBGOBLIN_STATS.set_min_max((1, 5))
 
 def hobgoblin_special(source: mob.Mob, target: player.Player) -> bool:
     """
@@ -69,6 +71,7 @@ BANDIT_STATS.set_damage(6)
 BANDIT_STATS.set_evasion(10)
 BANDIT_STATS.set_armor(2)
 BANDIT_STATS.set_loot((25, 10))
+BANDIT_STATS.set_min_max((1, 7))
 
 def bandit_special():
     """
@@ -85,6 +88,7 @@ GOBLIN_GANG_STATS.set_damage(5)
 GOBLIN_GANG_STATS.set_evasion(7)
 GOBLIN_GANG_STATS.set_armor(0)
 GOBLIN_GANG_STATS.set_loot((30, 10))
+GOBLIN_GANG_STATS.set_min_max((2, 6))
 
 def goblin_gang_special():
     """

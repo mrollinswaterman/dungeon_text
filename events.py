@@ -63,7 +63,7 @@ class Event():
         """
         self._stats.add(stat)
 
-    def add_tries(self, tries:int) -> None:
+    def set_tries(self, tries:int) -> None:
         """
         Sets the number of tries the event has to a given integer
         """

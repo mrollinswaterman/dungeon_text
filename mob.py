@@ -12,6 +12,8 @@ class Statblock():
         self._loot = (0, 0)
         self._dc = 0
         self._special: None | function = None
+        self._min_level = 0
+        self._max_level = 0
 
     #properties
     @property
@@ -38,6 +40,9 @@ class Statblock():
     @property
     def special(self):
         return self._special
+    @property
+    def level_range(self) -> tuple[int, int]:
+        return (self._min_level, self._max_level)
     
     #methods
     def set_hp(self, num:int) -> None:
@@ -54,6 +59,9 @@ class Statblock():
         self._dc = dc
     def set_special(self, func) -> None:
         self._special = func
+    def set_min_max(self, rng:tuple[int,int]) -> None:
+        self._min_level = rng[0]
+        self._max_level = rng[1]
 
 
 class Mob():
@@ -72,6 +80,8 @@ class Mob():
         #add loot
         self._loot = []
         self._special = statblock.special
+        self._min_level = statblock.level_range[0]
+        self._max_level = statblock.level_range[1]
         
 
     #properties
@@ -105,6 +115,9 @@ class Mob():
     @property
     def statblock(self) -> Statblock:
         return self._statblock
+    @property
+    def level_range(self) -> tuple[int, int]:
+        return (self._min_level, self._max_level)
         
     #methods
     def roll_attack(self) -> int:
