@@ -52,7 +52,7 @@ def link_start(enemy:mob.Mob) -> None:
         Begins the Player turn
         """
         PLAYER.update()
-        narrator.player_turn_options()
+        player_commands.player_turn_options(PLAYER)
     
     def player_death():
         #some text probably too

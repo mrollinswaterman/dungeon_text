@@ -8,6 +8,10 @@ import narrator
 
 GOD_MODE = False
 
+def player_turn_options(player:player.Player):
+    
+    print(f'What would you like to do? Action Points: {player.ap}/{player.max_ap}\n\n Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n')
+
 
 def attack(player: player.Player, enemy: mob.Mob, enemy_turn, end_scene) -> None:
     """
@@ -47,14 +51,18 @@ def attack(player: player.Player, enemy: mob.Mob, enemy_turn, end_scene) -> None
             taken = enemy.take_damage(player.roll_damage())
         
         global_commands.type_text(f'You hit the {enemy.id} for {taken} damage.\n')
-        if enemy.dead is False:
+        if enemy.dead is False and player.can_act is False:
             enemy_turn()
         elif enemy.dead is True:
             end_scene()
+        else:
+            player_turn_options(player)
 
     elif attack_roll < enemy.evasion:
         global_commands.type_text(f"You missed.\n")
-        enemy_turn()
+        if player.can_act is False:
+            enemy_turn()
+        else: player_turn_options(player)
 
 def hp(player: player.Player, player_turn) -> None:
     """

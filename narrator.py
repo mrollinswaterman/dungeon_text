@@ -1,12 +1,6 @@
 import time
 import global_commands
 
-
-def player_turn_options():
-    
-    print('What would you like to do?  Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n')
-
-
 def next_scene_options():
     
     global_commands.type_text("\nYou venture deeper into the dungeon...\n")

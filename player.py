@@ -34,12 +34,19 @@ class Player():
         self._max_hp = 8 + BONUS[self._constitution]
         self._hp = self._max_hp
         self._evasion = 12 + BONUS[self._dexterity]
+
+        #xp/gold/items
         self._xp = 0
         self._level = 1
         self._gold = 0
         self._inventory = {}
         self._status_effects = []
         
+        #static stats
+        self._max_ap = 1 + (self._level //5)
+        self._ap = self._max_ap
+        self._damage_taken_multiplier = 1
+
         #equipment
         self._weapon: items.Weapon = None
         self._armor: items.Armor = None
@@ -53,11 +60,15 @@ class Player():
             "wis": self._wisdom,
             "cha": self._charisma,
             "evasion": self._evasion,
+            "damage-taken -multiplier": self._damage_taken_multiplier
         }
 
     #properties
     @property
     def dead(self) -> bool:
+        """
+        Checks if the player is dead (ie HP <= 0)
+        """
         return self._hp <= 0
     @property
     def level(self) -> int:
@@ -88,11 +99,17 @@ class Player():
         return self._xp
     @property
     def armor(self) -> int:
+        """
+        Returns player's armor value, proably should be an object too
+        """
         if self._armor.broken is True:
             return 0
         return self._armor.armor_value
     @property
     def weapon(self) -> items.Weapon:
+        """
+        Returns player's weapon object
+        """
         return self._weapon
     @property
     def evasion(self):
@@ -117,10 +134,31 @@ class Player():
         return self._level * 2 + 1
     @property
     def level_up(self):
+        """
+        Checks if the player has enough XP to level up
+        """
         return self.xp > (15 * self._level)
     @property
     def status_effects(self):
         return self._status_effects
+    @property
+    def max_ap(self) -> None:
+        """
+        Returns max AP value
+        """
+        return self._max_ap
+    @property
+    def ap(self) -> None:
+        """
+        Returns current Action Point value
+        """
+        return self._ap
+    @property
+    def can_act(self) -> bool:
+        """
+        Checks if the player can act (ie AP > 0)
+        """
+        return self._ap > 0
 
     #methods
     def bonus(self, stat):
@@ -161,6 +199,7 @@ class Player():
         """
         Reduces the players hp by a damage amount, reduced by armor
         """
+        damage = damage * self._damage_taken_multiplier
         if self._armor.broken is False:
             self._armor.lose_durability()
         if damage - self.armor < 0:
@@ -247,6 +286,18 @@ class Player():
             all_i_have = self._gold
             self._gold = 0
             return all_i_have
+    
+    def spend_ap(self, num) -> None:
+        """
+        Spends Action points equal to num
+        """
+        self._ap -= num
+
+    def reset_ap(self, num) -> None:
+        """
+        Resets Action Points to max
+        """
+        self._ap = self._max_ap
 
     def die(self) -> None:
         """
