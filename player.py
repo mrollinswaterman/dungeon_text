@@ -43,7 +43,7 @@ class Player():
         self._status_effects = []
         
         #static stats
-        self._max_ap = 1 + (self._level //5)
+        self._max_ap = 1 + (self._level // 5)
         self._ap = self._max_ap
         self._damage_taken_multiplier = 1
 
@@ -293,7 +293,7 @@ class Player():
         """
         self._ap -= num
 
-    def reset_ap(self, num) -> None:
+    def reset_ap(self) -> None:
         """
         Resets Action Points to max
         """

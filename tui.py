@@ -125,6 +125,7 @@ def link_start(enemy:mob.Mob) -> None:
             next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
             next_event.set_tries(2)
             print(next_event.text)
+            print("-" * 110+'\n')
             run_event(next_event)
 
     def begin_encounter():
@@ -143,14 +144,12 @@ def link_start(enemy:mob.Mob) -> None:
         narrator.continue_run(next_scene)
 
     def run_event(event: events.Event):
-        print("-" * 110+'\n')
         narrator.event_options()
         command = input(">")
         if command.lower() != "w":
             print('\n'+"-" * 110)
-    
             global_commands.type_text(event.run(command, PLAYER.roll_a_check(command)))
-            print("-" * 110+'\n')
+            print("-" * 110)
             if event.passed is True:# if passed, reset event tries
                 event.set_tries(2)
                 next_scene()
@@ -163,7 +162,7 @@ def link_start(enemy:mob.Mob) -> None:
     def end_scene():
         PLAYER.gain_gold(enemy.loot[0])
         PLAYER.gain_xp(enemy.loot[1])
-
+        PLAYER.reset_ap()
         global_commands.type_text(f"You killed the {enemy.id}!\n")
         print("-"*110+'\n')
         if PLAYER.level_up is True:

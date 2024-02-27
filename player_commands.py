@@ -9,8 +9,7 @@ import narrator
 GOD_MODE = False
 
 def player_turn_options(player:player.Player):
-    
-    print(f'What would you like to do? Action Points: {player.ap}/{player.max_ap}\n\n Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n')
+    print(f'What would you like to do? Action Points: {player.ap}/{player.max_ap}\n\nAttack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n')
 
 
 def attack(player: player.Player, enemy: mob.Mob, enemy_turn, end_scene) -> None:
@@ -27,11 +26,11 @@ def attack(player: player.Player, enemy: mob.Mob, enemy_turn, end_scene) -> None
 
     Returns nothing
     """
-
     if GOD_MODE is True:
         attack_roll = 1000000
     else:
         attack_roll = player.roll_attack()
+        player.spend_ap(1)
     
     print('\n'+"-" * 110)
     global_commands.type_text(f'\nYou attack the {enemy.id}, rolling a {attack_roll}.\n')
@@ -41,7 +40,6 @@ def attack(player: player.Player, enemy: mob.Mob, enemy_turn, end_scene) -> None
         taken = enemy.take_damage(player.roll_damage() * player.weapon.crit)
 
     if attack_roll == 1:
-
         global_commands.type_text(f"Crtical Fail!\n")
 
     if attack_roll >= enemy.evasion:
@@ -52,6 +50,7 @@ def attack(player: player.Player, enemy: mob.Mob, enemy_turn, end_scene) -> None
         
         global_commands.type_text(f'You hit the {enemy.id} for {taken} damage.\n')
         if enemy.dead is False and player.can_act is False:
+            player.reset_ap()
             enemy_turn()
         elif enemy.dead is True:
             end_scene()
@@ -61,8 +60,10 @@ def attack(player: player.Player, enemy: mob.Mob, enemy_turn, end_scene) -> None
     elif attack_roll < enemy.evasion:
         global_commands.type_text(f"You missed.\n")
         if player.can_act is False:
+            player.reset_ap()
             enemy_turn()
-        else: player_turn_options(player)
+        else: 
+            player_turn_options(player)
 
 def hp(player: player.Player, player_turn) -> None:
     """
@@ -92,7 +93,12 @@ def use_an_item(player: player.Player, item: items.Consumable, target:player.Pla
     if player.has_item(item) is not False and player.has_item(item).quantity > 0:
         if player.has_item(item).use(target) is True:
             global_commands.type_text(f'\n{player.has_item(item).quantity} {item}(s) remaining.\n')
-            enemy_turn()
+            player.spend_ap(1)
+            if player.can_act is False:
+                player.reset_ap()
+                enemy_turn()
+            else:
+                player_turn()
         else:
             global_commands.type_text(f'\nAlready full HP.\n')
             player_turn()
@@ -101,6 +107,10 @@ def use_an_item(player: player.Player, item: items.Consumable, target:player.Pla
         player_turn()
 
 def stop_flee_attempt(source: mob.Mob, target: player.Player) -> None:
+    """
+    Checks to see if an enemy is able to successfuly interrupt
+    a player's attempt to flee
+    """
     enemy_attack = source.roll_attack()
     if enemy_attack - 2 >= player.evasion:
         if target.dead is False:
@@ -115,6 +125,9 @@ def stop_flee_attempt(source: mob.Mob, target: player.Player) -> None:
         global_commands.type_text(f"The {source.id} tries to stop you from retreating, but fails. You've fled successfully.\n")
 
 def flee(player: player.Player, enemy: mob.Mob) -> None:
+    """
+    Attempts to run away from the current encounter
+    """
     print('\n'+"-" * 110)
     global_commands.type_text(f"You attempt to flee.\n")
     chase_chance = random.randrange(0, 100)
