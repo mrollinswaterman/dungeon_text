@@ -113,6 +113,9 @@ class Consumable(Item):
     def increase_quantity(self, num:int) -> None:
         self._quantity += num
 
+    def decrease_quantity(self, num:int) -> None:
+        self._quantity -=- num
+
     def __str__(self) -> str:
         return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Quantity: {self._quantity}'
     

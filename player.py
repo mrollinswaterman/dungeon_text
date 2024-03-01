@@ -154,6 +154,9 @@ class Player():
     def gold(self):
         return self._gold
     @property
+    def inventory(self) -> dict:
+        return self._inventory
+    @property
     def name(self):
         return self._name
     @property
@@ -337,18 +340,23 @@ class Player():
 
 
     #INVENTORY STUFF
-    def pick_up(self, item: items.Item | items.Consumable, num: int) -> None:
+    def pick_up(self, item: items.Item | items.Consumable, num: int) -> bool:
         """
         Picks up an item if the player has inventory space for it
         """
         if len(self._inventory) < self.carrying_capacity:
-            global_commands.type_text(f"You picked up a(n) {item.id}.\n")
-            if item.id in self._inventory:
+            if item.id in self._inventory and isinstance(item, items.Consumable):
+                global_commands.type_text(f"You picked up {num} {item.id}(s).\n")
                 self._inventory[item.id].increase_quantity(num)
+                return True
+            elif item.id in self._inventory:
+                global_commands.type_text(f"You already have a {item.id}.\n")
+                return False
             else:
                 self._inventory[item.id] = item
                 if isinstance(item, items.Consumable):
                     self._inventory[item.id].increase_quantity(num)
+                global_commands.type_text(f"You picked up {num} {item.id}s.\n")
         else:
             raise ValueError("Not enough inventory space\n")
         
@@ -359,7 +367,7 @@ class Player():
         if item.id in self._inventory:
             del self._inventory[item.id]
         else:
-            raise ValueError("Can't drop an item you don't have")
+            raise ValueError("Can't drop an item you don't have.\n")
 
     def equip_weapon(self, weapon: "items.Weapon") ->  None:
         """

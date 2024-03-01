@@ -132,23 +132,25 @@ def flee(player: player.Player, enemy: mob.Mob) -> None:
     global_commands.type_text(f"You attempt to flee.\n")
     chase_chance = random.randrange(0, 100)
     if player.hp > player.max_hp * 0.75 and chase_chance <= 10: # above 75% hp, 10% chance enemy chases you
+        print('option 1')
         enemy_attack = enemy.roll_attack()
         if enemy_attack - 2 >= player.evasion:
             stop_flee_attempt(enemy, player)
         
     elif player.hp > player.max_hp * 0.5 and chase_chance < 33: #above 50% hp 33% chance enemy chases you
+        print('option 2')
         enemy_attack = enemy.roll_attack()
         if enemy_attack - 2 >= player.evasion:
             stop_flee_attempt(enemy, player)
 
     elif player.hp <= player.max_hp * 0.3 and chase_chance < 50: # below 30% hp, 50% chance enemy chases you
+        print('option 3')
         enemy_attack = enemy.roll_attack()
         if enemy_attack - 2 >= player.evasion:
             stop_flee_attempt(enemy, player)
 
     else:
+        print('else')
         global_commands.type_text(f"The {enemy.id} lets you go.\n")
         print("-" * 110+'\n')
         narrator.exit_the_dungeon()
-
-    print("ending flee..")

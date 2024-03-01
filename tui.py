@@ -8,6 +8,7 @@ import item_compendium
 import dms_guide
 import events
 import global_commands
+import shopkeep
 
 MOBS = {
     1: {

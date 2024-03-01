@@ -1,6 +1,9 @@
 import time
 import sys
 import global_commands
+import shopkeep
+
+SHOPKEEP = shopkeep.Shopkeep()
 
 def next_scene_options():
     global_commands.type_text("\nYou venture deeper into the dungeon...\n")
@@ -30,17 +33,33 @@ def continue_run(next):
 
 def exit_the_dungeon():
     global_commands.type_text("As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes.\n")
-    sys.exit()
+    menu_options()
+
+def buy_something():
+    pass
+def shopkeep_options():
+    print("\n"+"-"*110+'\n')
+    global_commands.type_text("The Shopkeep eyes you wearily.\n")
+    print("Buy Something - (b) | Leave - (l)\n")
+    command = input(">")
+    if command.lower() == "b":
+        buy_something()
+    elif command.lower() == "l":
+        menu_options()
+    else: 
+        print("Invalid command, please try again")
+        shopkeep_options()
+
 
 def menu_options():
-    global_commands.type_text("What would you like to do? Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v)\n")
+    print("What would you like to do? Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v)\n")
     command = input(">")
     if command.lower() == "e":
         pass
     elif command.lower() == "r":
         global_commands.type_text("Plenty of time to sleep when you're dead.\n")
     elif command.lower() == "v":
-        pass
+        shopkeep_options()
     else:
         global_commands.type_text("Invalid command please try again\n")
         menu_options()
