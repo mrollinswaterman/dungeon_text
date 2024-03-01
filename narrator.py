@@ -1,4 +1,5 @@
 import time
+import sys
 import global_commands
 
 def next_scene_options():
@@ -29,6 +30,7 @@ def continue_run(next):
 
 def exit_the_dungeon():
     global_commands.type_text("As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes.\n")
+    sys.exit()
 
 def menu_options():
     global_commands.type_text("What would you like to do? Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v)\n")
@@ -39,6 +41,6 @@ def menu_options():
         global_commands.type_text("Plenty of time to sleep when you're dead.\n")
     elif command.lower() == "v":
         pass
-    else: 
+    else:
         global_commands.type_text("Invalid command please try again\n")
         menu_options()

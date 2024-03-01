@@ -39,8 +39,7 @@ PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
 global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
 
-#STARTING_ENEMY: mob.Mob = mob.Mob(1, random.choice(list(MOBS[1].values())))
-STARTING_ENEMY: mob.Mob = mob.Mob(1, monster_manual.HOBGOBLIN_STATS)
+STARTING_ENEMY: mob.Mob = mob.Mob(1, random.choice(list(MOBS[1].values())))
 STARTING_ENEMY.set_level(1)
 
 
@@ -66,7 +65,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         print("-" * 110+"\n")
 
-        if random.randrange(1,100) > 99 or enemy.statblock.special is None:
+        if random.randrange(1,100) > 50 or enemy.statblock.special is None: # 50% chance of attack
             attack = enemy.roll_attack()
             global_commands.type_text(f'The {enemy.id} attacks you, rolling a {attack}\n')
             if attack == 0:
@@ -91,7 +90,7 @@ def link_start(enemy:mob.Mob) -> None:
                     player_turn()
                 else:
                     end_scene()
-            else:
+            else: 
                 if attack >= PLAYER.evasion:
                     taken = PLAYER.take_damage(enemy.roll_damage())
                     global_commands.type_text(f'The {enemy.id} hit you for {taken} damage.\n')
@@ -104,7 +103,7 @@ def link_start(enemy:mob.Mob) -> None:
                     global_commands.type_text(f"The {enemy.id} missed.\n")
                     print("-" * 110+"\n")
                     player_turn()
-        else:
+        else:# ...aaaaand 50% chance of performing a special move
             enemy.special_move(enemy, PLAYER)
             print("-" * 110+"\n")
             player_turn()
@@ -153,6 +152,8 @@ def link_start(enemy:mob.Mob) -> None:
             print("-" * 110)
             if event.passed is True:# if passed, reset event tries
                 event.set_tries(2)
+                if event.reward is not None:
+                    PLAYER.recieve_reward(event.reward)
                 next_scene()
             elif event.tries is True:# if not passed yet, and still tries, run it again
                 run_event(event)

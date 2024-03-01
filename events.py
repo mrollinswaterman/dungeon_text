@@ -39,6 +39,7 @@ class Event():
         self._messages: dict[bool, list[tuple[str, list[str]]]] = {True: [], False: []}
         self._passed = False
         self._end_message = ""
+        self._reward = None
 
     #properties
     @property
@@ -56,38 +57,19 @@ class Event():
     @property
     def end_message(self) -> str:
         return self._end_message
+    @property
+    def reward(self):
+        return self._reward
+
     #methods
+
+    #ADDERS
     def add_stat(self, stat: tuple[str, int]) -> None:
         """
         Adds a stat to the events stat list
         """
         self._stats.add(stat)
 
-    def set_tries(self, tries:int) -> None:
-        """
-        Sets the number of tries the event has to a given integer
-        """
-        self._tries = tries
-    
-    def has_stat(self, stat:str) -> bool:
-        """
-        Checks to see if the event has a stat in its stat list.
-
-        Return True if it does, False if it does not
-        """
-        for pair in self._stats:
-            if pair[0] == stat:
-                return True
-        return False
-
-    def stat_dc(self, stat:str) -> None | tuple[str, int]:
-        """
-        Returns the DC associated with a given stat
-        """
-        for pair in self._stats:
-            if pair[0] == stat:
-                return self._stats[pair]
-            
     def add_text(self, text:str) -> None:
         """
         Sets the event's text to a given string
@@ -113,6 +95,43 @@ class Event():
         """
         self._end_message = msg
 
+
+    #SETTERS
+    def set_tries(self, tries:int) -> None:
+        """
+        Sets the number of tries the event has to a given integer
+        """
+        self._tries = tries
+    
+    def set_reward(self, reward) -> None:
+        """
+        Adds reward to the event
+        """
+        self._reward = reward
+
+
+    #EVENT INFO
+    def has_stat(self, stat:str) -> bool:
+        """
+        Checks to see if the event has a stat in its stat list.
+
+        Return True if it does, False if it does not
+        """
+        for pair in self._stats:
+            if pair[0] == stat:
+                return True
+        return False
+    
+    def stat_dc(self, stat:str) -> None | tuple[str, int]:
+        """
+        Returns the DC associated with a given stat
+        """
+        for pair in self._stats:
+            if pair[0] == stat:
+                return self._stats[pair]
+            
+    
+    #RUN
     def run(self, stat:str, roll:int) -> str:
         """
         Runs the event for a given stat and roll
