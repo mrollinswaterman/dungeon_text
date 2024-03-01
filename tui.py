@@ -39,7 +39,8 @@ PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
 global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
 
-STARTING_ENEMY: mob.Mob = mob.Mob(1, random.choice(list(MOBS[1].values())))
+#STARTING_ENEMY: mob.Mob = mob.Mob(1, random.choice(list(MOBS[1].values())))
+STARTING_ENEMY: mob.Mob = mob.Mob(1, monster_manual.HOBGOBLIN_STATS)
 STARTING_ENEMY.set_level(1)
 
 
@@ -65,7 +66,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         print("-" * 110+"\n")
 
-        if random.randrange(1,100) > 50 or enemy.statblock.special is None:
+        if random.randrange(1,100) > 99 or enemy.statblock.special is None:
             attack = enemy.roll_attack()
             global_commands.type_text(f'The {enemy.id} attacks you, rolling a {attack}\n')
             if attack == 0:

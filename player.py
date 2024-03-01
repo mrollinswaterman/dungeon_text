@@ -17,30 +17,79 @@ BONUS = {
     20: 5
 }
 
+class Status_Effect():
+
+    def __init__(self, id:str, src, stat: str, target, power:int = 0, duration: int = 0):
+        #SRC is a player or mob object
+        self._id = id
+        self._src = src
+        self._power = power
+        self._duration = duration
+        self._stat = stat
+        self._target = target
+
+    #properties
+    @property
+    def id(self) -> str:
+        return self._id
+    @property
+    def src(self):
+        return self._src
+    @property
+    def power(self) -> int:
+        return self._power
+    @property
+    def duration(self) -> int:
+        return self._duration
+    @property
+    def stat(self) -> str:
+        return self._stat
+    @property
+    def target(self):
+        return self._target
+    
+    #methods
+    def update(self) -> None:
+        self._duration -= 1
+    def set_power(self, num:int) -> None:
+        self._power = num
+    def set_duration(self, num:int) -> None:
+        self._duration = num
+
+
 class Player():
 
     def __init__(self, name: str=""):
         self._name = name
 
         #statblock
-        self._strength:int = 12
-        self._dexterity:int = 12
-        self._constitution:int = 12
-        self._intelligence:int = 12
-        self._wisdom:int = 12
-        self._charisma:int = 12
+        self._stats = {
+            "str": 12,
+            "dex": 12,
+            "con": 12,
+            "int": 12,
+            "wis": 12,
+            "cha": 12,
+            "evasion": 10 +self._stats["dex"],
+            "damage-taken-multiplier": 1
+        }
+        #self._strength:int = 12
+        #self._dexterity:int = 12
+        #self._constitution:int = 12
+        #self._intelligence:int = 12
+        #self._wisdom:int = 12
+        #self._charisma:int = 12
 
         #calculated stats
-        self._max_hp = 8 + BONUS[self._constitution]
+        self._max_hp = 8 + BONUS[self._stats["con"]]
         self._hp = self._max_hp
-        self._evasion = 12 + BONUS[self._dexterity]
 
         #xp/gold/items
         self._xp = 0
         self._level = 1
         self._gold = 0
         self._inventory = {}
-        self._status_effects = []
+        self._status_effects:list[Status_Effect] = []
         
         #static stats
         self._max_ap = 1 + (self._level // 5)
@@ -51,17 +100,6 @@ class Player():
         self._weapon: items.Weapon = None
         self._armor: items.Armor = None
 
-        #stat-map
-        self._stat_map = {
-            "str": self._strength,
-            "dex": self._dexterity,
-            "con": self._constitution,
-            "int": self._intelligence,
-            "wis": self._wisdom,
-            "cha": self._charisma,
-            "evasion": self._evasion,
-            "damage-taken -multiplier": self._damage_taken_multiplier
-        }
 
     #properties
     @property
@@ -75,22 +113,22 @@ class Player():
         return self._level
     @property
     def str(self) -> int:
-        return self._strength
+        return self._stats["str"]
     @property
     def dex(self) -> int:
-        return self._dexterity
+        return self._stats["dex"]
     @property
     def con(self) -> int:
-        return self._constitution
+        return self._stats["con"]
     @property
     def int(self) -> int:
-        return self._intelligence
+        return self._stats["int"]
     @property
     def wis(self) -> int:
-        return self._wisdom
+        return self._stats["wis"]
     @property
     def cha(self) -> int:
-        return self._charisma
+        return self._stats["cha"]
     @property
     def hp(self) -> int:
         return self._hp
@@ -113,6 +151,7 @@ class Player():
         return self._weapon
     @property
     def evasion(self):
+        #print(self._evasion)
         return self._evasion
     @property
     def carrying_capacity(self) -> int:
@@ -161,12 +200,22 @@ class Player():
         return self._ap > 0
 
     #methods
-    def bonus(self, stat):
-        if type(stat) == str:
-            return BONUS[self._stat_map[stat]]
-        
-        return BONUS[stat]
+
+
+    #STATUS
+    def bonus(self, stat:str) -> int:
+        return BONUS[self._stats[stat]]
     
+    def die(self) -> None:
+        """
+        Kils the player. Lose gold and inventory on death
+        """
+        self._gold = 0
+        self._inventory = []
+        #other stuff to be added
+
+
+    #ROLLS
     def roll_attack(self) -> int:
         """
         Returns an attack roll (d20 + dex bonus)
@@ -193,7 +242,7 @@ class Player():
         """
         Returns a check with a given stat (d20 + stat bonus)
         """
-        return random.randrange(1, 20) + BONUS[self._stat_map[stat]]
+        return random.randrange(1, 20) + BONUS[self._stats[stat]]
     
     def take_damage(self, damage: int) -> int:
         """
@@ -208,46 +257,21 @@ class Player():
             self._hp -= damage - self.armor
             return damage - self.armor
 
-    def pick_up(self, item: items.Item | items.Consumable, num: int) -> None:
-        """
-        Picks up an item if the player has inventory space for it
-        """
-        if len(self._inventory) < self.carrying_capacity:
-            if item.id in self._inventory:
-                self._inventory[item.id].increase_quantity(num)
-            else:
-                self._inventory[item.id] = item
-                if isinstance(item, items.Consumable):
-                    self._inventory[item.id].increase_quantity(num)
 
-        else:
-            raise ValueError("Not enough inventory space")
-        
-    def drop(self, item: items.Item) -> None:
-        """
-        Drops an item out of the player's inventory
-        """
-        if item.id in self._inventory:
-            del self._inventory[item.id]
-
-        else:
-            raise ValueError("Can't drop an item you don't have")
-        
+    #RESOURCES
     def spend_xp(self, stat: str) -> None:
         """
         Levels up a given stat
         """
-        self._stat_map[stat] += 2
+        self._stats[stat] += 2
         self._xp -= 15 * self._level
         self._level += 1
         prev_max = self._max_hp
         self._max_hp += random.randrange(1, 8) + BONUS[self.con]
         if self._hp == prev_max:
             self._hp = self._max_hp
-
         if self._hp < (prev_max // 2):
             self._hp = self._max_hp // 2
-        
 
     def gain_xp(self, xp: int) -> None:
         """
@@ -269,7 +293,6 @@ class Player():
         """
         if gold > self.gold:   
             raise ValueError("Not enough gold")
-
         self._gold -= gold
 
     def lose_gold(self, amount:int) -> None:
@@ -281,12 +304,11 @@ class Player():
         if self._gold - amount >= 0:
             self._gold -= amount
             return amount
-
         else:
             all_i_have = self._gold
             self._gold = 0
             return all_i_have
-    
+
     def spend_ap(self, num) -> None:
         """
         Spends Action points equal to num
@@ -299,16 +321,46 @@ class Player():
         """
         self._ap = self._max_ap
 
-    def die(self) -> None:
-        """
-        Kils the player. Lose gold and inventory on death
-        """
-        self._gold = 0
-        self._inventory = []
-        #other stuff to be added
-
     def change_name(self, name:str) -> None:
         self._name = name
+
+    def heal(self, healing: int) -> None:
+        """
+        Heals the player for a given amount
+        """
+        if self._hp <= (self._max_hp - healing):
+            self._hp += healing
+            global_commands.type_text(f'\nYou healed {healing} HP.\n')
+            return None
+        if self._hp + healing > self._max_hp:
+            self._hp = self._max_hp
+            global_commands.type_text(f"\nYou only healed {self._max_hp - self._hp} HP.\n")
+            return None
+
+
+    #INVENTORY STUFF
+    def pick_up(self, item: items.Item | items.Consumable, num: int) -> None:
+        """
+        Picks up an item if the player has inventory space for it
+        """
+        if len(self._inventory) < self.carrying_capacity:
+            if item.id in self._inventory:
+                self._inventory[item.id].increase_quantity(num)
+            else:
+                self._inventory[item.id] = item
+                if isinstance(item, items.Consumable):
+                    self._inventory[item.id].increase_quantity(num)
+        else:
+            raise ValueError("Not enough inventory space")
+        
+    def drop(self, item: items.Item) -> None:
+        """
+        Drops an item out of the player's inventory
+        """
+        if item.id in self._inventory:
+            del self._inventory[item.id]
+        else:
+            raise ValueError("Can't drop an item you don't have")
 
     def equip_weapon(self, weapon: "items.Weapon") ->  None:
         """
@@ -324,19 +376,6 @@ class Player():
         self._armor = armor
         self._inventory[armor.id] = armor
 
-    def heal(self, healing: int) -> None:
-        """
-        Heals the player for a given amount
-        """
-        if self._hp <= (self._max_hp - healing):
-            self._hp += healing
-            global_commands.type_text(f'\nYou healed {healing} HP.\n')
-            return None
-        if self._hp + healing > self._max_hp:
-            self._hp = self._max_hp
-            global_commands.type_text(f"\nYou only healed {self._max_hp - self._hp} HP.\n")
-            return None
-
     def has_item(self, item: str) -> items.Consumable | bool | items.Item:
         """
         Checks if a player has an item in their inventory
@@ -346,7 +385,6 @@ class Player():
         if item in self._inventory:
             if self._inventory[item].quantity > 0:
                 return self._inventory[item]
-        
         return False
 
     def print_inventory(self) -> None:
@@ -356,9 +394,16 @@ class Player():
         for item in self._inventory:
             print(self._inventory[item])
 
-    def add_status_effect(self, effect) -> None:
-        self._stat_map[effect.stat] += effect.power
-        self._status_effects.append(effect)
+
+    #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
+    def add_status_effect(self, effect:Status_Effect) -> None:
+        for status in self._status_effects:
+            id, src = status.id, status.src
+            if effect.id == id and effect.src == src:
+                print(f"The {effect.id} effect hasn't run out yet.")
+            else:
+                self._stats[effect.stat] -= effect.power
+                self._status_effects.append(effect)
 
     def update(self) -> None:
         for effect in self._status_effects:
@@ -376,43 +421,3 @@ class bitch(Event):
         var: str = "bitch"
         self.bitches = num_bitches
         return f"miles has {self.bitches} {var}s"
-
-
-class Status_Effect():
-
-    def __init__(self, id:str, src, stat: str, target: Player, power:int = 0, duration: int = 0):
-        #SRC is a player or mob object
-        self._id = id
-        self._src = src
-        self._power = power
-        self._duration = duration
-        self._stat = stat
-        self._target = target
-
-    #properties
-    @property
-    def id(self) -> str:
-        return self._id
-    @property
-    def src(self):
-        return self._src
-    @property
-    def power(self) -> int:
-        return self._power
-    @property
-    def duration(self) -> int:
-        return self._duration
-    @property
-    def stat(self) -> str:
-        return self._stat
-    @property
-    def target(self) -> Player:
-        return self._target
-    
-    #methods
-    def update(self) -> None:
-        self._duration -= 1
-    def set_power(self, num:int) -> None:
-        self._power = num
-    def set_duration(self, num:int) -> None:
-        self._duration = num

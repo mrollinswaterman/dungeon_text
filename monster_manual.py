@@ -49,15 +49,16 @@ def hobgoblin_special(source: mob.Mob, target: player.Player) -> bool:
     """
     global_commands.type_text(f"The {source.id} hurls enraging insults at you.\n")
 
-    if target.roll_a_check("cha") >= source.dc:
+    if target.roll_a_check("cha") >= source.dc+25:
         global_commands.type_text(f"Your mind is an impenetrable fortess. The {source.id}'s words have no effect.\n")
 
     else:
         global_commands.type_text(f"The {source.id}'s insults distract you, making you an easier target.\n")
         taunt = player.Status_Effect("Taunt", source, "evasion", target)
         taunt.set_duration(2)
-        taunt.set_power(2)
+        taunt.set_power(-2)
         target.add_status_effect(taunt)
+        print(f"New Evasion: {target.evasion}")
 
 HOBGOBLIN_STATS.set_special(hobgoblin_special)
 
