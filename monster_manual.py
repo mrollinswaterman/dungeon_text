@@ -4,6 +4,8 @@ import global_commands
 import random
 
 
+
+
 #GOBLIN stuff
 GOBLIN_STATS = mob.Statblock("Goblin")
 
@@ -99,3 +101,20 @@ def goblin_gang_special():
     pass
 
 #GOBLIN_GANG_STATS.set_special(goblin_gang_special)
+
+
+MOBS = {
+    1: {
+        "Goblin": GOBLIN_STATS,
+
+        "Hobgoblin": HOBGOBLIN_STATS,
+
+        "Bandit": BANDIT_STATS
+    },
+
+    2: {
+        "Goblin Gang": GOBLIN_GANG_STATS
+        }
+}
+def random_mob(level):
+    return mob.Mob(1, random.choice(MOBS[level]))

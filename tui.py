@@ -9,38 +9,11 @@ import dms_guide
 import events
 import global_commands
 import shopkeep
-
-MOBS = {
-    1: {
-        "Goblin": monster_manual.GOBLIN_STATS,
-
-        "Hobgoblin": monster_manual.HOBGOBLIN_STATS,
-
-        "Bandit": monster_manual.BANDIT_STATS
-    },
-
-    2: {
-        "Goblin Gang": monster_manual.GOBLIN_GANG_STATS
-        }
-}
-
-PLAYER = player.Player()
-
-iron_sword = items.Weapon("Iron Sword", 1)
-iron_sword.set_damage_dice(1,8)
-iron_sword.set_crit_multiplier(2)
-
-leather_armor = items.Armor("Leather Armor", 1)
-leather_armor.set_armor_value(2)
-
-PLAYER.equip_armor(leather_armor)
-PLAYER.equip_weapon(iron_sword)
-
-PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
+import global_variables
 
 global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
 
-STARTING_ENEMY: mob.Mob = mob.Mob(1, random.choice(list(MOBS[1].values())))
+STARTING_ENEMY: mob.Mob = monster_manual.random_mob(1)
 STARTING_ENEMY.set_level(1)
 
 
@@ -52,8 +25,8 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the Player turn
         """
-        PLAYER.update()
-        player_commands.player_turn_options(PLAYER)
+        global_variables.PLAYER.update()
+        player_commands.player_turn_options(global_variables.PLAYER)
     
     def player_death():
         #some text probably too
@@ -71,10 +44,10 @@ def link_start(enemy:mob.Mob) -> None:
             global_commands.type_text(f'The {enemy.id} attacks you, rolling a {attack}\n')
             if attack == 0:
                 global_commands.type_text(f"A critical hit! Uh oh.\n")
-                taken = PLAYER.take_damage(enemy.roll_damage() * 2)
+                taken = global_variables.PLAYER.take_damage(enemy.roll_damage() * 2)
                 global_commands.type_text(f'The {enemy.id} hit you for {taken} damage!\n')
                 print("-" * 110+"\n")
-                if PLAYER.dead is False:
+                if global_variables.PLAYER.dead is False:
                     player_turn()
                 else:
                     player_death()
@@ -92,20 +65,20 @@ def link_start(enemy:mob.Mob) -> None:
                 else:
                     end_scene()
             else: 
-                if attack >= PLAYER.evasion:
-                    taken = PLAYER.take_damage(enemy.roll_damage())
+                if attack >= global_variables.PLAYER.evasion:
+                    taken = global_variables.PLAYER.take_damage(enemy.roll_damage())
                     global_commands.type_text(f'The {enemy.id} hit you for {taken} damage.\n')
                     print("-" * 110+"\n")
-                    if PLAYER.dead is False:
+                    if global_variables.PLAYER.dead is False:
                         player_turn()
-                    if PLAYER.dead is True:
+                    if global_variables.PLAYER.dead is True:
                         player_death()
                 else:
                     global_commands.type_text(f"The {enemy.id} missed.\n")
                     print("-" * 110+"\n")
                     player_turn()
         else:# ...aaaaand 50% chance of performing a special move
-            enemy.special_move(enemy, PLAYER)
+            enemy.special_move(enemy, global_variables.PLAYER)
             print("-" * 110+"\n")
             player_turn()
 
@@ -115,11 +88,10 @@ def link_start(enemy:mob.Mob) -> None:
         """
         narrator.next_scene_options()
         if random.randrange(0, 100) > 33: #66% chance of an enemy spawning next
-            next_enemy: mob.Mob = mob.Mob(1, random.choice(list(MOBS[PLAYER.level].values()))) 
-            #^ picks a random mob from the list, wth a min level equal to the players
-            next_enemy.set_level(random.randrange(next_enemy.level_range[0], PLAYER.threat))
-            #^ sets the enemy's level to a random value between its minimum level
-            #and the player's 'threat level'.
+            next_enemy: mob.Mob = monster_manual.random_mob(global_variables.PLAYER.level) 
+            #^ picks a random mob from the list, wth a min level equal to the player's level
+            next_enemy.set_level(random.randrange(next_enemy.level_range[0], global_variables.PLAYER.threat))
+            #^ sets the enemy's level to a random value between its minimum level and the player's 'threat level'.
             RUNNING = False
             link_start(next_enemy)
         else: #remainging 33% chance of an event spawning
@@ -139,9 +111,9 @@ def link_start(enemy:mob.Mob) -> None:
     def level_up_player():
         narrator.level_up_options()
         command = input(">")
-        PLAYER.spend_xp(command)
+        global_variables.PLAYER.spend_xp(command)
 
-        global_commands.type_text(f'\nYour {command} increased by 2. You are now Level {PLAYER.level}\n')
+        global_commands.type_text(f'\nYour {command} increased by 2. You are now Level {global_variables.PLAYER.level}\n')
         narrator.continue_run(next_scene)
 
     def run_event(event: events.Event):
@@ -149,12 +121,12 @@ def link_start(enemy:mob.Mob) -> None:
         command = input(">")
         if command.lower() != "w":
             print('\n'+"-" * 110)
-            global_commands.type_text(event.run(command, PLAYER.roll_a_check(command)))
+            global_commands.type_text(event.run(command, global_variables.PLAYER.roll_a_check(command)))
             print("-" * 110)
             if event.passed is True:# if passed, reset event tries
                 event.set_tries(2)
                 if event.reward is not None:
-                    PLAYER.recieve_reward(event.reward)
+                    global_variables.PLAYER.recieve_reward(event.reward)
                 next_scene()
             elif event.tries is True:# if not passed yet, and still tries, run it again
                 run_event(event)
@@ -163,12 +135,12 @@ def link_start(enemy:mob.Mob) -> None:
                 next_scene()
 
     def end_scene():
-        PLAYER.gain_gold(enemy.loot[0])
-        PLAYER.gain_xp(enemy.loot[1])
-        PLAYER.reset_ap()
+        global_variables.PLAYER.gain_gold(enemy.loot[0])
+        global_variables.PLAYER.gain_xp(enemy.loot[1])
+        global_variables.PLAYER.reset_ap()
         global_commands.type_text(f"You killed the {enemy.id}!\n")
         print("-"*110+'\n')
-        if PLAYER.level_up is True:
+        if global_variables.PLAYER.level_up is True:
             level_up_player()
         else:
             narrator.continue_run(next_scene)
@@ -186,15 +158,15 @@ def link_start(enemy:mob.Mob) -> None:
             RUNNING = False
             sys.exit()
         if command.lower() == "a":
-            player_commands.attack(PLAYER, enemy, enemy_turn, end_scene)
+            player_commands.attack(enemy, enemy_turn, end_scene)
         if command.lower() == "hp":
-            player_commands.hp(PLAYER, player_turn)
+            player_commands.hp(player_turn)
         if command.lower() == "i":
-            player_commands.inventory(PLAYER, player_turn)
+            player_commands.inventory(player_turn)
         if command.lower() == "u":
-            player_commands.use_an_item(PLAYER, "Health Potion", PLAYER, enemy_turn, player_turn)
+            player_commands.use_an_item("Health Potion", enemy_turn, player_turn)
         if command.lower() == "f":
-            player_commands.flee(PLAYER, enemy)
+            player_commands.flee(enemy, link_start)
             
         
 if input(">").lower() == "y":

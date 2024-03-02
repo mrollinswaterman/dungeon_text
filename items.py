@@ -1,5 +1,13 @@
 import random
 
+RARITY = {
+    1: "Common",
+    2: "Uncommon",
+    3: "Rare",
+    4: "Epic",
+    5: "Legendary",
+    6: "Unique"
+}
 
 class Item():
 
@@ -26,7 +34,7 @@ class Item():
         return (self._durability, self._max_durability)
     @property
     def rarity(self) -> int:
-        return self._rarity
+        return RARITY[self._rarity]
     
     #methods
     def lose_durability(self) -> None:
@@ -42,7 +50,7 @@ class Item():
         self._durability = self._max_durability
 
     def __str__(self) -> str:
-        return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n'
+        return f'Item: {self._id}\n Rarity: {RARITY[self._rarity]}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n'
 
 class Weapon(Item):
 

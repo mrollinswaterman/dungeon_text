@@ -1,9 +1,12 @@
 import time
-import sys
+import random
 import global_commands
+import global_variables
 import shopkeep
+import monster_manual
 
-SHOPKEEP = shopkeep.Shopkeep()
+
+
 
 def next_scene_options():
     global_commands.type_text("\nYou venture deeper into the dungeon...\n")
@@ -31,12 +34,13 @@ def continue_run(next):
         global_commands.type_text("\nInvalid command. Please try again.\n")
         continue_run(next)
 
-def exit_the_dungeon():
+def exit_the_dungeon(player, start):
     global_commands.type_text("As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes.\n")
-    menu_options()
+    menu_options(player, start)
 
 def buy_something():
     pass
+
 def shopkeep_options():
     print("\n"+"-"*110+'\n')
     global_commands.type_text("The Shopkeep eyes you wearily.\n")
@@ -51,11 +55,16 @@ def shopkeep_options():
         shopkeep_options()
 
 
-def menu_options():
+def menu_options(start):
     print("What would you like to do? Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v)\n")
     command = input(">")
     if command.lower() == "e":
-        pass
+        global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
+        command = input(">")
+        if command.lower() == "y":
+            enemy = monster_manual.random_mob(global_variables.PLAYER.level)
+            enemy.set_level(random.randrange(enemy.level_range[0], global_variables.PLAYER.threat))
+            start(enemy) #restart the game via the link_start function in tui.py
     elif command.lower() == "r":
         global_commands.type_text("Plenty of time to sleep when you're dead.\n")
     elif command.lower() == "v":

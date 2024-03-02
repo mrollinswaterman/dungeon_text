@@ -5,8 +5,8 @@ import global_commands
 
 class Shopkeep():
 
-    def __init__(self, inventory=set()):
-        self._inventory:set[items.Item] = inventory
+    def __init__(self, inventory=list()):
+        self._inventory:list[items.Item] = inventory
         self._gold = 100
     #properties
     @property
@@ -19,7 +19,7 @@ class Shopkeep():
     #methods
 
     def stock(self, item: items.Item) -> None:
-        self._inventory.add(item)
+        self._inventory.append(item)
 
     def sell(self, item:items.Item, buyer:player.Player, num:int=1) -> bool:
         """
@@ -53,7 +53,7 @@ class Shopkeep():
                 self._gold -= item.value
                 seller.gain_gold(item.value)
                 seller.drop(item, num)
-                self._inventory.add(item)
+                self._inventory.append(item)
                 return True
         else:
             global_commands.type_text("The Shopkeep throws you a questioning glance as you try to sell him thin air.\n")
@@ -61,5 +61,5 @@ class Shopkeep():
         
     def print_invevtory(self) -> None:
         for i, item in enumerate(self._inventory):
-            print(f"")
+            print(f"{i+1}: {item.id} Rarity: {item.rarity} Price: {item.value}g\n")
             
