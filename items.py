@@ -22,7 +22,7 @@ class Item():
     #properties
     @property
     def id(self) -> str:
-        return self._id
+        return f"{RARITY[self._rarity]} {self._id}"
     @property
     def value(self) -> int:
         return self._value
@@ -33,8 +33,11 @@ class Item():
     def durability(self) -> tuple[int, int]:
         return (self._durability, self._max_durability)
     @property
-    def rarity(self) -> int:
+    def rarity(self) -> str:
         return RARITY[self._rarity]
+    @property
+    def numerical_rarity(self) -> int:
+        return self._rarity
     
     #methods
     def lose_durability(self) -> None:
@@ -50,13 +53,13 @@ class Item():
         self._durability = self._max_durability
 
     def __str__(self) -> str:
-        return f'Item: {self._id}\n Rarity: {RARITY[self._rarity]}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n'
+        return f'{self.id}\n Rarity: {RARITY[self._rarity]}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n'
 
 class Weapon(Item):
 
-    def __init__(self, id, rarity):
+    def __init__(self, id, rarity=random.randrange(1, 4)):
         super().__init__(id, rarity)
-        self._value = 10 * rarity
+        self._value = 15 * rarity
         self._damage_dice = 0
         self._num_damage_dice = 0
         self._crit = 0
@@ -73,21 +76,22 @@ class Weapon(Item):
     def crit(self) -> int:
         return self._crit
     
-    def set_damage_dice(self, num, dice) -> None:
-        self._damage_dice = dice
+    def set_damage_dice(self, dice:tuple[int,int]) -> None:
+        num, type = dice
+        self._damage_dice = type
         self._num_damage_dice = num
 
     def set_crit_multiplier(self, crit)->None:
         self._crit = crit
     
     def __str__(self) -> str:
-        return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n'
+        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n'
 
 class Armor(Item):
 
-    def __init__(self, id, rarity=1):
+    def __init__(self, id, rarity=random.randrange(1, 4)):
         super().__init__(id, rarity)
-        self._value = 8 * rarity
+        self._value = 10 * rarity
         self._armor_value = 2 * self._rarity - 1
 
     #properties
@@ -102,7 +106,7 @@ class Armor(Item):
         self._armor_value = armor
     
     def __str__(self) -> str:
-        return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
+        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
     
 class Consumable(Item):
 
@@ -127,7 +131,7 @@ class Consumable(Item):
         self._quantity -= num
 
     def __str__(self) -> str:
-        return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Quantity: {self._quantity}'
+        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Quantity: {self._quantity}'
     
 
 

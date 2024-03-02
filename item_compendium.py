@@ -15,7 +15,19 @@ class Health_Potion(items.Consumable):
             self._quantity -= 1
             target.heal(self._strength)
             return True
-        
         return False
-    
-#STEEL_SWORD = items.Weapon("Steel Sword", 1)
+
+WEAPONS_DICTIONARY = {
+    ("Battleaxe", (1,8), 3),
+    ("Light Flail", (1, 8), 2),
+    ("Scimitar", (1, 6), 4),
+    ("Trident", (1, 10), 2),
+    ("Mace", (1, 8), 2),
+    ("Greatsword", (2, 6), 2),
+    ("Glaive", (1, 10), 3),
+    ("Greataxe", (1, 12), 3),
+    ("Scythe", (2, 4), 5),
+    ("Halberd", (1, 10), 3),
+    ("Lance", (1, 8), 2)
+}
+

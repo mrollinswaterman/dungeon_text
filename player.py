@@ -235,7 +235,10 @@ class Player():
         Returns a damage roll (weapon dice + str bonus)
         """
         self._weapon.lose_durability()
-        return random.randrange(1, self._weapon.damage_dice) + self.bonus(self.str)
+        weapon_damage = 0
+        for die in self._weapon._num_damage_dice:
+            weapon_damage += random.randrange(1, self._weapon.damage_dice)
+        return weapon_damage + self.bonus(self.str)
 
     def roll_a_check(self, stat: str) -> int:
         """

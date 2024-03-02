@@ -1,4 +1,5 @@
 import sys
+import math
 import random
 import player, items, mob
 import monster_manual
@@ -11,6 +12,8 @@ import global_commands
 import shopkeep
 import global_variables
 
+print(math.ceil(5/4))
+print(math.ceil(5/2))
 global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
 
 STARTING_ENEMY: mob.Mob = monster_manual.random_mob(1)
