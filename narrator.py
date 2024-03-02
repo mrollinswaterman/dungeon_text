@@ -34,41 +34,48 @@ def continue_run(next):
         global_commands.type_text("\nInvalid command. Please try again.\n")
         continue_run(next)
 
-def exit_the_dungeon(player, start):
-    global_commands.type_text("As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes.\n")
-    menu_options(player, start)
+def exit_the_dungeon():
+    global_commands.type_text("As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes.")
+    menu_options()
 
 def buy_something():
-    pass
+    global_variables.SHOPKEEP.print_invevtory()
+    global_commands.type_text(f"What would you like to buy? Enter an item's number to purchase it.\n")
+    command = input(">")
 
 def shopkeep_options():
     print("\n"+"-"*110+'\n')
     global_commands.type_text("The Shopkeep eyes you wearily.\n")
-    print("Buy Something - (b) | Leave - (l)\n")
+    print("What would you like to do? Buy Something - (b) | Leave - (l)\n")
     command = input(">")
     if command.lower() == "b":
+        command = None
         buy_something()
     elif command.lower() == "l":
+        command = None
         menu_options()
     else: 
         print("Invalid command, please try again")
         shopkeep_options()
 
 
-def menu_options(start):
-    print("What would you like to do? Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v)\n")
+def menu_options():
+    print("\nWhat would you like to do? Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v)\n")
     command = input(">")
     if command.lower() == "e":
         global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
         command = input(">")
         if command.lower() == "y":
-            enemy = monster_manual.random_mob(global_variables.PLAYER.level)
-            enemy.set_level(random.randrange(enemy.level_range[0], global_variables.PLAYER.threat))
-            start(enemy) #restart the game via the link_start function in tui.py
+            command = None
+            global_variables.RUNNING = True
     elif command.lower() == "r":
-        global_commands.type_text("Plenty of time to sleep when you're dead.\n")
+        command = None
+        global_commands.type_text("\nPlenty of time to sleep when you're dead.\n")
+        menu_options()
     elif command.lower() == "v":
+        command = None
         shopkeep_options()
     else:
-        global_commands.type_text("Invalid command please try again\n")
+        command = None
+        global_commands.type_text("\nInvalid command please try again\n")
         menu_options()

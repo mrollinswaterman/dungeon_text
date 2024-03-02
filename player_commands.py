@@ -84,13 +84,13 @@ def inventory(player_turn) -> None:
     print("\n"+"-" * 110+'\n')
     player_turn()
 
-def use_an_item(item: items.Consumable, target:global_variables.PLAYER.Player | mob.Mob, enemy_turn, player_turn) -> None:
+def use_an_item(item: items.Consumable, enemy_turn, player_turn) -> None:
     """
     Uses an item on the Player, if the player has the item in their inventory
     """
     print('\n'+"-" * 110)
     if global_variables.PLAYER.has_item(item) is not False and global_variables.PLAYER.has_item(item).quantity > 0:
-        if global_variables.PLAYER.has_item(item).use(target) is True:
+        if global_variables.PLAYER.has_item(item).use(global_variables.PLAYER) is True:
             global_commands.type_text(f'\n{global_variables.PLAYER.has_item(item).quantity} {item}(s) remaining.\n')
             global_variables.PLAYER.spend_ap(1)
             if global_variables.PLAYER.can_act is False:
@@ -105,7 +105,7 @@ def use_an_item(item: items.Consumable, target:global_variables.PLAYER.Player | 
         global_commands.type_text(f'\nNo {item}(s) avaliable!\n')
         player_turn()
 
-def stop_flee_attempt(source: mob.Mob, start) -> None:
+def stop_flee_attempt(source: mob.Mob, ) -> None:
     """
     Checks to see if an enemy is able to successfuly interrupt
     a player's attempt to flee
@@ -114,9 +114,9 @@ def stop_flee_attempt(source: mob.Mob, start) -> None:
     if enemy_attack - 2 >= global_variables.PLAYER.evasion:
         if global_variables.PLAYER.dead is False:
             global_commands.type_text(f"The {source.id} attacks you while you attempt to flee. You escape, but not unscathed.\n")
-            global_variables.PLAYER.fail_to_flee() #to be added
+            #global_variables.PLAYER.fail_to_flee() #to be added
             print("-" * 110+'\n')
-            narrator.exit_the_dungeon(start)
+            narrator.exit_the_dungeon()
             #insert a LEAVE DUNGEON command here
         else:
             #idk kill the player
@@ -124,7 +124,7 @@ def stop_flee_attempt(source: mob.Mob, start) -> None:
     else:
         global_commands.type_text(f"The {source.id} tries to stop you from retreating, but fails. You've fled successfully.\n")
 
-def flee(enemy: mob.Mob, start) -> None:
+def flee(enemy: mob.Mob) -> None:
     """
     Attempts to run away from the current encounter
     """
@@ -134,23 +134,21 @@ def flee(enemy: mob.Mob, start) -> None:
     if global_variables.PLAYER.hp > global_variables.PLAYER.max_hp * 0.75 and chase_chance <= 10: # above 75% hp, 10% chance enemy chases you
         print('option 1')
         enemy_attack = enemy.roll_attack()
-        if enemy_attack - 2 >= global_variables.PLAYER.evasion:
-            stop_flee_attempt(enemy, start)
+        stop_flee_attempt(enemy)
         
     elif global_variables.PLAYER.hp > global_variables.PLAYER.max_hp * 0.5 and chase_chance < 33: #above 50% hp 33% chance enemy chases you
         print('option 2')
         enemy_attack = enemy.roll_attack()
-        if enemy_attack - 2 >= global_variables.PLAYER.evasion:
-            stop_flee_attempt(enemy, start)
+        stop_flee_attempt(enemy)
+
 
     elif global_variables.PLAYER.hp <= global_variables.PLAYER.max_hp * 0.3 and chase_chance < 50: # below 30% hp, 50% chance enemy chases you
         print('option 3')
         enemy_attack = enemy.roll_attack()
-        if enemy_attack - 2 >= global_variables.PLAYER.evasion:
-            stop_flee_attempt(enemy, start)
+        stop_flee_attempt(enemy)
 
     else:
         print('else')
         global_commands.type_text(f"The {enemy.id} lets you go.\n")
         print("-" * 110+'\n')
-        narrator.exit_the_dungeon(start)
+        narrator.exit_the_dungeon()

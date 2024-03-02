@@ -40,7 +40,7 @@ class Item():
     def lose_durability(self) -> None:
         prob = random.randrange(100)
         #weapon only loses durability occasionally, probability decreases with rarity
-        if prob < (60 // self.rarity):
+        if prob < (60 // self._rarity):
             self._durability -= 1
 
     def repair(self) -> None:
@@ -56,6 +56,7 @@ class Weapon(Item):
 
     def __init__(self, id, rarity):
         super().__init__(id, rarity)
+        self._value = 10 * rarity
         self._damage_dice = 0
         self._num_damage_dice = 0
         self._crit = 0
@@ -86,7 +87,8 @@ class Armor(Item):
 
     def __init__(self, id, rarity=1):
         super().__init__(id, rarity)
-        self._armor_value = 2*self._rarity - 1
+        self._value = 8 * rarity
+        self._armor_value = 2 * self._rarity - 1
 
     #properties
     @property
@@ -104,9 +106,9 @@ class Armor(Item):
     
 class Consumable(Item):
 
-    def __init__(self, id, rarity):
+    def __init__(self, id:str, rarity:int,quantity:int=0):
         super().__init__(id, rarity)
-        self._quantity = 0
+        self._quantity = quantity
         self._strength = rarity * 2
 
     #properties
@@ -122,7 +124,7 @@ class Consumable(Item):
         self._quantity += num
 
     def decrease_quantity(self, num:int) -> None:
-        self._quantity -=- num
+        self._quantity -= num
 
     def __str__(self) -> str:
         return f'Item: {self._id}\n Rarity: {self._rarity}\n Value: {self._value}\n Quantity: {self._quantity}'

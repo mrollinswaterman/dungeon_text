@@ -5,8 +5,9 @@ import global_commands
 
 class Shopkeep():
 
-    def __init__(self, inventory=list()):
-        self._inventory:list[items.Item] = inventory
+    def __init__(self, inventory={}):
+        self._inventory:dict[int, items.Item] = inventory
+        self._stock_size = len(list(self._inventory.keys()))
         self._gold = 100
     #properties
     @property
@@ -15,11 +16,14 @@ class Shopkeep():
     @property
     def gold(self) -> int:
         return self._gold
-    
+    @property
+    def stock_size(self) -> int:
+        return len(list(self._inventory.keys()))
     #methods
 
-    def stock(self, item: items.Item) -> None:
-        self._inventory.append(item)
+    def stock(self, item: items.Item, num=1) -> None:
+        self._inventory[self.stock_size + 1] = item
+        
 
     def sell(self, item:items.Item, buyer:player.Player, num:int=1) -> bool:
         """
@@ -28,15 +32,21 @@ class Shopkeep():
 
         Returns True if the sale goes through, False otherwise
         """
-        if item in self._inventory:
+        id_num = 0
+
+        if item in list(self._inventory.values()):
+            for i in self._inventory:
+                if self._inventory[i] == item:
+                    id_num = i
+                    break
             if buyer.gold >= item.value:
                 buyer.lose_gold(item.value)
                 self._gold += item.value
                 if isinstance(item, items.Consumable) and item.quantity >= num:
                     item.quantity -= num
                     if item.quantity == 0:
-                        self._inventory.remove(item)
-                self._inventory.remove(item)
+                        del self._inventory[id_num]
+                del self._inventory[id_num]
                 buyer.pick_up(item, num) 
                 global_commands.type_text(f"The Shopkeep hands you the {item.id}, and happily pockets your gold coins.\n")
                 return True
@@ -53,13 +63,15 @@ class Shopkeep():
                 self._gold -= item.value
                 seller.gain_gold(item.value)
                 seller.drop(item, num)
-                self._inventory.append(item)
+                self.stock(item)
                 return True
         else:
             global_commands.type_text("The Shopkeep throws you a questioning glance as you try to sell him thin air.\n")
             return False
         
     def print_invevtory(self) -> None:
-        for i, item in enumerate(self._inventory):
-            print(f"{i+1}: {item.id} Rarity: {item.rarity} Price: {item.value}g\n")
+        print("")
+        for num in self._inventory:
+            item = self._inventory[num]
+            print(f"{num} - {item.id} | Rarity: {item.rarity} | Price: {item.value}g\n")
             

@@ -4,8 +4,8 @@ import player
 
 class Health_Potion(items.Consumable):
 
-    def __init__(self, id, rarity):
-        super().__init__(id, rarity)
+    def __init__(self, id, rarity, quantity=0):
+        super().__init__(id, rarity, quantity=0)
 
     def use(self, target: player.Player) -> None:
         """
@@ -17,3 +17,5 @@ class Health_Potion(items.Consumable):
             return True
         
         return False
+    
+#STEEL_SWORD = items.Weapon("Steel Sword", 1)

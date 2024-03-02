@@ -18,19 +18,20 @@ STARTING_ENEMY.set_level(1)
 
 
 def link_start(enemy:mob.Mob) -> None:
-    RUNNING = True
+    global_variables.RUNNING = True
 
     #functions
+
     def player_turn():
         """
         Begins the Player turn
         """
         global_variables.PLAYER.update()
-        player_commands.player_turn_options(global_variables.PLAYER)
+        player_commands.player_turn_options()
     
     def player_death():
         #some text probably too
-        RUNNING = False
+        global_variables.RUNNING
         sys.exit()
 
     def enemy_turn():
@@ -149,13 +150,15 @@ def link_start(enemy:mob.Mob) -> None:
     begin_encounter()
     player_turn()
 
-    while RUNNING:
+    while global_variables.RUNNING is True:
+        if enemy is None:
+            next_scene()
 
         command = input(">")
 
         #command interpretation
         if command.lower() == "exit":
-            RUNNING = False
+            global_variables.RUNNING = False
             sys.exit()
         if command.lower() == "a":
             player_commands.attack(enemy, enemy_turn, end_scene)
@@ -166,8 +169,9 @@ def link_start(enemy:mob.Mob) -> None:
         if command.lower() == "u":
             player_commands.use_an_item("Health Potion", enemy_turn, player_turn)
         if command.lower() == "f":
-            player_commands.flee(enemy, link_start)
-            
-        
+            global_variables.RUNNING = False
+            player_commands.flee(enemy)
+            enemy = None
+   
 if input(">").lower() == "y":
     link_start(STARTING_ENEMY)

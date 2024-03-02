@@ -4,6 +4,8 @@ import items
 import item_compendium
 import shopkeep
 
+RUNNING = False
+
 PLAYER = player.Player()
 
 iron_sword = items.Weapon("Iron Sword", 1)
@@ -19,3 +21,7 @@ PLAYER.equip_weapon(iron_sword)
 PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
 SHOPKEEP = shopkeep.Shopkeep()
+
+SHOPKEEP.stock(item_compendium.Health_Potion("Health Potion", 1, 5))
+SHOPKEEP.stock(iron_sword)
+#rarity 1, quantity 5
