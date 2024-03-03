@@ -167,7 +167,7 @@ class Player():
         """
         Returns the player's current threat level which effect mob spawns
         """
-        return self._level * 2 + 1
+        return int(self._level * 1.5)
     @property
     def level_up(self):
         """
@@ -236,7 +236,7 @@ class Player():
         """
         self._weapon.lose_durability()
         weapon_damage = 0
-        for die in self._weapon._num_damage_dice:
+        for die in range(self._weapon.num_damage_dice):
             weapon_damage += random.randrange(1, self._weapon.damage_dice)
         return weapon_damage + self.bonus(self.str)
 

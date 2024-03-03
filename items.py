@@ -38,6 +38,9 @@ class Item():
     @property
     def numerical_rarity(self) -> int:
         return self._rarity
+    @property
+    def stats(self):
+        raise NotImplementedError
     
     #methods
     def lose_durability(self) -> None:
@@ -57,9 +60,10 @@ class Item():
 
 class Weapon(Item):
 
-    def __init__(self, id, rarity=random.randrange(1, 4)):
+    def __init__(self, id, rarity=1):
         super().__init__(id, rarity)
-        self._value = 15 * rarity
+        self._rarity = random.randrange(1, 4)
+        self._value = 15 * self._rarity
         self._damage_dice = 0
         self._num_damage_dice = 0
         self._crit = 0
@@ -71,11 +75,26 @@ class Weapon(Item):
         Returns damage dice
         """
         return self._damage_dice
-    
+    @property
+    def num_damage_dice(self) -> int:
+        return self._num_damage_dice
+    @property
+    def stats(self) -> int:
+        return f"{self._num_damage_dice}d{self._damage_dice}, x{self._crit}"
     @property
     def crit(self) -> int:
         return self._crit
     
+    def set_stats(self, statblock: tuple[int, int, int]):
+        """
+        Sets a weapons stats based on a tuplized statblock
+
+        Returns nothing
+        """
+        num, dice, crit = statblock
+        self.set_damage_dice((num, dice))
+        self.set_crit_multiplier(crit)
+
     def set_damage_dice(self, dice:tuple[int,int]) -> None:
         num, type = dice
         self._damage_dice = type
@@ -85,7 +104,7 @@ class Weapon(Item):
         self._crit = crit
     
     def __str__(self) -> str:
-        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n'
+        return f'{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n'
 
 class Armor(Item):
 
@@ -101,6 +120,9 @@ class Armor(Item):
         Return the value of the armor
         """
         return self._armor_value
+    @property
+    def stats(self) -> str:
+        return f"{self.armor_value} P"
     
     def set_armor_value(self, armor) -> None:
         self._armor_value = armor

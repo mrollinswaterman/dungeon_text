@@ -23,15 +23,6 @@ PLAYER.equip_weapon(long_sword)
 #PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
 SHOPKEEP = shopkeep.Shopkeep()
+SHOPKEEP.set_threat(PLAYER.threat)
 
-for entry in item_compendium.WEAPONS_DICTIONARY:
-    id, dice, crit = entry
-
-    weapon = items.Weapon(id)
-    weapon.set_damage_dice(dice)
-    weapon.set_crit_multiplier(crit)
-
-    stock_chance = random.randrange(0, 10)
-    stock_chance = math.ceil(stock_chance / weapon.numerical_rarity)
-    
-
+SHOPKEEP.restock(item_compendium.WEAPONS_DICTIONARY, 5)

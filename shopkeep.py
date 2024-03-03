@@ -1,5 +1,7 @@
 #Shopkeep class
+import math, random
 import items
+import item_compendium
 import player
 import global_commands
 
@@ -9,6 +11,7 @@ class Shopkeep():
         self._inventory:dict[int, items.Item] = inventory
         self._stock_size = len(list(self._inventory.keys()))
         self._gold = 100
+        self._threat = 0
     #properties
     @property
     def inventory(self):
@@ -24,6 +27,8 @@ class Shopkeep():
     def stock(self, item: items.Item, num=1) -> None:
         self._inventory[self.stock_size + 1] = item
         
+    def set_threat(self, num:int) -> None:
+        self._threat = num
 
     def sell(self, item:items.Item, buyer:player.Player, num:int=1) -> bool:
         """
@@ -70,8 +75,34 @@ class Shopkeep():
             return False
         
     def print_invevtory(self) -> None:
+        if len(self.inventory) == 0:
+            print("Shop's empty!")
         print("")
         for num in self._inventory:
-            item = self._inventory[num]
-            print(f"{num} - {item.id} | Rarity: {item.rarity} | Price: {item.value}g\n")
-            
+            item:items.Item = self._inventory[num]
+            global_commands.type_text(f"{num}. {item.id} ({item.stats}): {item.value}g", 0.01, False)
+            print(""*110)
+
+    def restock(self, warehouse: dict[tuple[str, tuple[int,int], int]], amount) -> None:
+        for entry in warehouse:
+            id, stats = entry
+
+
+
+            stock_chance = random.randrange(0, 100)
+            stock_chance += self._threat
+            if item not in list(self._inventory.keys()):
+                if stock_chance > 90:
+                    self.stock(item)
+                elif stock_chance > 75 and item.numerical_rarity <= 3:
+                    self.stock(item)
+                elif stock_chance > 50 and item.numerical_rarity <= 2:
+                    self.stock(item)
+                elif stock_chance > 10 and item.numerical_rarity == 1:
+                    self.stock(item)
+
+            if len(self._inventory) == amount:
+                break
+
+        if len(self._inventory) < amount:
+            self.stock(warehouse, amount)

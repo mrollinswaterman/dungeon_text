@@ -17,17 +17,18 @@ class Health_Potion(items.Consumable):
             return True
         return False
 
-WEAPONS_DICTIONARY = {
-    ("Battleaxe", (1,8), 3),
-    ("Light Flail", (1, 8), 2),
-    ("Scimitar", (1, 6), 4),
-    ("Trident", (1, 10), 2),
-    ("Mace", (1, 8), 2),
-    ("Greatsword", (2, 6), 2),
-    ("Glaive", (1, 10), 3),
-    ("Greataxe", (1, 12), 3),
-    ("Scythe", (2, 4), 5),
-    ("Halberd", (1, 10), 3),
-    ("Lance", (1, 8), 2)
-}
+WEAPONS_DICTIONARY = [
+
+    ("Battleaxe", ("W"), (1,8, 3)),
+    ("Light Flail", ("W"), (1, 8, 2)),
+    ("Scimitar", ("W"), (1, 6, 4)),
+    ("Trident", ("W"), (1, 10, 2)),
+    ("Mace", ("W"), (1, 8, 2)),
+    ("Greatsword", ("W"), (2, 6, 2)),
+    ("Glaive", ("W"), (1, 10, 3)),
+    ("Greataxe", ("W"), (1, 12, 3)),
+    ("Scythe", ("W"), (2, 4, 5)),
+    ("Halberd", ("W"), (1, 10, 3)),
+    ("Lance", ("W"), (1, 8, 2))
+]
 

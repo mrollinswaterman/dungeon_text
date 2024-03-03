@@ -12,9 +12,7 @@ import global_commands
 import shopkeep
 import global_variables
 
-print(math.ceil(5/4))
-print(math.ceil(5/2))
-global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.03)
+global_commands.type_text("\nWould you like to enter the Dungeon? y/n\n", 0.02)
 
 STARTING_ENEMY: mob.Mob = monster_manual.random_mob(1)
 STARTING_ENEMY.set_level(1)
@@ -178,3 +176,6 @@ def link_start(enemy:mob.Mob) -> None:
    
 if input(">").lower() == "y":
     link_start(STARTING_ENEMY)
+
+else:
+    global_variables.SHOPKEEP.print_invevtory()
