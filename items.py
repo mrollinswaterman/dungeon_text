@@ -9,6 +9,13 @@ RARITY = {
     6: "Unique"
 }
 
+WEIGHT_CLASS = {
+    "Light": 2,
+    "Medium": 4,
+    "Heavy": 6,
+    "Superheavy": 8
+}
+
 class Item():
 
     def __init__(self, id, rarity):
@@ -55,6 +62,9 @@ class Item():
         """
         self._durability = self._max_durability
 
+    def set_stats(self, stats: tuple[int, int, int]):
+        raise NotImplementedError
+
     def __str__(self) -> str:
         return f'{self.id}\n Rarity: {RARITY[self._rarity]}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n'
 
@@ -85,13 +95,20 @@ class Weapon(Item):
     def crit(self) -> int:
         return self._crit
     
-    def set_stats(self, statblock: tuple[int, int, int]):
+    def set_stats(self, statblock: str):
         """
         Sets a weapons stats based on a tuplized statblock
 
         Returns nothing
         """
-        num, dice, crit = statblock
+        #finds the index of each piece of info
+        num_idx = statblock.index('d')
+        num = eval(statblock[0:num_idx])
+        dice_idx = statblock.index(",")
+        dice = eval(statblock[num_idx+1: dice_idx])
+        crit = eval(statblock[dice_idx+2: len(statblock)])
+
+        #sets the appropriate stats
         self.set_damage_dice((num, dice))
         self.set_crit_multiplier(crit)
 
@@ -108,10 +125,12 @@ class Weapon(Item):
 
 class Armor(Item):
 
-    def __init__(self, id, rarity=random.randrange(1, 4)):
+    def __init__(self, id, weight_class:int="Light", rarity=random.randrange(1, 4)):
         super().__init__(id, rarity)
         self._value = 10 * rarity
-        self._armor_value = 2 * self._rarity - 1
+        self._weight_class = weight_class
+        self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
+        self._armor_value = self._numerical_weight_class * self._rarity - self._numerical_weight_class
 
     #properties
     @property
@@ -122,13 +141,29 @@ class Armor(Item):
         return self._armor_value
     @property
     def stats(self) -> str:
-        return f"{self.armor_value} P"
-    
+        return f"{self.weight_class}, {self.armor_value}P"
+    @property
+    def weight_class(self) -> str:
+        return self._weight_class
+    @property
+    def numerical_weight_class(self) -> int:
+        return self._numerical_weight_class
+
+    #methods
     def set_armor_value(self, armor) -> None:
         self._armor_value = armor
+
+    def set_stats(self, stats) -> None:
+        if stats is None or len(stats) == 0:
+            return None
+
+        weight = stats
+        self._weight_class = weight
+        self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
+        self._armor_value = self._numerical_weight_class * self._rarity - self._numerical_weight_class
     
     def __str__(self) -> str:
-        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
+        return f'{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
     
 class Consumable(Item):
 

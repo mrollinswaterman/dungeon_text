@@ -5,13 +5,61 @@ import item_compendium
 import player
 import global_commands
 
+class Blacksmith():
+    """
+    A class that take in lists of item data and turns
+    them into objects of the correct type
+    then stores them in a set for later use
+    """
+
+    def __init__(self, forge_list:list=[]):
+        self._forge_list = forge_list
+        self._store_house = {
+            "WP": set(),
+            "AR": set(),
+        }
+        self._tag_map = {
+            "WP": items.Weapon,
+            "AR": items.Armor
+        }
+
+    #properties
+    @property
+    def forge_list(self):
+        return self._forge_list
+    @property
+    def storehouse(self):
+        return self._store_house
+
+    def items_of_type(self, type=""):
+        return self._store_house[type]
+    
+    def forge(self):
+        for mold in self._forge_list:
+            tag, id, stats = mold
+            item:items.Item = self._tag_map[tag](id)
+            item.set_stats(stats)
+            self._store_house[tag].add(item)
+        self._forge_list = []
+
+    def add_to_forge_list(self, items):
+        if type(items) == list:
+            self._forge_list = self._forge_list + items
+        else:
+            self._forge_list.append(items) 
+
 class Shopkeep():
+    """
+    A class that stores items for the player to buy
+    and that can buy items from the player
+    """
 
     def __init__(self, inventory={}):
         self._inventory:dict[int, items.Item] = inventory
         self._stock_size = len(list(self._inventory.keys()))
         self._gold = 100
         self._threat = 0
+        self._max_stock = 10
     #properties
     @property
     def inventory(self):
@@ -80,14 +128,15 @@ class Shopkeep():
         print("")
         for num in self._inventory:
             item:items.Item = self._inventory[num]
-            global_commands.type_text(f"{num}. {item.id} ({item.stats}): {item.value}g", 0.01, False)
+            try:
+                global_commands.type_text(f"{num}. {item.id} ({item.stats}): {item.value}g", 0.01, False)
+            except AttributeError:
+                print("ERROR")
+                print(item)
             print(""*110)
 
-    def restock(self, warehouse: dict[tuple[str, tuple[int,int], int]], amount) -> None:
-        for entry in warehouse:
-            id, stats = entry
-
-
+    def restock(self, warehouse, amount) -> None:
+        for item in warehouse:
 
             stock_chance = random.randrange(0, 100)
             stock_chance += self._threat
@@ -101,8 +150,8 @@ class Shopkeep():
                 elif stock_chance > 10 and item.numerical_rarity == 1:
                     self.stock(item)
 
-            if len(self._inventory) == amount:
+            if len(self._inventory)  == self._max_stock - amount:
                 break
 
-        if len(self._inventory) < amount:
+        if len(self._inventory) < self._max_stock - amount:
             self.stock(warehouse, amount)

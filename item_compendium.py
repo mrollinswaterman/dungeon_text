@@ -17,18 +17,32 @@ class Health_Potion(items.Consumable):
             return True
         return False
 
+#tag, id, (num dice, dice type, crit)
 WEAPONS_DICTIONARY = [
 
-    ("Battleaxe", ("W"), (1,8, 3)),
-    ("Light Flail", ("W"), (1, 8, 2)),
-    ("Scimitar", ("W"), (1, 6, 4)),
-    ("Trident", ("W"), (1, 10, 2)),
-    ("Mace", ("W"), (1, 8, 2)),
-    ("Greatsword", ("W"), (2, 6, 2)),
-    ("Glaive", ("W"), (1, 10, 3)),
-    ("Greataxe", ("W"), (1, 12, 3)),
-    ("Scythe", ("W"), (2, 4, 5)),
-    ("Halberd", ("W"), (1, 10, 3)),
-    ("Lance", ("W"), (1, 8, 2))
+    (("WP"), "Battleaxe", "1d8,x2"),
+    (("WP"), "Light Flail", "1d8,x2"),
+    (("WP"), "Scimitar", "1d6,x4"),
+    (("WP"), "Trident", "1d10,x2"),
+    (("WP"), "Mace", "1d8,x2"),
+    (("WP"), "Greatsword", "2d6,x2"),
+    (("WP"), "Glaive", "1d10,x3"),
+    (("WP"), "Greataxe", "1d12,x3"),
+    (("WP"), "Scythe", "2d4,x5"),
+    (("WP"), "Halberd", "1d10,x3"),
+    (("WP"), "Lance", "1d8,x2")
 ]
 
+ARMOR_DICTIONARY = [
+    (("AR"), "Studded Leather", ("Light")),
+    (("AR"), "Haramaki", ("Light")),
+    (("AR"), "Chain Shirt", ("Light")),
+    (("AR"), "Breastplate", ("Medium")),
+    (("AR"), "Chainmail", ("Medium")),
+    (("AR"), "Armored Coat", ("Medium")),
+    (("AR"), "Scale Mail", ("Medium")),
+    (("AR"), "Half-plate", ("Heavy")),
+    (("AR"), "Stoneplate", ("Heavy")),
+    (("AR"), "Branded Mail", ("Heavy")),
+    (("AR"), "Full-plate", ("Heavy")),
+]
