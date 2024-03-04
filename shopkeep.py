@@ -14,7 +14,7 @@ class Blacksmith():
 
     def __init__(self, forge_list:list=[]):
         self._forge_list = forge_list
-        self._store_house = {
+        self._storehouse = {
             "WP": set(),
             "AR": set(),
         }
@@ -29,17 +29,17 @@ class Blacksmith():
         return self._forge_list
     @property
     def storehouse(self):
-        return self._store_house
+        return self._storehouse
 
     def items_of_type(self, type=""):
-        return self._store_house[type]
+        return self._storehouse[type]
     
     def forge(self):
         for mold in self._forge_list:
             tag, id, stats = mold
             item:items.Item = self._tag_map[tag](id)
             item.set_stats(stats)
-            self._store_house[tag].add(item)
+            self._storehouse[tag].add(item)
         self._forge_list = []
 
     def add_to_forge_list(self, items):
@@ -128,16 +128,11 @@ class Shopkeep():
         print("")
         for num in self._inventory:
             item:items.Item = self._inventory[num]
-            try:
-                global_commands.type_text(f"{num}. {item.id} ({item.stats}): {item.value}g", 0.01, False)
-            except AttributeError:
-                print("ERROR")
-                print(item)
+            global_commands.type_text(f"{num}. {item.id} ({item.stats}): {item.value}g", 0.01, False)
             print(""*110)
 
     def restock(self, warehouse, amount) -> None:
         for item in warehouse:
-
             stock_chance = random.randrange(0, 100)
             stock_chance += self._threat
             if item not in list(self._inventory.keys()):
@@ -154,4 +149,4 @@ class Shopkeep():
                 break
 
         if len(self._inventory) < self._max_stock - amount:
-            self.stock(warehouse, amount)
+            self.restock(warehouse, amount)

@@ -34,15 +34,15 @@ WEAPONS_DICTIONARY = [
 ]
 
 ARMOR_DICTIONARY = [
-    (("AR"), "Studded Leather", ("Light")),
-    (("AR"), "Haramaki", ("Light")),
-    (("AR"), "Chain Shirt", ("Light")),
-    (("AR"), "Breastplate", ("Medium")),
-    (("AR"), "Chainmail", ("Medium")),
-    (("AR"), "Armored Coat", ("Medium")),
-    (("AR"), "Scale Mail", ("Medium")),
-    (("AR"), "Half-plate", ("Heavy")),
-    (("AR"), "Stoneplate", ("Heavy")),
-    (("AR"), "Branded Mail", ("Heavy")),
-    (("AR"), "Full-plate", ("Heavy")),
+    (("AR"), "Studded Leather", ("Light", None)),
+    (("AR"), "Haramaki", ("None", 1)),
+    (("AR"), "Chain Shirt", ("Light", None)),
+    (("AR"), "Breastplate", ("Medium", None)),
+    (("AR"), "Chainmail", ("Medium", 6)),
+    (("AR"), "Armored Coat", ("Medium", None)),
+    (("AR"), "Scale Mail", ("Medium", None)),
+    (("AR"), "Half-plate", ("Heavy", None)),
+    (("AR"), "Stoneplate", ("Heavy", 9)),
+    (("AR"), "Branded Mail", ("Heavy", None)),
+    (("AR"), "Full-plate", ("Heavy", 9)),
 ]

@@ -10,6 +10,7 @@ RARITY = {
 }
 
 WEIGHT_CLASS = {
+    "None": 0,
     "Light": 2,
     "Medium": 4,
     "Heavy": 6,
@@ -127,10 +128,11 @@ class Armor(Item):
 
     def __init__(self, id, weight_class:int="Light", rarity=random.randrange(1, 4)):
         super().__init__(id, rarity)
-        self._value = 10 * rarity
+        
         self._weight_class = weight_class
         self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
-        self._armor_value = self._numerical_weight_class * self._rarity - self._numerical_weight_class
+        self._armor_value = int(self._numerical_weight_class + self._rarity - (self._numerical_weight_class / 2))
+        self._value = (25 * rarity) + (10 * self.numerical_weight_class)
 
     #properties
     @property
@@ -154,13 +156,21 @@ class Armor(Item):
         self._armor_value = armor
 
     def set_stats(self, stats) -> None:
+        """
+        Sets armor weight class and armor value (if given),
+        then re-calculates value and armor value as necessary
+        """
         if stats is None or len(stats) == 0:
             return None
 
-        weight = stats
+        weight, armor = stats
         self._weight_class = weight
         self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
-        self._armor_value = self._numerical_weight_class * self._rarity - self._numerical_weight_class
+        if armor is not None:
+            self.set_armor_value(armor)
+        else:
+            self.set_armor_value(int(self._numerical_weight_class + self._rarity - (self._numerical_weight_class / 2)))
+        self._value = (25 * self._rarity) + (10 * self.numerical_weight_class)
     
     def __str__(self) -> str:
         return f'{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
