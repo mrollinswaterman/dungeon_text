@@ -68,6 +68,7 @@ class Mob():
 
     def __init__(self, level, statblock: Statblock):
         self._id = statblock.id
+        self._name = self._id
         self._level = level
         #base stats
         self._statblock = statblock
@@ -109,6 +110,9 @@ class Mob():
     @property
     def id(self) -> str:
         return self._id
+    @property
+    def name(self) -> str:
+        return self._name
     @property
     def dc(self) -> int:
         return self._dc

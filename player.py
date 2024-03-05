@@ -4,6 +4,11 @@ import global_commands
 from events import Event
 
 BONUS = {
+    5: -3,
+    6: -2,
+    7: -2,
+    8: -1, 
+    9: -1,
     10: 0,
     11: 0,
     12: 1,
@@ -15,6 +20,17 @@ BONUS = {
     18: 4,
     19: 4,
     20: 5
+}
+
+TAG_TO_STAT = {
+    "str": "Strength",
+    "dex": "Dexterity",
+    "con": "Constitution",
+    "int": "Intelligence",
+    "wis": "Wisdom",
+    "cha": "Charisma",
+    "evasion": "Evasion",
+    "damage-taken-multiplier": "Vulnerability"
 }
 
 class Status_Effect():
@@ -31,7 +47,7 @@ class Status_Effect():
     #properties
     @property
     def id(self) -> str:
-        return self._id
+        return f"{self._src.name}'s {self._id}"
     @property
     def src(self):
         return self._src
@@ -59,7 +75,8 @@ class Status_Effect():
 
 class Player():
 
-    def __init__(self, name: str=""):
+    def __init__(self, id: str="Player", name:str = ""):
+        self._id = id
         self._name = name
 
         #statblock
@@ -91,9 +108,10 @@ class Player():
         self._damage_taken_multiplier = 1
 
         #equipment
-        self._weapon: items.Weapon = None
-        self._armor: items.Armor = None
-
+        self._equipped = {
+            "Weapon" : None, 
+            "Armor": None
+        }
 
     #properties
     @property
@@ -130,19 +148,17 @@ class Player():
     def xp(self):
         return self._xp
     @property
-    def armor(self) -> int:
+    def armor(self) -> items.Armor:
         """
         Returns player's armor value, proably should be an object too
         """
-        if self._armor.broken is True:
-            return 0
-        return self._armor.armor_value
+        return self._equipped["Armor"]
     @property
     def weapon(self) -> items.Weapon:
         """
         Returns player's weapon object
         """
-        return self._weapon
+        return self._equipped["Weapon"]
     @property
     def evasion(self):
         #print(self._evasion)
@@ -157,8 +173,8 @@ class Player():
     def inventory(self) -> dict:
         return self._inventory
     @property
-    def name(self):
-        return self._name
+    def id(self):
+        return self._id
     @property
     def max_hp(self):
         return self._max_hp
@@ -234,10 +250,11 @@ class Player():
         """
         Returns a damage roll (weapon dice + str bonus)
         """
-        self._weapon.lose_durability()
+        weapon:items.Weapon = self._equipped["Weapon"]
+        weapon.lose_durability()
         weapon_damage = 0
-        for die in range(self._weapon.num_damage_dice):
-            weapon_damage += random.randrange(1, self._weapon.damage_dice)
+        for _ in range(weapon.num_damage_dice):
+            weapon_damage += random.randrange(1, weapon.damage_dice)
         return weapon_damage + self.bonus(self.str)
 
     def roll_a_check(self, stat: str) -> int:
@@ -250,10 +267,11 @@ class Player():
         """
         Reduces the players hp by a damage amount, reduced by armor
         """
+        armor:items.Armor = self._equipped["Armor"]
         damage = damage * self._damage_taken_multiplier
-        if self._armor.broken is False:
-            self._armor.lose_durability()
-        if damage - self.armor < 0:
+        if armor.broken is False:
+            armor.lose_durability()
+        if damage - self.armor.armor_value < 0:
             return 0 
         else:
             self._hp -= damage - self.armor
@@ -376,15 +394,24 @@ class Player():
         """
         Equips the player with a given weapon
         """
-        self._weapon = weapon
+        self._equipped["Weapon"] = weapon
         self._inventory[weapon.id] = weapon
 
     def equip_armor(self, armor: "items.Armor") -> None:
         """
         Same as above but for armor
         """
-        self._armor = armor
+        self.remove_status_effect(None, "Armor Debuff")
+        self._equipped["Armor"] = armor
         self._inventory[armor.id] = armor
+
+        print(self.bonus("str"))
+        if self.bonus("str") + 1 < armor.numerical_weight_class:
+            armor_debuff = Status_Effect("Armor Debuff", armor, "dex", self)
+            armor_debuff.set_power(-(armor.numerical_weight_class - 2))
+            armor_debuff.set_duration(10000)
+            self.add_status_effect(armor_debuff)
+            self._stats["evasion"] = 12 + BONUS[self._stats["dex"]]
 
     def has_item(self, item: str) -> items.Consumable | bool | items.Item:
         """
@@ -422,14 +449,29 @@ class Player():
                 #return None
         self._stats[effect.stat] += effect.power
         self._status_effects.append(effect)
+        change = "increased"
+        if effect.power < 0:
+            change = "decreased"
+        global_commands.type_text(f"\nYour {effect.stat} is being {change} by {abs(effect.power)} from {effect.id}\n")
+    def remove_status_effect(self, effect:Status_Effect=None, id:str=""):
+        if len(id) > 0 and effect is not None:
+            for item in self._status_effects:
+                if item.id == id:
+                    self._stats[effect.stat] += -(effect.power)
+                    self._status_effects.remove(effect)
+                    global_commands.type_text(f"\nThe {effect.id}'s effect has gone away.\n")
+                    break
+        else:
+            self._stats[effect.stat] += -(effect.power)
+            self._status_effects.remove(effect)
+            global_commands.type_text(f"\nThe {effect.id}'s effect has gone away.\n")
 
     def update(self) -> None:
         for effect in self._status_effects:
             effect.update()
             if effect.duration <= 0:
                 #removes effect
-                self._stats[effect.stat] += -(effect.power)
-                self._status_effects.remove(effect)
+                self.remove_status_effect(effect)
 
 
 # arush wrote this while drunk, he won't let me delete it

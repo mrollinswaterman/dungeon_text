@@ -14,11 +14,13 @@ long_sword = items.Weapon("Long Sword", 1)
 long_sword.set_damage_dice((1,8))
 long_sword.set_crit_multiplier(2)
 
-leather_armor = items.Armor("Leather Armor", "Light")
+leather_armor = items.Armor("Leather Armor", "Superheavy")
 leather_armor.set_armor_value(2)
 
 PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(long_sword)
+
+print(PLAYER._stats["evasion"])
 
 #PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 

@@ -32,6 +32,9 @@ class Item():
     def id(self) -> str:
         return f"{RARITY[self._rarity]} {self._id}"
     @property
+    def name(self) -> str:
+        return self._id
+    @property
     def value(self) -> int:
         return self._value
     @property
