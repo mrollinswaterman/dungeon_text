@@ -14,13 +14,11 @@ long_sword = items.Weapon("Long Sword", 1)
 long_sword.set_damage_dice((1,8))
 long_sword.set_crit_multiplier(2)
 
-leather_armor = items.Armor("Leather Armor", "Superheavy")
+leather_armor = items.Armor("Leather Armor", "Light")
 leather_armor.set_armor_value(2)
 
 PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(long_sword)
-
-print(PLAYER._stats["evasion"])
 
 #PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
 
@@ -35,3 +33,6 @@ SHOPKEEP.restock(BLACKSMITH.items_of_type("WP"), 5)#stock the shop with 5 random
 BLACKSMITH.add_to_forge_list(item_compendium.ARMOR_DICTIONARY)#add armors to forge list
 BLACKSMITH.forge()#randomly generate armors
 SHOPKEEP.restock(BLACKSMITH.items_of_type("AR"), 3)#stock the shop with 3 random armors from the blacksmith
+
+SHOPKEEP.stock(item_compendium.Health_Potion("Health Potion", 1, 5))
+SHOPKEEP.stock(item_compendium.Repair_Kit("Repair Kit", 2, 5))

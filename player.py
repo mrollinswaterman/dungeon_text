@@ -4,8 +4,8 @@ import global_commands
 from events import Event
 
 BONUS = {
-    5: -3,
-    6: -2,
+    5: -4,
+    6: -3,
     7: -2,
     8: -1, 
     9: -1,
@@ -183,6 +183,8 @@ class Player():
         """
         Returns the player's current threat level which effect mob spawns
         """
+        if int(self._level * 1.5) == 1:
+            return 2
         return int(self._level * 1.5)
     @property
     def level_up(self):
@@ -235,15 +237,16 @@ class Player():
         """
         Returns an attack roll (d20 + dex bonus)
         """
-        if self._weapon.broken is True:
-            raise ValueError("Weapon is broken")
-        
         roll = random.randrange(1,20)
         if roll == 1:
             return 1
         if roll == 20:
             return 0
-        
+
+        weapon:items.Weapon = self._equipped["Weapon"]
+        if weapon.broken is True:
+            raise ValueError("Weapon is broken")
+
         return roll + self.bonus(self.dex)
             
     def roll_damage(self) -> int:
@@ -401,11 +404,13 @@ class Player():
         """
         Same as above but for armor
         """
-        self.remove_status_effect(None, "Armor Debuff")
-        self._equipped["Armor"] = armor
-        self._inventory[armor.id] = armor
+        try:
+            self.remove_status_effect(None, "Armor Debuff")
+            self._equipped["Armor"] = armor
+            self._inventory[armor.id] = armor
+        except AttributeError:
+            pass
 
-        print(self.bonus("str"))
         if self.bonus("str") + 1 < armor.numerical_weight_class:
             armor_debuff = Status_Effect("Armor Debuff", armor, "dex", self)
             armor_debuff.set_power(-(armor.numerical_weight_class - 2))
@@ -452,7 +457,8 @@ class Player():
         change = "increased"
         if effect.power < 0:
             change = "decreased"
-        global_commands.type_text(f"\nYour {effect.stat} is being {change} by {abs(effect.power)} from {effect.id}\n")
+        global_commands.type_text(f"\nYour {effect.stat} is being {change} by {abs(effect.power)} from {effect.id}\n", 0.02, False)
+
     def remove_status_effect(self, effect:Status_Effect=None, id:str=""):
         if len(id) > 0 and effect is not None:
             for item in self._status_effects:

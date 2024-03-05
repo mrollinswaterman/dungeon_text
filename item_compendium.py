@@ -16,6 +16,21 @@ class Health_Potion(items.Consumable):
             target.heal(self._strength)
             return True
         return False
+    
+class Repair_Kit(items.Consumable):
+
+    def __init__(self, id, rarity=2, quantity=0):
+        super().__init__(id, rarity, quantity=0)
+
+    def use(self, target: items.Item) -> None:
+        """
+        Repairs the item to full durability
+        """
+        if target.durability[0] < target._durability[1]:#ie item is damaged
+            target.repair()
+            return True
+        return False
+
 
 #tag, id, (num dice, dice type, crit)
 WEAPONS_DICTIONARY = [
