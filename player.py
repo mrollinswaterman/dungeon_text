@@ -167,6 +167,13 @@ class Player():
     def carrying_capacity(self) -> int:
         return 10 + self.bonus(self.str) + self.bonus(self.con)
     @property
+    def current_weight(self) -> int:
+        total_weight = 0
+        for entry in self._inventory:
+            held_item:items.Item = self._inventory[entry]
+            total_weight += held_item.weight
+        return total_weight
+    @property
     def gold(self):
         return self._gold
     @property
@@ -367,23 +374,23 @@ class Player():
 
 
     #INVENTORY STUFF
-    def pick_up(self, item: items.Item | items.Consumable, num: int) -> bool:
+    def pick_up(self, item: items.Item | items.Consumable) -> bool:
         """
         Picks up an item if the player has inventory space for it
         """
-        if self.inventory_size - 1 < self.carrying_capacity:
+        if self.current_weight < self.carrying_capacity:
             if self.has_item(item) is True and item.is_consumable is True:
                 index = self.find_consumable_by_id(item)
                 if index is not False:
                     held_item:items.Consumable = self._inventory[index]
-                    held_item.increase_quantity(num)
+                    held_item.increase_quantity(item.quantity)
                     return True
+            self._inventory[self.inventory_size] = item
+            if item.is_consumable:
+                global_commands.type_text(f"You picked up {item.quantity} {item.id}s.\n")
             else:
-                if isinstance(item, items.Consumable):
-                    item.increase_quantity(num)
-                self._inventory[self.inventory_size] = item
-                global_commands.type_text(f"You picked up {num} {item.id}s.\n")
-                return True
+                global_commands.type_text(f"You picked up a {item.id}.\n")
+            return True
         else:
             raise ValueError("Not enough inventory space\n")
         

@@ -202,7 +202,10 @@ class Consumable(Item):
     @property
     def quantity(self) -> int:
         return self._quantity
-    
+    @property
+    def stats(self) -> str:
+        return self._quantity
+
     #methods
     def use(self, target):
         raise ValueError("Unimplemented")

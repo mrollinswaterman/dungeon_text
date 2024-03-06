@@ -20,7 +20,7 @@ leather_armor.set_armor_value(2)
 PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(long_sword)
 
-#PLAYER.pick_up(item_compendium.Health_Potion("Health Potion", 1), 5)
+PLAYER.pick_up(item_compendium.generate_hp_potions("Common", 5))
 
 SHOPKEEP = shopkeep.Shopkeep()
 SHOPKEEP.set_threat(PLAYER.threat)
@@ -34,5 +34,5 @@ BLACKSMITH.add_to_forge_list(item_compendium.ARMOR_DICTIONARY)#add armors to for
 BLACKSMITH.forge()#randomly generate armors
 SHOPKEEP.restock(BLACKSMITH.items_of_type("AR"), 3)#stock the shop with 3 random armors from the blacksmith
 
-SHOPKEEP.stock(item_compendium.Health_Potion("Health Potion", 1, 5))
-SHOPKEEP.stock(item_compendium.Repair_Kit("Repair Kit", 2, 5))
+SHOPKEEP.stock(item_compendium.generate_hp_potions("Common", 5))
+SHOPKEEP.stock(item_compendium.generate_repair_kits(5))

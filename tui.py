@@ -173,9 +173,11 @@ def link_start(enemy:mob.Mob) -> None:
             global_variables.RUNNING = False
             player_commands.flee(enemy)
             enemy = None
-   
-if input(">").lower() == "y":
-    link_start(STARTING_ENEMY)
 
-else:
+command = input(">").lower()
+if command == "y":
+    link_start(STARTING_ENEMY)
+elif command == "t":
     global_variables.SHOPKEEP.print_invevtory()
+elif command == "n":
+    sys.exit()
