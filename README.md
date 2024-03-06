@@ -1,4 +1,4 @@
-Hi guys! Welcome to Text Dungeon (or Dungeon Text, I haven't decided yet), a text-based dungeon crawler adventure game heavily based on DND & and Pathfinder, that is still in development. 
+Hi guys! Welcome to Text Dungeon (or Dungeon Text, I haven't decided yet), a text-based dungeon crawler adventure game heavily based on D&D and Pathfinder, that is still in development. 
 
 I am solo-developing this project, and I'm not 100% sure where it's going yet, so I don't have an end date in mind, 
 but I'm going to keep working on it as long as I have the spare time and energy, so check back later for updates and stuff.
