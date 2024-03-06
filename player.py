@@ -296,7 +296,7 @@ class Player():
         """
         Levels up a given stat
         """
-        self._stats[stat] += 2
+        self._stats[stat] += 1
         self._xp -= 15 * self._level
         self._level += 1
         prev_max = self._max_hp

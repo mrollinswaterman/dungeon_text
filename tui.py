@@ -114,8 +114,8 @@ def link_start(enemy:mob.Mob) -> None:
         narrator.level_up_options()
         command = input(">")
         global_variables.PLAYER.spend_xp(command)
-
-        global_commands.type_text(f'\nYour {command} increased by 2. You are now Level {global_variables.PLAYER.level}\n')
+        global_commands.type_text(f'\nYour {command} increased by 1. You are now Level {global_variables.PLAYER.level}\n')
+        global_variables.SHOPKEEP.set_threat(global_variables.PLAYER.threat)#make sure shopkeep's threat changes
         narrator.continue_run(next_scene)
 
     def run_event(event: events.Event):
