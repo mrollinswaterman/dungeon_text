@@ -173,6 +173,9 @@ class Player():
     def inventory(self) -> dict:
         return self._inventory
     @property
+    def inventory_size(self) -> int:
+        return len(self._inventory) + 1
+    @property
     def id(self):
         return self._id
     @property
@@ -368,19 +371,19 @@ class Player():
         """
         Picks up an item if the player has inventory space for it
         """
-        if len(self._inventory) < self.carrying_capacity:
-            if item.id in self._inventory and isinstance(item, items.Consumable):
-                global_commands.type_text(f"You picked up {num} {item.id}(s).\n")
-                self._inventory[item.id].increase_quantity(num)
-                return True
-            elif item.id in self._inventory:
-                global_commands.type_text(f"You already have a {item.id}.\n")
-                return False
+        if self.inventory_size - 1 < self.carrying_capacity:
+            if self.has_item(item) is True and item.is_consumable is True:
+                index = self.find_consumable_by_id(item)
+                if index is not False:
+                    held_item:items.Consumable = self._inventory[index]
+                    held_item.increase_quantity(num)
+                    return True
             else:
-                self._inventory[item.id] = item
                 if isinstance(item, items.Consumable):
-                    self._inventory[item.id].increase_quantity(num)
+                    item.increase_quantity(num)
+                self._inventory[self.inventory_size] = item
                 global_commands.type_text(f"You picked up {num} {item.id}s.\n")
+                return True
         else:
             raise ValueError("Not enough inventory space\n")
         
@@ -418,17 +421,28 @@ class Player():
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 12 + BONUS[self._stats["dex"]]
 
-    def has_item(self, item: str) -> items.Consumable | bool | items.Item:
+    def has_item(self, item: items.Item) -> bool:
         """
         Checks if a player has an item in their inventory
 
         Return the item if its there and False if not
         """
-        if item in self._inventory:
-            if self._inventory[item].quantity > 0:
-                return self._inventory[item]
+        if item.is_consumable is True:
+            for entry in self._inventory:
+                held_item:items.Consumable = self._inventory[entry]
+                if held_item.id == item.id:
+                    return True
+            return False
+        if item in list(self._inventory.values()):
+            return True
         return False
-
+    
+    def find_consumable_by_id(self, item: items.Consumable) -> int:
+        for entry in self._inventory:
+            inventory_entry:items.Item = self._inventory[entry]
+            if inventory_entry.id == item.id:
+                return entry
+        return False
     def print_inventory(self) -> None:
         """
         Prints the contents of the player's inventory

@@ -26,6 +26,8 @@ class Item():
         self._value = 5 * rarity
         self._max_durability = 10 * self._rarity
         self._durability = self._max_durability
+        self._is_consumable = False
+        self._weight = 0
 
     #properties
     @property
@@ -52,7 +54,12 @@ class Item():
     @property
     def stats(self):
         raise NotImplementedError
-    
+    @property
+    def is_consumable(self) -> bool:
+        return self._is_consumable
+    @property
+    def weight(self) -> int:
+        return self._weight
     #methods
     def lose_durability(self) -> None:
         prob = random.randrange(100)
@@ -65,6 +72,9 @@ class Item():
         Repairs weapon, returning its current durability to max value
         """
         self._durability = self._max_durability
+
+    def set_weight(self, num:int) -> None:
+        self._weight = num
 
     def set_stats(self, stats: tuple[int, int, int]):
         raise NotImplementedError
@@ -115,6 +125,7 @@ class Weapon(Item):
         #sets the appropriate stats
         self.set_damage_dice((num, dice))
         self.set_crit_multiplier(crit)
+        self._weight = int(2.5 * self._num_damage_dice + (self._damage_dice // 2))
 
     def set_damage_dice(self, dice:tuple[int,int]) -> None:
         num, type = dice
@@ -174,6 +185,7 @@ class Armor(Item):
         else:
             self.set_armor_value(int(self._numerical_weight_class + self._rarity - (self._numerical_weight_class / 2)))
         self._value = (25 * self._rarity) + (10 * self.numerical_weight_class)
+        self._weight = (10 * self._numerical_weight_class) + self._armor_value
     
     def __str__(self) -> str:
         return f'{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
@@ -184,6 +196,7 @@ class Consumable(Item):
         super().__init__(id, rarity)
         self._quantity = quantity
         self._strength = rarity * 2
+        self._is_consumable = True
 
     #properties
     @property
