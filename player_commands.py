@@ -9,7 +9,7 @@ GOD_MODE = True
 
 def player_turn_options():
     print("-"*110+'\n')
-    print(f'What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n\nAttack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n')
+    print(f' What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n\n Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n')
 
 
 def attack(enemy: mob.Mob, enemy_turn, end_scene) -> None:
@@ -33,14 +33,14 @@ def attack(enemy: mob.Mob, enemy_turn, end_scene) -> None:
         global_variables.PLAYER.spend_ap(1)
     
     print('\n'+"-" * 110+'\n')
-    global_commands.type_text(f'You attack the {enemy.id}, rolling a {attack_roll}.\n')
+    global_commands.type_text(f' You attack the {enemy.id}, rolling a {attack_roll}.\n')
 
     if attack_roll == 0:
-        global_commands.type_text(f"Critical Hit!\n")
+        global_commands.type_text(f" Critical Hit!\n")
         taken = enemy.take_damage(global_variables.PLAYER.roll_damage() * global_variables.PLAYER.weapon.crit)
 
     if attack_roll == 1:
-        global_commands.type_text(f"Crtical Fail!\n")
+        global_commands.type_text(f" Crtical Fail!\n")
 
     if attack_roll >= enemy.evasion:
         if GOD_MODE is True:
@@ -48,7 +48,7 @@ def attack(enemy: mob.Mob, enemy_turn, end_scene) -> None:
         else:
             taken = enemy.take_damage(global_variables.PLAYER.roll_damage())
         
-        global_commands.type_text(f'You hit the {enemy.id} for {taken} damage.\n')
+        global_commands.type_text(f' You hit the {enemy.id} for {taken} damage.\n')
         if enemy.dead is False and global_variables.PLAYER.can_act is False:
             global_variables.PLAYER.reset_ap()
             enemy_turn()
@@ -58,7 +58,7 @@ def attack(enemy: mob.Mob, enemy_turn, end_scene) -> None:
             player_turn_options()
 
     elif attack_roll < enemy.evasion:
-        global_commands.type_text(f"You missed.\n")
+        global_commands.type_text(f" You missed.\n")
         if global_variables.PLAYER.can_act is False:
             global_variables.PLAYER.reset_ap()
             enemy_turn()
@@ -70,8 +70,8 @@ def hp(player_turn) -> None:
     Prints the player's HP then runs the given function
     """
     print('\n'+"-" * 110+'\n')
-    print(f'HP: {global_variables.PLAYER.hp}/{global_variables.PLAYER.max_hp}')
-    print("["+"/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp)+"]\n")
+    print(f' HP: {global_variables.PLAYER.hp}/{global_variables.PLAYER.max_hp}')
+    print(" ["+"/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp)+"]\n")
     player_turn()
 
 def inventory(player_turn) -> None:
@@ -79,7 +79,7 @@ def inventory(player_turn) -> None:
     Prints the player's inventory then runs the given function
     """
     print('\n'+"-" * 110+'\n')
-    print(f'Gold: {global_variables.PLAYER.gold}\n')
+    print(f' Gold: {global_variables.PLAYER.gold}\n')
     global_variables.PLAYER.print_inventory()
     player_turn()
 
@@ -94,10 +94,10 @@ def use_an_item(item: items.Consumable, enemy_turn, player_turn, target=global_v
 
         if held_item.quantity == 0: #if the items quantity is 0, remove it
             global_variables.PLAYER.inventory.remove(held_item)
-            global_commands.type_text(f'No {item.id}s avaliable!\n')
+            global_commands.type_text(f' No {item.id}s avaliable!\n')
             player_turn()
         if held_item.use(target) is True:
-            global_commands.type_text(f'{held_item.quantity} {item.id}s remaining.\n')
+            global_commands.type_text(f' {held_item.quantity} {item.id}s remaining.\n')
             global_variables.PLAYER.spend_ap(1)
             if global_variables.PLAYER.can_act is False:
                 global_variables.PLAYER.reset_ap()
@@ -105,10 +105,10 @@ def use_an_item(item: items.Consumable, enemy_turn, player_turn, target=global_v
             else:
                 player_turn()
         else:
-            global_commands.type_text(f"Can't use this yet.\n")
+            global_commands.type_text(f" Can't use this yet.\n")
             player_turn()
     else:
-        global_commands.type_text(f'No {item.name}s avaliable!\n')
+        global_commands.type_text(f' No {item.name}s avaliable!\n')
         player_turn()
 
 def stop_flee_attempt(source: mob.Mob, ) -> None:
@@ -119,7 +119,7 @@ def stop_flee_attempt(source: mob.Mob, ) -> None:
     enemy_attack = source.roll_attack()
     if enemy_attack - 2 >= global_variables.PLAYER.evasion:
         if global_variables.PLAYER.dead is False:
-            global_commands.type_text(f"The {source.id} attacks you while you attempt to flee. You escape, but not unscathed.\n")
+            global_commands.type_text(f" The {source.id} attacks you while you attempt to flee. You escape, but not unscathed.\n")
             #global_variables.PLAYER.fail_to_flee() #to be added
             print("-" * 110+'\n')
             narrator.exit_the_dungeon()
@@ -128,14 +128,14 @@ def stop_flee_attempt(source: mob.Mob, ) -> None:
             #idk kill the player
             global_variables.PLAYER.die()
     else:
-        global_commands.type_text(f"The {source.id} tries to stop you from retreating, but fails. You've fled successfully.\n")
+        global_commands.type_text(f" The {source.id} tries to stop you from retreating, but fails. You've fled successfully.\n")
 
 def flee(enemy: mob.Mob) -> None:
     """
     Attempts to run away from the current encounter
     """
     print('\n'+"-" * 110)
-    global_commands.type_text(f"You attempt to flee.\n")
+    global_commands.type_text(f" You attempt to flee.\n")
     chase_chance = random.randrange(0, 100)
     if global_variables.PLAYER.hp > global_variables.PLAYER.max_hp * 0.75 and chase_chance <= 10: # above 75% hp, 10% chance enemy chases you
         print('option 1')
@@ -155,6 +155,6 @@ def flee(enemy: mob.Mob) -> None:
 
     else:
         print('else')
-        global_commands.type_text(f"The {enemy.id} lets you go.\n")
+        global_commands.type_text(f" The {enemy.id} lets you go.\n")
         print("-" * 110+'\n')
         narrator.exit_the_dungeon()

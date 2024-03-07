@@ -322,14 +322,14 @@ class Player():
         """
         Increases player XP by a given amount
         """
-        global_commands.type_text(f"{xp} XP earned.\n")
+        global_commands.type_text(f" {xp} XP earned.\n")
         self._xp += xp
     
     def gain_gold(self, gold:int) -> None:
         """
         Increases player gold by a given amount
         """
-        global_commands.type_text(f"{gold} Gold gained.\n")
+        global_commands.type_text(f" {gold} Gold gained.\n")
         self._gold += gold
 
     def spend_gold(self, gold:int) -> None:
@@ -339,7 +339,7 @@ class Player():
         Throws a value error if the player doesnt have enough gold to spend
         """
         if gold > self.gold:   
-            raise ValueError("Not enough gold")
+            raise ValueError(" Not enough gold\n")
         self._gold -= gold
 
     def lose_gold(self, amount:int) -> None:
@@ -377,11 +377,11 @@ class Player():
         """
         if self._hp <= (self._max_hp - healing):
             self._hp += healing
-            global_commands.type_text(f'\nYou healed {healing} HP.\n')
+            global_commands.type_text(f'\n You healed {healing} HP.\n')
             return None
         if self._hp + healing > self._max_hp:
             self._hp = self._max_hp
-            global_commands.type_text(f"\nYou only healed {self._max_hp - self._hp} HP.\n")
+            global_commands.type_text(f"\n You only healed {self._max_hp - self._hp} HP.\n")
             return None
 
 
@@ -433,7 +433,7 @@ class Player():
             armor_debuff = Status_Effect("Armor Debuff", armor, "dex", self)
             armor_debuff.set_power(-(armor.numerical_weight_class - 2))
             armor_debuff.set_duration(10000)
-            armor_debuff.set_message(f"Your Dexterity is being decreased by 2 by your {armor.id}!\n")
+            armor_debuff.set_message(f" Your Dexterity is being decreased by 2 by your {armor.id}!\n")
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 12 + BONUS[self._stats["dex"]]
 
@@ -494,12 +494,12 @@ class Player():
                 if entry.id == id:
                     self._stats[effect.stat] += -(effect.power)
                     self._status_effects.remove(effect)
-                    global_commands.type_text(f"The {effect.id}'s effect has gone away.\n")
+                    global_commands.type_text(f" The {effect.id}'s effect has gone away.\n")
                     break
         else:
             self._stats[effect.stat] += -(effect.power)
             self._status_effects.remove(effect)
-            global_commands.type_text(f"The {effect.id}'s effect has gone away.\n")
+            global_commands.type_text(f" The {effect.id}'s effect has gone away.\n")
 
     def update(self) -> None:
         for effect in self._status_effects:

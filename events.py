@@ -5,27 +5,42 @@ import global_commands
 
 FAILURE_LINES = {
     "str": [
-        f"\nYou're going to need more than brawn to solve this one.\n"
+        " You're going to need more than brawn to solve this one.\n",
+        " Your bulging biceps aren't up to this task.\n",
+        " No amount of strength can solve this problem.\n"
     ],
 
     "dex": [
-        f"\nYou do a sick spin move. Nothing happens.\n"
+        " You do a sick spin move. Nothing happens.\n",
+        " You can't think of a way to come at this problem using your dexterity.\n",
+        " This will require substancially more than the ability to twist yourself into a pretzel.\n",
+        " No way to wriggle your way out of this.\n"
     ],
 
     "con": [
-        f"\nAfter the 5th consecutive minute of holding your breath, you give up.\n"
+        " After the 5th consecutive minute of holding your breath, you give up.\n",
+        " Being stout of heart won't do you much good here.\n",
+        " Your above average pain tolerance will get you nowhere with this.\n"
     ],
 
     "int": [
-       f"\nCan't think your way out of this one nerd!\n"
+       " You can't think your way out of this one.\n",
+       " You deduce you should try a different approach.\n",
+       " Maybe those kids that picked on you in school had a point...\n"
     ],
 
     "wis": [
-        f"\nYou pause for a while to ponder the forms. The forms are throughly unhelpful.\n"
+        " You pause for a while to ponder the forms. The forms are throughly unhelpful.\n",
+        " You sense that your Wisdom is futile here.\n",
+        " Your intution tells you to try something else.\n",
+        " The ability to keep a cool head is useful, but this will require a different skill set"
     ],
 
     "cha": [
-        f"\nYou tell a mildly amusing Knock, Knock joke. Nobody laughs.\n"
+        " You tell a mildly amusing Knock, Knock joke. Nobody laughs.\n",
+        " Your silver tongue is of no use.\n",
+        " Now is not the time for smooth talking!\n",
+        " Good looks can only get you so far...\n"
     ]
 }
 
@@ -110,6 +125,9 @@ class Event():
         """
         self._reward = reward
 
+    def set_passed(self, val:bool) -> None:
+        self._passed = val
+
 
     #EVENT INFO
     def has_stat(self, stat:str) -> bool:
@@ -134,6 +152,9 @@ class Event():
     
     #RUN
     def start(self) -> None:
+        """
+        Prints the start text and associated formatting of the event
+        """
         print("\n" + "-"*110 + "\n")
         global_commands.type_text(self.text)
 
@@ -156,18 +177,25 @@ class Event():
                         if msg[0] == stat:
                             self._passed = True
                             global_commands.type_text(f"{random.choice(msg[1])}")
-                            print('-'*110+'\n')
+                            #print('-'*110+'\n')
                             return True
             for msg in self._messages[False]:
                 if msg[0] == stat:
                     global_commands.type_text(f"{random.choice(msg[1])}")
-                    print('-'*110+'\n')
+                    if self.tries is False:
+                       # print('-'*110+'\n')
+                        pass
                     return False
 
         global_commands.type_text(f"{random.choice(FAILURE_LINES[stat])}")
-        print('-'*110+'\n')
+        if self.tries is False:
+            #print('-'*110+'\n')
+            pass
         return False
 
     def end(self) -> None:
+        """
+        Prints the end text and associated formatting of the event
+        """
         global_commands.type_text(self.end_message)
         print('-'*110+'\n')

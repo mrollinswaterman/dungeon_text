@@ -74,6 +74,7 @@ class Shopkeep():
 
     def stock(self, item: items.Item, num=1) -> None:
         self._inventory[self.stock_size + 1] = item
+        self._stock_size = len(list(self._inventory.keys()))
         
     def set_threat(self, num:int) -> None:
         self._threat = num
@@ -125,11 +126,25 @@ class Shopkeep():
     def print_invevtory(self) -> None:
         if len(self.inventory) == 0:
             print("Shop's empty!")
-        print("")
-        for num in self._inventory:
-            item:items.Item = self._inventory[num]
-            global_commands.type_text(f"{num}. {item.id} ({item.stats}): {item.value}g", 0.01, False)
-            print(""*110)
+
+        print("-"*110 + '\n')
+        for num in range(1, self._stock_size+1):
+            if num % 2 == 0:
+                pass
+            else:
+                try:
+                    item1:items.Item = self._inventory[num]
+                    item2:items.Item = self._inventory[num+1]
+                    string = f"{num}. {item1.id} ({item1.stats}): {item1.value}g"+'\t'*3+f"{num+1}. {item2.id} ({item2.stats}): {item2.value}g"
+                    global_commands.type_list(string)
+                    print("")
+                except KeyError:
+                    item1:items.Item = self._inventory[num]
+                    string = f"{num}. {item1.id} ({item1.stats}): {item1.value}g"
+                    global_commands.type_list(string)
+                    print("")
+
+        print("-"*110 + '\n')
 
     def restock(self, warehouse, amount) -> None:
         for item in warehouse:
