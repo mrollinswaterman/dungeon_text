@@ -27,6 +27,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the Player turn
         """
+        print("-"*110+'\n')
         global_variables.PLAYER.update()
         player_commands.player_turn_options()
     
@@ -61,7 +62,7 @@ def link_start(enemy:mob.Mob) -> None:
                     global_commands.type_text(f'The {enemy.id} hit itself for {taken} damage!\n')
                 else:
                     global_commands.type_text(f"It missed.\n")
-                    print("-" * 110+"\n")
+                    #print("-" * 110+"\n")
                 if enemy.dead is False:
                     player_turn()
                 else:
@@ -77,11 +78,11 @@ def link_start(enemy:mob.Mob) -> None:
                         player_death()
                 else:
                     global_commands.type_text(f"The {enemy.id} missed.\n")
-                    print("-" * 110+"\n")
+                    #print("-" * 110+"\n")
                     player_turn()
         else:# ...aaaaand 50% chance of performing a special move
             enemy.special_move(enemy, global_variables.PLAYER)
-            print("-" * 110+"\n")
+            #print("-" * 110+"\n")
             player_turn()
 
     def next_scene():
@@ -122,7 +123,7 @@ def link_start(enemy:mob.Mob) -> None:
         narrator.event_options()
         command = input(">")
         if command.lower() != "w":
-            print('\n'+"-" * 110)
+            print("-" * 110)
             global_commands.type_text(event.run(command, global_variables.PLAYER.roll_a_check(command)))
             print("-" * 110)
             if event.passed is True:# if passed, reset event tries
@@ -168,7 +169,7 @@ def link_start(enemy:mob.Mob) -> None:
         if command.lower() == "i":
             player_commands.inventory(player_turn)
         if command.lower() == "u":
-            player_commands.use_an_item("Health Potion", enemy_turn, player_turn)
+            player_commands.use_an_item(item_compendium.generate_hp_potions(), enemy_turn, player_turn)
         if command.lower() == "f":
             global_variables.RUNNING = False
             player_commands.flee(enemy)

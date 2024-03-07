@@ -57,6 +57,7 @@ def hobgoblin_special(source: mob.Mob, target: player.Player) -> bool:
         taunt = player.Status_Effect("Taunt", source, "evasion", target)
         taunt.set_duration(2)
         taunt.set_power(-2)
+        taunt.set_message(f"Your Evasion has been redcued by 2 by the {source.id}'s Taunt!\n")
         target.add_status_effect(taunt)
 
 HOBGOBLIN_STATS.set_special(hobgoblin_special)

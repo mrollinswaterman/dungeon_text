@@ -28,6 +28,9 @@ class Item():
         self._durability = self._max_durability
         self._is_consumable = False
         self._weight = 0
+        self._pickup_message = ""
+        self._description = ""
+        self._broken = False
 
     #properties
     @property
@@ -60,12 +63,29 @@ class Item():
     @property
     def weight(self) -> int:
         return self._weight
+    @property
+    def pickup_message(self) -> str:
+        return self._pickup_message
+    @property
+    def description(self) -> str:
+        return self._description
+    @property
+    def broken(self) -> bool:
+       return self._durability <= 0
     #methods
     def lose_durability(self) -> None:
         prob = random.randrange(100)
         #weapon only loses durability occasionally, probability decreases with rarity
         if prob < (60 // self._rarity):
             self._durability -= 1
+            if self.broken is True:
+                self.item_has_broken()
+
+    def remove_durability(self, num:int) -> None:
+        self._durability -= num
+        if self.broken is True:
+            self._durability = 0
+            self.item_has_broken()
 
     def repair(self) -> None:
         """
@@ -78,6 +98,16 @@ class Item():
 
     def set_stats(self, stats: tuple[int, int, int]):
         raise NotImplementedError
+
+    def set_pickup_message(self, msg:str) -> None:
+        self._pickup_message = msg
+
+    def item_has_broken(self) -> None:
+        print(f"Your {self._id} has broken!")
+    
+    def set_description(self, words:str) -> None:
+        self._description = words
+
 
     def __str__(self) -> str:
         return f'{self.id}\n Rarity: {RARITY[self._rarity]}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n'
@@ -147,6 +177,7 @@ class Armor(Item):
         self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
         self._armor_value = int(self._numerical_weight_class + self._rarity - (self._numerical_weight_class / 2))
         self._value = (25 * rarity) + (10 * self.numerical_weight_class)
+        self._broken = False
 
     #properties
     @property
@@ -215,6 +246,12 @@ class Consumable(Item):
 
     def decrease_quantity(self, num:int) -> None:
         self._quantity -= num
+
+    def set_pickup_message(self, msg: str="") -> None:
+        if self._quantity > 1:
+            self._pickup_message = f"You picked up {self._quantity} {self.id}s\n"
+        else:
+            self._pickup_message = f"You picked up a {self._id}\n"
 
     def __str__(self) -> str:
         return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Quantity: {self._quantity}'

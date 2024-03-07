@@ -84,14 +84,21 @@ def inventory(player_turn) -> None:
     print("\n"+"-" * 110+'\n')
     player_turn()
 
-def use_an_item(item: items.Consumable, enemy_turn, player_turn) -> None:
+def use_an_item(item: items.Consumable, enemy_turn, player_turn, target=global_variables.PLAYER) -> None:
     """
     Uses an item on the Player, if the player has the item in their inventory
     """
     print('\n'+"-" * 110)
-    if global_variables.PLAYER.has_item(item) is not False and global_variables.PLAYER.has_item(item).quantity > 0:
-        if global_variables.PLAYER.has_item(item).use(global_variables.PLAYER) is True:
-            global_commands.type_text(f'\n{global_variables.PLAYER.has_item(item).quantity} {item}(s) remaining.\n')
+    if global_variables.PLAYER.has_item(item) is True:#check the player has the item
+        index = global_variables.PLAYER.find_consumable_by_id(item)
+        held_item:items.Consumable = global_variables.PLAYER.inventory[index]
+
+        if held_item.quantity == 0: #if the items quantity is 0, remove it
+            global_variables.PLAYER.inventory.remove(held_item)
+            global_commands.type_text(f'\nNo {item.id}s avaliable!\n')
+            player_turn()
+        if held_item.use(target) is True:
+            global_commands.type_text(f'\n{held_item.quantity} {item.id}s remaining.\n')
             global_variables.PLAYER.spend_ap(1)
             if global_variables.PLAYER.can_act is False:
                 global_variables.PLAYER.reset_ap()
@@ -99,10 +106,10 @@ def use_an_item(item: items.Consumable, enemy_turn, player_turn) -> None:
             else:
                 player_turn()
         else:
-            global_commands.type_text(f'\nAlready full HP.\n')
+            global_commands.type_text(f"\nCan't use this yet.\n")
             player_turn()
     else:
-        global_commands.type_text(f'\nNo {item}(s) avaliable!\n')
+        global_commands.type_text(f'\nNo {item.id}s avaliable!\n')
         player_turn()
 
 def stop_flee_attempt(source: mob.Mob, ) -> None:

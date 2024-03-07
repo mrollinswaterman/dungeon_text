@@ -20,7 +20,7 @@ def level_up_options():
     print('Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n')
 
 def event_options():
-    global_commands.type_text(f"Which stat would you like to roll?\n")
+    global_commands.type_text(f"\nWhich stat would you like to roll?\n")
     print("Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n")
 
 def continue_run(next):

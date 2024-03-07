@@ -17,6 +17,8 @@ long_sword.set_crit_multiplier(2)
 leather_armor = items.Armor("Leather Armor", "Light")
 leather_armor.set_armor_value(2)
 
+print(leather_armor)
+
 PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(long_sword)
 
