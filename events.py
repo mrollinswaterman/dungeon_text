@@ -1,6 +1,7 @@
 
 from typing import Optional
 import random
+import global_commands
 
 FAILURE_LINES = {
     "str": [
@@ -132,6 +133,10 @@ class Event():
             
     
     #RUN
+    def start(self) -> None:
+        print("\n" + "-"*110 + "\n")
+        global_commands.type_text(self.text)
+
     def run(self, stat:str, roll:int) -> str:
         """
         Runs the event for a given stat and roll
@@ -139,6 +144,7 @@ class Event():
         Returns an f-string determined by the stat rolled and whether or not
         the check succeded
         """
+        print("\n"+"-" * 110+'\n')
         if self.tries is False:
             raise ValueError("No more tries")
         self._tries -= 1
@@ -149,9 +155,19 @@ class Event():
                     for msg in self._messages[True]:
                         if msg[0] == stat:
                             self._passed = True
-                            return random.choice(msg[1])
+                            global_commands.type_text(f"{random.choice(msg[1])}")
+                            print('-'*110+'\n')
+                            return True
             for msg in self._messages[False]:
                 if msg[0] == stat:
-                    return random.choice(msg[1])
+                    global_commands.type_text(f"{random.choice(msg[1])}")
+                    print('-'*110+'\n')
+                    return False
 
-        return random.choice(FAILURE_LINES[stat])
+        global_commands.type_text(f"{random.choice(FAILURE_LINES[stat])}")
+        print('-'*110+'\n')
+        return False
+
+    def end(self) -> None:
+        global_commands.type_text(self.end_message)
+        print('-'*110+'\n')

@@ -27,13 +27,12 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the Player turn
         """
-        print("-"*110+'\n')
         global_variables.PLAYER.update()
         player_commands.player_turn_options()
     
     def player_death():
         #some text probably too
-        global_variables.RUNNING
+        global_variables.RUNNING = False
         sys.exit()
 
     def enemy_turn():
@@ -49,7 +48,6 @@ def link_start(enemy:mob.Mob) -> None:
                 global_commands.type_text(f"A critical hit! Uh oh.\n")
                 taken = global_variables.PLAYER.take_damage(enemy.roll_damage() * 2)
                 global_commands.type_text(f'The {enemy.id} hit you for {taken} damage!\n')
-                print("-" * 110+"\n")
                 if global_variables.PLAYER.dead is False:
                     player_turn()
                 else:
@@ -58,11 +56,9 @@ def link_start(enemy:mob.Mob) -> None:
                 global_commands.type_text(f"It critically failed!\n")
                 if enemy.fumble_table() is True:
                     taken = enemy.take_damage(enemy.roll_damage())
-            
                     global_commands.type_text(f'The {enemy.id} hit itself for {taken} damage!\n')
                 else:
                     global_commands.type_text(f"It missed.\n")
-                    #print("-" * 110+"\n")
                 if enemy.dead is False:
                     player_turn()
                 else:
@@ -71,18 +67,15 @@ def link_start(enemy:mob.Mob) -> None:
                 if attack >= global_variables.PLAYER.evasion:
                     taken = global_variables.PLAYER.take_damage(enemy.roll_damage())
                     global_commands.type_text(f'The {enemy.id} hit you for {taken} damage.\n')
-                    print("-" * 110+"\n")
                     if global_variables.PLAYER.dead is False:
                         player_turn()
                     if global_variables.PLAYER.dead is True:
                         player_death()
                 else:
                     global_commands.type_text(f"The {enemy.id} missed.\n")
-                    #print("-" * 110+"\n")
                     player_turn()
         else:# ...aaaaand 50% chance of performing a special move
             enemy.special_move(enemy, global_variables.PLAYER)
-            #print("-" * 110+"\n")
             player_turn()
 
     def next_scene():
@@ -90,25 +83,24 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        if random.randrange(0, 100) > 33: #66% chance of an enemy spawning next
+        if random.randrange(0, 100) > 99: #66% chance of an enemy spawning next
             next_enemy: mob.Mob = monster_manual.random_mob(global_variables.PLAYER.level) 
             #^ picks a random mob from the list, wth a min level equal to the player's level
             next_enemy.set_level(random.randrange(next_enemy.level_range[0], global_variables.PLAYER.threat))
             #^ sets the enemy's level to a random value between its minimum level and the player's 'threat level'.
-            RUNNING = False
+            global_variables.RUNNING = False
             link_start(next_enemy)
         else: #remainging 33% chance of an event spawning
             next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
             next_event.set_tries(2)
-            print(next_event.text)
-            print("-" * 110+'\n')
+            print(f"TRIES: {next_event.tries}")
+            next_event.start()#prints event start text
             run_event(next_event)
 
     def begin_encounter():
         """
         Begins an encounter
         """
-
         global_commands.type_text(f'\nYou encounter a Level {enemy.level} {enemy.id}!\n')
 
     def level_up_player():
@@ -123,9 +115,7 @@ def link_start(enemy:mob.Mob) -> None:
         narrator.event_options()
         command = input(">")
         if command.lower() != "w":
-            print("-" * 110)
-            global_commands.type_text(event.run(command, global_variables.PLAYER.roll_a_check(command)))
-            print("-" * 110)
+            event.run(command, global_variables.PLAYER.roll_a_check(command))
             if event.passed is True:# if passed, reset event tries
                 event.set_tries(2)
                 if event.reward is not None:
@@ -133,16 +123,15 @@ def link_start(enemy:mob.Mob) -> None:
                 next_scene()
             elif event.tries is True:# if not passed yet, and still tries, run it again
                 run_event(event)
-            else: # in failed, tell the player
-                global_commands.type_text(event.end_message)
+            else: # if failed, tell the player and move on
+                event.end_message()
                 next_scene()
 
     def end_scene():
+        global_commands.type_text(f"You killed the {enemy.id}!\n")
         global_variables.PLAYER.gain_gold(enemy.loot[0])
         global_variables.PLAYER.gain_xp(enemy.loot[1])
         global_variables.PLAYER.reset_ap()
-        global_commands.type_text(f"You killed the {enemy.id}!\n")
-        print("-"*110+'\n')
         if global_variables.PLAYER.level_up is True:
             level_up_player()
         else:

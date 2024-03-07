@@ -9,7 +9,7 @@ import monster_manual
 
 
 def next_scene_options():
-    global_commands.type_text("\nYou venture deeper into the dungeon...\n")
+    global_commands.type_text("You venture deeper into the dungeon...\n")
     ominous = f'    ...\n'
     for i in range(5):
         time.sleep(.5)
@@ -20,13 +20,16 @@ def level_up_options():
     print('Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n')
 
 def event_options():
-    global_commands.type_text(f"\nWhich stat would you like to roll?\n")
+    print('-'*110+'\n')
+    global_commands.type_text(f"Which stat would you like to roll?\n")
     print("Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n")
 
 def continue_run(next):
+    print("-"*110+"\n")
     global_commands.type_text("Continue? y/n\n")
     command = input(">")
     if command.lower() == "y":
+        print("")
         next()
     elif command.lower() == "n":
         pass

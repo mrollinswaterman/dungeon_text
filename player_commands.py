@@ -5,9 +5,10 @@ import mob
 import items
 import narrator
 
-GOD_MODE = False
+GOD_MODE = True
 
 def player_turn_options():
+    print("-"*110+'\n')
     print(f'What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n\nAttack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n')
 
 
@@ -31,8 +32,8 @@ def attack(enemy: mob.Mob, enemy_turn, end_scene) -> None:
         attack_roll = global_variables.PLAYER.roll_attack()
         global_variables.PLAYER.spend_ap(1)
     
-    print('\n'+"-" * 110)
-    global_commands.type_text(f'\nYou attack the {enemy.id}, rolling a {attack_roll}.\n')
+    print('\n'+"-" * 110+'\n')
+    global_commands.type_text(f'You attack the {enemy.id}, rolling a {attack_roll}.\n')
 
     if attack_roll == 0:
         global_commands.type_text(f"Critical Hit!\n")
@@ -68,37 +69,35 @@ def hp(player_turn) -> None:
     """
     Prints the player's HP then runs the given function
     """
-    print('\n'+"-" * 110)
-    print(f'\nHP: {global_variables.PLAYER.hp}/{global_variables.PLAYER.max_hp}')
-    print("["+"/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp)+"]")
     print('\n'+"-" * 110+'\n')
+    print(f'HP: {global_variables.PLAYER.hp}/{global_variables.PLAYER.max_hp}')
+    print("["+"/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp)+"]\n")
     player_turn()
 
 def inventory(player_turn) -> None:
     """
     Prints the player's inventory then runs the given function
     """
-    print('\n'+"-" * 110)
-    print(f'\nGold: {global_variables.PLAYER.gold}\n')
+    print('\n'+"-" * 110+'\n')
+    print(f'Gold: {global_variables.PLAYER.gold}\n')
     global_variables.PLAYER.print_inventory()
-    print("\n"+"-" * 110+'\n')
     player_turn()
 
 def use_an_item(item: items.Consumable, enemy_turn, player_turn, target=global_variables.PLAYER) -> None:
     """
     Uses an item on the Player, if the player has the item in their inventory
     """
-    print('\n'+"-" * 110)
+    print('\n'+"-" * 110+'\n')
     if global_variables.PLAYER.has_item(item) is True:#check the player has the item
         index = global_variables.PLAYER.find_consumable_by_id(item)
         held_item:items.Consumable = global_variables.PLAYER.inventory[index]
 
         if held_item.quantity == 0: #if the items quantity is 0, remove it
             global_variables.PLAYER.inventory.remove(held_item)
-            global_commands.type_text(f'\nNo {item.id}s avaliable!\n')
+            global_commands.type_text(f'No {item.id}s avaliable!\n')
             player_turn()
         if held_item.use(target) is True:
-            global_commands.type_text(f'\n{held_item.quantity} {item.id}s remaining.\n')
+            global_commands.type_text(f'{held_item.quantity} {item.id}s remaining.\n')
             global_variables.PLAYER.spend_ap(1)
             if global_variables.PLAYER.can_act is False:
                 global_variables.PLAYER.reset_ap()
@@ -106,10 +105,10 @@ def use_an_item(item: items.Consumable, enemy_turn, player_turn, target=global_v
             else:
                 player_turn()
         else:
-            global_commands.type_text(f"\nCan't use this yet.\n")
+            global_commands.type_text(f"Can't use this yet.\n")
             player_turn()
     else:
-        global_commands.type_text(f'\nNo {item.id}s avaliable!\n')
+        global_commands.type_text(f'No {item.name}s avaliable!\n')
         player_turn()
 
 def stop_flee_attempt(source: mob.Mob, ) -> None:

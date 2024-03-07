@@ -291,16 +291,14 @@ class Player():
         Reduces the players hp by a damage amount, reduced by armor
         """
         armor:items.Armor = self._equipped["Armor"]
-        print(armor)
-        raise Exception
         damage = damage * self._damage_taken_multiplier
         if armor.broken is False:
             armor.lose_durability()
             if damage - self.armor.armor_value < 0:
                 return 0 
             else:
-                self._hp -= damage - self.armor
-                return damage - self.armor
+                self._hp -= damage - self.armor.armor_value
+                return damage - self.armor.armor_value
         self._hp -= damage
         return damage
 
@@ -438,6 +436,8 @@ class Player():
             armor_debuff.set_message(f"Your Dexterity is being decreased by 2 by your {armor.id}!\n")
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 12 + BONUS[self._stats["dex"]]
+
+        self._equipped["Armor"] = armor
 
     def has_item(self, item: items.Item) -> bool:
         """
