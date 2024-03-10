@@ -339,8 +339,10 @@ class Player():
         Throws a value error if the player doesnt have enough gold to spend
         """
         if gold > self.gold:   
-            raise ValueError(" Not enough gold\n")
+            return False
         self._gold -= gold
+        print(f" {gold} gold spent. {self._gold} gold remaining.\n")
+        return True
 
     def lose_gold(self, amount:int) -> None:
         """
@@ -386,7 +388,7 @@ class Player():
 
 
     #INVENTORY STUFF
-    def pick_up(self, item: items.Item | items.Consumable) -> bool:
+    def pick_up(self, item: items.Item | items.Consumable, num:int=1) -> bool:
         """
         Picks up an item if the player has inventory space for it
         """
@@ -394,7 +396,7 @@ class Player():
             if self.has_item(item) is True and item.is_consumable is True:
                 index = self.find_consumable_by_id(item)
                 held_item:items.Consumable = self._inventory[index]
-                held_item.increase_quantity(item.quantity)
+                held_item.increase_quantity(num)
                 return True
             self._inventory.append(item)
             print(item.pickup_message)

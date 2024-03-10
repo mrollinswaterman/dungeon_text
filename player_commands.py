@@ -121,40 +121,39 @@ def stop_flee_attempt(source: mob.Mob, ) -> None:
         if global_variables.PLAYER.dead is False:
             global_commands.type_text(f" The {source.id} attacks you while you attempt to flee. You escape, but not unscathed.\n")
             #global_variables.PLAYER.fail_to_flee() #to be added
-            print("-" * 110+'\n')
             narrator.exit_the_dungeon()
-            #insert a LEAVE DUNGEON command here
         else:
             #idk kill the player
             global_variables.PLAYER.die()
     else:
         global_commands.type_text(f" The {source.id} tries to stop you from retreating, but fails. You've fled successfully.\n")
+        narrator.exit_the_dungeon()
 
 def flee(enemy: mob.Mob) -> None:
     """
     Attempts to run away from the current encounter
     """
-    print('\n'+"-" * 110)
-    global_commands.type_text(f" You attempt to flee.\n")
+    print("")
+    print("-" * 110+'\n')
+    global_commands.type_text(f" You attempt to flee...\n")
     chase_chance = random.randrange(0, 100)
     if global_variables.PLAYER.hp > global_variables.PLAYER.max_hp * 0.75 and chase_chance <= 10: # above 75% hp, 10% chance enemy chases you
-        print('option 1')
-        enemy_attack = enemy.roll_attack()
+        #print('option 1')
+        #enemy_attack = enemy.roll_attack()
         stop_flee_attempt(enemy)
         
     elif global_variables.PLAYER.hp > global_variables.PLAYER.max_hp * 0.5 and chase_chance < 33: #above 50% hp 33% chance enemy chases you
-        print('option 2')
-        enemy_attack = enemy.roll_attack()
+       # print('option 2')
+        #enemy_attack = enemy.roll_attack()
         stop_flee_attempt(enemy)
 
 
     elif global_variables.PLAYER.hp <= global_variables.PLAYER.max_hp * 0.3 and chase_chance < 50: # below 30% hp, 50% chance enemy chases you
-        print('option 3')
-        enemy_attack = enemy.roll_attack()
+        #print('option 3')
+        #enemy_attack = enemy.roll_attack()
         stop_flee_attempt(enemy)
 
     else:
-        print('else')
+        #print('else')
         global_commands.type_text(f" The {enemy.id} lets you go.\n")
-        print("-" * 110+'\n')
         narrator.exit_the_dungeon()

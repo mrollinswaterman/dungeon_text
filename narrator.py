@@ -1,4 +1,5 @@
 import time
+import sys
 import random
 import global_commands
 import global_variables
@@ -35,20 +36,35 @@ def continue_run(next):
         print("")
         next()
     elif command.lower() == "n":
+        print("")
         exit_the_dungeon()
     else:
         global_commands.type_text("\n Invalid command. Please try again.\n")
         continue_run(next)
 
 def exit_the_dungeon():
-    print('')
+    print("-" * 110+'\n')
     global_commands.type_text(" As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes.\n")
+    print("-"*110+'\n')
     menu_options()
 
 def buy_something():
-    global_variables.SHOPKEEP.print_invevtory()
+    #global_variables.SHOPKEEP.print_invevtory()
     global_commands.type_text(" What would you like to buy? Enter an item's number to purchase it.\n")
     command = input(">")
+    stock_num = int(command)
+    print("")
+    if stock_num in global_variables.SHOPKEEP.inventory:
+        global_variables.SHOPKEEP.sell(global_variables.SHOPKEEP.inventory[stock_num],
+                                       global_variables.PLAYER)
+    shopkeep_options()
+    
+
+def leave_the_shop():
+    print("-" * 110+'\n')
+    global_commands.type_text(" You go on your way.\n")
+    print("-"*110+'\n')
+    menu_options()
 
 def shopkeep_options():
     print("-"*110+'\n')
@@ -57,15 +73,19 @@ def shopkeep_options():
     print(" What would you like to do? Buy Something - (b) | Leave - (l)\n")
     command = input(">")
     if command.lower() == "b":
-        command = None
+        global_variables.SHOPKEEP.print_invevtory()
         buy_something()
     elif command.lower() == "l":
-        command = None
-        menu_options()
+        leave_the_shop()
     else: 
         print(" Invalid command, please try again")
         shopkeep_options()
 
+def rest():
+    print("-" * 110+'\n')
+    global_commands.type_text(" Plenty of time to rest when you're dead.\n")
+    print("-"*110+'\n')
+    menu_options()
 
 def menu_options():
     print(" What would you like to do? Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v)\n")
@@ -77,11 +97,11 @@ def menu_options():
         if command.lower() == "y":
             global_variables.RUNNING = True
     elif command.lower() == "r":
-        global_commands.type_text(" Plenty of time to sleep when you're dead.\n")
-        menu_options()
+        rest()
     elif command.lower() == "v":
-        print('')
         shopkeep_options()
+    elif command.lower() == "exit":
+        sys.exit()
     else:
         command = None
         global_commands.type_text(" Invalid command please try again\n")

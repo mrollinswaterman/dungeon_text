@@ -93,8 +93,7 @@ class Shopkeep():
                 if self._inventory[i] == item:
                     id_num = i
                     break
-            if buyer.gold >= item.value:
-                buyer.lose_gold(item.value)
+            if buyer.spend_gold(item.value) is True:
                 self._gold += item.value
                 if isinstance(item, items.Consumable) and item.quantity >= num:
                     item.quantity -= num
@@ -124,7 +123,7 @@ class Shopkeep():
             return False
         
     def print_invevtory(self) -> None:
-        if len(self.inventory) == 0:
+        if len(self._inventory) == 0:
             print("Shop's empty!")
 
         print("-"*110 + '\n')

@@ -20,6 +20,8 @@ leather_armor.set_armor_value(2)
 PLAYER.equip_armor(leather_armor)
 PLAYER.equip_weapon(long_sword)
 
+PLAYER.gain_gold(300)
+
 SHOPKEEP = shopkeep.Shopkeep()
 SHOPKEEP.set_threat(PLAYER.threat)
 BLACKSMITH = shopkeep.Blacksmith()
