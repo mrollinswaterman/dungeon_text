@@ -1,12 +1,12 @@
 import random
 
 RARITY = {
-    1: "Common",
-    2: "Uncommon",
-    3: "Rare",
-    4: "Epic",
-    5: "Legendary",
-    6: "Unique"
+    "Common": 1,
+    "Uncommon": 2,
+    "Rare": 3,
+    "Epic": 4,
+    "Legendary": 5,
+    "Unique": 6 
 }
 
 WEIGHT_CLASS = {
@@ -17,14 +17,28 @@ WEIGHT_CLASS = {
     "Superheavy": 8
 }
 
+def generate_item_rarity() -> str:
+    rarity_roll = random.randrange(0, 13)
+    if rarity_roll == 1:
+        return "Epic"
+    elif rarity_roll < 3:
+        return "Rare"
+    elif rarity_roll  < 7:
+        return "Uncommon"
+    return "Common"
+
 class Item():
 
-    def __init__(self, id, rarity):
+    def __init__(self, id, rarity=None):
 
         self._id = id
-        self._rarity = rarity
-        self._value = 5 * rarity
-        self._max_durability = 10 * self._rarity
+        if rarity is None:
+            self._rarity = generate_item_rarity()
+        else:
+            self._rarity = rarity
+        self._numerical_rarity = RARITY[self._rarity]
+        self._value = 10 * self._numerical_rarity
+        self._max_durability = 10 * self._numerical_rarity
         self._durability = self._max_durability
         self._is_consumable = False
         self._weight = 0
@@ -36,12 +50,15 @@ class Item():
     #properties
     @property
     def id(self) -> str:
-        return f"{RARITY[self._rarity]} {self._id}"
+        return f"{self._rarity} {self._id}"
     @property
     def name(self) -> str:
         return self._id
     @property
     def value(self) -> int:
+        return self._value
+    @property
+    def total_value(self) -> int:
         return self._value
     @property
     def broken(self) -> bool:
@@ -51,10 +68,10 @@ class Item():
         return (self._durability, self._max_durability)
     @property
     def rarity(self) -> str:
-        return RARITY[self._rarity]
+        return self._rarity
     @property
     def numerical_rarity(self) -> int:
-        return self._rarity
+        return self._numerical_rarity
     @property
     def stats(self):
         raise NotImplementedError
@@ -63,6 +80,9 @@ class Item():
         return self._is_consumable
     @property
     def weight(self) -> int:
+        return self._weight
+    @property
+    def total_weight(self) -> int:
         return self._weight
     @property
     def pickup_message(self) -> str:
@@ -80,7 +100,7 @@ class Item():
     def lose_durability(self) -> None:
         prob = random.randrange(100)
         #weapon only loses durability occasionally, probability decreases with rarity
-        if prob < (60 // self._rarity):
+        if prob < (60 // self._numerical_rarity):
             self._durability -= 1
             if self.broken is True:
                 self.item_has_broken()
@@ -114,16 +134,14 @@ class Item():
 
 
     def __str__(self) -> str:
-        return f'{self.id}\n Rarity: {RARITY[self._rarity]}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n'
+        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n'
 
 class Weapon(Item):
 
-    def __init__(self, id, rarity=0):
+    def __init__(self, id, rarity=None):
         super().__init__(id, rarity)
-        if self._rarity == 0:
-            self._rarity = random.randrange(1, 4)
-        self._value = 15 * self._rarity
-        self._max_durability = 10 * self._rarity
+        self._value = 15 * self._numerical_rarity
+        self._max_durability = 10 * self._numerical_rarity
         self._durability = self._max_durability
         self._damage_dice = 0
         self._num_damage_dice = 0
@@ -181,14 +199,12 @@ class Weapon(Item):
 
 class Armor(Item):
 
-    def __init__(self, id, weight_class:int="Light", rarity=0):
+    def __init__(self, id, weight_class:int="Light", rarity=None):
         super().__init__(id, rarity)
-        if self._rarity == 0:
-            self._rarity = random.randrange(1, 4)
         self._weight_class = weight_class
         self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
-        self._armor_value = int(self._numerical_weight_class + self._rarity - (self._numerical_weight_class / 2))
-        self._value = (25 * rarity) + (10 * self.numerical_weight_class)
+        self._armor_value = int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2))
+        self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
         self._broken = False
         self._type = "Armor"
 
@@ -227,8 +243,8 @@ class Armor(Item):
         if armor is not None:
             self.set_armor_value(armor)
         else:
-            self.set_armor_value(int(self._numerical_weight_class + self._rarity - (self._numerical_weight_class / 2)))
-        self._value = (25 * self._rarity) + (10 * self.numerical_weight_class)
+            self.set_armor_value(int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2)))
+        self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
         self._weight = (10 * self._numerical_weight_class) + self._armor_value
     
     def __str__(self) -> str:
@@ -236,13 +252,15 @@ class Armor(Item):
     
 class Consumable(Item):
 
-    def __init__(self, id:str, rarity:int,quantity:int=0):
+    def __init__(self, id:str, rarity="Common",quantity:int=0):
         super().__init__(id, rarity)
         self._quantity = quantity
-        self._strength = rarity * 2
+        self._strength = self._numerical_rarity * 2
         self._is_consumable = True
         self._type = "Consumable"
         self._unit_weight = 1
+        self._unit_value = 8 * self._numerical_rarity
+        self._value = self._unit_value * self._quantity
 
     #properties
     @property
@@ -251,6 +269,12 @@ class Consumable(Item):
     @property
     def stats(self) -> str:
         return self._quantity
+    @property
+    def weight(self) -> int:
+        return self._unit_weight
+    @property
+    def value(self) -> int:
+        return self._unit_value
 
     #methods
     def use(self, target):
@@ -258,20 +282,26 @@ class Consumable(Item):
 
     def increase_quantity(self, num:int) -> None:
         self._quantity += num
-        self._weight = self._unit_weight * self._quantity
+        self.set_quantity_related_stats()
 
     def decrease_quantity(self, num:int) -> None:
         self._quantity -= num
+        self.set_quantity_related_stats()
+    
+    def set_quantity(self, num:int) -> None:
+        self._quantity = num
+        self.set_quantity_related_stats()
+
+    def set_quantity_related_stats(self, msg: str="") -> None:
+        if self._quantity > 1:
+            self._pickup_message = f" You picked up {self._quantity} {self.id}s\n"
+        else:
+            self._pickup_message = f" You picked up a {self._id}\n"
+        self._value = self._unit_value * self._quantity
         self._weight = self._unit_weight * self._quantity
 
-    def set_pickup_message(self, msg: str="") -> None:
-        if self._quantity > 1:
-            self._pickup_message = f"You picked up {self._quantity} {self.id}s\n"
-        else:
-            self._pickup_message = f"You picked up a {self._id}\n"
-
     def __str__(self) -> str:
-        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Quantity: {self._quantity}'
+        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}'
     
 
 

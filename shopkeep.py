@@ -1,5 +1,6 @@
 #Shopkeep class
 import math, random
+from copy import deepcopy
 import items
 import item_compendium
 import player
@@ -86,27 +87,56 @@ class Shopkeep():
 
         Returns True if the sale goes through, False otherwise
         """
-        if item in self._inventory:
-            if buyer.can_carry(item) is True:
-                if buyer.spend_gold(item.value) is True:
-                    self._gold += item.value
-                    if item.is_consumable and item.quantity >= num:
-                        item.quantity -= num
-                        if item.quantity == 0:
-                            self._inventory.remove(item)
-                    self._inventory.remove(item)
-                    buyer.pick_up(item, num) 
-                    global_commands.type_text(f" The Shopkeep hands you the {item.name}, and happily pockets your gold.\n")
+        if item.is_consumable:
+            self.sell_consumable(item, buyer, num)
+        else:
+            if item in self._inventory:
+                if buyer.can_carry(item) is True:
+                    if buyer.spend_gold(item.value) is True:
+                        self._gold += item.value
+                        self._inventory.remove(item)
+                        buyer.pick_up(item, 1) 
+                        global_commands.type_text(f" The Shopkeep hands you the {item.name}, and happily pockets your gold.\n")
+                        return True
+                    else:
+                        global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")
+                        return False
+                else:
+                    global_commands.type_text(f" You can't carry the {item.name}.\n")
+                    return False
+            else:
+                global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.\n")
+                return True
+        
+    def sell_consumable(self, item: items.Consumable, buyer: player.Player, quantity) -> bool:
+        if item in self._inventory and item.quantity > 0:
+            buyer_version = deepcopy(item)
+            buyer_version.set_quantity(1)
+            my_version:items.Consumable = self.find_item(item.id)
+            if quantity <= my_version.quantity:
+               pass
+            else:
+                global_commands.type_text(f"The Shopkeep does not have {quantity} {item.name}s. He'll sell you all that he has.\n")
+                quantity = my_version.quantity
+            buyer_version.set_quantity(quantity)
+            if buyer.can_carry(buyer_version) is True:
+                if buyer.spend_gold(buyer_version.total_value) is True:
+                    self._gold += buyer_version.total_value
+                    my_version.decrease_quantity(quantity)
+                    buyer_version.set_quantity(1)
+                    global_commands.type_text(f" The Shopkeep hands you the {item.name}s and happily pockets your gold.\n")
+                    buyer.pick_up(buyer_version, quantity)
                     return True
                 else:
                     global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")
                     return False
             else:
-                global_commands.type_text(f" You can't carry the {item.name}.\n")
+                global_commands.type_text(f" You can't carry {quantity} {item.name}s.\n")
                 return False
         else:
             global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.\n")
             return True
+
         
     def buy(self, item:items.Item, seller:player.Player, num:int=1) -> bool:
         if item.id in seller.inventory:
@@ -166,3 +196,8 @@ class Shopkeep():
 
         if len(self._inventory) < self._max_stock - amount:
             self.restock(warehouse, amount)
+
+    def find_item(self, id:str) -> items.Item:
+        for item in self._inventory:
+            if item.id == id:
+                return item

@@ -10,10 +10,6 @@ import events
 import global_commands
 import global_variables
 
-top = len(f"What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n")
-
-print(f"DIVIDE: {top/4000}")
-
 def link_start(enemy:mob.Mob) -> None:
     global_variables.RUNNING = True
 

@@ -4,9 +4,8 @@ import player
 
 class Health_Potion(items.Consumable):
 
-    def __init__(self, rarity=1, id="Health Potion", quantity=0):
+    def __init__(self, rarity="Common", id="Health Potion", quantity=0):
         super().__init__(id, rarity, quantity)
-        self._value = 10 * rarity
         self._unit_weight = 0.5
 
     def use(self, target: player.Player) -> None:
@@ -14,25 +13,22 @@ class Health_Potion(items.Consumable):
         Heals the target for a given amount
         """
         if target.hp < target.max_hp:
-            self._quantity -= 1
+            self.decrease_quantity(1)
             target.heal(self._strength)
             return True
         return False
     
 def generate_hp_potions(rarity="Common", num=1):
-    hp = Health_Potion(list(items.RARITY.values()).index(rarity) +1)
+    hp = Health_Potion(rarity)
     #the above is just a formula to find numerical rarity from a string
-    hp.increase_quantity(num)
-    hp.set_pickup_message()
+    hp.set_quantity(num)
     return hp
 
-
-    
 class Repair_Kit(items.Consumable):
 
-    def __init__(self, rarity=2, id="Repair Kit", quantity=0):
+    def __init__(self, rarity="Uncommon", id="Repair Kit", quantity=0):
         super().__init__(id, rarity, quantity)
-        self._value = 10 * rarity
+        self._unit_value = 10 * self._numerical_rarity
         self._unit_weight = .5
 
     def use(self, target: items.Item) -> None:
@@ -41,13 +37,13 @@ class Repair_Kit(items.Consumable):
         """
         if target.durability[0] < target._durability[1]:#ie item is damaged
             target.repair()
+            self.decrease_quantity(1)
             return True
         return False
 
 def generate_repair_kits(num):
     repair = Repair_Kit()
-    repair.increase_quantity(num)
-    repair.set_pickup_message()
+    repair.set_quantity(num)
     return repair
 
 #tag, id, (num dice, dice type, crit)

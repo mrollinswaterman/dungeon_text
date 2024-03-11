@@ -1,6 +1,6 @@
 import time
 
-def type_list(text:str, speed:int = .03, delay= True) -> None:
+def type_list(text:str, speed:int = .03, delay=False) -> None:
 
     text = text.split(' ')
     #print(text)

@@ -394,18 +394,23 @@ class Player():
         """
         Picks up an item if the player has inventory space for it
         """
-        if self.current_weight <= self.carrying_capacity:
+        if self.current_weight <= self.carrying_capacity and self.can_carry(item):
             if self.has_item(item) is True and item.is_consumable is True:
                 index = self.find_consumable_by_id(item)
                 held_item:items.Consumable = self._inventory[index]
                 held_item.increase_quantity(num)
                 print(item.pickup_message)
-                return None
+                return True
+            elif item.is_consumable:
+                item.increase_quantity(num)
+                if self.can_carry(item) is False:
+                    global_commands.type_text(" Not enough inventory space\n")
+                    return False
             self._inventory.append(item)
             print(item.pickup_message)
             return True
         else:
-            raise ValueError("Not enough inventory space\n")
+            global_commands.type_text(" Not enough inventory space\n")
         
     def drop(self, item: items.Item) -> None:
         """
@@ -454,7 +459,7 @@ class Player():
         #self._equipped["Armor"] = armor
             
     def can_carry(self, item:items.Item) -> bool:
-        return self.current_weight + item.weight <= self.carrying_capacity
+        return self.current_weight + item.total_weight <= self.carrying_capacity
 
     def has_item(self, item: items.Item) -> bool:
         """

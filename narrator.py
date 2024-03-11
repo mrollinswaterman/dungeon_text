@@ -4,6 +4,8 @@ import random
 import global_commands
 import global_variables
 
+
+
 SCENE_CHANGE = [
     " You press towards your goal...\n",
     " Your resolve steeled, you continue forwards...\n",
@@ -53,11 +55,20 @@ def buy_something():
     command = input(">")
     stock_num = int(command)
     print("")
-    if stock_num < global_variables.SHOPKEEP.stock_size:
-        global_variables.SHOPKEEP.sell(global_variables.SHOPKEEP.inventory[stock_num-1],
+
+    if stock_num <= global_variables.SHOPKEEP.stock_size+1:
+        if global_variables.SHOPKEEP.inventory[stock_num-1].is_consumable is False:
+            global_variables.SHOPKEEP.sell(global_variables.SHOPKEEP.inventory[stock_num-1],
                                        global_variables.PLAYER)
+        else:
+            global_commands.type_text(f" Please enter desired quantity:\n")
+            command_2 = input(">")
+            print("")
+            global_variables.SHOPKEEP.sell(global_variables.SHOPKEEP.inventory[stock_num-1],
+                                       global_variables.PLAYER, int(command_2))
         shopkeep_options()
     else:
+        global_commands.type_text(f" Invalid item number '{int(command)}'. Please try again.\n")
         shopkeep_options()
 
 def leave_the_shop():
@@ -105,7 +116,7 @@ def check_player_inventory(next):
         item = global_variables.PLAYER.inventory[int(command)-1]
         if global_variables.PLAYER.equip(item) is True:
             global_variables.PLAYER.equip(item)
-        menu_options()
+        next()
 
 def menu_options():
     global_commands.type_text(" What would you like to do?\n")
