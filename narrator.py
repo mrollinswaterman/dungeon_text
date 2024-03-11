@@ -24,7 +24,7 @@ EXIT_DUNGEON = [
     " As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes.\n"
 ]
 
-SHOPKEEP_INTRO = [
+ENTER_THE_SHOP = [
     " The Shopkeep eyes you sleepily.\n",
     " The Shopkeep glances at you warmly.\n",
     " The Shopkeep glares at you.\n",
@@ -73,10 +73,9 @@ def exit_the_dungeon():
     menu_options()
 
 def buy_something():
-    global_variables.SHOPKEEP.print_invevtory()
     global_commands.type_text(" Enter an item's number to purchase it OR (c) - Cancel Order\n")
     command = input(">")
-    print("")
+    #print("")
 
     if command.lower() == "exit":
         sys.exit()
@@ -111,14 +110,13 @@ def leave_the_shop():
 
 def shopkeep_options():
     print("-"*110+'\n')
-    global_commands.type_text(random.choice(SHOPKEEP_INTRO))
+    global_commands.type_text(random.choice(ENTER_THE_SHOP))
     print("-"*110+'\n')
     global_commands.type_text(" What would you like to do?\n")
     print(" Buy Something - (b) | Leave - (l) | Sell something - (s) | Inventory - (i)\n")
-
     command = input(">")
     if command.lower() == "b":
-        #global_variables.SHOPKEEP.print_invevtory()
+        global_variables.SHOPKEEP.print_invevtory()
         buy_something()
     elif command.lower() == "l":
         leave_the_shop()
