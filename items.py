@@ -31,6 +31,7 @@ class Item():
         self._pickup_message = ""
         self._description = ""
         self._broken = False
+        self._type = "Item"
 
     #properties
     @property
@@ -72,6 +73,9 @@ class Item():
     @property
     def broken(self) -> bool:
        return self._durability <= 0
+    @property
+    def type(self) -> str:
+        return self._type
     #methods
     def lose_durability(self) -> None:
         prob = random.randrange(100)
@@ -121,6 +125,7 @@ class Weapon(Item):
         self._damage_dice = 0
         self._num_damage_dice = 0
         self._crit = 0
+        self._type = "Weapon"
 
     #properties
     @property
@@ -138,6 +143,9 @@ class Weapon(Item):
     @property
     def crit(self) -> int:
         return self._crit
+    @property
+    def type(self) -> str:
+        return self._type
     
     def set_stats(self, statblock: str):
         """
@@ -178,6 +186,7 @@ class Armor(Item):
         self._armor_value = int(self._numerical_weight_class + self._rarity - (self._numerical_weight_class / 2))
         self._value = (25 * rarity) + (10 * self.numerical_weight_class)
         self._broken = False
+        self._type = "Armor"
 
     #properties
     @property
@@ -228,6 +237,7 @@ class Consumable(Item):
         self._quantity = quantity
         self._strength = rarity * 2
         self._is_consumable = True
+        self._type = "Consumable"
 
     #properties
     @property

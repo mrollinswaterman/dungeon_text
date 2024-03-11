@@ -3,11 +3,9 @@ import sys
 import random
 import global_commands
 import global_variables
-import shopkeep
-import monster_manual
 
 SCENE_CHANGE = [
-    " You press on...\n",
+    " You press towards your goal...\n",
     " Your resolve steeled, you continue forwards...\n",
     " Your weary legs carry you on...\n",
     " You venture deeper into the dungeon...\n"
@@ -20,6 +18,7 @@ def next_scene_options():
         print('\t'*i + ominous)
 
 def level_up_options():
+    print("-"*110 + '\n')
     global_commands.type_text(' You have gained enough XP to level up! Which stat would you like to level up?\n')
     print(' Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n')
 
@@ -49,16 +48,19 @@ def exit_the_dungeon():
     menu_options()
 
 def buy_something():
-    #global_variables.SHOPKEEP.print_invevtory()
+    global_variables.SHOPKEEP.print_invevtory()
     global_commands.type_text(" What would you like to buy? Enter an item's number to purchase it.\n")
     command = input(">")
     stock_num = int(command)
     print("")
-    if stock_num in global_variables.SHOPKEEP.inventory:
-        global_variables.SHOPKEEP.sell(global_variables.SHOPKEEP.inventory[stock_num],
+    if stock_num < global_variables.SHOPKEEP.stock_size:
+        global_variables.SHOPKEEP.sell(global_variables.SHOPKEEP.inventory[stock_num-1],
                                        global_variables.PLAYER)
-    shopkeep_options()
-    
+        shopkeep_options()
+    else:
+        print(stock_num)
+        print(global_variables.SHOPKEEP.inventory[stock_num])
+        shopkeep_options()
 
 def leave_the_shop():
     print("-" * 110+'\n')
@@ -70,13 +72,17 @@ def shopkeep_options():
     print("-"*110+'\n')
     global_commands.type_text(" The Shopkeep eyes you wearily.\n")
     print("-"*110+'\n')
-    print(" What would you like to do? Buy Something - (b) | Leave - (l)\n")
+    global_commands.type_text(" What would you like to do?\n")
+    print(" Buy Something - (b) | Leave - (l) | Sell something - (s)\n")
+
     command = input(">")
     if command.lower() == "b":
-        global_variables.SHOPKEEP.print_invevtory()
+        #global_variables.SHOPKEEP.print_invevtory()
         buy_something()
     elif command.lower() == "l":
         leave_the_shop()
+    elif command.lower() == "exit":
+        sys.exit()
     else: 
         print(" Invalid command, please try again")
         shopkeep_options()
@@ -87,19 +93,28 @@ def rest():
     print("-"*110+'\n')
     menu_options()
 
+def check_player_inventory():
+    global_variables.PLAYER.print_inventory()
+    global_commands.type_text(" Enter an item's number to equip it.\n")
+    command = input(">")
+    item = global_variables.PLAYER.inventory[int(command)-1]
+    if global_variables.PLAYER.equip(item) is True:
+        global_variables.PLAYER.equip(item)
+    menu_options()
+
 def menu_options():
-    print(" What would you like to do? Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v)\n")
+    global_commands.type_text(" What would you like to do?\n")
+    print(" Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v) | Inventory - (i) \n")
     command = input(">")
     print('')
     if command.lower() == "e":
-        global_commands.type_text(" Would you like to enter the Dungeon? y/n\n", 0.03)
-        command = input(">")
-        if command.lower() == "y":
-            global_variables.RUNNING = True
+        global_variables.START_CMD = True
     elif command.lower() == "r":
         rest()
     elif command.lower() == "v":
         shopkeep_options()
+    elif command.lower() == "i":
+        check_player_inventory()
     elif command.lower() == "exit":
         sys.exit()
     else:

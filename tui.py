@@ -1,7 +1,6 @@
 import sys
-import math
 import random
-import player, items, mob
+import mob
 import monster_manual
 import narrator
 import player_commands
@@ -9,14 +8,7 @@ import item_compendium
 import dms_guide
 import events
 import global_commands
-import shopkeep
 import global_variables
-
-global_commands.type_text("\n Would you like to enter the Dungeon? y/n\n", 0.02)
-
-STARTING_ENEMY: mob.Mob = monster_manual.random_mob(1)
-STARTING_ENEMY.set_level(1)
-
 
 def link_start(enemy:mob.Mob) -> None:
     global_variables.RUNNING = True
@@ -99,7 +91,7 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        if random.randrange(0, 100) > 66: #66% chance of an enemy spawning next
+        if random.randrange(0, 100) <= 66: #66% chance of an enemy spawning next
             next_enemy: mob.Mob = monster_manual.random_mob(global_variables.PLAYER.level) 
             #^ picks a random mob from the list, wth a min level equal to the player's level
             next_enemy.set_level(random.randrange(next_enemy.level_range[0], global_variables.PLAYER.threat))
@@ -174,10 +166,21 @@ def link_start(enemy:mob.Mob) -> None:
             player_commands.flee(enemy)
             enemy = None
 
-command = input(">").lower()
-if command == "y":
-    link_start(STARTING_ENEMY)
-elif command == "t":
-    global_variables.SHOPKEEP.print_invevtory()
-elif command == "n":
-    sys.exit()
+def begin():
+    global_commands.type_text("\n Would you like to enter the Dungeon? y/n\n", 0.02)
+
+    STARTING_ENEMY: mob.Mob = monster_manual.random_mob(global_variables.PLAYER.level)
+    STARTING_ENEMY.set_level(global_variables.PLAYER.level)
+
+    command = input(">").lower()
+    if command == "y":
+        global_variables.RUNNING = True
+        link_start(STARTING_ENEMY)
+    elif command == "t":
+        global_variables.SHOPKEEP.print_invevtory()
+    elif command == "n":
+        sys.exit()
+
+while global_variables.START_CMD is True:
+    global_variables.START_CMD = False
+    begin()

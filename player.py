@@ -180,7 +180,7 @@ class Player():
     def current_weight(self) -> int:
         total_weight = 0
         for entry in self._inventory:
-            held_item:items.Item = self._inventory[entry]
+            held_item:items.Item = entry
             total_weight += held_item.weight
         return total_weight
     @property
@@ -413,11 +413,20 @@ class Player():
         else:
             raise ValueError("Can't drop an item you don't have.\n")
 
-    def equip_weapon(self, weapon: "items.Weapon") ->  None:
+    def equip(self, item: "items.Item") ->  None:
         """
         Equips the player with a given weapon
         """
-        self._equipped["Weapon"] = weapon
+        if item.type in self._equipped:
+            if self._equipped[item.type] is not None:
+                self.pick_up(self._equipped[item.type])
+            self._equipped[item.type] = item
+            if item.type == "Armor":
+                self.equip_armor(item)
+
+            if item in self._inventory:
+                self._inventory.remove(item)
+            print(f" {item.name} equipped.\n")
         #self._inventory[weapon.id] = weapon
 
     def equip_armor(self, armor: "items.Armor") -> None:
@@ -426,7 +435,7 @@ class Player():
         """
         try:
             self.remove_status_effect(None, "Armor Debuff")
-            self._equipped["Armor"] = armor
+            #self._equipped["Armor"] = armor
             #self._inventory[armor.id] = armor
         except AttributeError:
             pass
@@ -439,7 +448,7 @@ class Player():
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 12 + BONUS[self._stats["dex"]]
 
-        self._equipped["Armor"] = armor
+        #self._equipped["Armor"] = armor
 
     def has_item(self, item: items.Item) -> bool:
         """
@@ -467,16 +476,18 @@ class Player():
         """
         Prints the contents of the player's inventory
         """
-        for item in self._inventory:
-            print(item)
+        for idx, item in enumerate(self._inventory):
+            print(f"{idx+1}. {item}")
 
     def recieve_reward(self, reward) -> None:
         if isinstance(reward, tuple):
             id, num = reward
             if id == "xp":
                 self.gain_xp(num)
+                return None
             if id == "gold":
                 self.gain_gold(num)
+                return None
         self.pick_up(reward)
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#

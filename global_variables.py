@@ -6,6 +6,8 @@ import items
 import item_compendium
 import shopkeep
 
+
+START_CMD = True
 RUNNING = False
 
 PLAYER = player.Player()
@@ -17,8 +19,8 @@ long_sword.set_crit_multiplier(2)
 leather_armor = items.Armor("Leather Armor", "Light")
 leather_armor.set_armor_value(2)
 
-PLAYER.equip_armor(leather_armor)
-PLAYER.equip_weapon(long_sword)
+PLAYER.equip(leather_armor)
+PLAYER.equip(long_sword)
 
 PLAYER.gain_gold(300)
 

@@ -2,6 +2,7 @@
 from typing import Optional
 import random
 import global_commands
+#import global_variables
 
 FAILURE_LINES = {
     "str": [
@@ -176,6 +177,8 @@ class Event():
                     for msg in self._messages[True]:
                         if msg[0] == stat:
                             self._passed = True
+                            if self._reward is None:
+                                self.set_reward(("xp", int(check / 1.5)))
                             global_commands.type_text(f"{random.choice(msg[1])}")
                             #print('-'*110+'\n')
                             return True

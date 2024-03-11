@@ -54,9 +54,9 @@ class Shopkeep():
     and that can buy items from the player
     """
 
-    def __init__(self, inventory={}):
-        self._inventory:dict[int, items.Item] = inventory
-        self._stock_size = len(list(self._inventory.keys()))
+    def __init__(self, inventory=[]):
+        self._inventory:list[items.Item] = inventory
+        self._stock_size = len(self._inventory)
         self._gold = 100
         self._threat = 0
         self._max_stock = 10
@@ -69,12 +69,12 @@ class Shopkeep():
         return self._gold
     @property
     def stock_size(self) -> int:
-        return len(list(self._inventory.keys()))
+        return len(self._inventory)
     #methods
 
     def stock(self, item: items.Item, num=1) -> None:
-        self._inventory[self.stock_size + 1] = item
-        self._stock_size = len(list(self._inventory.keys()))
+        self._inventory.append(item)
+        self._stock_size = len(self._inventory)
         
     def set_threat(self, num:int) -> None:
         self._threat = num
@@ -88,26 +88,23 @@ class Shopkeep():
         """
         id_num = 0
 
-        if item in list(self._inventory.values()):
-            for i in self._inventory:
-                if self._inventory[i] == item:
-                    id_num = i
-                    break
+        if item in self._inventory:
+            id_num = self._inventory.index(item)
             if buyer.spend_gold(item.value) is True:
                 self._gold += item.value
-                if isinstance(item, items.Consumable) and item.quantity >= num:
+                if item.is_consumable and item.quantity >= num:
                     item.quantity -= num
                     if item.quantity == 0:
-                        del self._inventory[id_num]
-                del self._inventory[id_num]
+                        self._inventory.remove(item)
+                self._inventory.remove(item)
                 buyer.pick_up(item, num) 
-                global_commands.type_text(f"The Shopkeep hands you the {item.id}, and happily pockets your gold coins.\n")
+                global_commands.type_text(f"The Shopkeep hands you the {item.name}, and happily pockets your gold coins.\n")
                 return True
             else:
-                global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.id}'s price. You don't have the coin.\n")
+                global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")
                 return False
         else:
-            global_commands.type_text(f"The Shopkeep doesn't have any {item.id}s right now. Come back another time.\n")
+            global_commands.type_text(f"The Shopkeep doesn't have any {item.name}s right now. Come back another time.\n")
             return True
         
     def buy(self, item:items.Item, seller:player.Player, num:int=1) -> bool:
@@ -127,21 +124,24 @@ class Shopkeep():
             print("Shop's empty!")
 
         print("-"*110 + '\n')
-        for num in range(1, self._stock_size+1):
+        for num in range(self.stock_size+1):
             if num % 2 == 0:
-                pass
-            else:
                 try:
                     item1:items.Item = self._inventory[num]
                     item2:items.Item = self._inventory[num+1]
-                    string = f"{num}. {item1.id} ({item1.stats}): {item1.value}g"+'\t'*3+f"{num+1}. {item2.id} ({item2.stats}): {item2.value}g"
+                    string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g"+'\t'*3+f"{num+2}. {item2.id} ({item2.stats}): {item2.value}g"
                     global_commands.type_list(string)
                     print("")
-                except KeyError:
-                    item1:items.Item = self._inventory[num]
-                    string = f"{num}. {item1.id} ({item1.stats}): {item1.value}g"
-                    global_commands.type_list(string)
-                    print("")
+                except IndexError:
+                    try:
+                        item1:items.Item = self._inventory[num]
+                        string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g"
+                        global_commands.type_list(string)
+                        print("")
+                    except IndexError:
+                        pass
+            else:
+                pass
 
         print("-"*110 + '\n')
 
@@ -149,7 +149,7 @@ class Shopkeep():
         for item in warehouse:
             stock_chance = random.randrange(0, 100)
             stock_chance += self._threat
-            if item not in list(self._inventory.keys()):
+            if item not in self._inventory:
                 if stock_chance > 90:
                     self.stock(item)
                 elif stock_chance > 75 and item.numerical_rarity <= 3:
