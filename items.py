@@ -118,10 +118,13 @@ class Item():
 
 class Weapon(Item):
 
-    def __init__(self, id, rarity=1):
+    def __init__(self, id, rarity=0):
         super().__init__(id, rarity)
-        self._rarity = random.randrange(1, 4)
+        if self._rarity == 0:
+            self._rarity = random.randrange(1, 4)
         self._value = 15 * self._rarity
+        self._max_durability = 10 * self._rarity
+        self._durability = self._max_durability
         self._damage_dice = 0
         self._num_damage_dice = 0
         self._crit = 0
@@ -174,13 +177,14 @@ class Weapon(Item):
         self._crit = crit
     
     def __str__(self) -> str:
-        return f'{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n'
+        return (f"""{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n""")
 
 class Armor(Item):
 
-    def __init__(self, id, weight_class:int="Light", rarity=random.randrange(1, 4)):
+    def __init__(self, id, weight_class:int="Light", rarity=0):
         super().__init__(id, rarity)
-        
+        if self._rarity == 0:
+            self._rarity = random.randrange(1, 4)
         self._weight_class = weight_class
         self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
         self._armor_value = int(self._numerical_weight_class + self._rarity - (self._numerical_weight_class / 2))
@@ -238,6 +242,7 @@ class Consumable(Item):
         self._strength = rarity * 2
         self._is_consumable = True
         self._type = "Consumable"
+        self._unit_weight = 1
 
     #properties
     @property
@@ -253,9 +258,11 @@ class Consumable(Item):
 
     def increase_quantity(self, num:int) -> None:
         self._quantity += num
+        self._weight = self._unit_weight * self._quantity
 
     def decrease_quantity(self, num:int) -> None:
         self._quantity -= num
+        self._weight = self._unit_weight * self._quantity
 
     def set_pickup_message(self, msg: str="") -> None:
         if self._quantity > 1:

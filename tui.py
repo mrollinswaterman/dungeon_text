@@ -10,6 +10,10 @@ import events
 import global_commands
 import global_variables
 
+top = len(f"What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n")
+
+print(f"DIVIDE: {top/4000}")
+
 def link_start(enemy:mob.Mob) -> None:
     global_variables.RUNNING = True
 
@@ -177,7 +181,7 @@ def begin():
         global_variables.RUNNING = True
         link_start(STARTING_ENEMY)
     elif command == "t":
-        global_variables.SHOPKEEP.print_invevtory()
+        narrator.exit_the_dungeon()
     elif command == "n":
         sys.exit()
 

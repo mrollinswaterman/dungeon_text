@@ -49,7 +49,7 @@ def exit_the_dungeon():
 
 def buy_something():
     global_variables.SHOPKEEP.print_invevtory()
-    global_commands.type_text(" What would you like to buy? Enter an item's number to purchase it.\n")
+    global_commands.type_text(" Enter an item's number to purchase it.\n")
     command = input(">")
     stock_num = int(command)
     print("")
@@ -58,8 +58,6 @@ def buy_something():
                                        global_variables.PLAYER)
         shopkeep_options()
     else:
-        print(stock_num)
-        print(global_variables.SHOPKEEP.inventory[stock_num])
         shopkeep_options()
 
 def leave_the_shop():
@@ -73,7 +71,7 @@ def shopkeep_options():
     global_commands.type_text(" The Shopkeep eyes you wearily.\n")
     print("-"*110+'\n')
     global_commands.type_text(" What would you like to do?\n")
-    print(" Buy Something - (b) | Leave - (l) | Sell something - (s)\n")
+    print(" Buy Something - (b) | Leave - (l) | Sell something - (s) | Inventory - (i)\n")
 
     command = input(">")
     if command.lower() == "b":
@@ -81,6 +79,8 @@ def shopkeep_options():
         buy_something()
     elif command.lower() == "l":
         leave_the_shop()
+    elif command.lower() == "i":
+        check_player_inventory(shopkeep_options)
     elif command.lower() == "exit":
         sys.exit()
     else: 
@@ -93,14 +93,19 @@ def rest():
     print("-"*110+'\n')
     menu_options()
 
-def check_player_inventory():
+def check_player_inventory(next):
+    print('')
     global_variables.PLAYER.print_inventory()
-    global_commands.type_text(" Enter an item's number to equip it.\n")
+    global_commands.type_list(" Enter an item's number to equip it OR Go Back - (b)\n")
     command = input(">")
-    item = global_variables.PLAYER.inventory[int(command)-1]
-    if global_variables.PLAYER.equip(item) is True:
-        global_variables.PLAYER.equip(item)
-    menu_options()
+    print('')
+    if command.lower() == "b":
+        next()
+    else:
+        item = global_variables.PLAYER.inventory[int(command)-1]
+        if global_variables.PLAYER.equip(item) is True:
+            global_variables.PLAYER.equip(item)
+        menu_options()
 
 def menu_options():
     global_commands.type_text(" What would you like to do?\n")
@@ -114,7 +119,7 @@ def menu_options():
     elif command.lower() == "v":
         shopkeep_options()
     elif command.lower() == "i":
-        check_player_inventory()
+        check_player_inventory(menu_options)
     elif command.lower() == "exit":
         sys.exit()
     else:

@@ -175,13 +175,15 @@ class Player():
         return self._stats["evasion"]
     @property
     def carrying_capacity(self) -> int:
-        return 10 + self.bonus(self.str) + self.bonus(self.con)
+        return int(5.5 * self._stats["str"])
     @property
     def current_weight(self) -> int:
         total_weight = 0
         for entry in self._inventory:
             held_item:items.Item = entry
             total_weight += held_item.weight
+        for item in self._equipped:
+            total_weight += self._equipped[item].weight
         return total_weight
     @property
     def gold(self):
@@ -392,12 +394,13 @@ class Player():
         """
         Picks up an item if the player has inventory space for it
         """
-        if self.current_weight < self.carrying_capacity:
+        if self.current_weight <= self.carrying_capacity:
             if self.has_item(item) is True and item.is_consumable is True:
                 index = self.find_consumable_by_id(item)
                 held_item:items.Consumable = self._inventory[index]
                 held_item.increase_quantity(num)
-                return True
+                print(item.pickup_message)
+                return None
             self._inventory.append(item)
             print(item.pickup_message)
             return True
@@ -419,7 +422,7 @@ class Player():
         """
         if item.type in self._equipped:
             if self._equipped[item.type] is not None:
-                self.pick_up(self._equipped[item.type])
+                self._inventory.append(self._equipped[item.type])
             self._equipped[item.type] = item
             if item.type == "Armor":
                 self.equip_armor(item)
@@ -449,6 +452,9 @@ class Player():
             self._stats["evasion"] = 12 + BONUS[self._stats["dex"]]
 
         #self._equipped["Armor"] = armor
+            
+    def can_carry(self, item:items.Item) -> bool:
+        return self.current_weight + item.weight <= self.carrying_capacity
 
     def has_item(self, item: items.Item) -> bool:
         """
@@ -478,6 +484,8 @@ class Player():
         """
         for idx, item in enumerate(self._inventory):
             print(f"{idx+1}. {item}")
+
+        print(f"Carrying Capacity: {self.current_weight}/{self.carrying_capacity}\n")
 
     def recieve_reward(self, reward) -> None:
         if isinstance(reward, tuple):

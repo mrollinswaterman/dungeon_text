@@ -9,7 +9,8 @@ GOD_MODE = True
 
 def player_turn_options():
     print("-"*110+'\n')
-    print(f' What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n\n Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n')
+    global_commands.type_text(f" What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n", )
+    print (f"\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n")
 
 
 def attack(enemy: mob.Mob, enemy_turn, end_scene) -> None:

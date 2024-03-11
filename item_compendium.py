@@ -7,6 +7,7 @@ class Health_Potion(items.Consumable):
     def __init__(self, rarity=1, id="Health Potion", quantity=0):
         super().__init__(id, rarity, quantity)
         self._value = 10 * rarity
+        self._unit_weight = 0.5
 
     def use(self, target: player.Player) -> None:
         """
@@ -31,8 +32,8 @@ class Repair_Kit(items.Consumable):
 
     def __init__(self, rarity=2, id="Repair Kit", quantity=0):
         super().__init__(id, rarity, quantity)
-
         self._value = 10 * rarity
+        self._unit_weight = .5
 
     def use(self, target: items.Item) -> None:
         """

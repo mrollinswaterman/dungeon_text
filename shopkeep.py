@@ -86,25 +86,26 @@ class Shopkeep():
 
         Returns True if the sale goes through, False otherwise
         """
-        id_num = 0
-
         if item in self._inventory:
-            id_num = self._inventory.index(item)
-            if buyer.spend_gold(item.value) is True:
-                self._gold += item.value
-                if item.is_consumable and item.quantity >= num:
-                    item.quantity -= num
-                    if item.quantity == 0:
-                        self._inventory.remove(item)
-                self._inventory.remove(item)
-                buyer.pick_up(item, num) 
-                global_commands.type_text(f"The Shopkeep hands you the {item.name}, and happily pockets your gold coins.\n")
-                return True
+            if buyer.can_carry(item) is True:
+                if buyer.spend_gold(item.value) is True:
+                    self._gold += item.value
+                    if item.is_consumable and item.quantity >= num:
+                        item.quantity -= num
+                        if item.quantity == 0:
+                            self._inventory.remove(item)
+                    self._inventory.remove(item)
+                    buyer.pick_up(item, num) 
+                    global_commands.type_text(f" The Shopkeep hands you the {item.name}, and happily pockets your gold.\n")
+                    return True
+                else:
+                    global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")
+                    return False
             else:
-                global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")
+                global_commands.type_text(f" You can't carry the {item.name}.\n")
                 return False
         else:
-            global_commands.type_text(f"The Shopkeep doesn't have any {item.name}s right now. Come back another time.\n")
+            global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.\n")
             return True
         
     def buy(self, item:items.Item, seller:player.Player, num:int=1) -> bool:
@@ -116,7 +117,7 @@ class Shopkeep():
                 self.stock(item)
                 return True
         else:
-            global_commands.type_text("The Shopkeep throws you a questioning glance as you try to sell him thin air.\n")
+            global_commands.type_text(" The Shopkeep throws you a questioning glance as you try to sell him thin air.\n")
             return False
         
     def print_invevtory(self) -> None:
@@ -129,15 +130,16 @@ class Shopkeep():
                 try:
                     item1:items.Item = self._inventory[num]
                     item2:items.Item = self._inventory[num+1]
-                    string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g"+'\t'*3+f"{num+2}. {item2.id} ({item2.stats}): {item2.value}g"
+                    string = (f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs"+'\t'*3+
+                    f"{num+2}. {item2.id} ({item2.stats}): {item2.value}g, {item2.weight} lbs\n")
                     global_commands.type_list(string)
-                    print("")
+                    #print("")
                 except IndexError:
                     try:
                         item1:items.Item = self._inventory[num]
-                        string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g"
+                        string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs\n"
                         global_commands.type_list(string)
-                        print("")
+                        #print("")
                     except IndexError:
                         pass
             else:
