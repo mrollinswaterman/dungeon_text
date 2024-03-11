@@ -71,15 +71,13 @@ class Shopkeep():
     @property
     def stock_size(self) -> int:
         return len(self._inventory)
-    #methods
 
-    def stock(self, item: items.Item, num=1) -> None:
-        self._inventory.append(item)
-        self._stock_size = len(self._inventory)
+    #methods
         
     def set_threat(self, num:int) -> None:
         self._threat = num
 
+    #BUY/SELL
     def sell(self, item:items.Item, buyer:player.Player, num:int=1) -> bool:
         """
         Sells an item to a player if the item is in the Shopkeep's 
@@ -95,8 +93,8 @@ class Shopkeep():
                     if buyer.spend_gold(item.value) is True:
                         self._gold += item.value
                         self._inventory.remove(item)
+                        global_commands.type_text(self.generate_successful_sale_message(item))
                         buyer.pick_up(item, 1) 
-                        global_commands.type_text(f" The Shopkeep hands you the {item.name}, and happily pockets your gold.\n")
                         return True
                     else:
                         global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")
@@ -123,8 +121,8 @@ class Shopkeep():
                 if buyer.spend_gold(buyer_version.total_value) is True:
                     self._gold += buyer_version.total_value
                     my_version.decrease_quantity(quantity)
+                    global_commands.type_text(self.generate_successful_sale_message(buyer_version))
                     buyer_version.set_quantity(1)
-                    global_commands.type_text(f" The Shopkeep hands you the {item.name}s and happily pockets your gold.\n")
                     buyer.pick_up(buyer_version, quantity)
                     return True
                 else:
@@ -136,7 +134,6 @@ class Shopkeep():
         else:
             global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.\n")
             return True
-
         
     def buy(self, item:items.Item, seller:player.Player, num:int=1) -> bool:
         if item.id in seller.inventory:
@@ -150,6 +147,11 @@ class Shopkeep():
             global_commands.type_text(" The Shopkeep throws you a questioning glance as you try to sell him thin air.\n")
             return False
         
+    #INVENTORY/STOCK
+    def stock(self, item: items.Item, num=1) -> None:
+        self._inventory.append(item)
+        self._stock_size = len(self._inventory)
+
     def print_invevtory(self) -> None:
         if len(self._inventory) == 0:
             print("Shop's empty!")
@@ -201,3 +203,14 @@ class Shopkeep():
         for item in self._inventory:
             if item.id == id:
                 return item
+            
+    #NARRATION
+    def generate_successful_sale_message(self, item:items.Item) -> str:
+        message_list = [
+            f" The Shopkeep hands you the {item.name} and happily pockets your gold.\n",
+            f" He takes your coin and slides you the {item.name}.\n",
+            f" Upon seeeing your plump gold pouch, The Shopkeep grunts with approval and gets the {item.name} down for you.\n",
+            f" He nods silently and makes the exchange.\n"
+        ]
+
+        return random.choice(message_list)

@@ -488,9 +488,9 @@ class Player():
         Prints the contents of the player's inventory
         """
         for idx, item in enumerate(self._inventory):
-            print(f"{idx+1}. {item}")
+            print(f" {idx+1}. {item}")
 
-        print(f"Carrying Capacity: {self.current_weight}/{self.carrying_capacity}\n")
+        print(f" Carrying Capacity: {self.current_weight}/{self.carrying_capacity}\n")
 
     def recieve_reward(self, reward) -> None:
         if isinstance(reward, tuple):

@@ -29,8 +29,18 @@ def generate_item_rarity() -> str:
 
 class Item():
 
-    def __init__(self, id, rarity=None):
+    def __init__(self, id:str, rarity=None):
+        """
+        Init function for the base Item class
 
+        id = the item's rarity + item's name
+        rarity = rarity as a string (ie common, uncommon, etc)
+        numerical_rarity = rarity as an integer value, used in calculations
+        name property = the item's name without rarity tag attached
+        (
+            ie. 'Uncommon Sword'[id] vs 'Sword'[name]
+        )
+        """
         self._id = id
         if rarity is None:
             self._rarity = generate_item_rarity()
@@ -295,10 +305,14 @@ class Consumable(Item):
     def set_quantity_related_stats(self, msg: str="") -> None:
         if self._quantity > 1:
             self._pickup_message = f" You picked up {self._quantity} {self.id}s\n"
+            self._id = self._id +"s"
         else:
             self._pickup_message = f" You picked up a {self._id}\n"
+            if self._id[-1] == "s":
+                self._id = self._id.rstrip(self._id[-1])
         self._value = self._unit_value * self._quantity
         self._weight = self._unit_weight * self._quantity
+
 
     def __str__(self) -> str:
         return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}'
