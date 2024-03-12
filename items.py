@@ -146,6 +146,7 @@ class Item():
     def __str__(self) -> str:
         return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n'
 
+
 class Weapon(Item):
 
     def __init__(self, id, rarity=None):
@@ -207,6 +208,7 @@ class Weapon(Item):
     def __str__(self) -> str:
         return (f"""{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n""")
 
+
 class Armor(Item):
 
     def __init__(self, id, weight_class:int="Light", rarity=None):
@@ -259,7 +261,8 @@ class Armor(Item):
     
     def __str__(self) -> str:
         return f'{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
-    
+
+
 class Consumable(Item):
 
     def __init__(self, id:str, rarity="Common",quantity:int=0):
@@ -292,17 +295,17 @@ class Consumable(Item):
 
     def increase_quantity(self, num:int) -> None:
         self._quantity += num
-        self.set_quantity_related_stats()
+        self.update()
 
     def decrease_quantity(self, num:int) -> None:
         self._quantity -= num
-        self.set_quantity_related_stats()
+        self.update()
     
     def set_quantity(self, num:int) -> None:
         self._quantity = num
-        self.set_quantity_related_stats()
+        self.update()
 
-    def set_quantity_related_stats(self, msg: str="") -> None:
+    def update(self) -> None:
         if self._quantity > 1:
             self._pickup_message = f" You picked up {self._quantity} {self.id}s\n"
             self._id = self._id +"s"
@@ -313,9 +316,5 @@ class Consumable(Item):
         self._value = self._unit_value * self._quantity
         self._weight = self._unit_weight * self._quantity
 
-
     def __str__(self) -> str:
         return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}'
-    
-
-

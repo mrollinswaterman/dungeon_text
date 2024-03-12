@@ -15,6 +15,8 @@ import global_variables
 def link_start(enemy:mob.Mob) -> None:
     global_variables.RUNNING = True
 
+    if enemy is None:
+        next_scene()
     #functions
 
     def player_turn():
@@ -88,14 +90,13 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        if random.randrange(0, 100) <= 0: #66% chance of an enemy spawning next
-            next_enemy: mob.Mob = monster_manual.random_mob(global_variables.PLAYER.level) 
-            #^ picks a random mob from the list, wth a min level equal to the player's level
-            next_enemy.set_level(random.randrange(next_enemy.level_range[0], global_variables.PLAYER.threat))
-            #^ sets the enemy's level to a random value between its minimum level and the player's 'threat level'.
+        roll = random.randrange(0, 100)
+        if roll <= 80: #80% chance of an enemy spawning next
+            next_enemy: mob.Mob = monster_manual.spawn_mob(global_variables.PLAYER.level)
             global_variables.RUNNING = False
+            print(next_enemy)
             link_start(next_enemy)
-        else: #remainging 33% chance of an event spawning
+        else: #remainging 20% chance of an event spawning
             next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
             next_event.set_tries(2)
             next_event.set_passed(False)
@@ -145,32 +146,30 @@ def link_start(enemy:mob.Mob) -> None:
     player_turn()
 
     while global_variables.RUNNING is True:
-        if enemy is None:
-            next_scene()
 
-        command = input(">")
+        command = input(">").lower()
 
         #command interpretation
-        if command.lower() == "exit":
+        if command == "exit":
             global_variables.RUNNING = False
             sys.exit()
-        if command.lower() == "a":
+        if command == "a":
             player_commands.attack(enemy, enemy_turn, end_scene)
-        if command.lower() == "hp":
+        if command == "hp":
             player_commands.hp(player_turn)
-        if command.lower() == "i":
+        if command == "i":
             player_commands.inventory(player_turn)
-        if command.lower() == "u":
+        if command == "u":
             player_commands.use_an_item(item_compendium.generate_hp_potions(), enemy_turn, player_turn)
-        if command.lower() == "f":
+        if command == "f":
             global_variables.RUNNING = False
             player_commands.flee(enemy)
             enemy = None
 
 def begin():
-    global_commands.type_text(" Would you like to enter the Dungeon? y/n\n", 0.02)
+    global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    STARTING_ENEMY: mob.Mob = monster_manual.random_mob(global_variables.PLAYER.level)
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob(global_variables.PLAYER.level)
     STARTING_ENEMY.set_level(global_variables.PLAYER.level)
 
     command = input(">").lower()

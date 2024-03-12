@@ -108,7 +108,7 @@ class Player():
 
         #xp/gold/items
         self._xp = 0
-        self._level = 1
+        self._level = 4
         self._gold = 0
         self._inventory = []
         self._status_effects:list[Status_Effect] = []

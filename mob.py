@@ -1,5 +1,6 @@
 import random
 from typing import Union
+import global_variables
 
 class Statblock():
 
@@ -45,8 +46,11 @@ class Statblock():
     def special(self):
         return self._special
     @property
-    def level_range(self) -> tuple[int, int]:
-        return (self._min_level, self._max_level)
+    def min_level(self) -> int:
+        return self._min_level
+    @property
+    def max_level(self) -> int:
+        return self._max_level
     
     #methods
     def set_hp(self, num:int) -> None:
@@ -67,17 +71,16 @@ class Statblock():
         self._dc = dc
     def set_special(self, func) -> None:
         self._special = func
-    def set_min_max(self, rng:tuple[int,int]) -> None:
-        self._min_level = rng[0]
-        self._max_level = rng[1]
+    def set_min_max(self, rang:tuple[int,int]) -> None:
+        self._min_level = rang[0]
+        self._max_level = rang[1]
 
 
 class Mob():
 
-    def __init__(self, level, statblock: Statblock):
+    def __init__(self,statblock: Statblock, level:int = 0):
         self._id = statblock.id
         self._name = self._id
-        self._level = level
         #base stats
         self._statblock = statblock
         #calculated stats
@@ -89,8 +92,14 @@ class Mob():
         #add loot
         self._loot = statblock.loot
         self._special = statblock.special
-        self._min_level = statblock.level_range[0]
-        self._max_level = statblock.level_range[1]
+        self._min_level = statblock.min_level
+        self._max_level = statblock.max_level
+        if level == 0:
+            self._level = random.randrange(statblock.min_level, global_variables.PLAYER.threat)
+        else:
+            self._level = level
+        self.update()
+
         
 
     #properties
@@ -143,7 +152,7 @@ class Mob():
         if roll == 20:
             return 0
         
-        return roll
+        return roll + self._level // 5
     
     def roll_damage(self) -> int:
         """
@@ -208,8 +217,13 @@ class Mob():
         Sets the mobs levels then calculates HP and loot based on level
         """
         self._level = level
-        for _ in range(level-1):
-            self._hp += random.randrange(1, self._statblock.hp) + round(level + 0.1 / 2)
+
+    def update(self):
+        """
+        Updates all relevant stats when a mob's level is changed
+        """
+        for _ in range(self._level-1):
+            self._hp += random.randrange(1, self._statblock.hp) + round(self._level + 0.1 / 2)
 
         self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
         self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)

@@ -18,7 +18,7 @@ boulder_line_false = {
 boulder.add_stat(("str", 10))
 boulder.add_stat(("dex", 15))
 
-boulder.add_text(f' A boulder blocks your way.')
+boulder.add_text(' A boulder blocks your way.')
 boulder.add_message((True, "str", boulder_lines_true["str"]))
 boulder.add_message((True, "dex", boulder_lines_true["dex"]))
 boulder.add_message((False, "str", boulder_line_false["str"]))
@@ -43,7 +43,7 @@ rock_wall_line_false = {
 rock_wall.add_stat(("str", 20))
 rock_wall.add_stat(("dex", 10))
 
-rock_wall.add_text(f' The path abruptly ends in a sheer rock wall.')
+rock_wall.add_text(' The path abruptly ends in a sheer rock wall.')
 rock_wall.add_message((True, "str", rock_wall_lines_true["str"]))
 rock_wall.add_message((True, "dex", rock_wall_lines_true["dex"]))
 rock_wall.add_message((False, "str", rock_wall_line_false["str"]))

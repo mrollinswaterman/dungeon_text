@@ -61,8 +61,7 @@ WEAPONS_DICTIONARY = [
     (("WP"), "Glaive", "1d10,x3"),
     (("WP"), "Greataxe", "1d12,x3"),
     (("WP"), "Scythe", "2d4,x5"),
-    (("WP"), "Halberd", "1d10,x3"),
-    (("WP"), "Lance", "1d8,x2")
+    (("WP"), "Halberd", "1d10,x3")
 ]
 
 ARMOR_DICTIONARY = [

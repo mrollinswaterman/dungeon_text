@@ -241,33 +241,3 @@ class Shopkeep():
         ]
 
         return random.choice(message_list)
-
-
-"""
-def print_invevtory(self) -> None:
-        if len(self._inventory) == 0:
-            print("Shop's empty!")
-
-        print("-"*110 + '\n')
-        for num in range(self.stock_size+1):
-            if num % 2 == 0:
-                try:
-                    item1:items.Item = self._inventory[num]
-                    item2:items.Item = self._inventory[num+1]
-                    string = (f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs"+'\t'*3+
-                    f"{num+2}. {item2.id} ({item2.stats}): {item2.value}g, {item2.weight} lbs\n")
-                    global_commands.type_list(string)
-                    #print("")
-                except IndexError:
-                    try:
-                        item1:items.Item = self._inventory[num]
-                        string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs\n"
-                        global_commands.type_list(string)
-                        #print("")
-                    except IndexError:
-                        pass
-            else:
-                pass
-
-        print("-"*110 + '\n')
-"""
