@@ -38,3 +38,5 @@ SHOPKEEP.restock(BLACKSMITH.items_of_type("AR"), 3)#stock the shop with 3 random
 
 SHOPKEEP.stock(item_compendium.generate_hp_potions("Common", 5))
 SHOPKEEP.stock(item_compendium.generate_repair_kits(5))
+
+SHOPKEEP.print_inventory()

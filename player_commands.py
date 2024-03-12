@@ -8,8 +8,8 @@ import narrator
 GOD_MODE = True
 
 def player_turn_options():
-    print("-"*110+'\n')
-    global_commands.type_text(f" What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n", )
+    print("_"*110+'\n')
+    global_commands.type_text(f" What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n")
     print (f"\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n")
 
 
@@ -33,7 +33,7 @@ def attack(enemy: mob.Mob, enemy_turn, end_scene) -> None:
         attack_roll = global_variables.PLAYER.roll_attack()
         global_variables.PLAYER.spend_ap(1)
     
-    print('\n'+"-" * 110+'\n')
+    print('\n'+"_" * 110+'\n')
     global_commands.type_text(f' You attack the {enemy.id}, rolling a {attack_roll}.\n')
 
     if attack_roll == 0:
@@ -70,7 +70,7 @@ def hp(player_turn) -> None:
     """
     Prints the player's HP then runs the given function
     """
-    print('\n'+"-" * 110+'\n')
+    print('\n'+"_" * 110+'\n')
     print(f' HP: {global_variables.PLAYER.hp}/{global_variables.PLAYER.max_hp}')
     print(" ["+"/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp)+"]\n")
     player_turn()
@@ -79,7 +79,7 @@ def inventory(player_turn) -> None:
     """
     Prints the player's inventory then runs the given function
     """
-    print('\n'+"-" * 110+'\n')
+    print('\n'+"_" * 110+'\n')
     print(f' Gold: {global_variables.PLAYER.gold}\n')
     global_variables.PLAYER.print_inventory()
     player_turn()
@@ -88,7 +88,7 @@ def use_an_item(item: items.Consumable, enemy_turn, player_turn, target=global_v
     """
     Uses an item on the Player, if the player has the item in their inventory
     """
-    print('\n'+"-" * 110+'\n')
+    print('\n'+"_" * 110+'\n')
     if global_variables.PLAYER.has_item(item) is True:#check the player has the item
         index = global_variables.PLAYER.find_consumable_by_id(item)
         held_item:items.Consumable = global_variables.PLAYER.inventory[index]
@@ -135,7 +135,7 @@ def flee(enemy: mob.Mob) -> None:
     Attempts to run away from the current encounter
     """
     print("")
-    print("-" * 110+'\n')
+    print("_" * 110+'\n')
     global_commands.type_text(f" You attempt to flee...\n")
     chase_chance = random.randrange(0, 100)
     if global_variables.PLAYER.hp > global_variables.PLAYER.max_hp * 0.75 and chase_chance <= 10: # above 75% hp, 10% chance enemy chases you

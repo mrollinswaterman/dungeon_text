@@ -7,7 +7,8 @@ def type_list(text:str, speed:int = .03, delay=False) -> None:
     if delay is True:
         time.sleep(.2)
     for word in text:
-        time.sleep(speed)
+        if word != "" and word != " ":
+            time.sleep(speed)
         print(word + " ", end="", flush=True)
     print("")
 

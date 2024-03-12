@@ -43,7 +43,7 @@ def next_scene_options():
         print('\t'*i + ominous)
 
 def level_up_options():
-    print("-"*110 + '\n')
+    print("_"*110 + '\n')
     global_commands.type_text(' You have gained enough XP to level up! Which stat would you like to level up?\n')
     print(' Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n')
 
@@ -53,7 +53,7 @@ def event_options():
     print(" Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n")
 
 def continue_run(next):
-    print("-"*110+"\n")
+    print("_"*110+"\n")
     global_commands.type_text(" Continue? y/n\n")
     command = input(">")
     if command.lower() == "y":
@@ -67,15 +67,15 @@ def continue_run(next):
         continue_run(next)
 
 def exit_the_dungeon():
-    print("-" * 110+'\n')
+    print("_" * 110+'\n')
     global_commands.type_text(random.choice(EXIT_DUNGEON))
-    print("-"*110+'\n')
+    print("_"*110+'\n')
     menu_options()
 
 def buy_something():
     global_commands.type_text(" Enter an item's number to purchase it OR (c) - Cancel Order\n")
     command = input(">")
-    #print("")
+    print("")
 
     if command.lower() == "exit":
         sys.exit()
@@ -94,7 +94,7 @@ def buy_something():
             else:
                 global_commands.type_text(f" Please enter desired quantity:\n")
                 command_2 = input(">")
-                #print("")
+                print("")
                 global_variables.SHOPKEEP.sell(global_variables.SHOPKEEP.inventory[stock_num-1],
                                         global_variables.PLAYER, int(command_2))
             shopkeep_options()
@@ -103,15 +103,15 @@ def buy_something():
             buy_something()
 
 def leave_the_shop():
-    print("-" * 110+'\n')
+    print("_" * 110+'\n')
     global_commands.type_text(" You go on your way.\n")
-    print("-"*110+'\n')
+    print("_"*110+'\n')
     menu_options()
 
 def shopkeep_options():
-    print("-"*110+'\n')
+    print("_"*110+'\n')
     global_commands.type_text(random.choice(ENTER_THE_SHOP))
-    print("-"*110+'\n')
+    print("_"*110+'\n')
     global_commands.type_text(" What would you like to do?\n")
     print(" Buy Something - (b) | Leave - (l) | Sell something - (s) | Inventory - (i)\n")
     command = input(">")
@@ -129,13 +129,14 @@ def shopkeep_options():
         shopkeep_options()
 
 def rest():
-    print("-" * 110+'\n')
+    print("_" * 110+'\n')
     global_commands.type_text(" Plenty of time to rest when you're dead.\n")
-    print("-"*110+'\n')
+    print("_"*110+'\n')
     menu_options()
 
 def check_player_inventory(next):
     print('')
+    print(f" Gold: {global_variables.PLAYER.gold}\n")
     global_variables.PLAYER.print_inventory()
     global_commands.type_list(" Enter an item's number to equip it OR (b) - Go Back\n")
     command = input(">")

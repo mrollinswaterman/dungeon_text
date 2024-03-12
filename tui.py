@@ -10,6 +10,7 @@ import events
 import global_commands
 import global_variables
 
+
 def link_start(enemy:mob.Mob) -> None:
     global_variables.RUNNING = True
 
@@ -31,7 +32,8 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins an encounter
         """
-        global_commands.type_text(f'\n You encounter a Level {enemy.level} {enemy.id}!\n')
+        print("")
+        global_commands.type_text(f" You encounter a Level {enemy.level} {enemy.id}!")
 
     def end_scene():
         global_commands.type_text(f" You killed the {enemy.id}!\n")
@@ -47,7 +49,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
-        print("-" * 110+"\n")
+        print("_" * 110+"\n")
 
         if random.randrange(1,100) > 50 or enemy.statblock.special is None: # 50% chance of attack
             attack = enemy.roll_attack()
@@ -128,7 +130,7 @@ def link_start(enemy:mob.Mob) -> None:
             sys.exit()
         else:
             global_commands.type_text(f"\n Invalid command '{command}', please try again.\n")
-            print("-"* 110 + '\n')
+            print("_"* 110 + '\n')
             run_event(event)
 
     def level_up_player():

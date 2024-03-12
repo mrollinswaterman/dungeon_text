@@ -156,7 +156,7 @@ class Event():
         """
         Prints the start text and associated formatting of the event
         """
-        print("\n" + "-"*110 + "\n")
+        print("\n" + "_"*110 + "\n")
         global_commands.type_text(self.text)
 
     def run(self, stat:str, roll:int) -> str:
@@ -166,7 +166,7 @@ class Event():
         Returns an f-string determined by the stat rolled and whether or not
         the check succeded
         """
-        print("\n"+"-" * 110+'\n')
+        print("\n"+"_" * 110+'\n')
         if self.tries is False:
             raise ValueError("No more tries")
         self._tries -= 1

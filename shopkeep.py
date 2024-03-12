@@ -1,10 +1,37 @@
 #Shopkeep class
-import math, random
+import math, random, time
 from copy import deepcopy
 import items
 import item_compendium
 import player
 import global_commands
+
+def format_shop(string1="", string1_1=""):
+    print("")
+    string1_1 = list(string1_1)
+    string1 = list(string1)
+    string2 = "a"*50+"\t"*2 +"b"*50
+    string2 = list(string2)
+    string3 = ""
+    for idx, char in enumerate(string2):
+        if char == "a":
+            try:
+                string2[idx] = string1[0]
+                string1.pop(0)
+            except IndexError:
+                string2[idx] = " "
+        elif char == "b":
+            try:
+                string2[idx] = string1_1[0]
+                string1_1.pop(0)
+            except IndexError:
+                string2[idx] = " "
+        
+
+    for i in string2:
+        string3 = string3+i
+
+    return string3
 
 class Blacksmith():
     """
@@ -152,32 +179,32 @@ class Shopkeep():
         self._inventory.append(item)
         self._stock_size = len(self._inventory)
 
-    def print_invevtory(self) -> None:
+    def print_inventory(self):
         if len(self._inventory) == 0:
             print("Shop's empty!")
 
-        print("-"*110 + '\n')
+        print("_"*110 + '\n')
         for num in range(self.stock_size+1):
             if num % 2 == 0:
                 try:
                     item1:items.Item = self._inventory[num]
                     item2:items.Item = self._inventory[num+1]
-                    string = (f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs"+'\t'*3+
-                    f"{num+2}. {item2.id} ({item2.stats}): {item2.value}g, {item2.weight} lbs\n")
-                    global_commands.type_list(string)
+                    string1 = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs"
+                    string2 = f"{num+2}. {item2.id} ({item2.stats}): {item2.value}g, {item2.weight} lbs"
+                    global_commands.type_list(format_shop(string1, string2))
                     #print("")
                 except IndexError:
                     try:
                         item1:items.Item = self._inventory[num]
                         string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs\n"
-                        global_commands.type_list(string)
+                        global_commands.type_list(format_shop(string))
                         #print("")
                     except IndexError:
                         pass
             else:
                 pass
 
-        print("-"*110 + '\n')
+        print("_"*110 + '\n')
 
     def restock(self, warehouse, amount) -> None:
         for item in warehouse:
@@ -207,10 +234,40 @@ class Shopkeep():
     #NARRATION
     def generate_successful_sale_message(self, item:items.Item) -> str:
         message_list = [
-            f" The Shopkeep hands you the {item.name} and happily pockets your gold.\n",
-            f" He takes your coin and slides you the {item.name}.\n",
-            f" Upon seeeing your plump gold pouch, The Shopkeep grunts with approval and gets the {item.name} down for you.\n",
-            f" He nods silently and makes the exchange.\n"
+            f" The Shopkeep hands you the {item.name} and happily pockets your gold.",
+            f" He takes your coin and slides you the {item.name}.",
+            f" Upon seeeing your plump gold pouch, The Shopkeep grunts with approval and gets the {item.name} down for you.",
+            f" He nods silently and makes the exchange."
         ]
 
         return random.choice(message_list)
+
+
+"""
+def print_invevtory(self) -> None:
+        if len(self._inventory) == 0:
+            print("Shop's empty!")
+
+        print("-"*110 + '\n')
+        for num in range(self.stock_size+1):
+            if num % 2 == 0:
+                try:
+                    item1:items.Item = self._inventory[num]
+                    item2:items.Item = self._inventory[num+1]
+                    string = (f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs"+'\t'*3+
+                    f"{num+2}. {item2.id} ({item2.stats}): {item2.value}g, {item2.weight} lbs\n")
+                    global_commands.type_list(string)
+                    #print("")
+                except IndexError:
+                    try:
+                        item1:items.Item = self._inventory[num]
+                        string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs\n"
+                        global_commands.type_list(string)
+                        #print("")
+                    except IndexError:
+                        pass
+            else:
+                pass
+
+        print("-"*110 + '\n')
+"""
