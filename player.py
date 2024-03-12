@@ -112,6 +112,7 @@ class Player():
         self._gold = 0
         self._inventory = []
         self._status_effects:list[Status_Effect] = []
+        self._level_up_function = None
         
         #static stats
         self._max_ap = 1 + (self._level // 5)
@@ -181,7 +182,7 @@ class Player():
         total_weight = 0
         for entry in self._inventory:
             held_item:items.Item = entry
-            total_weight += held_item.weight
+            total_weight += held_item.total_weight
         for item in self._equipped:
             total_weight += self._equipped[item].weight
         return total_weight
@@ -252,6 +253,8 @@ class Player():
         self._gold = 0
         self._inventory = []
         #other stuff to be added
+    def set_level_up_function(self, func) -> None:
+        self._level_up_function = func
 
 
     #ROLLS
@@ -324,17 +327,25 @@ class Player():
         """
         Increases player XP by a given amount
         """
-        global_commands.type_text(f" {xp} XP earned.\n")
+        if xp <= 0:
+            return None
+        global_commands.type_text(f" {xp} XP earned.")
         self._xp += xp
+
+        if self.level_up is True:
+            self._level_up_function()
     
-    def gain_gold(self, gold:int) -> None:
+    def gain_gold(self, gold:int, silently:bool=False) -> None:
         """
         Increases player gold by a given amount
         """
-        global_commands.type_text(f" {gold} Gold gained.\n")
+        if gold <= 0:
+            return None
+        if silently is False:
+            global_commands.type_text(f" {gold} Gold gained.\n")
         self._gold += gold
 
-    def spend_gold(self, gold:int) -> None:
+    def spend_gold(self, gold:int) -> bool:
         """
         Reduces player gold by a given amount
 
@@ -390,27 +401,27 @@ class Player():
 
 
     #INVENTORY STUFF
-    def pick_up(self, item: items.Item | items.Consumable, num:int=1) -> bool:
+    def pick_up(self, item: items.Item | items.Consumable, silently:bool = False) -> bool:
         """
         Picks up an item if the player has inventory space for it
         """
+        if item is None:
+            return False
         if self.current_weight <= self.carrying_capacity and self.can_carry(item):
             if self.has_item(item) is True and item.is_consumable is True:
                 index = self.find_consumable_by_id(item)
                 held_item:items.Consumable = self._inventory[index]
-                held_item.increase_quantity(num)
-                print(item.pickup_message)
+                held_item.increase_quantity(item.quantity)
+                if silently is False:
+                    print(item.pickup_message)
                 return True
-            elif item.is_consumable:
-                item.increase_quantity(num)
-                if self.can_carry(item) is False:
-                    global_commands.type_text(" Not enough inventory space\n")
-                    return False
             self._inventory.append(item)
-            print(item.pickup_message)
+            if silently is False:
+                print(item.pickup_message)
             return True
         else:
-            global_commands.type_text(" Not enough inventory space\n")
+            if silently is False:
+                global_commands.type_text(" Not enough inventory space\n")
         
     def drop(self, item: items.Item) -> None:
         """
@@ -435,7 +446,6 @@ class Player():
             if item in self._inventory:
                 self._inventory.remove(item)
             print(f" {item.name} equipped.\n")
-        #self._inventory[weapon.id] = weapon
 
     def equip_armor(self, armor: "items.Armor") -> None:
         """
@@ -492,16 +502,14 @@ class Player():
 
         print(f" Carrying Capacity: {self.current_weight}/{self.carrying_capacity}\n")
 
-    def recieve_reward(self, reward) -> None:
-        if isinstance(reward, tuple):
-            id, num = reward
-            if id == "xp":
-                self.gain_xp(num)
-                return None
-            if id == "gold":
-                self.gain_gold(num)
-                return None
-        self.pick_up(reward)
+    def recieve_reward(self, reward:dict) -> None:
+        for entry in reward:
+            if entry == "gold":
+                self.gain_gold(reward[entry])
+            if entry == "xp":
+                self.gain_xp(reward[entry])
+            if entry == "drop":
+                self.pick_up(reward[entry])
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
     def add_status_effect(self, effect:Status_Effect) -> None:

@@ -1,5 +1,17 @@
 import time
 
+def type_with_lines(text:str, num:int=1, speed:int = 0.03, delay=True) -> None:
+    print("_"*110+"\n")
+    type_text(text, speed, delay)
+    if num > 1:
+        print("_"*110+"\n")
+
+def print_with_lines(text:str, num:int=1) -> None:
+    print("_"*110+"\n")
+    print(text)
+    if num > 1:
+        print("_"*110+"\n")
+
 def type_list(text:str, speed:int = .03, delay=False) -> None:
 
     text = text.split(' ')
@@ -10,8 +22,6 @@ def type_list(text:str, speed:int = .03, delay=False) -> None:
         if word != "" and word != " ":
             time.sleep(speed)
         print(word + " ", end="", flush=True)
-    print("")
-
 
 def type_text(text: str, speed: int = .03, delay=True) -> None:
     """
@@ -22,7 +32,6 @@ def type_text(text: str, speed: int = .03, delay=True) -> None:
     if delay is True:
         time.sleep(.2)
 
-    #print(len(text))
     if len(text) > 30:
         speed = 0.01
     elif len(text) > 20:
@@ -30,7 +39,8 @@ def type_text(text: str, speed: int = .03, delay=True) -> None:
     else: 
         speed = 0.03
         
-    for char in text:
+    for idx, char in enumerate(text):
         time.sleep(speed)
         print(char, end='', flush=True)
-    print("")
+    print("")#newline after typing text
+

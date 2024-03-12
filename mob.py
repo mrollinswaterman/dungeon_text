@@ -9,7 +9,11 @@ class Statblock():
         self._damage = 0
         self._evasion = 0
         self._armor = 0
-        self._loot = (0, 0)
+        self._loot = {
+            "gold": 0,
+            "xp": 0,
+            "drop" : None
+        }
         self._dc = 0
         self._special: None | function = None
         self._min_level = 0
@@ -53,8 +57,12 @@ class Statblock():
         self._evasion = num
     def set_armor(self, num:int) -> None:
         self._armor = num
-    def set_loot(self, loot:tuple[int, int]) -> None:
-        self._loot = loot
+    def set_gold(self, num:int) -> None:
+        self._loot["gold"] = num
+    def set_xp(self, num:int) -> None:
+        self._loot["xp"] = num
+    def set_drop(self, item) -> None:
+        self._loot["drop"] = item
     def set_dc(self, dc: int) -> None:
         self._dc = dc
     def set_special(self, func) -> None:
@@ -79,7 +87,7 @@ class Mob():
         self._armor:int = statblock.armor
         self._dc = statblock.dc
         #add loot
-        self._loot = []
+        self._loot = statblock.loot
         self._special = statblock.special
         self._min_level = statblock.level_range[0]
         self._max_level = statblock.level_range[1]
@@ -165,6 +173,12 @@ class Mob():
         else: 
             return True
         
+    def attack_of_oppurtunity(self, target) -> bool:
+        
+        if self.roll_attack() - 2 >= target.evasion:
+            return True
+        return False
+        
     def special_move(self, source, target):
         """
         Calls the special move function
@@ -181,15 +195,13 @@ class Mob():
         """
         Adds an integer value to the mob's gold reward
         """
-        xp, gold = self._loot
-        self._loot = (xp, gold + num)
+        self._loot["gold"] += num
 
     def add_xp(self, num:int) -> None:
         """
         Adds an integer value to the mob's XP reward
         """
-        xp, gold = self._loot
-        self._loot = (xp + num, gold)
+        self._loot["xp"] += num
 
     def set_level(self, level:int)-> None:
         """
@@ -199,5 +211,5 @@ class Mob():
         for _ in range(level-1):
             self._hp += random.randrange(1, self._statblock.hp) + round(level + 0.1 / 2)
 
-        for item in self._statblock.loot:
-            self._loot.append(item*level // 2)
+        self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
+        self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)

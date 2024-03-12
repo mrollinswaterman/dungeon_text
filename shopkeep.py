@@ -136,21 +136,21 @@ class Shopkeep():
     def sell_consumable(self, item: items.Consumable, buyer: player.Player, quantity) -> bool:
         if item in self._inventory and item.quantity > 0:
             buyer_version = deepcopy(item)
-            buyer_version.set_quantity(1)
+            #buyer_version.set_quantity(1)
             my_version:items.Consumable = self.find_item(item.id)
             if quantity <= my_version.quantity:
                pass
             else:
                 global_commands.type_text(f"The Shopkeep does not have {quantity} {item.name}s. He'll sell you all that he has.\n")
                 quantity = my_version.quantity
-            buyer_version.set_quantity(quantity)
+            #buyer_version.set_quantity(quantity)
             if buyer.can_carry(buyer_version) is True:
                 if buyer.spend_gold(buyer_version.total_value) is True:
                     self._gold += buyer_version.total_value
                     my_version.decrease_quantity(quantity)
                     global_commands.type_text(self.generate_successful_sale_message(buyer_version))
-                    buyer_version.set_quantity(1)
-                    buyer.pick_up(buyer_version, quantity)
+                    #buyer_version.set_quantity(1)
+                    buyer.pick_up(buyer_version)
                     return True
                 else:
                     global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")

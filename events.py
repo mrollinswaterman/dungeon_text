@@ -6,42 +6,42 @@ import global_commands
 
 FAILURE_LINES = {
     "str": [
-        " You're going to need more than brawn to solve this one.\n",
-        " Your bulging biceps aren't up to this task.\n",
-        " No amount of strength can solve this problem.\n"
+        " You're going to need more than brawn to solve this one.",
+        " Your bulging biceps aren't up to this task.",
+        " No amount of strength can solve this problem."
     ],
 
     "dex": [
-        " You do a sick spin move. Nothing happens.\n",
-        " You can't think of a way to come at this problem using your dexterity.\n",
-        " This will require substancially more than the ability to twist yourself into a pretzel.\n",
-        " No way to wriggle your way out of this.\n"
+        " You do a sick spin move. Nothing happens.",
+        " You can't think of a way to come at this problem using your dexterity.",
+        " This will require substancially more than the ability to twist yourself into a pretzel.",
+        " No way to wriggle your way out of this."
     ],
 
     "con": [
-        " After the 5th consecutive minute of holding your breath, you give up.\n",
-        " Being stout of heart won't do you much good here.\n",
-        " Your above average pain tolerance will get you nowhere with this.\n"
+        " After the 5th consecutive minute of holding your breath, you give up.",
+        " Being stout of heart won't do you much good here.",
+        " Your above average pain tolerance will get you nowhere with this."
     ],
 
     "int": [
-       " You can't think your way out of this one.\n",
-       " You deduce you should try a different approach.\n",
-       " Maybe those kids that picked on you in school had a point...\n"
+       " You can't think your way out of this one.",
+       " You deduce you should try a different approach.",
+       " Maybe those kids that picked on you in school had a point..."
     ],
 
     "wis": [
-        " You pause for a while to ponder the forms. The forms are throughly unhelpful.\n",
-        " You sense that your Wisdom is futile here.\n",
-        " Your intution tells you to try something else.\n",
+        " You pause for a while to ponder the forms. The forms are throughly unhelpful.",
+        " You sense that your Wisdom is useless here.",
+        " Your intution tells you to try something else.",
         " The ability to keep a cool head is useful, but this will require a different skill set"
     ],
 
     "cha": [
-        " You tell a mildly amusing Knock, Knock joke. Nobody laughs.\n",
-        " Your silver tongue is of no use.\n",
-        " Now is not the time for smooth talking!\n",
-        " Good looks can only get you so far...\n"
+        " You tell a mildly amusing Knock, Knock joke. Nobody laughs.",
+        " Your silver tongue is of no use.",
+        " Now is not the time for smooth talking",
+        " Good looks can only get you so far..."
     ]
 }
 
@@ -56,7 +56,11 @@ class Event():
         self._messages: dict[bool, list[tuple[str, list[str]]]] = {True: [], False: []}
         self._passed = False
         self._end_message = ""
-        self._reward = None
+        self._loot = {
+            "xp": 0,
+            "gold": 0,
+            "drop": None
+        }
 
     #properties
     @property
@@ -75,8 +79,8 @@ class Event():
     def end_message(self) -> str:
         return self._end_message
     @property
-    def reward(self):
-        return self._reward
+    def loot(self):
+        return self._loot
 
     #methods
 
@@ -119,12 +123,22 @@ class Event():
         Sets the number of tries the event has to a given integer
         """
         self._tries = tries
-    
-    def set_reward(self, reward) -> None:
+
+    def set_loot(self, loot) -> None:
         """
-        Adds reward to the event
+        Adds loot to the event
         """
-        self._reward = reward
+        for idx, entry in enumerate(self._loot):
+            self._loot[entry] = loot[idx]
+
+    def set_gold(self, num:int) -> None:
+        self._loot["gold"] = num
+
+    def set_xp(self, num:int) -> None:
+        self._loot["xp"] = num
+
+    def set_drop(self, item) -> None:
+        self._loot["drop"] = item
 
     def set_passed(self, val:bool) -> None:
         self._passed = val
@@ -156,8 +170,7 @@ class Event():
         """
         Prints the start text and associated formatting of the event
         """
-        print("\n" + "_"*110 + "\n")
-        global_commands.type_text(self.text)
+        global_commands.type_with_lines(self.text)
 
     def run(self, stat:str, roll:int) -> str:
         """
@@ -166,7 +179,6 @@ class Event():
         Returns an f-string determined by the stat rolled and whether or not
         the check succeded
         """
-        print("\n"+"_" * 110+'\n')
         if self.tries is False:
             raise ValueError("No more tries")
         self._tries -= 1
@@ -174,31 +186,24 @@ class Event():
             for item in self._stats:
                 code, check = item
                 if code == stat and roll >= check:
-                    for msg in self._messages[True]:
+                    for msg in self._messages[True]: #SUCCESS
                         if msg[0] == stat:
                             self._passed = True
-                            if self._reward is None:
-                                self.set_reward(("xp", int(check / 1.5)))
-                            global_commands.type_text(f"{random.choice(msg[1])}")
-                            #print('-'*110+'\n')
+                            if self._loot["xp"] <= 0:
+                                self.set_xp(int(check / 1.5))
+                            global_commands.type_text(random.choice(msg[1])+"\n")
                             return True
-            for msg in self._messages[False]:
+            for msg in self._messages[False]: #FAILURE
                 if msg[0] == stat:
-                    global_commands.type_text(f"{random.choice(msg[1])}")
-                    if self.tries is False:
-                       # print('-'*110+'\n')
-                        pass
-                    return False
+                    global_commands.type_text(random.choice(msg[1]))
+                    return self.tries
 
-        global_commands.type_text(f"{random.choice(FAILURE_LINES[stat])}")
-        if self.tries is False:
-            #print('-'*110+'\n')
-            pass
-        return False
+        global_commands.type_text(random.choice(FAILURE_LINES[stat])) #WRONG STAT
+        return self.tries
 
     def end(self) -> None:
         """
         Prints the end text and associated formatting of the event
         """
+        print("")#newline b4 end
         global_commands.type_text(self.end_message)
-        print('-'*110+'\n')

@@ -1,6 +1,7 @@
 #item compendium
 import items
 import player
+import global_commands
 
 class Health_Potion(items.Consumable):
 
@@ -8,12 +9,13 @@ class Health_Potion(items.Consumable):
         super().__init__(id, rarity, quantity)
         self._unit_weight = 0.5
 
-    def use(self, target: player.Player) -> None:
+    def use(self, target: player.Player) -> bool:
         """
         Heals the target for a given amount
         """
         if target.hp < target.max_hp:
             self.decrease_quantity(1)
+            global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
             target.heal(self._strength)
             return True
         return False
@@ -31,13 +33,14 @@ class Repair_Kit(items.Consumable):
         self._unit_value = 10 * self._numerical_rarity
         self._unit_weight = .5
 
-    def use(self, target: items.Item) -> None:
+    def use(self, target: items.Item) -> bool:
         """
         Repairs the item to full durability
         """
         if target.durability[0] < target._durability[1]:#ie item is damaged
-            target.repair()
             self.decrease_quantity(1)
+            global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
+            target.repair()
             return True
         return False
 

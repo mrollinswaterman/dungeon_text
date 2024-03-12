@@ -14,14 +14,14 @@ SCENE_CHANGE = [
 ]
 
 EXIT_DUNGEON = [
-    " You climb out of the darkness.\n",
-    " You take your first breath of fresh in what feels like an eternity.\n",
-    " Finally, out...\n",
-    " The soft moonlight bathes the world in a gentle glow.\n",
-    " The sky above you seems too real to touch. You barely remember what it looked like...\n",
-    " As you breathe a sigh of relief, you can't help but wonder if you ever even made it out...\n",
-    " The openess of the Overworld is a stark contrast to the confines of the Dungeon.\n",
-    " As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes.\n"
+    " You climb out of the darkness.",
+    " You take your first breath of fresh in what feels like an eternity.",
+    " Finally, out...",
+    " The soft moonlight bathes the world in a gentle glow.",
+    " The sky above you seems too real to touch. You barely remember what it looked like...",
+    " As you breathe a sigh of relief, you can't help but wonder if you'll make it out the next time...",
+    " The openess of the Overworld is a \n\n stark contrast to the confines of the Dungeon.",
+    " As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes."
 ]
 
 ENTER_THE_SHOP = [
@@ -43,39 +43,35 @@ def next_scene_options():
         print('\t'*i + ominous)
 
 def level_up_options():
-    print("_"*110 + '\n')
-    global_commands.type_text(' You have gained enough XP to level up! Which stat would you like to level up?\n')
+    global_commands.type_with_lines(' You have gained enough XP to level up! Which stat would you like to level up?\n')
     print(' Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n')
 
 def event_options():
-    print('-'*110+'\n')
-    print(" Which stat would you like to roll?\n")
+    global_commands.type_with_lines(" Which stat would you like to roll?\n")
     print(" Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n")
 
 def continue_run(next):
-    print("_"*110+"\n")
-    global_commands.type_text(" Continue? y/n\n")
+    global_commands.type_with_lines(" Continue? y/n\n")
     command = input(">")
+    print("")#newline after cmd prompt
     if command.lower() == "y":
-        print("")
         next()
     elif command.lower() == "n":
-        print("")
         exit_the_dungeon()
+    elif command.lower() == "exit":
+        sys.exit()
     else:
-        global_commands.type_text("\n Invalid command. Please try again.\n")
+        global_commands.type_text(" Invalid command. Please try again.\n")
         continue_run(next)
 
 def exit_the_dungeon():
-    print("_" * 110+'\n')
-    global_commands.type_text(random.choice(EXIT_DUNGEON))
-    print("_"*110+'\n')
+    global_commands.type_with_lines(EXIT_DUNGEON[6], 2)
     menu_options()
 
 def buy_something():
     global_commands.type_text(" Enter an item's number to purchase it OR (c) - Cancel Order\n")
     command = input(">")
-    print("")
+    print("")#newline after cmd prompt
 
     if command.lower() == "exit":
         sys.exit()
@@ -94,7 +90,7 @@ def buy_something():
             else:
                 global_commands.type_text(f" Please enter desired quantity:\n")
                 command_2 = input(">")
-                print("")
+                print("")#newline after... you get the idea
                 global_variables.SHOPKEEP.sell(global_variables.SHOPKEEP.inventory[stock_num-1],
                                         global_variables.PLAYER, int(command_2))
             shopkeep_options()
@@ -103,20 +99,16 @@ def buy_something():
             buy_something()
 
 def leave_the_shop():
-    print("_" * 110+'\n')
-    global_commands.type_text(" You go on your way.\n")
-    print("_"*110+'\n')
+    global_commands.type_with_lines(" You go on your way.\n", 2)
     menu_options()
 
 def shopkeep_options():
-    print("_"*110+'\n')
-    global_commands.type_text(random.choice(ENTER_THE_SHOP))
-    print("_"*110+'\n')
+    global_commands.type_with_lines(random.choice(ENTER_THE_SHOP), 2)
     global_commands.type_text(" What would you like to do?\n")
     print(" Buy Something - (b) | Leave - (l) | Sell something - (s) | Inventory - (i)\n")
     command = input(">")
     if command.lower() == "b":
-        global_variables.SHOPKEEP.print_invevtory()
+        global_variables.SHOPKEEP.print_inventory()
         buy_something()
     elif command.lower() == "l":
         leave_the_shop()
@@ -160,7 +152,7 @@ def menu_options():
     global_commands.type_text(" What would you like to do?\n")
     print(" Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v) | Inventory - (i) \n")
     command = input(">")
-    print('')
+    print("")#newline after cmd prompt
     if command.lower() == "e":
         global_variables.START_CMD = True
     elif command.lower() == "r":

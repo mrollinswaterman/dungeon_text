@@ -19,10 +19,12 @@ long_sword.set_crit_multiplier(2)
 leather_armor = items.Armor("Leather Armor", "Light", "Common")
 leather_armor.set_armor_value(2)
 
+print("")#newline for formatting
 PLAYER.equip(leather_armor)
 PLAYER.equip(long_sword)
 
-PLAYER.gain_gold(300)
+PLAYER.gain_gold(300, True)
+PLAYER.pick_up(item_compendium.generate_hp_potions("Common", 5))
 
 SHOPKEEP = shopkeep.Shopkeep()
 SHOPKEEP.set_threat(PLAYER.threat)
@@ -38,5 +40,3 @@ SHOPKEEP.restock(BLACKSMITH.items_of_type("AR"), 3)#stock the shop with 3 random
 
 SHOPKEEP.stock(item_compendium.generate_hp_potions("Common", 5))
 SHOPKEEP.stock(item_compendium.generate_repair_kits(5))
-
-SHOPKEEP.print_inventory()
