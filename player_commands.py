@@ -5,7 +5,7 @@ import mob
 import items
 import narrator
 
-GOD_MODE = False
+GOD_MODE = True
 
 def player_turn_options():
     global_commands.type_with_lines(f" What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n")
