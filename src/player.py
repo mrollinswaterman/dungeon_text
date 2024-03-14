@@ -357,7 +357,7 @@ class Player():
         if gold > self.gold:   
             return False
         self._gold -= gold
-        print(f" {gold} gold spent. {self._gold} gold remaining.\n")
+        #print(f" {gold} gold spent. {self._gold} gold remaining.\n")
         return True
 
     def lose_gold(self, amount:int) -> None:
@@ -435,7 +435,7 @@ class Player():
         else:
             raise ValueError("Can't drop an item you don't have.\n")
 
-    def equip(self, item: "items.Item", silently=False) ->  None:
+    def equip(self, item: "items.Item", silently=False) -> bool:
         """
         Equips the player with a given weapon
         """
@@ -445,11 +445,13 @@ class Player():
             self._equipped[item.type] = item
             if item.type == "Armor":
                 self.equip_armor(item)
-
+                return True
             if item in self._inventory:
                 self._inventory.remove(item)
             if silently is False:
-                print(f" {item.name} equipped.\n")
+                print(f" {item.name} equipped.")
+            return True
+        return False
 
     def equip_armor(self, armor: "items.Armor") -> None:
         """
@@ -504,7 +506,7 @@ class Player():
         for idx, item in enumerate(self._inventory):
             print(f" {idx+1}. {item}")
 
-        print(f" Carrying Capacity: {self.current_weight}/{self.carrying_capacity}\n")
+        print(f"Carrying Capacity: {self.current_weight}/{self.carrying_capacity}")
 
     def recieve_reward(self, reward:dict) -> None:
         for entry in reward:
