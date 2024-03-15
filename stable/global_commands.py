@@ -1,9 +1,25 @@
 import time
 import random
+import global_variables
+
+
+def generate_item_rarity() -> str:
+    """
+    Generates item rarity based on player level
+    """
+    if probability(10+global_variables.PLAYER.level):
+        return "Epic"
+    
+    if probability(15+global_variables.PLAYER.level * 1.25):
+        return "Rare"
+    
+    if probability(33+global_variables.PLAYER.level // 2):
+        return "Uncommon"
+    
+    return "Common"
 
 def probability(chance):
     return random.random() < (chance / 100)
-
 
 def type_with_lines(text:str, num:int=1, speed:int = 0.03, delay=True) -> None:
     print("_"*110+"\n")

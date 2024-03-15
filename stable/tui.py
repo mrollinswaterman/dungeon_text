@@ -1,89 +1,19 @@
-import sys
-import random
-import mob
-import monster_manual
-import narrator
-import player_commands
+import sys, random
+import mob, monster_manual
+import narrator, player_commands, enemy_commands
 import item_compendium
-import dms_guide
-import events
-import global_commands
-import global_variables
+import dms_guide, events
+import global_commands, global_variables
+
+PLAYER = global_variables.PLAYER
 
 #notes on formatting
 
 def link_start(enemy:mob.Mob) -> None:
     global_variables.RUNNING = True
 
-    if enemy is None:
-        next_scene()
-    #functions
-
-    def player_turn():
-        """
-        Begins the Player turn
-        """
-        global_variables.PLAYER.update()
-        player_commands.player_turn_options()
-
-    def player_death():
-        #some text probably too
-        global_variables.RUNNING = False
-        sys.exit()
- 
-    def begin_encounter():
-        """
-        Begins an encounter
-        """
-        global_commands.type_text(f" You encounter a Level {enemy.level} {enemy.id.upper()}!")
-
-    def end_scene():
-        global_commands.type_text(f" You killed the {enemy.id}!\n")
-        global_variables.PLAYER.recieve_reward(enemy.loot)
-        global_variables.PLAYER.reset_ap()
-        narrator.continue_run(next_scene)
-
-    def enemy_turn():
-        """
-        Begins the enemy turn
-        """
-        if random.randrange(1,100) > 50 or enemy.statblock.special is None: # 50% chance of attack
-            attack = enemy.roll_attack()
-            global_commands.type_with_lines(f" The {enemy.id} attacks you, rolling a {attack}\n")
-            if attack == 0:
-                global_commands.type_text(f" A critical hit! Uh oh.\n")
-                taken = global_variables.PLAYER.take_damage(enemy.roll_damage() * 2)
-                global_commands.type_text(f" The {enemy.id} hit you for {taken} damage!\n")
-                if global_variables.PLAYER.dead is False:
-                    player_turn()
-                else:
-                    player_death()
-            elif attack == 1:
-                global_commands.type_text(f" It critically failed!\n")
-                if enemy.fumble_table() is True:
-                    taken = enemy.take_damage(enemy.roll_damage())
-                    global_commands.type_text(f" The {enemy.id} hit itself for {taken} damage!\n")
-                else:
-                    global_commands.type_text(f" It missed.\n")
-
-                if enemy.dead is False:
-                    player_turn()
-                else:
-                    end_scene()
-            else: 
-                if attack >= global_variables.PLAYER.evasion:
-                    taken = global_variables.PLAYER.take_damage(enemy.roll_damage())
-                    global_commands.type_text(f" The {enemy.id} hit you for {taken} damage.\n")
-                    if global_variables.PLAYER.dead is False:
-                        player_turn()
-                    if global_variables.PLAYER.dead is True:
-                        player_death()
-                else:
-                    global_commands.type_text(f" The {enemy.id} missed.\n")
-                    player_turn()
-        else:# ...aaaaand 50% chance of performing a special move
-            enemy.special_move(enemy, global_variables.PLAYER)
-            player_turn()
+    enemy_commands.ENEMY = enemy
+    player_commands.ENEMY = enemy
 
     def next_scene():
         """
@@ -92,9 +22,8 @@ def link_start(enemy:mob.Mob) -> None:
         narrator.next_scene_options()
         roll = random.randrange(0, 100)
         if roll <= 80: #80% chance of an enemy spawning next
-            next_enemy: mob.Mob = monster_manual.spawn_mob(global_variables.PLAYER.level)
+            next_enemy: mob.Mob = monster_manual.spawn_mob(PLAYER.level)
             global_variables.RUNNING = False
-            print(next_enemy)
             link_start(next_enemy)
         else: #remainging 20% chance of an event spawning
             next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
@@ -104,16 +33,69 @@ def link_start(enemy:mob.Mob) -> None:
             next_event.start()#prints event start text
             run_event(next_event)
 
+    if enemy is None:
+        next_scene()
+
+    #functions
+    def begin_encounter():
+        """
+        Begins an encounter
+        """
+        global_commands.type_text(f" You encounter a Level {enemy.level} {enemy.id.upper()}!")
+
+    def player_turn():
+        """
+        Begins the Player turn
+        """
+        PLAYER.update()
+        player_commands.player_turn_options()
+
+    def player_death():
+        #some text probably too
+        global_variables.RUNNING = False
+        sys.exit()
+
+    def enemy_turn():
+        """
+        Begins the enemy turn
+        """
+        if enemy.fleeing:
+            enemy_commands.enemy_flee_attempt()
+        if enemy.special.conditions is True:
+            if global_commands.probability(75) is True:
+                if enemy.special.run() is True:
+                    enemy_commands.run_enemy_next()
+
+                else:
+                    enemy_commands.enemy_attack()
+            else:
+                enemy_commands.enemy_attack()
+        else:
+            if global_commands.probability(25) is True:
+                if enemy.special.run() is True:
+                    enemy_commands.run_enemy_next()
+
+                else:
+                    enemy_commands.enemy_attack()
+            else:
+                enemy_commands.enemy_attack()
+
+    def end_scene():
+        global_commands.type_text(f" You killed the {enemy.id}!\n")
+        PLAYER.recieve_reward(enemy.loot)
+        PLAYER.reset_ap()
+        narrator.continue_run(next_scene)
+
     def run_event(event: events.Event):
         narrator.event_options()
         command = input(">")
         print("")#newline after cmd prompt
         if command.lower() in events.FAILURE_LINES:
-            event.run(command, global_variables.PLAYER.roll_a_check(command))
+            event.run(command, PLAYER.roll_a_check(command))
             if event.passed is True:# if passed, reset event tries and next_scene()
                 event.set_tries(2)
                 event.set_passed(False)
-                global_variables.PLAYER.recieve_reward(event.loot)
+                PLAYER.recieve_reward(event.loot)
                 narrator.continue_run(next_scene)
             elif event.tries is True:# if not passed yet, and still tries left, run it again
                 run_event(event)
@@ -131,15 +113,28 @@ def link_start(enemy:mob.Mob) -> None:
         narrator.level_up_options()
         command = input(">")
         print("")#newline after cmd prompt
-        global_variables.PLAYER.spend_xp(command)
-        global_commands.type_text(f" Your {command} increased by 1. You are now Level {global_variables.PLAYER.level}")
-        global_variables.SHOPKEEP.set_threat(global_variables.PLAYER.threat)#make sure shopkeep's threat changes
-        if global_variables.PLAYER.level_up is True:
+        PLAYER.spend_xp(command)
+        global_commands.type_text(f" Your {command} increased by 1. You are now Level {PLAYER.level}")
+        global_variables.SHOPKEEP.set_player_level(PLAYER.level)#make sure shopkeep's threat changes
+        if PLAYER.level_up is True:
             level_up_player()
         else:
             narrator.continue_run(next_scene)
+    PLAYER.set_level_up_function(level_up_player)
 
-    global_variables.PLAYER.set_level_up_function(level_up_player)
+
+    #Set constants for command files
+    enemy_commands.PLAYER_TURN = player_turn
+    player_commands.PLAYER_TURN = player_turn
+
+    enemy_commands.PLAYER_DEATH = player_death
+    player_commands.PLAYER_DEATH = player_death
+
+    enemy_commands.END_SCENE = end_scene
+    player_commands.END_SCENE = end_scene
+
+    enemy_commands.ENEMY_TURN = enemy_turn
+    player_commands.ENEMY_TURN = enemy_turn
 
     #starting print statements
     begin_encounter()
@@ -154,30 +149,34 @@ def link_start(enemy:mob.Mob) -> None:
             global_variables.RUNNING = False
             sys.exit()
         if command == "a":
-            player_commands.attack(enemy, enemy_turn, end_scene)
+            player_commands.attack()
         if command == "hp":
-            player_commands.hp(player_turn)
+            player_commands.hp()
         if command == "i":
-            player_commands.inventory(player_turn)
+            player_commands.inventory()
         if command == "u":
-            player_commands.use_an_item(item_compendium.generate_hp_potions(), enemy_turn, player_turn)
+            player_commands.use_an_item(item_compendium.generate_hp_potions())
         if command == "f":
             global_variables.RUNNING = False
-            player_commands.flee(enemy)
+            player_commands.flee()
             enemy = None
 
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob(global_variables.PLAYER.level)
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob(PLAYER.level)
+    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
+
     if STARTING_ENEMY is None:
-        raise Exception ("enemy is None")
-    STARTING_ENEMY.set_level(global_variables.PLAYER.level)
+        print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
+        STARTING_ENEMY = mob.Mob(monster_manual.mobs[0])
+
+    STARTING_ENEMY.set_level(PLAYER.level)
 
     command = input(">").lower()
     print("")#newline after command prompt
     if command == "y":
-        global_variables.RUNNING = True
+        global_variables.RUNNING = True#
         link_start(STARTING_ENEMY)
     elif command == "t":
         narrator.exit_the_dungeon()
@@ -186,4 +185,5 @@ def begin():
 
 while global_variables.START_CMD is True:
     global_variables.START_CMD = False
+    print("")
     begin()

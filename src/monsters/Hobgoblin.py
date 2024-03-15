@@ -1,8 +1,7 @@
 #Hobgoblin mob file
 import random
 import mob, player, global_commands
-
-print("GOBLIN DEEZ NTS")
+import global_variables
 
 stats = mob.Statblock("Hobgoblin")
 
@@ -38,7 +37,8 @@ def conditions(target: player.Player) -> bool:
     return False
 
 stats.set_special(special)
-stats.special.set_conditions(conditions, True)
+stats.special.set_target(global_variables.PLAYER)
+stats.special.set_conditions(conditions, global_variables.PLAYER)
 
 
 

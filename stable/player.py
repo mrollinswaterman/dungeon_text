@@ -47,6 +47,7 @@ class Status_Effect():
         self._change = "increased"
         if self._power < 0:
             self._change = "decreased"
+        self._active = True
 
     #properties
     @property
@@ -70,16 +71,24 @@ class Status_Effect():
     @property
     def message(self):
         return self._message
+    @property
+    def active(self):
+        return self._active
     
     #methods
     def update(self) -> None:
         self._duration -= 1
+        if self._duration <= 0:
+            self._active = False
+
     def set_power(self, num:int) -> None:
         self._power = num
         if self._power < 0:
             self._change = "decreased"
+
     def set_duration(self, num:int) -> None:
         self._duration = num
+
     def set_message(self, msg:str) -> None:
         self._message = msg
 
@@ -256,6 +265,9 @@ class Player():
     def set_level_up_function(self, func) -> None:
         self._level_up_function = func
 
+    def set_level(self, num:int) -> None:
+        self._level = num
+
 
     #ROLLS
     def roll_attack(self) -> int:
@@ -354,7 +366,7 @@ class Player():
         if gold > self.gold:   
             return False
         self._gold -= gold
-        print(f" {gold} gold spent. {self._gold} gold remaining.\n")
+        #print(f" {gold} gold spent. {self._gold} gold remaining.\n")
         return True
 
     def lose_gold(self, amount:int) -> None:
@@ -432,7 +444,7 @@ class Player():
         else:
             raise ValueError("Can't drop an item you don't have.\n")
 
-    def equip(self, item: "items.Item", silently=False) ->  None:
+    def equip(self, item: "items.Item", silently=False) -> bool:
         """
         Equips the player with a given weapon
         """
@@ -442,11 +454,13 @@ class Player():
             self._equipped[item.type] = item
             if item.type == "Armor":
                 self.equip_armor(item)
-
+                return True
             if item in self._inventory:
                 self._inventory.remove(item)
             if silently is False:
-                print(f" {item.name} equipped.\n")
+                print(f" {item.name} equipped.")
+            return True
+        return False
 
     def equip_armor(self, armor: "items.Armor") -> None:
         """
@@ -501,7 +515,7 @@ class Player():
         for idx, item in enumerate(self._inventory):
             print(f" {idx+1}. {item}")
 
-        print(f" Carrying Capacity: {self.current_weight}/{self.carrying_capacity}\n")
+        print(f"Carrying Capacity: {self.current_weight}/{self.carrying_capacity}")
 
     def recieve_reward(self, reward:dict) -> None:
         for entry in reward:
@@ -514,6 +528,10 @@ class Player():
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
     def add_status_effect(self, effect:Status_Effect) -> None:
+        """
+        Adds a status effect to the player's status effect list
+        and changes the corresponding stat
+        """
         #for status in self._status_effects:
             #id, src = status.id, status.src
             #if effect.id == id and effect.src == src: --> All this code makes status effects not stack
@@ -523,23 +541,24 @@ class Player():
         self._status_effects.append(effect)
         global_commands.type_text(effect.message)
 
-    def remove_status_effect(self, effect:Status_Effect=None, id:str=""):
+    def remove_status_effect(self, effect:Status_Effect=None, id:str="") -> None:
         if len(id) > 0 and effect is not None:
             for entry in self._status_effects:
                 if entry.id == id:
                     self._stats[effect.stat] += -(effect.power)
                     self._status_effects.remove(effect)
-                    global_commands.type_text(f" The {effect.id}'s effect has gone away.\n")
-                    break
+                    global_commands.type_with_lines(f" The {effect.id}'s effect has worn off.")
+                    return None
         else:
             self._stats[effect.stat] += -(effect.power)
             self._status_effects.remove(effect)
-            global_commands.type_text(f" The {effect.id}'s effect has gone away.\n")
+            global_commands.type_with_lines(f" The {effect.id}'s effect has gone away.")
+            return None
 
     def update(self) -> None:
         for effect in self._status_effects:
             effect.update()
-            if effect.duration <= 0:
+            if effect.active is False:
                 #removes effect
                 self.remove_status_effect(effect)
 

@@ -10,7 +10,7 @@ def format_shop(string1="", string1_1=""):
     print("")#newline after each paired entry
     string1_1 = list(string1_1)
     string1 = list(string1)
-    string2 = "a"*80+"\t"*2 +"b"*80
+    string2 = "a"*60+"\t"*2+"b"*60
     string2 = list(string2)
     string3 = ""
     for idx, char in enumerate(string2):
@@ -29,6 +29,13 @@ def format_shop(string1="", string1_1=""):
     for i in string2:
         string3 = string3+i
     return string3
+
+STATS = {
+    "Common": 0,
+    "Uncommon": 0,
+    "Rare": 0,
+    "Epic": 0
+}
 
 class Blacksmith():
     """
@@ -64,10 +71,8 @@ class Blacksmith():
             tag, id, stats = mold
             item:items.Item = self._tag_map[tag](id)
             item.set_stats(stats)
+            STATS[item.rarity] += 1
             self._storehouse[tag].append(item)
-            #print(id)
-        self._forge_list = []
-        #self.print_storehouse()
 
     def add_to_forge_list(self, items):
         if type(items) == list:
@@ -90,7 +95,7 @@ class Shopkeep():
         self._inventory:list[items.Item] = inventory
         self._stock_size = len(self._inventory)
         self._gold = 100
-        self._threat = 0
+        self._player_level = 0
         self._max_stock = 10
     #properties
     @property
@@ -105,8 +110,8 @@ class Shopkeep():
 
     #methods
         
-    def set_threat(self, num:int) -> None:
-        self._threat = num
+    def set_player_level(self, num:int) -> None:
+        self._player_level = num
 
     #BUY/SELL
     def sell(self, item:items.Item, buyer:player.Player, num:int=1) -> bool:
@@ -125,46 +130,43 @@ class Shopkeep():
                         self._gold += item.value
                         self._inventory.remove(item)
                         global_commands.type_text(self.generate_successful_sale_message(item))
-                        buyer.pick_up(item, 1) 
+                        buyer.pick_up(item) 
                         return True
                     else:
-                        global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")
+                        global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.")
                         return False
                 else:
-                    global_commands.type_text(f" You can't carry the {item.name}.\n")
+                    global_commands.type_text(f" You can't carry the {item.name}.")
                     return False
             else:
-                global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.\n")
+                global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.")
                 return True
         
     def sell_consumable(self, item: items.Consumable, buyer: player.Player, quantity) -> bool:
         if item in self._inventory and item.quantity > 0:
             buyer_version = deepcopy(item)
-            #buyer_version.set_quantity(1)
             my_version:items.Consumable = self.find_item(item.id)
             if quantity <= my_version.quantity:
                pass
             else:
-                global_commands.type_text(f"The Shopkeep does not have {quantity} {item.name}s. He'll sell you all that he has.\n")
+                global_commands.type_text(f" The Shopkeep does not have {quantity} {item.name}s. He'll sell you all that he has.\n")
                 quantity = my_version.quantity
-            #buyer_version.set_quantity(quantity)
             if buyer.can_carry(buyer_version) is True:
                 if buyer.spend_gold(buyer_version.total_value) is True:
                     self._gold += buyer_version.total_value
                     my_version.decrease_quantity(quantity)
                     global_commands.type_text(self.generate_successful_sale_message(buyer_version))
-                    #buyer_version.set_quantity(1)
                     buyer.pick_up(buyer_version)
                     return True
                 else:
-                    global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.\n")
+                    global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.")
                     return False
             else:
-                global_commands.type_text(f" You can't carry {quantity} {item.name}s.\n")
+                global_commands.type_text(f" You can't carry {quantity} {item.name}s.")
                 return False
         else:
-            global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.\n")
-            return True
+            global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.")
+            return False
         
     def buy(self, item:items.Item, seller:player.Player, num:int=1) -> bool:
         if item.id in seller.inventory:
@@ -187,7 +189,7 @@ class Shopkeep():
         if len(self._inventory) == 0:
             print("Shop's empty!")
 
-        global_commands.type_with_lines(" Shop:")
+        global_commands.type_with_lines("Shopkeep's Inventory:")
         for num in range(self.stock_size+1):
             if num % 2 == 0:
                 try:
@@ -201,36 +203,35 @@ class Shopkeep():
                         item1:items.Item = self._inventory[num]
                         string = f" {num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs\n"
                         global_commands.type_list(format_shop(string))
-                        print("")#newline after last
                     except IndexError:
                         pass
             else:
                 pass
+        print("")#newline after last
 
     def restock(self, warehouse:list, amount:int) -> None:
-        #print(f"THREAT {self._threat}")
+        ready_to_stock = set()
         for entry in warehouse:
             item:items.Item = entry
 
             if item.rarity == "Epic":
-                if global_commands.probability(10 + self._threat) is True:
-                    self.stock(item)
+                if global_commands.probability(5) is True:
+                    ready_to_stock.add(item)
             if item.rarity == "Rare":
-                if global_commands.probability(25 + self._threat) is True:
-                    self.stock(item)
+                if global_commands.probability(10) is True:
+                    ready_to_stock.add(item)
             if item.rarity == "Uncommon":
-                if global_commands.probability(40+ self._threat) is True:
-                    self.stock(item)
+                if global_commands.probability(33) is True:
+                    ready_to_stock.add(item)
             if item.rarity == "Common":
-                self.stock(item)
-            warehouse.remove(entry)
-
-            if len(self._inventory) == self._max_stock - amount:
+                if global_commands.probability(60 - 2*self._player_level) is True:
+                    ready_to_stock.add(item)
+            
+            if len(ready_to_stock) == amount:
                 break
 
-        if len(self._inventory) < self._max_stock - amount and len(warehouse) > 0:
-            #print("retrying restock...")
-            self.restock(warehouse, amount)
+        for item in ready_to_stock:
+            self.stock(item)
 
     def find_item(self, id:str) -> items.Item:
         for item in self._inventory:
@@ -249,4 +250,4 @@ class Shopkeep():
             f" He nods silently and makes the exchange."
         ]
 
-        return random.choice(message_list)
+        return random.choice(message_list) + "\n"

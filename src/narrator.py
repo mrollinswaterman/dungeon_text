@@ -171,7 +171,6 @@ def check_player_inventory(next):
                 print(" Can't equip that.")
                 select_item()
     select_item()
-    
 
 def menu_options():
     global_commands.type_text(" What would you like to do?\n")
