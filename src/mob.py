@@ -16,7 +16,7 @@ class Statblock():
             "drop" : None
         }
         self._dc = 0
-        self._special: None | function = None
+        self._special: Special_Move = None
         self._min_level = 0
         self._max_level = 0
 
@@ -69,16 +69,22 @@ class Statblock():
         self._loot["drop"] = item
     def set_dc(self, dc: int) -> None:
         self._dc = dc
-    def set_special(self, func) -> None:
-        self._special = func
+    def set_special(self, move) -> None:
+        if isinstance(move, Special_Move):
+            print("Already spec")
+            self._special = move
+        else:
+            print("Converting func to special move..")
+            move = Special_Move(self, move)
+            self._special = move
     def set_min_max(self, rang:tuple[int,int]) -> None:
         self._min_level = rang[0]
         self._max_level = rang[1]
 
-
 class Mob():
 
     def __init__(self,statblock: Statblock, level:int = 0):
+        #identification
         self._id = statblock.id
         self._name = self._id
         #base stats
@@ -89,9 +95,10 @@ class Mob():
         self._evasion: int = statblock.evasion
         self._armor:int = statblock.armor
         self._dc = statblock.dc
-        #add loot
         self._loot = statblock.loot
         self._special = statblock.special
+        self._special.set_src(self)
+        #level stuff
         self._min_level = statblock.min_level
         self._max_level = statblock.max_level
         if level == 0:
@@ -99,8 +106,8 @@ class Mob():
         else:
             self._level = level
         self.update()
-
-        
+        self._max_ap = 1 + self._level // 5
+        self._ap = self._max_ap
 
     #properties
     @property
@@ -139,6 +146,18 @@ class Mob():
     @property
     def level_range(self) -> tuple[int, int]:
         return (self._min_level, self._max_level)
+    @property
+    def max_ap(self) -> int:
+        return self._max_ap
+    @property
+    def ap(self) -> int:
+        return self._ap
+    @property
+    def special(self) -> "Special_Move":
+        return self._special
+    @property
+    def can_act(self) -> int:
+        return self._ap > 0
         
     #methods
     def roll_attack(self) -> int:
@@ -153,6 +172,15 @@ class Mob():
             return 0
         
         return roll + self._level // 5
+    
+    def spend_ap(self, num:int) -> None:
+        if self.can_act:
+            self._ap -= 1
+        else:
+            raise ValueError("No AP to spend")
+        
+    def reset_ap(self):
+        self._ap = self._max_ap
     
     def roll_damage(self) -> int:
         """
@@ -187,12 +215,6 @@ class Mob():
         if self.roll_attack() - 2 >= target.evasion:
             return True
         return False
-        
-    def special_move(self, source, target):
-        """
-        Calls the special move function
-        """
-        self._special(source, target)
 
     def add_special_move(self, special) -> None:
         """
@@ -227,3 +249,63 @@ class Mob():
 
         self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
         self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
+
+class Special_Move():
+
+    def __init__(self, src: Mob, func=None, target=None):
+        self._src = src
+        self._target = target
+        self._action = func
+        self._ap_cost = 1
+        self._conditions = None
+        self._conditions_target = None
+
+    #properties
+    @property
+    def src(self) -> Mob:
+        return self._src
+    @property
+    def target(self):
+        return self._target
+    @property
+    def action(self):
+        return self._action
+    @property
+    def ap_cost(self) -> int:
+        return self._ap_cost
+    @property
+    def conditions(self):
+        if self._conditions_target is True:
+            return self._conditions(self._target)
+        elif self._conditions_target is False:
+            return self._conditions(self._src)
+        return self._conditions_target
+    
+    #SETTERS
+    def set_src(self, src:Mob):
+        self._src = src
+    def set_action(self, func):
+        self._action = func
+    def set_ap_cost(self, num:int) -> None:
+        self._ap_cost = num
+    def set_conditions(self, func, target=None) -> None:
+        if self._conditions is None:
+            self._conditions = func
+            self._conditions_target = target
+    def set_target(self, tar) -> None:
+        if self._target is None:
+            self._target = tar
+
+    #RUN
+    def run(self):
+        if self._target is None:
+            raise ValueError("No target.")
+            return False
+        
+        if self._ap_cost > self._src.ap:
+            return False
+        if self.conditions is True:
+            self._action(self._src, self._target)
+            self._src.spend_ap(self._ap_cost)
+            return True
+        return False

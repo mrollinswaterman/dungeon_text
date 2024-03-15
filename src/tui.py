@@ -1,14 +1,9 @@
-import sys
-import random
-import mob
-import monster_manual
-import narrator
-import player_commands
+import sys, random
+import mob, monster_manual
+import narrator, player_commands
 import item_compendium
-import dms_guide
-import events
-import global_commands
-import global_variables
+import dms_guide, events
+import global_commands, global_variables
 
 #notes on formatting
 
@@ -17,6 +12,7 @@ def link_start(enemy:mob.Mob) -> None:
 
     if enemy is None:
         next_scene()
+
     #functions
 
     def player_turn():
@@ -47,7 +43,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
-        if random.randrange(1,100) > 50 or enemy.statblock.special is None: # 50% chance of attack
+        if global_commands.probability(1) or enemy.statblock.special is None: # 50% chance of attack
             attack = enemy.roll_attack()
             global_commands.type_with_lines(f" The {enemy.id} attacks you, rolling a {attack}\n")
             if attack == 0:
@@ -55,7 +51,11 @@ def link_start(enemy:mob.Mob) -> None:
                 taken = global_variables.PLAYER.take_damage(enemy.roll_damage() * 2)
                 global_commands.type_text(f" The {enemy.id} hit you for {taken} damage!\n")
                 if global_variables.PLAYER.dead is False:
-                    player_turn()
+                    if enemy.can_act is False:
+                        enemy.reset_ap()
+                        player_turn()
+                    else:
+                        enemy_turn()
                 else:
                     player_death()
             elif attack == 1:
@@ -66,24 +66,43 @@ def link_start(enemy:mob.Mob) -> None:
                 else:
                     global_commands.type_text(f" It missed.\n")
 
-                if enemy.dead is False:
-                    player_turn()
-                else:
+                if enemy.dead is True:
                     end_scene()
+                else:
+                    if enemy.can_act is False:
+                        enemy.reset_ap()
+                        player_turn()
+                    else:
+                        enemy_turn()
             else: 
                 if attack >= global_variables.PLAYER.evasion:
                     taken = global_variables.PLAYER.take_damage(enemy.roll_damage())
-                    global_commands.type_text(f" The {enemy.id} hit you for {taken} damage.\n")
-                    if global_variables.PLAYER.dead is False:
-                        player_turn()
-                    if global_variables.PLAYER.dead is True:
-                        player_death()
+                    global_commands.type_text(f" The {enemy.id} hit you for {taken} damage.")
+                    if enemy.can_act is False:
+                        if global_variables.PLAYER.dead is False:
+                            enemy.reset_ap()
+                            player_turn()
+                        if global_variables.PLAYER.dead is True:
+                            player_death()
+                    else:
+                        enemy_turn()
                 else:
-                    global_commands.type_text(f" The {enemy.id} missed.\n")
-                    player_turn()
+                    global_commands.type_text(f" The {enemy.id} missed.")
+                    if enemy.can_act is False:
+                        enemy.reset_ap()
+                        player_turn()
+                    else:
+                        enemy_turn()
         else:# ...aaaaand 50% chance of performing a special move
-            enemy.special_move(enemy, global_variables.PLAYER)
-            player_turn()
+            enemy.special.set_target(global_variables.PLAYER)
+            if enemy.special.run() is True:
+                if enemy.can_act is False:
+                    enemy.reset_ap()
+                    player_turn()
+                else:
+                    enemy_turn()
+            else:
+                enemy_turn()
 
     def next_scene():
         """
@@ -168,7 +187,8 @@ def link_start(enemy:mob.Mob) -> None:
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob(global_variables.PLAYER.level)
+    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob(global_variables.PLAYER.level)
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")

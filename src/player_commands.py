@@ -5,7 +5,7 @@ import mob
 import items
 import narrator
 
-GOD_MODE = True
+GOD_MODE = False
 
 def player_turn_options():
     global_commands.type_with_lines(f" What would you like to do? Action Points: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}\n")
@@ -50,16 +50,16 @@ def attack(enemy: mob.Mob, enemy_turn, end_scene) -> None:
         
         if enemy.dead is False and global_variables.PLAYER.can_act is False:
             global_variables.PLAYER.reset_ap()
-            global_commands.type_text(f' You hit the {enemy.id} for {taken} damage.\n') #last thing printed = only one \n
+            global_commands.type_text(f" You hit the {enemy.id} for {taken} damage.") #last thing printed = no \n
             enemy_turn()
         elif enemy.dead is True:
-            global_commands.type_text(f' You hit the {enemy.id} for {taken} damage.\n')
+            global_commands.type_text(f" You hit the {enemy.id} for {taken} damage.\n")
             end_scene()
         else:
             player_turn_options()
 
     elif attack_roll < enemy.evasion:
-        global_commands.type_text(f" You missed.\n") #last thing printed = only one \n
+        global_commands.type_text(f" You missed.") #last thing printed = no \n
         if global_variables.PLAYER.can_act is False:
             global_variables.PLAYER.reset_ap()
             enemy_turn()

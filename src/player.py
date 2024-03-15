@@ -47,6 +47,7 @@ class Status_Effect():
         self._change = "increased"
         if self._power < 0:
             self._change = "decreased"
+        self._active = True
 
     #properties
     @property
@@ -70,16 +71,24 @@ class Status_Effect():
     @property
     def message(self):
         return self._message
+    @property
+    def active(self):
+        return self._active
     
     #methods
     def update(self) -> None:
         self._duration -= 1
+        if self._duration <= 0:
+            self._active = False
+
     def set_power(self, num:int) -> None:
         self._power = num
         if self._power < 0:
             self._change = "decreased"
+
     def set_duration(self, num:int) -> None:
         self._duration = num
+
     def set_message(self, msg:str) -> None:
         self._message = msg
 
@@ -519,6 +528,10 @@ class Player():
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
     def add_status_effect(self, effect:Status_Effect) -> None:
+        """
+        Adds a status effect to the player's status effect list
+        and changes the corresponding stat
+        """
         #for status in self._status_effects:
             #id, src = status.id, status.src
             #if effect.id == id and effect.src == src: --> All this code makes status effects not stack
@@ -528,23 +541,24 @@ class Player():
         self._status_effects.append(effect)
         global_commands.type_text(effect.message)
 
-    def remove_status_effect(self, effect:Status_Effect=None, id:str=""):
+    def remove_status_effect(self, effect:Status_Effect=None, id:str="") -> None:
         if len(id) > 0 and effect is not None:
             for entry in self._status_effects:
                 if entry.id == id:
                     self._stats[effect.stat] += -(effect.power)
                     self._status_effects.remove(effect)
-                    global_commands.type_text(f" The {effect.id}'s effect has gone away.\n")
-                    break
+                    global_commands.type_with_lines(f" The {effect.id}'s effect has worn off.")
+                    return None
         else:
             self._stats[effect.stat] += -(effect.power)
             self._status_effects.remove(effect)
-            global_commands.type_text(f" The {effect.id}'s effect has gone away.\n")
+            global_commands.type_with_lines(f" The {effect.id}'s effect has gone away.")
+            return None
 
     def update(self) -> None:
         for effect in self._status_effects:
             effect.update()
-            if effect.duration <= 0:
+            if effect.active is False:
                 #removes effect
                 self.remove_status_effect(effect)
 

@@ -8,7 +8,7 @@ stats.set_hp(6)
 stats.set_damage(5)
 stats.set_evasion(7)
 stats.set_armor(0)
-stats.set_gold(30)
+stats.set_gold(20)
 stats.set_xp(10)
 stats.set_min_max((2, 6))
 
