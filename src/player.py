@@ -80,6 +80,7 @@ class Status_Effect():
         self._duration -= 1
         if self._duration <= 0:
             self._active = False
+            self._src._applied_debuff = False
 
     def set_power(self, num:int) -> None:
         self._power = num
@@ -91,6 +92,10 @@ class Status_Effect():
 
     def set_message(self, msg:str) -> None:
         self._message = msg
+
+    def cleanse(self) -> None:
+        self._duration = 0
+        self._active = False
 
 
 class Player():
@@ -107,12 +112,12 @@ class Player():
             "int": 12,
             "wis": 12,
             "cha": 12,
-            "evasion": 12 + BONUS[12],
+            "evasion": 9,
             "damage-taken-multiplier": 1
         }
 
         #calculated stats
-        self._max_hp = 8 + BONUS[self._stats["con"]]
+        self._max_hp = 10 + self.bonus("con")
         self._hp = self._max_hp
 
         #xp/gold/items
@@ -182,7 +187,7 @@ class Player():
         return self._equipped["Weapon"]
     @property
     def evasion(self):
-        return self._stats["evasion"]
+        return self._stats["evasion"] + self.bonus("dex")
     @property
     def carrying_capacity(self) -> int:
         return int(5.5 * self._stats["str"])
@@ -404,11 +409,11 @@ class Player():
         """
         if self._hp <= (self._max_hp - healing):
             self._hp += healing
-            global_commands.type_text(f'\n You healed {healing} HP.\n')
+            global_commands.type_text(f" You healed {healing} HP.")
             return None
         if self._hp + healing > self._max_hp:
             self._hp = self._max_hp
-            global_commands.type_text(f"\n You only healed {self._max_hp - self._hp} HP.\n")
+            global_commands.type_text(f" You only healed {self._max_hp - self._hp} HP.")
             return None
 
 
@@ -425,9 +430,10 @@ class Player():
                 held_item:items.Consumable = self._inventory[index]
                 held_item.increase_quantity(item.quantity)
                 if silently is False:
-                    print(item.pickup_message)
+                    print(held_item.pickup_message)
                 return True
             self._inventory.append(item)
+            item.set_owner(self)
             if silently is False:
                 print(item.pickup_message)
             return True
@@ -441,6 +447,7 @@ class Player():
         """
         if item.id in self._inventory:
             self._inventory.remove(item)
+            item.set_owner(None)
         else:
             raise ValueError("Can't drop an item you don't have.\n")
 
@@ -492,6 +499,7 @@ class Player():
 
         Return the item if its there and False if not
         """
+
         if item.is_consumable is True:
             for entry in self._inventory:
                 held_item:items.Consumable = entry

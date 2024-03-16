@@ -20,16 +20,14 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        roll = random.randrange(0, 100)
-        if roll <= 80: #80% chance of an enemy spawning next
-            next_enemy: mob.Mob = monster_manual.spawn_mob(PLAYER.level)
+        if global_commands.probability(80): #80% chance of an enemy spawning next
+            next_enemy: mob.Mob = monster_manual.spawn_random_mob()
             global_variables.RUNNING = False
             link_start(next_enemy)
         else: #remainging 20% chance of an event spawning
             next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
             next_event.set_tries(2)
             next_event.set_passed(False)
-            #print(f"TRIES: {next_event._tries}")
             next_event.start()#prints event start text
             run_event(next_event)
 
@@ -61,24 +59,23 @@ def link_start(enemy:mob.Mob) -> None:
         """
         if enemy.fleeing:
             enemy_commands.enemy_flee_attempt()
-        if enemy.special.conditions is True:
+            return None
+        #if trigger is active, 75% chance of special
+        if enemy.trigger() is True:
             if global_commands.probability(75) is True:
-                if enemy.special.run() is True:
+                if enemy.special() is True:
                     enemy_commands.run_enemy_next()
-
-                else:
-                    enemy_commands.enemy_attack()
+                    return None
             else:
                 enemy_commands.enemy_attack()
-        else:
+                return None
+        else: #if trigger not active, 25% of doing special
             if global_commands.probability(25) is True:
-                if enemy.special.run() is True:
+                if enemy.special() is True:
                     enemy_commands.run_enemy_next()
-
-                else:
-                    enemy_commands.enemy_attack()
-            else:
-                enemy_commands.enemy_attack()
+                    return None
+            enemy_commands.enemy_attack()
+            return None
 
     def end_scene():
         global_commands.type_text(f" You killed the {enemy.id}!\n")
@@ -136,6 +133,9 @@ def link_start(enemy:mob.Mob) -> None:
     enemy_commands.ENEMY_TURN = enemy_turn
     player_commands.ENEMY_TURN = enemy_turn
 
+    enemy_commands.NEXT_SCENE = next_scene
+    player_commands.NEXT_SCENE = next_scene
+
     #starting print statements
     begin_encounter()
     player_turn()
@@ -164,12 +164,12 @@ def link_start(enemy:mob.Mob) -> None:
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob(PLAYER.level)
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
     #STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
-        STARTING_ENEMY = mob.Mob(monster_manual.mobs[0])
+        STARTING_ENEMY = monster_manual.mobs[0]
 
     STARTING_ENEMY.set_level(PLAYER.level)
 

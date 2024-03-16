@@ -183,6 +183,7 @@ class Shopkeep():
     #INVENTORY/STOCK
     def stock(self, item: items.Item, num=1) -> None:
         self._inventory.append(item)
+        item.set_owner(self)
         self._stock_size = len(self._inventory)
 
     def print_inventory(self):

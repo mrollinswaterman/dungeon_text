@@ -1,6 +1,6 @@
 import random
 import global_commands
-import global_variables
+import player
 
 RARITY = {
     "Common": 1,
@@ -37,6 +37,7 @@ class Item():
         )
         """
         self._id = id
+        self._name = id
         if rarity is None:
             self._rarity = global_commands.generate_item_rarity()
         else:
@@ -52,19 +53,24 @@ class Item():
         self._broken = False
         self._type = "Item"
 
+        self._owner:player.Player = None
+
     #properties
     @property
     def id(self) -> str:
         return f"{self._rarity} {self._id}"
     @property
     def name(self) -> str:
-        return self._id
+        return self._name
     @property
     def value(self) -> int:
         return self._value
     @property
     def total_value(self) -> int:
         return self._value
+    @property
+    def owner(self) -> int:
+        return self._owner
     @property
     def broken(self) -> bool:
         return self._durability <= 0
@@ -139,6 +145,9 @@ class Item():
     
     def set_description(self, words:str) -> None:
         self._description = words
+
+    def set_owner(self, owner) -> None:
+        self._owner = owner
 
 
     def __str__(self) -> str:
@@ -306,12 +315,13 @@ class Consumable(Item):
 
     def update(self) -> None:
         if self._quantity > 1:
-            self._pickup_message = f" You picked up {self._quantity} {self.id}s."
-            self._id = self._id +"s"
+            self._pickup_message = f" You picked up {self._quantity} {self._name}."
+            self._name = self._id +"s"
         else:
             self._pickup_message = f" You picked up a {self._id}."
-            if self._id[-1] == "s":
-                self._id = self._id.rstrip(self._id[-1])
+            if self._name[-1] == "s":
+                self._name = self._name.rstrip(self._name[-1])
+
         self._value = self._unit_value * self._quantity
         self._weight = self._unit_weight * self._quantity
 

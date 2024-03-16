@@ -2,22 +2,32 @@
 import random
 import mob, player, global_commands
 
-stats = mob.Statblock("Goblin Gang")
+class Goblin_Gang(mob.Mob):
+    def __init__(self, id="Goblin Gang", level = (2,6)):
+        super().__init__(id, level)
 
-stats.set_hp(6)
-stats.set_damage(5)
-stats.set_evasion(7)
-stats.set_armor(0)
-stats.set_gold(20)
-stats.set_xp(10)
-stats.set_min_max((2, 6))
+        self._stats = {
+            "str": 14,
+            "dex": 10,
+            "con": 14,
+            "int": 8,
+            "wis": 10,
+            "cha": 7,
+            "evasion": 6,
+            "damage-taken-multiplier": 1
+        }
+        
+        self._max_hp = 7 + self.bonus("con")
+        self._damage = 5
 
-def special():
-    """
-    Goblin gang special tbd
-    
-    maybe the gang scatters, rasing evasion but lowering damage??
-    """
-    pass
+        self._loot = {
+            "gold": 20,
+            "xp": 10,
+            "drops": None
+        }
+        self._flee_threshold = 10
 
-#stats.set_special(special)
+    def special(self) -> bool:
+        return False
+
+object = Goblin_Gang()

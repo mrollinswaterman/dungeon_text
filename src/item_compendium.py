@@ -17,7 +17,9 @@ class Health_Potion(items.Consumable):
             self.decrease_quantity(1)
             global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
             target.heal(self._strength)
+            self._owner.spend_ap(1)
             return True
+        global_commands.type_with_lines(" You are already full HP.")
         return False
     
 def generate_hp_potions(rarity="Common", num=1):

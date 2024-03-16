@@ -42,6 +42,7 @@ EXIT_THE_SHOP = [
     " You slink out of the Shop.",
     " As you leave, you wonder if you'll see this place again...",
 ]
+
 def next_scene_options():
     global_commands.type_text(random.choice(SCENE_CHANGE))
     ominous = f'    ...\n'

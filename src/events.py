@@ -2,7 +2,6 @@
 from typing import Optional
 import random
 import global_commands
-#import global_variables
 
 FAILURE_LINES = {
     "str": [

@@ -9,19 +9,20 @@ GOD_MODE = False
 
 ENEMY:mob.Mob = None
 ENEMY_TURN = None
+END_SCENE = None
 
 PLAYER = global_variables.PLAYER
 PLAYER_TURN = None
 PLAYER_DEATH = None
 
-END_SCENE = None
+NEXT_SCENE = None
 
 def player_turn_options():
     global_commands.type_with_lines(f" What would you like to do? Action Points: {PLAYER.ap}/{PLAYER.max_ap}\n")
     print (f"\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n")
 
 
-def attack() -> None:
+def attack(run_on_hit=None, run_on_miss=None) -> None:
     """
     Attacks an enemy. 
 
@@ -31,6 +32,11 @@ def attack() -> None:
 
     Returns nothing
     """
+    if run_on_miss is None:
+        run_on_miss = ENEMY_TURN
+    if run_on_hit is None:
+        run_on_hit = ENEMY_TURN
+
     if GOD_MODE is True:
         attack_roll = 1000000
     else:
@@ -55,7 +61,7 @@ def attack() -> None:
         if ENEMY.dead is False and PLAYER.can_act is False:
             PLAYER.reset_ap()
             global_commands.type_text(f" You hit the {ENEMY.id} for {taken} damage.") #last thing printed = no \n
-            ENEMY_TURN()
+            run_on_hit()
         elif ENEMY.dead is True:
             global_commands.type_text(f" You hit the {ENEMY.id} for {taken} damage.\n")
             END_SCENE()
@@ -66,7 +72,7 @@ def attack() -> None:
         global_commands.type_text(f" You missed.") #last thing printed = no \n
         if PLAYER.can_act is False:
             PLAYER.reset_ap()
-            ENEMY_TURN()
+            run_on_miss()
         else: 
             player_turn_options()
 
@@ -93,20 +99,20 @@ def use_an_item(item: items.Consumable, target=PLAYER) -> None:
     if PLAYER.has_item(item) is True:#check the player has the item
         index = PLAYER.find_consumable_by_id(item)
         held_item:items.Consumable = PLAYER.inventory[index]
-
         if held_item.quantity == 0: #if the items quantity is 0, remove it
             PLAYER.inventory.remove(held_item)
-            global_commands.type_with_lines(f' No {item.id}s avaliable!\n')
+            held_item.set_owner(None)
+            global_commands.type_with_lines(f" No {item.name} avaliable!")
             PLAYER_TURN()
+            return None
         held_item.use(target)
-        PLAYER.spend_ap(1)
         if PLAYER.can_act is False:
             PLAYER.reset_ap()
             ENEMY_TURN()
         else:
             PLAYER_TURN()
     else:
-        global_commands.type_with_lines(f' No {item.name}s avaliable!\n')
+        global_commands.type_with_lines(f" No {item.name} avaliable!")
         PLAYER_TURN()
 
 def stop_flee_attempt() -> None:
@@ -127,15 +133,9 @@ def flee() -> None:
     Attempts to run away from the current encounter
     """
     global_commands.type_with_lines(f" You attempt to flee...\n")
-    chase_chance = random.randrange(0, 100)
-    if PLAYER.hp > PLAYER.max_hp * 0.75 and chase_chance <= 10: 
-        # above 75% hp, 10% chance enemy chases you
-        stop_flee_attempt()
-    elif PLAYER.hp > PLAYER.max_hp * 0.5 and chase_chance < 33: 
-        #above 50% hp 33% chance  chases you
-        stop_flee_attempt()
-    elif PLAYER.hp <= PLAYER.max_hp * 0.3 and chase_chance < 50: 
-        # below 30% hp, 50% chance  chases you
+    
+    if global_commands.probability(90 - int((PLAYER.hp / PLAYER.max_hp) * 100)):
+        #higher HP == lower chase chance
         stop_flee_attempt()
     else:
         global_commands.type_text(f" The {ENEMY.id} lets you go.")

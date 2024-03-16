@@ -6,11 +6,14 @@ import player_commands
 import mob
 
 ENEMY:mob.Mob = None
-PLAYER_TURN = None
 ENEMY_TURN = None
-
-PLAYER_DEATH = None
 END_SCENE = None
+
+PLAYER_TURN = None
+PLAYER_DEATH = None
+
+NEXT_SCENE = None
+
 
 def enemy_flee_attempt():
     """
@@ -21,16 +24,16 @@ def enemy_flee_attempt():
     """
     def enemy_flee_success():
         global_commands.type_text(" It got away.")
-        narrator.continue_run()
+        narrator.continue_run(NEXT_SCENE)
     def enemy_flee_failure():
         global_commands.type_text(f" You stopped the {ENEMY.id}. It is forced to continue fighting.")
         PLAYER_TURN()
     global_commands.type_with_lines(f" The {ENEMY.id} attempts to flee...\n")
-    print(" Try to stop it? y/n\n")
+    print(" Try to stop them? y/n\n")
     command = input(">").lower()
-    print("")#newline after cmd prompt
+    #print("")#newline after cmd prompt
     if command == "y":
-        player_commands.attack(ENEMY, enemy_flee_success, enemy_flee_failure)
+        player_commands.attack(enemy_flee_failure, enemy_flee_success)
     if command == "n":
         global_commands.type_text(f" You let the {ENEMY.id} go.")
         narrator.continue_run()
@@ -69,9 +72,9 @@ def enemy_attack():
         global_commands.type_text(f" It critically failed!\n")
         if ENEMY.fumble_table() is True:
             taken = ENEMY.take_damage(ENEMY.roll_damage())
-            global_commands.type_text(f" The {ENEMY.id} hit itself for {taken} damage!\n")
+            global_commands.type_text(f" The {ENEMY.id} hit itself for {taken} damage!")
         else:
-            global_commands.type_text(f" It missed.\n")
+            global_commands.type_text(f" It missed.")
         if ENEMY.dead is True:
             END_SCENE()
         else:

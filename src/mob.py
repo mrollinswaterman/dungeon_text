@@ -1,138 +1,60 @@
 import random
 from typing import Union
-import global_variables
+import global_variables, global_commands
+import player
 
-class Statblock():
+class Mob():
 
-    def __init__(self, id):
-        """
-        Init function for the mob statblock
-
-        _id = name
-        _loot = dictionary containing loot dropped on death
-        keys are the loot type, values are the loot itself
-        _dc = the difficulty class of the mob's special moves (if any)
-        _special = the mob's special move (when applicable)
-        _min and _max level = the min level the mobs spawns
-        and the max level it can spawn at
-        _flee_threshold = the hp threshold the mob will flee at
-        as a percentage of max hp
-        """
+    def __init__(self, id:str="Anonymous_Mob", level:tuple= (1, 20)):
+        #identification
         self._id = id
-        self._max_hp = 0
+        self._name = self._id
+        self._level = random.randrange(min(level), max(level))
+        self._range = level
+
+        #statblock
+        self._stats = {
+            "str": 10,
+            "dex": 10,
+            "con": 10,
+            "int": 10,
+            "wis": 10,
+            "cha": 10,
+            "evasion": 9,
+            "damage-taken-multiplier": 1
+        }
+        #calculated stats
+        self._max_hp = 8 + self.bonus("con")
         self._hp = self._max_hp
+
+        self._max_ap = 1 + self._level // 5
+        self._ap = self._max_ap
+
         self._damage = 0
-        self._evasion = 0
-        self._armor = 0
+        self._evasion = self._stats["evasion"] + self.bonus("dex")
+        self._armor= 0
+
+        self._dc = 10
+
         self._loot = {
             "gold": 0,
             "xp": 0,
-            "drop" : None
+            "drops": None
         }
-        self._dc = 0
-        self._special: Special_Move = None
-        self._min_level = 0
-        self._max_level = 0
-        self._flee_threshold = 15
+
+        # %hp threshold at which the enemy flees, higher == more cowardly
+        self._flee_threshold = 15 - self.bonus("cha") * 2
+        self._player = global_variables.PLAYER
+
+        self._status_effects = set()
+        self._applied_status_effects = set()
+
+        self.update()
 
     #properties
     @property
     def id(self) -> str:
         return self._id
-    @property
-    def hp(self) -> int:
-        return self._hp
-    @property
-    def damage(self) -> int:
-        return self._damage
-    @property
-    def evasion(self) -> int:
-        return self._evasion
-    @property
-    def armor(self) -> int:
-        return self._armor
-    @property
-    def loot(self):
-        return self._loot
-    @property
-    def dc(self):
-        return self._dc
-    @property
-    def special(self):
-        return self._special
-    @property
-    def min_level(self) -> int:
-        return self._min_level
-    @property
-    def max_level(self) -> int:
-        return self._max_level
-    @property
-    def flee_threshold(self) -> int:
-        return self._flee_threshold
-    
-    #methods
-    def set_hp(self, num:int) -> None:
-        self._max_hp = num
-        self._hp = num
-    def set_damage(self, num:int) -> None:
-        self._damage = num
-    def set_evasion(self, num:int) -> None:
-        self._evasion = num
-    def set_armor(self, num:int) -> None:
-        self._armor = num
-    def set_gold(self, num:int) -> None:
-        self._loot["gold"] = num
-    def set_xp(self, num:int) -> None:
-        self._loot["xp"] = num
-    def set_drop(self, item) -> None:
-        self._loot["drop"] = item
-    def set_dc(self, dc: int) -> None:
-        self._dc = dc
-    def set_special(self, move) -> None:
-        if isinstance(move, Special_Move):
-            self._special = move
-        else:
-            move = Special_Move(self, move)
-            self._special = move
-    def set_min_max(self, rang:tuple[int,int]) -> None:
-        self._min_level = rang[0]
-        self._max_level = rang[1]
-    def set_flee_threshold(self, num):
-        self._flee_threshold = num
-
-class Mob():
-
-    def __init__(self,statblock: Statblock, level:int = 0):
-        #identification
-        self._id = statblock.id
-        self._name = self._id
-        #base stats
-        self._statblock = statblock
-        #calculated stats
-        self._max_hp = statblock.hp
-        self._hp = statblock.hp
-        self._damage: int = statblock.damage
-        self._evasion: int = statblock.evasion
-        self._armor:int = statblock.armor
-        self._dc = statblock.dc
-        self._loot = statblock.loot
-        self._special = statblock.special
-        self._special.set_src(self)
-        #level stuff
-        self._min_level = statblock.min_level
-        self._max_level = statblock.max_level
-        self._flee_threshold = statblock.flee_threshold
-        if level == 0:
-            self._level = random.randrange(statblock.min_level, global_variables.PLAYER.threat+1)
-        else:
-            self._level = level
-        self.update()
-        self._max_ap = 1 + self._level // 5
-        self._ap = self._max_ap
-
-        self._gold = random.randrange(1, self._loot["gold"])
-
-    #properties
     @property
     def dead(self) -> bool:
         return self.hp <= 0
@@ -155,20 +77,11 @@ class Mob():
     def loot(self):
         return self._loot
     @property
-    def id(self) -> str:
-        return self._id
-    @property
     def name(self) -> str:
         return self._name
     @property
     def dc(self) -> int:
         return self._dc
-    @property
-    def statblock(self) -> Statblock:
-        return self._statblock
-    @property
-    def level_range(self) -> tuple[int, int]:
-        return (self._min_level, self._max_level)
     @property
     def max_ap(self) -> int:
         return self._max_ap
@@ -176,18 +89,14 @@ class Mob():
     def ap(self) -> int:
         return self._ap
     @property
-    def gold(self) -> int:
-        return self._gold
-    @property
-    def special(self) -> "Special_Move":
-        return self._special
-    @property
     def can_act(self) -> int:
         return self._ap > 0
     @property
     def fleeing(self) -> bool:
         return self._hp <= self._max_hp * (self._flee_threshold / 100)
-        
+    @property
+    def range(self) -> int:
+        return self._range
     #methods
     def roll_attack(self) -> int:
         """
@@ -200,7 +109,7 @@ class Mob():
         if roll == 20:
             return 0
         
-        return roll + self._level // 5
+        return roll + self.bonus("dex") + self._level // 5
     
     def spend_ap(self, num:int) -> None:
         if self.can_act:
@@ -215,7 +124,7 @@ class Mob():
         """
         Rolls damage (damage dice)
         """
-        return random.randrange(1, self._damage) + 1
+        return random.randrange(1, self._damage) + self.bonus("str")
     
     def take_damage(self, damage:int) -> int:
         """
@@ -231,13 +140,8 @@ class Mob():
         """
         Determines if a mob sufferes a negative effect upon rolling a nat 1.
         """
-        prob = random.randrange(100)
 
-        if prob > 50:
-            return False
-        
-        else: 
-            return True
+        return global_commands.probability(50)
         
     def attack_of_oppurtunity(self, target) -> bool:
         
@@ -245,103 +149,34 @@ class Mob():
             return True
         return False
 
-    def add_special_move(self, special) -> None:
-        """
-        Adds a function to serve as the mob's "special move".
-        """
-        self._special = special
-
-    def add_gold(self, num:int) -> None:
-        """
-        Adds an integer value to the mob's gold reward
-        """
-        self._loot["gold"] += num
-
-    def add_xp(self, num:int) -> None:
-        """
-        Adds an integer value to the mob's XP reward
-        """
-        self._loot["xp"] += num
-
     def set_level(self, level:int)-> None:
         """
         Sets the mobs levels then calculates HP and loot based on level
         """
         self._level = level
+        self.level_up()
 
     def update(self):
         """
         Updates all relevant stats when a mob's level is changed
         """
-        for _ in range(self._level-1):
-            self._max_hp += random.randrange(1, self._statblock.hp) + round(self._level + 0.1 / 2)
-            self._hp = self._max_hp
-
         self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
         self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
 
-class Special_Move():
+        self._max_ap = 1 + self._level // 5
+        self._ap = self._max_ap
 
-    def __init__(self, src: Mob, func=None, target=None):
-        """
-        Init function for the Special_Move function
-
-        _src = the source of the move (ie the one doing it)
-        _target = target of the move
-        _action = the function to be performed
-        _ap_cost = how much AP the move costs
-        _conditions = a function to check if the move should performed
-        _conditon_target = the target for the conditons function
-        """
-        self._src = src
-        self._target = target
-        self._action = func
-        self._ap_cost = 1
-        self._conditions = None
-        self._condition_target = None
-
-    #properties
-    @property
-    def src(self) -> Mob:
-        return self._src
-    @property
-    def target(self):
-        return self._target
-    @property
-    def action(self):
-        return self._action
-    @property
-    def ap_cost(self) -> int:
-        return self._ap_cost
-    @property
-    def conditions(self):
-        if self._condition_target is not None:
-            return self._conditions(self._condition_target)
-        return self._conditions()
+    def level_up(self):
+        for _ in range(self._level-1):
+            self._max_hp += random.randrange(1, self._max_hp) + round(self._level + 0.1 / 2)
+            self._hp = self._max_hp
+        self.update()
     
-    #SETTERS
-    def set_src(self, src:Mob):
-        self._src = src
-    def set_action(self, func):
-        self._action = func
-    def set_ap_cost(self, num:int) -> None:
-        self._ap_cost = num
-    def set_conditions(self, func, target=None) -> None:
-        if self._conditions is None:
-            self._conditions = func
-            self._condition_target = target
-    def set_target(self, tar) -> None:
-        if self._target is None:
-            self._target = tar
+    def bonus(self, stat:str) -> int:
+        return player.BONUS[self._stats[stat]]
 
-    #RUN
-    def run(self):
-        if self._target is None:
-            raise ValueError("No target.")
-        if self._ap_cost > self._src.ap:
-            return False
-        if self.conditions is True:
-            self._action(self._src, self._target)
-            self._src.spend_ap(self._ap_cost)
-            return True
+    def special(self):
+        raise NotImplementedError
+    
+    def trigger(self):
         return False
