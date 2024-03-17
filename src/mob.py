@@ -12,6 +12,13 @@ class Mob():
         self._level = random.randrange(min(level), max(level))
         self._range = level
 
+                #calculated stats
+        self._max_hp = 8 + self.bonus("con")
+        self._hp = self._max_hp
+
+        self._max_ap = 1 + self._level // 5
+        self._ap = self._max_ap
+
         #statblock
         self._stats = {
             "str": 10,
@@ -21,14 +28,10 @@ class Mob():
             "wis": 10,
             "cha": 10,
             "evasion": 9,
-            "damage-taken-multiplier": 1
+            "damage-taken-multiplier": 1,
+            "hp": self._hp,
+            "ap": self._max_ap
         }
-        #calculated stats
-        self._max_hp = 8 + self.bonus("con")
-        self._hp = self._max_hp
-
-        self._max_ap = 1 + self._level // 5
-        self._ap = self._max_ap
 
         self._damage = 0
         self._evasion = self._stats["evasion"] + self.bonus("dex")
@@ -46,7 +49,7 @@ class Mob():
         self._flee_threshold = 15 - self.bonus("cha") * 2
         self._player = global_variables.PLAYER
 
-        self._status_effects = set()
+        self._status_effects: set[player.Status_Effect] = set()
         self._applied_status_effects = set()
 
         self.update()
@@ -97,6 +100,9 @@ class Mob():
     @property
     def range(self) -> int:
         return self._range
+    @property
+    def stats(self) -> dict:
+        return self._stats
     #methods
     def roll_attack(self) -> int:
         """
@@ -110,6 +116,9 @@ class Mob():
             return 0
         
         return roll + self.bonus("dex") + self._level // 5
+
+    def roll_a_check(self, stat:str):
+        return random.randrange(1, 20) + self.bonus(stat)
     
     def spend_ap(self, num:int) -> None:
         if self.can_act:
@@ -148,6 +157,18 @@ class Mob():
         if self.roll_attack() - 2 >= target.evasion:
             return True
         return False
+    
+    def add_status_effect(self, effect:player.Status_Effect) -> None:
+        #self._stats[effect.stat] += effect.power
+        self._status_effects.add(effect)
+        effect.update()
+
+    def remove_status_effect(self, effect:player.Status_Effect) -> None:
+        if effect.temp is True:
+            self._stats[effect.stat] += -(effect.power)
+        self._status_effects.remove(effect)
+        global_commands.type_with_lines(f" The {effect.id}'s effect has gone away.")
+        return None
 
     def set_level(self, level:int)-> None:
         """
@@ -165,6 +186,12 @@ class Mob():
 
         self._max_ap = 1 + self._level // 5
         self._ap = self._max_ap
+
+        for effect in self._status_effects:
+            effect.update()
+            if effect.active is False:
+                #removes effect
+                self.remove_status_effect(effect)
 
     def level_up(self):
         for _ in range(self._level-1):

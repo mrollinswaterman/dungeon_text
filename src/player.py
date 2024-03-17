@@ -47,6 +47,7 @@ class Status_Effect():
         self._change = "increased"
         if self._power < 0:
             self._change = "decreased"
+        self._temp = False
         self._active = True
 
     #properties
@@ -74,6 +75,9 @@ class Status_Effect():
     @property
     def active(self):
         return self._active
+    @property
+    def temp(self) -> bool:
+        return self._temp
     
     #methods
     def update(self) -> None:
@@ -82,6 +86,8 @@ class Status_Effect():
             self._active = False
             self._src._applied_debuff = False
 
+    def apply(self) -> None:
+        self._target.stats[self._stat] += self._power
     def set_power(self, num:int) -> None:
         self._power = num
         if self._power < 0:
@@ -96,6 +102,9 @@ class Status_Effect():
     def cleanse(self) -> None:
         self._duration = 0
         self._active = False
+
+    def set_temp(self, temp:bool) -> None:
+        self._temp = temp
 
 
 class Player():
@@ -113,7 +122,9 @@ class Player():
             "wis": 12,
             "cha": 12,
             "evasion": 9,
-            "damage-taken-multiplier": 1
+            "damage-taken-multiplier": 1,
+            "hp": self._hp,
+            "ap": self._max_ap
         }
 
         #calculated stats
@@ -484,6 +495,7 @@ class Player():
             armor_debuff = Status_Effect("Armor Debuff", armor, "dex", self)
             armor_debuff.set_power(-(armor.numerical_weight_class - 2))
             armor_debuff.set_duration(10000)
+            armor_debuff.set_temp(True)
             armor_debuff.set_message(f" Your Dexterity is being decreased by 2 by your {armor.id}!\n")
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 12 + BONUS[self._stats["dex"]]
@@ -545,20 +557,23 @@ class Player():
             #if effect.id == id and effect.src == src: --> All this code makes status effects not stack
                 #print(f"The {effect.id} effect hasn't run out yet.")
                 #return None
-        self._stats[effect.stat] += effect.power
+        #self._stats[effect.stat] += effect.power
         self._status_effects.append(effect)
+        effect.update()
         global_commands.type_text(effect.message)
 
     def remove_status_effect(self, effect:Status_Effect=None, id:str="") -> None:
         if len(id) > 0 and effect is not None:
             for entry in self._status_effects:
                 if entry.id == id:
-                    self._stats[effect.stat] += -(effect.power)
+                    if entry.temp is True:
+                        self._stats[effect.stat] += -(effect.power)
                     self._status_effects.remove(effect)
                     global_commands.type_with_lines(f" The {effect.id}'s effect has worn off.")
                     return None
         else:
-            self._stats[effect.stat] += -(effect.power)
+            if effect.temp is True:
+                self._stats[effect.stat] += -(effect.power)
             self._status_effects.remove(effect)
             global_commands.type_with_lines(f" The {effect.id}'s effect has gone away.")
             return None
