@@ -55,7 +55,6 @@ def run_enemy_next():
 def enemy_attack():
     """
     Runs the enemy attack
-
     """
     ENEMY.spend_ap(1)
     attack = ENEMY.roll_attack()

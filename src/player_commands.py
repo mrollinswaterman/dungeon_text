@@ -19,7 +19,7 @@ NEXT_SCENE = None
 
 def player_turn_options():
     global_commands.type_with_lines(f" What would you like to do? Action Points: {PLAYER.ap}/{PLAYER.max_ap}\n")
-    print (f"\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u)\n")
+    print (f"\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u) | Throw a Firebomb - (t)\n")
 
 
 def attack(run_on_hit=None, run_on_miss=None) -> None:
@@ -40,7 +40,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     if GOD_MODE is True:
         attack_roll = 1000000
     else:
-        attack_roll = PLAYER.roll_attack()
+        attack_roll = 1#PLAYER.roll_attack()
         PLAYER.spend_ap(1)
 
     global_commands.type_with_lines(f" You attack the {ENEMY.id}, rolling a {attack_roll}.\n")
@@ -96,9 +96,11 @@ def use_an_item(item: items.Consumable, target=PLAYER) -> None:
     """
     Uses an item on the Player, if the player has the item in their inventory
     """
+    if item is None:
+        raise ValueError("")
     if PLAYER.has_item(item) is True:#check the player has the item
-        index = PLAYER.find_consumable_by_id(item)
-        held_item:items.Consumable = PLAYER.inventory[index]
+        item = PLAYER.find_item_by_name(item.name)
+        held_item:items.Consumable = item
         if held_item.quantity == 0: #if the items quantity is 0, remove it
             PLAYER.inventory.remove(held_item)
             held_item.set_owner(None)

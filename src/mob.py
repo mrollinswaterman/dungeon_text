@@ -12,14 +12,6 @@ class Mob():
         self._level = random.randrange(min(level), max(level))
         self._range = level
 
-                #calculated stats
-        self._max_hp = 8 + self.bonus("con")
-        self._hp = self._max_hp
-
-        self._max_ap = 1 + self._level // 5
-        self._ap = self._max_ap
-
-        #statblock
         self._stats = {
             "str": 10,
             "dex": 10,
@@ -27,11 +19,25 @@ class Mob():
             "int": 10,
             "wis": 10,
             "cha": 10,
-            "evasion": 9,
-            "damage-taken-multiplier": 1,
-            "hp": self._hp,
-            "ap": self._max_ap
         }
+
+        self._max_hp = 8 + self.bonus("con")
+        self._hp = self._max_hp
+        self._max_ap = 1 + (self._level // 5)
+        self._ap = self._max_ap
+        self._damage_taken_multiplier = 1
+
+        self._stats["evasion"] = 9
+        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["hp"] = self._hp
+        self._stats["ap"] = self._max_ap
+
+        #calculated stats
+        self._max_hp = 8 + self.bonus("con")
+        self._hp = self._max_hp
+
+        self._max_ap = 1 + self._level // 5
+        self._ap = self._max_ap
 
         self._damage = 0
         self._evasion = self._stats["evasion"] + self.bonus("dex")
@@ -161,7 +167,8 @@ class Mob():
     def add_status_effect(self, effect:player.Status_Effect) -> None:
         #self._stats[effect.stat] += effect.power
         self._status_effects.add(effect)
-        effect.update()
+        if effect.temp is True:
+            effect.apply()
 
     def remove_status_effect(self, effect:player.Status_Effect) -> None:
         if effect.temp is True:

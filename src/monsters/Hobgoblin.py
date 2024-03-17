@@ -5,7 +5,6 @@ import mob, player, global_commands
 class Hobgoblin(mob.Mob):
     def __init__(self, id="Hobgoblin", level = (1,5)):
         super().__init__(id, level)
-
         self._stats = {
             "str": 12,
             "dex": 12,
@@ -13,10 +12,19 @@ class Hobgoblin(mob.Mob):
             "int": 9,
             "wis": 7,
             "cha": 14,
-            "evasion": 8,
-            "damage-taken-multiplier": 1
         }
+
         self._max_hp = 6 + self.bonus("con")
+        self._hp = self._max_hp
+        self._max_ap = 1 + (self._level // 5)
+        self._ap = self._max_ap
+        self._damage_taken_multiplier = 1
+
+        self._stats["evasion"] = 8
+        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["hp"] = self._hp
+        self._stats["ap"] = self._max_ap
+
         self._damage = 5
         self._armor = 1
         self._dc = 12 + self.bonus("cha")

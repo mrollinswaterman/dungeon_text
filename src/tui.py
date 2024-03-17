@@ -57,6 +57,9 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
+        enemy.update()
+        if enemy.dead:
+            end_scene()
         if enemy.fleeing:
             enemy_commands.enemy_flee_attempt()
             return None
@@ -156,6 +159,10 @@ def link_start(enemy:mob.Mob) -> None:
             player_commands.inventory()
         if command == "u":
             player_commands.use_an_item(item_compendium.generate_hp_potions())
+        if command == "t":
+            player_commands.use_an_item(PLAYER.find_item_by_name("Firebombs"), enemy)
+        if command == "test":
+            print(enemy.hp)
         if command == "f":
             global_variables.RUNNING = False
             player_commands.flee()

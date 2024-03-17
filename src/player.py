@@ -82,12 +82,24 @@ class Status_Effect():
     #methods
     def update(self) -> None:
         self._duration -= 1
+        if self._temp is False:
+            self.apply()
         if self._duration <= 0:
             self._active = False
             self._src._applied_debuff = False
+        
 
     def apply(self) -> None:
-        self._target.stats[self._stat] += self._power
+        if self._temp is True:
+            self._target.stats[self._stat] += self._power
+
+        else:
+            taken = self._target.take_damage(self._power)
+            if self._target.dead:
+                global_commands.type_with_lines(f" The {self.id} did {taken} damage to the {self._target.id}.\n")
+            else:
+                global_commands.type_with_lines(f" The {self.id} did {taken} damage to the {self._target.id}.")
+
     def set_power(self, num:int) -> None:
         self._power = num
         if self._power < 0:
@@ -112,8 +124,8 @@ class Player():
     def __init__(self, id: str="Player", name:str = ""):
         self._id = id
         self._name = name
+        self._level = 1
 
-        #statblock
         self._stats = {
             "str": 12,
             "dex": 12,
@@ -121,28 +133,25 @@ class Player():
             "int": 12,
             "wis": 12,
             "cha": 12,
-            "evasion": 9,
-            "damage-taken-multiplier": 1,
-            "hp": self._hp,
-            "ap": self._max_ap
         }
 
-        #calculated stats
         self._max_hp = 10 + self.bonus("con")
         self._hp = self._max_hp
+        self._max_ap = 1 + (self._level // 5)
+        self._ap = self._max_ap
+        self._damage_taken_multiplier = 1
 
+        self._stats["evasion"] = 9
+        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["hp"] = self._hp
+        self._stats["ap"] = self._max_ap
+        
         #xp/gold/items
         self._xp = 0
-        self._level = 1
         self._gold = 0
         self._inventory = []
         self._status_effects:list[Status_Effect] = []
         self._level_up_function = None
-        
-        #static stats
-        self._max_ap = 1 + (self._level // 5)
-        self._ap = self._max_ap
-        self._damage_taken_multiplier = 1
 
         #equipment
         self._equipped = {
@@ -157,6 +166,9 @@ class Player():
         Checks if the player is dead (ie HP <= 0)
         """
         return self._hp <= 0
+    @property
+    def stats(self) -> int:
+        return self._stats
     @property
     def level(self) -> int:
         return self._level
@@ -262,9 +274,6 @@ class Player():
         """
         return self._ap > 0
 
-    #methods
-
-
     #STATUS
     def bonus(self, stat) -> int:
         if isinstance(stat, str):
@@ -319,10 +328,13 @@ class Player():
         """
         return random.randrange(1, 20) + BONUS[self._stats[stat]]
     
-    def take_damage(self, damage: int) -> int:
+    def take_damage(self, damage: int, armor_piercing=False) -> int:
         """
         Reduces the players hp by a damage amount, reduced by armor
         """
+        if armor_piercing is True:
+            self._hp -= damage
+            return damage
         armor:items.Armor = self._equipped["Armor"]
         damage = damage * self._damage_taken_multiplier
         if armor.broken is False:
@@ -512,6 +524,9 @@ class Player():
         Return the item if its there and False if not
         """
 
+        if item is None:
+            return False
+
         if item.is_consumable is True:
             for entry in self._inventory:
                 held_item:items.Consumable = entry
@@ -522,12 +537,14 @@ class Player():
             return True
         return False
     
-    def find_consumable_by_id(self, item: items.Consumable) -> int:
+    def find_item_by_name(self, name:str) -> items.Item:
         for entry in self._inventory:
-            held_item:items.Consumable = entry
-            if held_item.id == item.id:
-                return self._inventory.index(held_item)
-        return False
+            held_item: items.Item = entry
+            if held_item.name == name:
+                return entry
+            
+        return None
+
     def print_inventory(self) -> None:
         """
         Prints the contents of the player's inventory
@@ -559,7 +576,8 @@ class Player():
                 #return None
         #self._stats[effect.stat] += effect.power
         self._status_effects.append(effect)
-        effect.update()
+        if effect.temp is True:
+            effect.apply()
         global_commands.type_text(effect.message)
 
     def remove_status_effect(self, effect:Status_Effect=None, id:str="") -> None:
@@ -568,7 +586,7 @@ class Player():
                 if entry.id == id:
                     if entry.temp is True:
                         self._stats[effect.stat] += -(effect.power)
-                    self._status_effects.remove(effect)
+                    self._status_effects.remove(entry)
                     global_commands.type_with_lines(f" The {effect.id}'s effect has worn off.")
                     return None
         else:
