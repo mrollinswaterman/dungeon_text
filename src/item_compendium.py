@@ -2,6 +2,7 @@
 import items
 import player
 import global_commands
+import status_effects
 #import mob
 
 class Health_Potion(items.Consumable):
@@ -95,13 +96,13 @@ class Firebomb(items.Consumable):
 
     def set_on_fire(self) -> None:
 
-        burning  = player.Status_Effect("Burning", self, "hp", self._target)
-        burning.set_duration(3)
-        burning.set_power(self._numerical_rarity)
-        burning.set_message(f" The {self._target.id} is now Burning!")
-        global_commands.type_text(burning.message)
-        self._target.add_status_effect(burning)
-        
+        firebomb = status_effects.On_Fire(self._owner, self._target)
+        firebomb.set_duration(3)
+        firebomb.set_power(self._numerical_rarity)
+        firebomb.set_message(f" The {self._target.id} is now On Fire!")
+        #global_commands.type_text(firebomb.message)
+        self._target.add_status_effect(firebomb)
+       
 def generate_firebombs(num):
     fb = Firebomb()
     fb.set_quantity(num)

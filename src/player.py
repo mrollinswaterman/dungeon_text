@@ -2,6 +2,7 @@ import random
 import items
 import global_commands
 from events import Event
+import status_effects
 
 BONUS = {
     5: -4,
@@ -32,92 +33,6 @@ TAG_TO_STAT = {
     "evasion": "Evasion",
     "damage-taken-multiplier": "Vulnerability"
 }
-
-class Status_Effect():
-
-    def __init__(self, id:str, src, stat: str, target, power:int = 0, duration: int = 0):
-        #SRC is a player or mob object
-        self._id = id
-        self._src = src
-        self._power = power
-        self._duration = duration
-        self._stat = stat
-        self._target = target
-        self._message = ""
-        self._change = "increased"
-        if self._power < 0:
-            self._change = "decreased"
-        self._temp = False
-        self._active = True
-
-    #properties
-    @property
-    def id(self) -> str:
-        return f"{self._src.name}'s {self._id}"
-    @property
-    def src(self):
-        return self._src
-    @property
-    def power(self) -> int:
-        return self._power
-    @property
-    def duration(self) -> int:
-        return self._duration
-    @property
-    def stat(self) -> str:
-        return self._stat
-    @property
-    def target(self):
-        return self._target
-    @property
-    def message(self):
-        return self._message
-    @property
-    def active(self):
-        return self._active
-    @property
-    def temp(self) -> bool:
-        return self._temp
-    
-    #methods
-    def update(self) -> None:
-        self._duration -= 1
-        if self._temp is False:
-            self.apply()
-        if self._duration <= 0:
-            self._active = False
-            self._src._applied_debuff = False
-        
-
-    def apply(self) -> None:
-        if self._temp is True:
-            self._target.stats[self._stat] += self._power
-
-        else:
-            taken = self._target.take_damage(self._power)
-            if self._target.dead:
-                global_commands.type_with_lines(f" The {self.id} did {taken} damage to the {self._target.id}.\n")
-            else:
-                global_commands.type_with_lines(f" The {self.id} did {taken} damage to the {self._target.id}.")
-
-    def set_power(self, num:int) -> None:
-        self._power = num
-        if self._power < 0:
-            self._change = "decreased"
-
-    def set_duration(self, num:int) -> None:
-        self._duration = num
-
-    def set_message(self, msg:str) -> None:
-        self._message = msg
-
-    def cleanse(self) -> None:
-        self._duration = 0
-        self._active = False
-
-    def set_temp(self, temp:bool) -> None:
-        self._temp = temp
-
 
 class Player():
 
@@ -150,7 +65,7 @@ class Player():
         self._xp = 0
         self._gold = 0
         self._inventory = []
-        self._status_effects:list[Status_Effect] = []
+        self._status_effects_list:set[status_effects.Status_Effect] = set()
         self._level_up_function = None
 
         #equipment
@@ -254,7 +169,7 @@ class Player():
         return self.xp > (15 * self._level)
     @property
     def status_effects(self):
-        return self._status_effects
+        return self._status_effects_list
     @property
     def max_ap(self) -> None:
         """
@@ -504,15 +419,12 @@ class Player():
             pass
 
         if self.bonus("str") + 1 < armor.numerical_weight_class:
-            armor_debuff = Status_Effect("Armor Debuff", armor, "dex", self)
+            armor_debuff = status_effects.Stat_Debuff(self, self, "dex")
             armor_debuff.set_power(-(armor.numerical_weight_class - 2))
             armor_debuff.set_duration(10000)
-            armor_debuff.set_temp(True)
-            armor_debuff.set_message(f" Your Dexterity is being decreased by 2 by your {armor.id}!\n")
             self.add_status_effect(armor_debuff)
-            self._stats["evasion"] = 12 + BONUS[self._stats["dex"]]
+            self._stats["evasion"] = 9 + self.bonus("dex")
 
-        #self._equipped["Armor"] = armor
             
     def can_carry(self, item:items.Item) -> bool:
         return self.current_weight + item.total_weight <= self.carrying_capacity
@@ -564,45 +476,37 @@ class Player():
                 self.pick_up(reward[entry])
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
-    def add_status_effect(self, effect:Status_Effect) -> None:
+    def add_status_effect(self, effect) -> None:
         """
         Adds a status effect to the player's status effect list
         and changes the corresponding stat
         """
-        #for status in self._status_effects:
+        #for status in self._status_effects_list:
             #id, src = status.id, status.src
             #if effect.id == id and effect.src == src: --> All this code makes status effects not stack
                 #print(f"The {effect.id} effect hasn't run out yet.")
                 #return None
         #self._stats[effect.stat] += effect.power
-        self._status_effects.append(effect)
-        if effect.temp is True:
-            effect.apply()
+        effect: status_effects.Status_Effect = effect
+        self._status_effects_list.add(effect)
         global_commands.type_text(effect.message)
 
-    def remove_status_effect(self, effect:Status_Effect=None, id:str="") -> None:
-        if len(id) > 0 and effect is not None:
-            for entry in self._status_effects:
-                if entry.id == id:
-                    if entry.temp is True:
-                        self._stats[effect.stat] += -(effect.power)
-                    self._status_effects.remove(entry)
-                    global_commands.type_with_lines(f" The {effect.id}'s effect has worn off.")
-                    return None
-        else:
-            if effect.temp is True:
-                self._stats[effect.stat] += -(effect.power)
-            self._status_effects.remove(effect)
+    def remove_status_effect(self, effect) -> bool:
+        effect: status_effects.Status_Effect = effect
+        if effect in self._status_effects_list:
+            effect.cleanse()
+            self._status_effects_list.remove(effect)
             global_commands.type_with_lines(f" The {effect.id}'s effect has gone away.")
-            return None
+            return True
+        else:
+            raise ValueError("Stat to be removed cannot be found")
 
     def update(self) -> None:
-        for effect in self._status_effects:
+        for effect in self._status_effects_list:
             effect.update()
             if effect.active is False:
                 #removes effect
                 self.remove_status_effect(effect)
-
 
 # arush wrote this while drunk, he won't let me delete it
 class bitch(Event):
