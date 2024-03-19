@@ -7,6 +7,8 @@ import global_commands, global_variables
 
 PLAYER = global_variables.PLAYER
 
+item_compendium.PLAYER = PLAYER
+
 #notes on formatting
 
 def link_start(enemy:mob.Mob) -> None:
@@ -45,7 +47,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the Player turn
         """
-        PLAYER.update()
+        enemy.update()
         player_commands.player_turn_options()
 
     def player_death():
@@ -57,7 +59,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
-        enemy.update()
+        PLAYER.update()
         if enemy.dead:
             end_scene()
         if enemy.fleeing:
@@ -65,7 +67,7 @@ def link_start(enemy:mob.Mob) -> None:
             return None
         #if trigger is active, 75% chance of special
         if enemy.trigger() is True:
-            if global_commands.probability(75) is True:
+            if global_commands.probability(100) is True:#75
                 if enemy.special() is True:
                     enemy_commands.run_enemy_next()
                     return None
@@ -146,6 +148,7 @@ def link_start(enemy:mob.Mob) -> None:
     while global_variables.RUNNING is True:
 
         command = input(">").lower()
+        #print("")
 
         #command interpretation
         if command == "exit":
@@ -157,12 +160,10 @@ def link_start(enemy:mob.Mob) -> None:
             player_commands.hp()
         if command == "i":
             player_commands.inventory()
-        if command == "u":
-            player_commands.use_an_item(item_compendium.generate_hp_potions())
-        if command == "t":
-            player_commands.use_an_item(PLAYER.find_item_by_name("Firebombs"), enemy)
         if command == "test":
             print(enemy.hp)
+        if command == "p":
+            enemy_turn()
         if command == "f":
             global_variables.RUNNING = False
             player_commands.flee()
@@ -171,8 +172,8 @@ def link_start(enemy:mob.Mob) -> None:
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
-    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
+    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")

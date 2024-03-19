@@ -5,20 +5,23 @@ import global_commands
 import status_effects
 #import mob
 
+PLAYER = None
+
 class Health_Potion(items.Consumable):
 
     def __init__(self, rarity="Common", id="Health Potion", quantity=0):
         super().__init__(id, rarity, quantity)
         self._unit_weight = 0.5
+        self._target:player.Player = PLAYER
 
-    def use(self, target: player.Player) -> bool:
+    def use(self, target=PLAYER) -> bool:
         """
         Heals the target for a given amount
         """
-        if target.hp < target.max_hp:
+        if self._target.hp < self._target.max_hp:
             self.decrease_quantity(1)
             global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
-            target.heal(self._strength)
+            self._target.heal(self._strength)
             self._owner.spend_ap(1)
             return True
         global_commands.type_with_lines(" You are already full HP.")
@@ -66,41 +69,39 @@ class Firebomb(items.Consumable):
         throw = self._owner.roll_a_check("dex")
         dodge = target.roll_a_check("dex")
 
-        self._owner.spend_ap(1)
+        self._owner.spend_ap()
 
         global_commands.type_with_lines(f" You throw a {self._id} at the {self._target.id}.\n")
 
         if dodge >= throw + 10:
-            global_commands.type_text(f" The {target.id} dodged your {self._id} entirely!")
+            global_commands.type_text(f" The {self._target.id} dodged your {self._id} entirely!")
             return True
         
         if dodge >= throw:
-            global_commands.type_text(f" The {target.id} partially dodged your {self._id}.\n")
-            taken = target.take_damage(int(self._damage / 2))
+            global_commands.type_text(f" The {self._target.id} partially dodged your {self._id}.\n")
+            taken = self._target.take_damage(int(self._damage / 2))
             if global_commands.probability(50 - dodge): #--> this is a formattting thing the message doesn't change 
-                global_commands.type_text(f" The {self._id} did {taken} damage to the {target.id}.\n")
+                global_commands.type_text(f" The {self._id} did {taken} damage to the {self._target.id}.\n")
                 self.set_on_fire()
             else:
-                global_commands.type_text(f" The {self._id} did {taken} damage to the {target.id}.")
+                global_commands.type_text(f" The {self._id} did {taken} damage to the {self._target.id}.")
             return True
         
         if throw > dodge:
             global_commands.type_text(f" You hit the {self._target.id}.\n")
-            taken = target.take_damage(int(self._damage))
+            taken = self._target.take_damage(int(self._damage))
             if global_commands.probability(50):#--> this is a formattting thing the message doesn't change 
-                global_commands.type_text(f" Your {self._id} did {taken} damage to the {target.id}.\n")
+                global_commands.type_text(f" Your {self._id} did {taken} damage to the {self._target.id}.\n")
                 self.set_on_fire()
             else:
-                global_commands.type_text(f" Your {self._id} did {taken} damage to the {target.id}.")
+                global_commands.type_text(f" Your {self._id} did {taken} damage to the {self._target.id}.")
             return True
 
     def set_on_fire(self) -> None:
-
         firebomb = status_effects.On_Fire(self._owner, self._target)
         firebomb.set_duration(3)
-        firebomb.set_power(self._numerical_rarity)
+        firebomb.set_potency(self._numerical_rarity)
         firebomb.set_message(f" The {self._target.id} is now On Fire!")
-        #global_commands.type_text(firebomb.message)
         self._target.add_status_effect(firebomb)
        
 def generate_firebombs(num):

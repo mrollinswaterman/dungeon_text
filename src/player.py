@@ -65,7 +65,7 @@ class Player():
         self._xp = 0
         self._gold = 0
         self._inventory = []
-        self._status_effects_list:set[status_effects.Status_Effect] = set()
+        self._status_effects_list:list[status_effects.Status_Effect] = []
         self._level_up_function = None
 
         #equipment
@@ -336,7 +336,7 @@ class Player():
         """
         Resets Action Points to max
         """
-        self._ap = self._max_ap
+        self._ap = self._stats["ap"]
 
     def change_name(self, name:str) -> None:
         self._name = name
@@ -396,14 +396,14 @@ class Player():
         if item.type in self._equipped:
             if self._equipped[item.type] is not None:
                 self._inventory.append(self._equipped[item.type])
-            self._equipped[item.type] = item
-            if item.type == "Armor":
-                self.equip_armor(item)
-                return True
             if item in self._inventory:
                 self._inventory.remove(item)
             if silently is False:
                 print(f" {item.name} equipped.")
+            if item.type == "Armor":
+                self.equip_armor(item)
+                return True
+            self._equipped[item.type] = item
             return True
         return False
 
@@ -411,22 +411,28 @@ class Player():
         """
         Same as above but for armor
         """
-        try:
-            self.remove_status_effect(None, "Armor Debuff")
-            #self._equipped["Armor"] = armor
-            #self._inventory[armor.id] = armor
-        except AttributeError:
-            pass
+        for effect in self._status_effects_list:
+            effect:status_effects.Status_Effect = effect
+            if effect.id == "Maximum Dexterity Bonus":
+                self.remove_status_effect(effect)
+
+        self._equipped["Armor"] = armor
 
         if self.bonus("str") + 1 < armor.numerical_weight_class:
-            armor_debuff = status_effects.Stat_Debuff(self, self, "dex")
+            armor_debuff = status_effects.Stat_Debuff(armor, self)
+            armor_debuff.set_stat("dex")
+            armor_debuff.set_id("Maximum Dexterity Bonus")#placeholder id --> just a flag to find and remove it when equipped armor changes
             armor_debuff.set_power(-(armor.numerical_weight_class - 2))
             armor_debuff.set_duration(10000)
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 9 + self.bonus("dex")
 
-            
     def can_carry(self, item:items.Item) -> bool:
+        """
+        Checks if the player can carry item 
+
+        Returns True if they can, False if not
+        """
         return self.current_weight + item.total_weight <= self.carrying_capacity
 
     def has_item(self, item: items.Item) -> bool:
@@ -450,6 +456,11 @@ class Player():
         return False
     
     def find_item_by_name(self, name:str) -> items.Item:
+        """
+        Finds an item in the player's inventory by it's name
+
+        Returns the item, None if not found
+        """
         for entry in self._inventory:
             held_item: items.Item = entry
             if held_item.name == name:
@@ -488,15 +499,14 @@ class Player():
                 #return None
         #self._stats[effect.stat] += effect.power
         effect: status_effects.Status_Effect = effect
-        self._status_effects_list.add(effect)
-        global_commands.type_text(effect.message)
+        effect.apply()
+        self._status_effects_list.append(effect)
 
     def remove_status_effect(self, effect) -> bool:
         effect: status_effects.Status_Effect = effect
         if effect in self._status_effects_list:
-            effect.cleanse()
             self._status_effects_list.remove(effect)
-            global_commands.type_with_lines(f" The {effect.id}'s effect has gone away.")
+            effect.cleanse()
             return True
         else:
             raise ValueError("Stat to be removed cannot be found")
@@ -507,6 +517,10 @@ class Player():
             if effect.active is False:
                 #removes effect
                 self.remove_status_effect(effect)
+                break
+
+
+        
 
 # arush wrote this while drunk, he won't let me delete it
 class bitch(Event):

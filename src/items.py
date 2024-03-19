@@ -279,6 +279,7 @@ class Consumable(Item):
         self._strength = self._numerical_rarity * 2
         self._is_consumable = True
         self._type = "Consumable"
+        self._target = None
         self._unit_weight = 1
         self._unit_value = 8 * self._numerical_rarity
         self._value = self._unit_value * self._quantity
@@ -296,6 +297,9 @@ class Consumable(Item):
     @property
     def value(self) -> int:
         return self._unit_value
+    @property
+    def target(self):
+        return self._target
 
     #methods
     def use(self, target):

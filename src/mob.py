@@ -2,6 +2,7 @@ import random
 from typing import Union
 import global_variables, global_commands
 import player
+import status_effects
 
 class Mob():
 
@@ -126,13 +127,19 @@ class Mob():
     def roll_a_check(self, stat:str):
         return random.randrange(1, 20) + self.bonus(stat)
     
-    def spend_ap(self, num:int) -> None:
+    def spend_ap(self, num:int=1) -> None:
+        """
+        Spend an amount of AP
+        """
         if self.can_act:
             self._ap -= 1
         else:
             raise ValueError("No AP to spend")
         
     def reset_ap(self):
+        """
+        Resets mob's AP to max value
+        """
         self._ap = self._max_ap
     
     def roll_damage(self) -> int:
@@ -155,26 +162,29 @@ class Mob():
         """
         Determines if a mob sufferes a negative effect upon rolling a nat 1.
         """
-
         return global_commands.probability(50)
         
-    def attack_of_oppurtunity(self, target) -> bool:
-        
-        if self.roll_attack() - 2 >= target.evasion:
+    def attack_of_oppurtunity(self) -> bool:
+        """
+        Rolls an attack of opportuity against the player
+        """
+        if self.roll_attack() - 2 >= self._player.evasion:
             return True
         return False
     
-    def add_status_effect(self, effect:player.Status_Effect) -> None:
-        #self._stats[effect.stat] += effect.power
+    def add_status_effect(self, effect:status_effects.Status_Effect) -> None:
+        """
+        Adds a status effect to the mob
+        """
         self._status_effects.add(effect)
-        if effect.temp is True:
-            effect.apply()
+        effect.apply()
 
-    def remove_status_effect(self, effect:player.Status_Effect) -> None:
-        if effect.temp is True:
-            self._stats[effect.stat] += -(effect.power)
+    def remove_status_effect(self, effect:status_effects.Status_Effect) -> None:
+        """
+        Removes a status effect from the mob
+        """
         self._status_effects.remove(effect)
-        global_commands.type_with_lines(f" The {effect.id}'s effect has gone away.")
+        effect.cleanse()
         return None
 
     def set_level(self, level:int)-> None:

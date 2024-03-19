@@ -56,7 +56,7 @@ def enemy_attack():
     """
     Runs the enemy attack
     """
-    ENEMY.spend_ap(1)
+    ENEMY.spend_ap()
     attack = ENEMY.roll_attack()
     global_commands.type_with_lines(f" The {ENEMY.id} attacks you, rolling a {attack}\n")
     if attack == 0:

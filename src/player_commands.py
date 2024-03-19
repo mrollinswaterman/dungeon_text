@@ -19,7 +19,7 @@ NEXT_SCENE = None
 
 def player_turn_options():
     global_commands.type_with_lines(f" What would you like to do? Action Points: {PLAYER.ap}/{PLAYER.max_ap}\n")
-    print (f"\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Use a Health Potion - (u) | Throw a Firebomb - (t)\n")
+    print (f"\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Pass Turn - (p)\n")
 
 
 def attack(run_on_hit=None, run_on_miss=None) -> None:
@@ -32,6 +32,11 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
 
     Returns nothing
     """
+    if PLAYER.can_act is False:
+        global_commands.type_text("\nNo AP available.")
+        PLAYER_TURN()
+        return None
+
     if run_on_miss is None:
         run_on_miss = ENEMY_TURN
     if run_on_hit is None:
@@ -90,29 +95,55 @@ def inventory() -> None:
     """
     global_commands.print_with_lines(f" Gold: {PLAYER.gold}\n")
     PLAYER.print_inventory()
-    PLAYER_TURN()
+    select_an_item()
+
+def select_an_item() -> None:
+    global_commands.type_with_lines(" Enter an Item's number to use it\n")
+    command = input(">")
+    print("")
+    try:
+        command = int(command)
+        try:
+            item = PLAYER.inventory[command - 1]
+        except IndexError:
+            print(" Please enter a valid number.")
+            select_an_item()
+            return None
+    except TypeError:
+        print(" Please enter a valid number.")
+        select_an_item()
+        return None
+    use_an_item(item)
 
 def use_an_item(item: items.Consumable, target=PLAYER) -> None:
     """
     Uses an item on the Player, if the player has the item in their inventory
     """
+    if PLAYER.can_act is False:
+        global_commands.type_text(" No AP available.")
+        PLAYER_TURN()
+        return None
     if item is None:
         raise ValueError("")
     if PLAYER.has_item(item) is True:#check the player has the item
-        item = PLAYER.find_item_by_name(item.name)
-        held_item:items.Consumable = item
-        if held_item.quantity == 0: #if the items quantity is 0, remove it
-            PLAYER.inventory.remove(held_item)
-            held_item.set_owner(None)
-            global_commands.type_with_lines(f" No {item.name} avaliable!")
-            PLAYER_TURN()
-            return None
-        held_item.use(target)
-        if PLAYER.can_act is False:
-            PLAYER.reset_ap()
-            ENEMY_TURN()
+        if item.is_consumable is True:
+            item = PLAYER.find_item_by_name(item.name)
+            held_item:items.Consumable = item
+            if held_item.quantity == 0: #if the items quantity is 0, remove it
+                PLAYER.inventory.remove(held_item)
+                held_item.set_owner(None)
+                global_commands.type_with_lines(f" No {item.name} avaliable!")
+                select_an_item()
+                return None
+            held_item.use(target)
+            if PLAYER.can_act is False:
+                PLAYER.reset_ap()
+                ENEMY_TURN()
+            else:
+                PLAYER_TURN()
         else:
-            PLAYER_TURN()
+            global_commands.type_text(f" {item.name} is not a consumable.")
+            select_an_item()
     else:
         global_commands.type_with_lines(f" No {item.name} avaliable!")
         PLAYER_TURN()
@@ -134,6 +165,10 @@ def flee() -> None:
     """
     Attempts to run away from the current encounter
     """
+    if PLAYER.can_act is False:
+        global_commands.type_text(" No AP available.")
+        PLAYER_TURN()
+
     global_commands.type_with_lines(f" You attempt to flee...\n")
     
     if global_commands.probability(90 - int((PLAYER.hp / PLAYER.max_hp) * 100)):
