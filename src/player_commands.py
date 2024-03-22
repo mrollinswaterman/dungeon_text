@@ -19,8 +19,11 @@ NEXT_SCENE = None
 
 def player_turn_options():
     global_commands.type_with_lines(f" What would you like to do? Action Points: {PLAYER.ap}/{PLAYER.max_ap}\n")
-    print (f"\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Pass Turn - (p)\n")
+    options = "\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Pass Turn - (p)" + add_turn_options()
+    print(options)
 
+def add_turn_options():
+    pass
 
 def attack(run_on_hit=None, run_on_miss=None) -> None:
     """

@@ -13,6 +13,8 @@ class Status_Effect():
         self._duration = 0
         self._message:str = ""
         self._cleanse_message:str = ""
+        self._cleanse_stat = None
+        self._cleanse_option = ""
         self._active = True
 
     #properties
@@ -77,6 +79,7 @@ class On_Fire(Status_Effect):
         super().__init__(src, target, id)
         self._message = f" The {self._target} is now {id}."
         self._cleanse_message = f" The {self._target} is not longer {id}."
+        self._cleanse_option = f" Remove {id} - (r)"
     
     def update(self):
         self._duration -= 1
@@ -126,6 +129,7 @@ class Entangled(Status_Effect):
         self._stat = "ap"
         self._message = f" You are now {id}."
         self._cleanse_message = f" You are no longer {id}."
+        self._cleanse_option = f" Remove {id} - ({id[0].lower()})"
     
     def apply(self):
         super().apply()
