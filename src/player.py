@@ -326,7 +326,7 @@ class Player():
             self._gold = 0
             return all_i_have
 
-    def spend_ap(self, num) -> None:
+    def spend_ap(self, num=1) -> None:
         """
         Spends Action points equal to num
         """

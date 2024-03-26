@@ -64,4 +64,3 @@ def type_text(text: str, speed: int = .03, delay=True) -> None:
         time.sleep(speed)
         print(char, end='', flush=True)
     print("")#newline after typing text
-

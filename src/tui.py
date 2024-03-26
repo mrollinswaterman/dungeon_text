@@ -164,6 +164,8 @@ def link_start(enemy:mob.Mob) -> None:
             print(enemy.hp)
         if command == "p":
             enemy_turn()
+        if command == "c":
+            player_commands.cleanse_an_effect()
         if command == "f":
             global_variables.RUNNING = False
             player_commands.flee()

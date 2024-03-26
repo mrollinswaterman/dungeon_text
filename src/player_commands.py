@@ -4,6 +4,7 @@ import global_variables
 import mob
 import items
 import narrator
+import status_effects
 
 GOD_MODE = False
 
@@ -19,11 +20,8 @@ NEXT_SCENE = None
 
 def player_turn_options():
     global_commands.type_with_lines(f" What would you like to do? Action Points: {PLAYER.ap}/{PLAYER.max_ap}\n")
-    options = "\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Pass Turn - (p)" + add_turn_options()
+    options = "\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Pass Turn - (p) | Cleanse a Status Effect - (c)"
     print(options)
-
-def add_turn_options():
-    pass
 
 def attack(run_on_hit=None, run_on_miss=None) -> None:
     """
@@ -36,7 +34,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     Returns nothing
     """
     if PLAYER.can_act is False:
-        global_commands.type_text("\nNo AP available.")
+        global_commands.type_text("\n No AP available.")
         PLAYER_TURN()
         return None
 
@@ -49,7 +47,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
         attack_roll = 1000000
     else:
         attack_roll = 1#PLAYER.roll_attack()
-        PLAYER.spend_ap(1)
+        PLAYER.spend_ap()
 
     global_commands.type_with_lines(f" You attack the {ENEMY.id}, rolling a {attack_roll}.\n")
 
