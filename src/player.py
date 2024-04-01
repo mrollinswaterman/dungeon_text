@@ -70,7 +70,7 @@ class Player():
 
         #equipment
         self._equipped = {
-            "Weapon" : None, 
+            "Weapon": None, 
             "Armor": None
         }
 
@@ -284,7 +284,7 @@ class Player():
         """
         if xp <= 0:
             return None
-        global_commands.type_text(f" {xp} XP earned.")
+        global_commands.type_text(f"{xp} XP earned.")
         self._xp += xp
 
         if self.level_up is True:
@@ -297,7 +297,7 @@ class Player():
         if gold <= 0:
             return None
         if silently is False:
-            global_commands.type_text(f" {gold} Gold gained.\n")
+            global_commands.type_text(f"{gold} Gold gained.\n")
         self._gold += gold
 
     def spend_gold(self, gold:int) -> bool:
@@ -347,11 +347,11 @@ class Player():
         """
         if self._hp <= (self._max_hp - healing):
             self._hp += healing
-            global_commands.type_text(f" You healed {healing} HP.")
+            global_commands.type_text(f"You healed {healing} HP.")
             return None
         if self._hp + healing > self._max_hp:
             self._hp = self._max_hp
-            global_commands.type_text(f" You only healed {self._max_hp - self._hp} HP.")
+            global_commands.type_text(f"You only healed {self._max_hp - self._hp} HP.")
             return None
 
 
@@ -377,7 +377,7 @@ class Player():
             return True
         else:
             if silently is False:
-                global_commands.type_text(" Not enough inventory space\n")
+                global_commands.type_text("Not enough inventory space\n")
         
     def drop(self, item: items.Item) -> None:
         """

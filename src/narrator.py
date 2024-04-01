@@ -78,7 +78,7 @@ def exit_the_dungeon():
     menu_options()
 
 def buy_something():
-    global_commands.type_with_lines(" Enter an item's number to purchase it OR (c) - Cancel Order\n")
+    global_commands.type_with_lines("Enter an item's number to purchase it OR (c) - Cancel Order\n")
     command = input(">").lower()
     print("")#newline after cmd prompt
 
@@ -91,7 +91,7 @@ def buy_something():
             stock_num = int(command)
             item = global_variables.SHOPKEEP.inventory[stock_num-1]
         except ValueError:
-            print(" Invalid option, please try again.\n")
+            print("Invalid option, please try again.\n")
             buy_something()
         if stock_num <= global_variables.SHOPKEEP.stock_size+1:
             if item.is_consumable is False:
@@ -101,7 +101,7 @@ def buy_something():
                     shopkeep_options()
             else:
                 def ask_quantity():
-                    global_commands.type_text(f" Please enter desired quantity:\n")
+                    global_commands.type_text(f"Please enter desired quantity:\n")
                     command = input(">").lower()
                     print("")#newline after... you get the idea
                     if command == "exit":
@@ -112,12 +112,12 @@ def buy_something():
                         else:
                             shopkeep_options()
                     except TypeError:
-                        print(f" Invalid quantity '{command}'. Please enter a valid quantity.\n")
+                        print(f"Invalid quantity '{command}'. Please enter a valid quantity.\n")
                         ask_quantity()
 
                 ask_quantity()
         else:
-            print(f" Invalid item number '{int(command)}'. Please try again.\n")
+            print(f"Invalid item number '{int(command)}'. Please try again.\n")
             buy_something()
 
 def leave_the_shop():
@@ -126,7 +126,7 @@ def leave_the_shop():
 
 def shopkeep_options():
     global_commands.type_with_lines(random.choice(ENTER_THE_SHOP))
-    global_commands.type_with_lines(" What would you like to do?\n")
+    global_commands.type_with_lines("What would you like to do?\n")
     print("\t Buy Something - (b) | Leave - (l) | Sell something - (s) | Inventory - (i)\n")
     command = input(">").lower()
     print("")
@@ -140,11 +140,11 @@ def shopkeep_options():
     elif command == "exit":
         sys.exit()
     else: 
-        print(" Invalid command, please try again")
+        print("Invalid command, please try again")
         shopkeep_options()
 
 def rest():
-    global_commands.type_with_lines(" Plenty of time to rest when you're dead.\n", 2)
+    global_commands.type_with_lines("Plenty of time to rest when you're dead.\n", 2)
     menu_options()
 
 def check_player_inventory(next):
@@ -152,7 +152,7 @@ def check_player_inventory(next):
     print(f" Gold: {global_variables.PLAYER.gold}\n")
     global_variables.PLAYER.print_inventory()
     def select_item():
-        global_commands.type_with_lines(" Enter an item's number to equip it OR (b) - Go Back\n")
+        global_commands.type_with_lines("Enter an item's number to equip it OR (b) - Go Back\n")
         command = input(">").lower()
         print("")#newline after cmd prompt
         if command == "b":
@@ -163,18 +163,18 @@ def check_player_inventory(next):
             try:
                 x = int(command)
             except ValueError:
-                print(" Invalid command, please try again.\n")
+                print("Invalid command, please try again.\n")
                 select_item()
             item = global_variables.PLAYER.inventory[int(command)-1]
             if global_variables.PLAYER.equip(item) is True:
                 check_player_inventory(next)
             else:
-                print(" Can't equip that.")
+                print("Can't equip that.")
                 select_item()
     select_item()
 
 def menu_options():
-    global_commands.type_text(" What would you like to do?\n")
+    global_commands.type_text("What would you like to do?\n")
     print("\t Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v) | Inventory - (i) \n")
     command = input(">").lower()
     #print("")#newline after cmd prompt
@@ -189,5 +189,5 @@ def menu_options():
     elif command == "exit":
         sys.exit()
     else:
-        global_commands.type_text(" Invalid command please try again\n")
+        global_commands.type_text("Invalid command please try again\n")
         menu_options()

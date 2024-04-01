@@ -41,7 +41,7 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins an encounter
         """
-        global_commands.type_text(f" You encounter a Level {enemy.level} {enemy.id.upper()}!")
+        global_commands.type_text(f"You encounter a Level {enemy.level} {enemy.id.upper()}!")
 
     def player_turn():
         """
@@ -83,7 +83,7 @@ def link_start(enemy:mob.Mob) -> None:
             return None
 
     def end_scene():
-        global_commands.type_text(f" You killed the {enemy.id}!\n")
+        global_commands.type_text(f"You killed the {enemy.id}!\n")
         PLAYER.recieve_reward(enemy.loot)
         PLAYER.reset_ap()
         narrator.continue_run(next_scene)
@@ -108,7 +108,7 @@ def link_start(enemy:mob.Mob) -> None:
             global_variables.RUNNING = False
             sys.exit()
         else:
-            global_commands.type_text(f" Invalid command '{command}', please try again.")
+            global_commands.type_text(f"Invalid command '{command}', please try again.")
             run_event(event)
 
     def level_up_player():
@@ -116,7 +116,7 @@ def link_start(enemy:mob.Mob) -> None:
         command = input(">")
         print("")#newline after cmd prompt
         PLAYER.spend_xp(command)
-        global_commands.type_text(f" Your {command} increased by 1. You are now Level {PLAYER.level}")
+        global_commands.type_text(f"Your {command} increased by 1. You are now Level {PLAYER.level}")
         global_variables.SHOPKEEP.set_player_level(PLAYER.level)#make sure shopkeep's threat changes
         if PLAYER.level_up is True:
             level_up_player()

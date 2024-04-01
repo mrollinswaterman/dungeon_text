@@ -48,13 +48,13 @@ class Goblin(mob.Mob):
         """
         if self.trigger():
             self.spend_ap(1)
-            global_commands.type_with_lines(f" The {self._id} makes a grab at your gold pouch.\n")
+            global_commands.type_with_lines(f"The {self._id} makes a grab at your gold pouch.\n")
             if self._player.roll_a_check("dex") >= self.roll_attack():
                 global_commands.type_text(" It missed.")
             else:
                 prospective = random.randrange(1,20)
                 actual = self._player.lose_gold(prospective)
-                global_commands.type_text(f" The {self._id} stole {actual} gold from you!")
+                global_commands.type_text(f"The {self._id} stole {actual} gold from you!")
                 self._loot["gold"] += actual
             return True
         return False

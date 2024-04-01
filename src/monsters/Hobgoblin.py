@@ -54,15 +54,15 @@ class Hobgoblin(mob.Mob):
         """
         if self.trigger():
             self.spend_ap()
-            global_commands.type_with_lines(f" The {self.id} hurls enraging insults at you.\n")
+            global_commands.type_with_lines(f"The {self.id} hurls enraging insults at you.\n")
 
             if self._player.roll_a_check("cha") >= self.dc:
-                global_commands.type_text(f" Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
+                global_commands.type_text(f"Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
 
             else:
                 if len(self._applied_status_effects) > 0:
                     return False
-                global_commands.type_text(f" The {self.id}'s insults distract you, making you an easier target.\n")
+                global_commands.type_text(f"The {self.id}'s insults distract you, making you an easier target.\n")
                 taunt = status_effects.Entangled(self, self._player)
                 taunt.set_duration(3)
                 #taunt = status_effects.Stat_Debuff(self, self._player, "evasion")

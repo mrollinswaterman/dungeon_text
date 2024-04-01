@@ -50,6 +50,8 @@ def type_text(text: str, speed: int = .03, delay=True) -> None:
 
     speed: an integer denoting the delay between characters
     """
+    text = " " + text
+    
     if delay is True:
         time.sleep(.2)
 

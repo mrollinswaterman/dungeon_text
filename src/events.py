@@ -5,42 +5,42 @@ import global_commands
 
 FAILURE_LINES = {
     "str": [
-        " You're going to need more than brawn to solve this one.",
-        " Your bulging biceps aren't up to this task.",
-        " No amount of strength can solve this problem."
+        "You're going to need more than brawn to solve this one.",
+        "Your bulging biceps aren't up to this task.",
+        "No amount of strength can solve this problem."
     ],
 
     "dex": [
-        " You do a sick spin move. Nothing happens.",
-        " You can't think of a way to come at this problem using your dexterity.",
-        " This will require substancially more than the ability to twist yourself into a pretzel.",
-        " No way to wriggle your way out of this."
+        "You do a sick spin move. Nothing happens.",
+        "You can't think of a way to come at this problem using your dexterity.",
+        "This will require substancially more than the ability to twist yourself into a pretzel.",
+        "No way to wriggle your way out of this."
     ],
 
     "con": [
-        " After the 5th consecutive minute of holding your breath, you give up.",
-        " Being stout of heart won't do you much good here.",
-        " Your above average pain tolerance will get you nowhere with this."
+        "After the 5th consecutive minute of holding your breath, you give up.",
+        "Being stout of heart won't do you much good here.",
+        "Your above average pain tolerance will get you nowhere with this."
     ],
 
     "int": [
-       " You can't think your way out of this one.",
-       " You deduce you should try a different approach.",
-       " Maybe those kids that picked on you in school had a point..."
+       "You can't think your way out of this one.",
+       "You deduce you should try a different approach.",
+       "Maybe those kids that picked on you in school had a point..."
     ],
 
     "wis": [
-        " You pause for a while to ponder the forms. The forms are throughly unhelpful.",
-        " You sense that your Wisdom is useless here.",
-        " Your intution tells you to try something else.",
-        " The ability to keep a cool head is useful, but this will require a different skill set"
+        "You pause for a while to ponder the forms. The forms are throughly unhelpful.",
+        "You sense that your Wisdom is useless here.",
+        "Your intution tells you to try something else.",
+        "The ability to keep a cool head is useful, but this will require a different skill set"
     ],
 
     "cha": [
-        " You tell a mildly amusing Knock, Knock joke. Nobody laughs.",
-        " Your silver tongue is of no use.",
-        " Now is not the time for smooth talking",
-        " Good looks can only get you so far..."
+        "You tell a mildly amusing Knock, Knock joke. Nobody laughs.",
+        "Your silver tongue is of no use.",
+        "Now is not the time for smooth talking",
+        "Good looks can only get you so far..."
     ]
 }
 

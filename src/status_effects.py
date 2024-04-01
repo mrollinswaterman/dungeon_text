@@ -11,11 +11,9 @@ class Status_Effect():
         self._target = target
         self._potency = 1
         self._duration = 0
-        self._dc = 0
         self._message:str = ""
         self._cleanse_message:str = ""
         self._cleanse_stat = None
-        self._cleanse_attempt = ""
         self._active = True
 
     #properties
@@ -41,14 +39,8 @@ class Status_Effect():
     def active(self):
         return self._active
     @property
-    def cleanse_option(self):
-        return self._cleanse_option
-    @property
     def cleanse_stat(self):
         return self._cleanse_stat
-    @property
-    def dc(self):
-        return self._dc
     
     #methods
     def update(self) -> None:
@@ -80,38 +72,30 @@ class Status_Effect():
         self._active = False
         global_commands.type_with_lines(self._cleanse_message)
 
-    def roll_to_cleanse(self, roll:int) -> None:
-        global_commands.type_text(self._cleanse_attempt)
-        if roll > self._dc:
-            self.cleanse()
-            return True
-        else:
-            global_commands.type_text(f" {self._cleanse_stat} roll failed!\n")
-            return False
-
+    def attempt_cleanse(self, roll:int = 0):
+        raise NotImplementedError
 
 class On_Fire(Status_Effect):
 
     def __init__(self, src, target, id="On Fire"):
         super().__init__(src, target, id)
-        self._message = f" The {self._target} is now {id}."
-        self._cleanse_message = f" The {self._target} is not longer {id}."
-        self._dc = -10000
+        self._message = f"The {self._target} is now {id}."
+        self._cleanse_message = f"The {self._target} is not longer {id}."
     
     def update(self):
         self._duration -= 1
 
         taken = self._target.take_damage(self._potency, True)
 
-        global_commands.type_text(f" The {self._target} took {taken} damage from from the fire.\n")
+        global_commands.type_text(f"The {self._target} took {taken} damage from from the fire.\n")
 
         if self._duration <= 0:
             self.cleanse()
     
-    def roll_to_cleanse(self, roll: int=0) -> None:
-        global_commands.type_text(self._cleanse_attempt)
+    def attempt_cleanse(self) -> None:
+        global_commands.type_text(" You put out the fire.\n")
         self._target.remove_status_effect(self)
-        return True
+        return None
 
 class Stat_Buff(Status_Effect):
 
@@ -119,9 +103,8 @@ class Stat_Buff(Status_Effect):
         super().__init__(src, target, id)
         self._stat = ""
         self._id = self._stat + id
-        self._message = f" Your {self._stat} is being increased by {self._potency} by the {self._src}'s {self._id}."
-        self._cleanse_message = f" Your {self._stat} has returned to normal."
-        self._cleanse_option = ""
+        self._message = f"Your {self._stat} is being increased by {self._potency} by the {self._src}'s {self._id}."
+        self._cleanse_message = f"Your {self._stat} has returned to normal."
 
     @property
     def stat(self) -> str:
@@ -143,18 +126,17 @@ class Stat_Debuff(Stat_Buff):
     def __init__(self, src, target, id="Debuff"):
         super().__init__(src, target, id)
         self._potency = -self._potency
-        self._message = f" Your {self._stat} is being decreased by {self._potency} by the {self._src.id}'s {self._id}."
+        self._message = f"Your {self._stat} is being decreased by {self._potency} by the {self._src.id}'s {self._id}."
 
 class Entangled(Status_Effect):
 
     def __init__(self, src, target, id="Entangled"):
         super().__init__(src, target, id)
         self._stat = "ap"
-        self._message = f" You are now {id}."
-        self._cleanse_message = f" You are no longer {id}."
+        self._message = f"You are now {id}."
+        self._cleanse_message = f"You are no longer {id}."
         self._cleanse_stat = "str"
-        self._dc = self._src.dc
-        self._cleanse_attempt = f" You put out the fire.\n"
+        self._cleanse_attempt = f"You put out the fire.\n"
     
     def apply(self):
         super().apply()
@@ -166,3 +148,14 @@ class Entangled(Status_Effect):
         self._src._applied_status_effects.remove(self)
         self._target.stats[self._stat] += self._potency
         self._target.reset_ap()
+
+    def attempt_cleanse(self, roll: int = 0):
+        global_commands.type_text(" You try to break free of your entanglement.\n")
+
+        if roll >= self._src.dc - 2:
+            global_commands.type_text(" You succeed!")
+            self._target.remove_status_effect(self)
+            return None
+        global_commands.type_text(" You failed.\n")
+        return None
+
