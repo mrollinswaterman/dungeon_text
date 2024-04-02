@@ -48,7 +48,7 @@ class Item():
         self._durability = self._max_durability
         self._is_consumable = False
         self._weight = 0
-        self._pickup_message = f" You picked up a {self._id}."
+        self._pickup_message = f"You picked up a {self._id}."
         self._description = ""
         self._broken = False
         self._type = "Item"
@@ -151,7 +151,7 @@ class Item():
 
 
     def __str__(self) -> str:
-        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n'
+        return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 
 class Weapon(Item):
@@ -268,7 +268,7 @@ class Armor(Item):
         self._weight = (10 * self._numerical_weight_class) + self._armor_value
     
     def __str__(self) -> str:
-        return f'{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n'
+        return f"{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n"
 
 
 class Consumable(Item):
@@ -279,6 +279,7 @@ class Consumable(Item):
         self._strength = self._numerical_rarity * 2
         self._is_consumable = True
         self._type = "Consumable"
+        self._target = None
         self._unit_weight = 1
         self._unit_value = 8 * self._numerical_rarity
         self._value = self._unit_value * self._quantity
@@ -296,6 +297,9 @@ class Consumable(Item):
     @property
     def value(self) -> int:
         return self._unit_value
+    @property
+    def target(self):
+        return self._target
 
     #methods
     def use(self, target):
@@ -315,10 +319,10 @@ class Consumable(Item):
 
     def update(self) -> None:
         if self._quantity > 1:
-            self._pickup_message = f" You picked up {self._quantity} {self._name}."
+            self._pickup_message = f"You picked up {self._quantity} {self._name}."
             self._name = self._id +"s"
         else:
-            self._pickup_message = f" You picked up a {self._id}."
+            self._pickup_message = f"You picked up a {self._id}."
             if self._name[-1] == "s":
                 self._name = self._name.rstrip(self._name[-1])
 
@@ -326,4 +330,4 @@ class Consumable(Item):
         self._weight = self._unit_weight * self._quantity
 
     def __str__(self) -> str:
-        return f'{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}\n'
+        return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}\n"

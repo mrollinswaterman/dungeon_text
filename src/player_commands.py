@@ -25,28 +25,36 @@ def player_turn_options():
     print(options)
 
 def cleanse_an_effect():
-    print("")#formatting
-    global_commands.type_text("Select an effect to cleanse OR Cancel - (c)\n")
-    for effect in PLAYER.status_effects:
+    global_commands.type_with_lines("Select an effect to cleanse OR Cancel - (c)\n")
+    for idx, effect in enumerate(PLAYER.status_effects):
         effect: status_effects.Status_Effect = effect
-        print(f"{effect.id}\n")
+        print(f"{idx+1}. {effect.id}\n")
 
     cmd = input(">").lower()
-    
-    if type(cmd) is str:
+    print("")
+    try:
+        num = int(cmd)
+        effect: status_effects.Status_Effect = PLAYER.status_effects[num-1]
+        PLAYER.spend_ap()
+        if effect.attempt_cleanse(PLAYER.roll_a_check(effect.cleanse_stat)) is True:
+            if PLAYER.can_act is True:
+                PLAYER_TURN()
+                return None
+            ENEMY_TURN()
+            return None
+        else:
+            raise Exception("attempt failed")
+        
+        
+    except ValueError:
         if cmd == "exit":
             sys.exit()
         elif cmd == "c":
             PLAYER_TURN()
         else:
             #invalid entry
-            pass
-    else:
-        effect: status_effects.Status_Effect = PLAYER.status_effects[cmd-1]
-
-        effect.attempt_cleanse()
-    
-    
+            pass 
+  
 def attack(run_on_hit=None, run_on_miss=None) -> None:
     """
     Attacks an enemy. 
@@ -58,7 +66,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     Returns nothing
     """
     if PLAYER.can_act is False:
-        global_commands.type_text("\n No AP available.")
+        global_commands.type_text("No AP available.")
         PLAYER_TURN()
         return None
 
@@ -70,7 +78,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     if GOD_MODE is True:
         attack_roll = 1000000
     else:
-        attack_roll = 1#PLAYER.roll_attack()
+        attack_roll = PLAYER.roll_attack()
         PLAYER.spend_ap()
 
     global_commands.type_with_lines(f"You attack the {ENEMY.id}, rolling a {attack_roll}.\n")

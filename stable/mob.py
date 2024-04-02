@@ -2,6 +2,7 @@ import random
 from typing import Union
 import global_variables, global_commands
 import player
+import status_effects
 
 class Mob():
 
@@ -12,7 +13,6 @@ class Mob():
         self._level = random.randrange(min(level), max(level))
         self._range = level
 
-        #statblock
         self._stats = {
             "str": 10,
             "dex": 10,
@@ -20,9 +20,19 @@ class Mob():
             "int": 10,
             "wis": 10,
             "cha": 10,
-            "evasion": 9,
-            "damage-taken-multiplier": 1
         }
+
+        self._max_hp = 8 + self.bonus("con")
+        self._hp = self._max_hp
+        self._max_ap = 1 + (self._level // 5)
+        self._ap = self._max_ap
+        self._damage_taken_multiplier = 1
+
+        self._stats["evasion"] = 9
+        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["hp"] = self._hp
+        self._stats["ap"] = self._max_ap
+
         #calculated stats
         self._max_hp = 8 + self.bonus("con")
         self._hp = self._max_hp
@@ -46,7 +56,7 @@ class Mob():
         self._flee_threshold = 15 - self.bonus("cha") * 2
         self._player = global_variables.PLAYER
 
-        self._status_effects = set()
+        self._status_effects: set[player.Status_Effect] = set()
         self._applied_status_effects = set()
 
         self.update()
@@ -97,6 +107,9 @@ class Mob():
     @property
     def range(self) -> int:
         return self._range
+    @property
+    def stats(self) -> dict:
+        return self._stats
     #methods
     def roll_attack(self) -> int:
         """
@@ -110,14 +123,23 @@ class Mob():
             return 0
         
         return roll + self.bonus("dex") + self._level // 5
+
+    def roll_a_check(self, stat:str):
+        return random.randrange(1, 20) + self.bonus(stat)
     
-    def spend_ap(self, num:int) -> None:
+    def spend_ap(self, num:int=1) -> None:
+        """
+        Spend an amount of AP
+        """
         if self.can_act:
             self._ap -= 1
         else:
             raise ValueError("No AP to spend")
         
     def reset_ap(self):
+        """
+        Resets mob's AP to max value
+        """
         self._ap = self._max_ap
     
     def roll_damage(self) -> int:
@@ -140,14 +162,30 @@ class Mob():
         """
         Determines if a mob sufferes a negative effect upon rolling a nat 1.
         """
-
         return global_commands.probability(50)
         
-    def attack_of_oppurtunity(self, target) -> bool:
-        
-        if self.roll_attack() - 2 >= target.evasion:
+    def attack_of_oppurtunity(self) -> bool:
+        """
+        Rolls an attack of opportuity against the player
+        """
+        if self.roll_attack() - 2 >= self._player.evasion:
             return True
         return False
+    
+    def add_status_effect(self, effect:status_effects.Status_Effect) -> None:
+        """
+        Adds a status effect to the mob
+        """
+        self._status_effects.add(effect)
+        effect.apply()
+
+    def remove_status_effect(self, effect:status_effects.Status_Effect) -> None:
+        """
+        Removes a status effect from the mob
+        """
+        self._status_effects.remove(effect)
+        effect.cleanse()
+        return None
 
     def set_level(self, level:int)-> None:
         """
@@ -165,6 +203,12 @@ class Mob():
 
         self._max_ap = 1 + self._level // 5
         self._ap = self._max_ap
+
+        for effect in self._status_effects:
+            effect.update()
+            if effect.active is False:
+                #removes effect
+                self.remove_status_effect(effect)
 
     def level_up(self):
         for _ in range(self._level-1):

@@ -12,10 +12,19 @@ class Goblin(mob.Mob):
             "int": 9,
             "wis": 7,
             "cha": 6,
-            "evasion": 9,
-            "damage-taken-multiplier": 1
         }
+
         self._max_hp = 5 + self.bonus("con")
+        self._hp = self._max_hp
+        self._max_ap = 1 + (self._level // 5)
+        self._ap = self._max_ap
+        self._damage_taken_multiplier = 1
+
+        self._stats["evasion"] = 9
+        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["hp"] = self._hp
+        self._stats["ap"] = self._max_ap
+
         self._damage = 4
         self._loot = {
             "gold": 10,
@@ -39,13 +48,13 @@ class Goblin(mob.Mob):
         """
         if self.trigger():
             self.spend_ap(1)
-            global_commands.type_with_lines(f" The {self._id} makes a grab at your gold pouch.\n")
+            global_commands.type_with_lines(f"The {self._id} makes a grab at your gold pouch.\n")
             if self._player.roll_a_check("dex") >= self.roll_attack():
                 global_commands.type_text(" It missed.")
             else:
                 prospective = random.randrange(1,20)
                 actual = self._player.lose_gold(prospective)
-                global_commands.type_text(f" The {self._id} stole {actual} gold from you!")
+                global_commands.type_text(f"The {self._id} stole {actual} gold from you!")
                 self._loot["gold"] += actual
             return True
         return False

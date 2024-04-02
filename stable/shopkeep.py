@@ -19,13 +19,13 @@ def format_shop(string1="", string1_1=""):
                 string2[idx] = string1[0]
                 string1.pop(0)
             except IndexError:
-                string2[idx] = " "
+                string2[idx] = ""
         elif char == "b":
             try:
                 string2[idx] = string1_1[0]
                 string1_1.pop(0)
             except IndexError:
-                string2[idx] = " "
+                string2[idx] = ""
     for i in string2:
         string3 = string3+i
     return string3
@@ -133,13 +133,13 @@ class Shopkeep():
                         buyer.pick_up(item) 
                         return True
                     else:
-                        global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.")
+                        global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.")
                         return False
                 else:
-                    global_commands.type_text(f" You can't carry the {item.name}.")
+                    global_commands.type_text(f"You can't carry the {item.name}.")
                     return False
             else:
-                global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.")
+                global_commands.type_text(f"The Shopkeep doesn't have any {item.name}s right now. Come back another time.")
                 return True
         
     def sell_consumable(self, item: items.Consumable, buyer: player.Player, quantity) -> bool:
@@ -149,7 +149,7 @@ class Shopkeep():
             if quantity <= my_version.quantity:
                pass
             else:
-                global_commands.type_text(f" The Shopkeep does not have {quantity} {item.name}s. He'll sell you all that he has.\n")
+                global_commands.type_text(f"The Shopkeep does not have {quantity} {item.name}s. He'll sell you all that he has.\n")
                 quantity = my_version.quantity
             if buyer.can_carry(buyer_version) is True:
                 if buyer.spend_gold(buyer_version.total_value) is True:
@@ -159,13 +159,13 @@ class Shopkeep():
                     buyer.pick_up(buyer_version)
                     return True
                 else:
-                    global_commands.type_text(f" The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.")
+                    global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.name}'s price. You don't have the coin.")
                     return False
             else:
-                global_commands.type_text(f" You can't carry {quantity} {item.name}s.")
+                global_commands.type_text(f"You can't carry {quantity} {item.name}s.")
                 return False
         else:
-            global_commands.type_text(f" The Shopkeep doesn't have any {item.name}s right now. Come back another time.")
+            global_commands.type_text(f"The Shopkeep doesn't have any {item.name}s right now. Come back another time.")
             return False
         
     def buy(self, item:items.Item, seller:player.Player, num:int=1) -> bool:
@@ -177,7 +177,7 @@ class Shopkeep():
                 self.stock(item)
                 return True
         else:
-            global_commands.type_text(" The Shopkeep throws you a questioning glance as you try to sell him thin air.\n")
+            global_commands.type_text("The Shopkeep throws you a questioning glance as you try to sell him thin air.\n")
             return False
         
     #INVENTORY/STOCK
@@ -196,13 +196,13 @@ class Shopkeep():
                 try:
                     item1:items.Item = self._inventory[num]
                     item2:items.Item = self._inventory[num+1]
-                    string1 = f" {num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs"
-                    string2 = f" {num+2}. {item2.id} ({item2.stats}): {item2.value}g, {item2.weight} lbs\n"
+                    string1 = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs"
+                    string2 = f"{num+2}. {item2.id} ({item2.stats}): {item2.value}g, {item2.weight} lbs\n"
                     global_commands.type_list(format_shop(string1, string2))
                 except IndexError: #last item in list with no pair
                     try:
                         item1:items.Item = self._inventory[num]
-                        string = f" {num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs\n"
+                        string = f"{num+1}. {item1.id} ({item1.stats}): {item1.value}g, {item1.weight} lbs\n"
                         global_commands.type_list(format_shop(string))
                     except IndexError:
                         pass
@@ -245,10 +245,10 @@ class Shopkeep():
     #NARRATION
     def generate_successful_sale_message(self, item:items.Item) -> str:
         message_list = [
-            f" The Shopkeep hands you the {item.name} and happily pockets your gold.",
-            f" He takes your coin and slides you the {item.name}.",
-            f" Upon seeeing your plump gold pouch, The Shopkeep grunts with approval and gets the {item.name} down for you.",
-            f" He nods silently and makes the exchange."
+            f"The Shopkeep hands you the {item.name} and happily pockets your gold.",
+            f"He takes your coin and slides you the {item.name}.",
+            f"Upon seeeing your plump gold pouch, The Shopkeep grunts with approval and gets the {item.name} down for you.",
+            f"He nods silently and makes the exchange."
         ]
 
         return random.choice(message_list) + "\n"

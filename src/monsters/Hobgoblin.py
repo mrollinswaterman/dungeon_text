@@ -63,11 +63,9 @@ class Hobgoblin(mob.Mob):
                 if len(self._applied_status_effects) > 0:
                     return False
                 global_commands.type_text(f"The {self.id}'s insults distract you, making you an easier target.\n")
-                taunt = status_effects.Entangled(self, self._player)
+                taunt = status_effects.Stat_Debuff(self, self._player, "evasion")
                 taunt.set_duration(3)
-                #taunt = status_effects.Stat_Debuff(self, self._player, "evasion")
-                #taunt.set_duration(3)
-                #taunt.set_power(2)
+                taunt.set_potency(2)
                 self._player.add_status_effect(taunt)
                 self._applied_status_effects.add(taunt)
             return True

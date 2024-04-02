@@ -48,6 +48,7 @@ def link_start(enemy:mob.Mob) -> None:
         Begins the Player turn
         """
         enemy.update()
+        PLAYER.reset_ap()
         player_commands.player_turn_options()
 
     def player_death():
@@ -148,7 +149,7 @@ def link_start(enemy:mob.Mob) -> None:
     while global_variables.RUNNING is True:
 
         command = input(">").lower()
-        #print("")
+        print("")
 
         #command interpretation
         if command == "exit":

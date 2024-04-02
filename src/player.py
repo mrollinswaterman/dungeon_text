@@ -492,12 +492,6 @@ class Player():
         Adds a status effect to the player's status effect list
         and changes the corresponding stat
         """
-        #for status in self._status_effects_list:
-            #id, src = status.id, status.src
-            #if effect.id == id and effect.src == src: --> All this code makes status effects not stack
-                #print(f"The {effect.id} effect hasn't run out yet.")
-                #return None
-        #self._stats[effect.stat] += effect.power
         effect: status_effects.Status_Effect = effect
         effect.apply()
         self._status_effects_list.append(effect)

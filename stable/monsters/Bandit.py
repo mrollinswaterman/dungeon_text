@@ -12,9 +12,19 @@ class Bandit(mob.Mob):
             "int": 14,
             "wis": 8,
             "cha": 10,
-            "evasion": 9,
-            "damage-taken-multiplier": 1
         }
+
+        self._max_hp = 8 + self.bonus("con")
+        self._hp = self._max_hp
+        self._max_ap = 1 + (self._level // 5)
+        self._ap = self._max_ap
+        self._damage_taken_multiplier = 1
+
+        self._stats["evasion"] = 9
+        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["hp"] = self._hp
+        self._stats["ap"] = self._max_ap
+
         self._damage = 6
         self._armor = 2
         self._loot = {

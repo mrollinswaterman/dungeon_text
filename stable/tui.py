@@ -7,6 +7,8 @@ import global_commands, global_variables
 
 PLAYER = global_variables.PLAYER
 
+item_compendium.PLAYER = PLAYER
+
 #notes on formatting
 
 def link_start(enemy:mob.Mob) -> None:
@@ -39,13 +41,14 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins an encounter
         """
-        global_commands.type_text(f" You encounter a Level {enemy.level} {enemy.id.upper()}!")
+        global_commands.type_text(f"You encounter a Level {enemy.level} {enemy.id.upper()}!")
 
     def player_turn():
         """
         Begins the Player turn
         """
-        PLAYER.update()
+        enemy.update()
+        PLAYER.reset_ap()
         player_commands.player_turn_options()
 
     def player_death():
@@ -57,12 +60,15 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the enemy turn
         """
+        PLAYER.update()
+        if enemy.dead:
+            end_scene()
         if enemy.fleeing:
             enemy_commands.enemy_flee_attempt()
             return None
         #if trigger is active, 75% chance of special
         if enemy.trigger() is True:
-            if global_commands.probability(75) is True:
+            if global_commands.probability(100) is True:#75
                 if enemy.special() is True:
                     enemy_commands.run_enemy_next()
                     return None
@@ -78,7 +84,7 @@ def link_start(enemy:mob.Mob) -> None:
             return None
 
     def end_scene():
-        global_commands.type_text(f" You killed the {enemy.id}!\n")
+        global_commands.type_text(f"You killed the {enemy.id}!\n")
         PLAYER.recieve_reward(enemy.loot)
         PLAYER.reset_ap()
         narrator.continue_run(next_scene)
@@ -103,7 +109,7 @@ def link_start(enemy:mob.Mob) -> None:
             global_variables.RUNNING = False
             sys.exit()
         else:
-            global_commands.type_text(f" Invalid command '{command}', please try again.")
+            global_commands.type_text(f"Invalid command '{command}', please try again.")
             run_event(event)
 
     def level_up_player():
@@ -111,7 +117,7 @@ def link_start(enemy:mob.Mob) -> None:
         command = input(">")
         print("")#newline after cmd prompt
         PLAYER.spend_xp(command)
-        global_commands.type_text(f" Your {command} increased by 1. You are now Level {PLAYER.level}")
+        global_commands.type_text(f"Your {command} increased by 1. You are now Level {PLAYER.level}")
         global_variables.SHOPKEEP.set_player_level(PLAYER.level)#make sure shopkeep's threat changes
         if PLAYER.level_up is True:
             level_up_player()
@@ -143,6 +149,7 @@ def link_start(enemy:mob.Mob) -> None:
     while global_variables.RUNNING is True:
 
         command = input(">").lower()
+        print("")
 
         #command interpretation
         if command == "exit":
@@ -154,8 +161,12 @@ def link_start(enemy:mob.Mob) -> None:
             player_commands.hp()
         if command == "i":
             player_commands.inventory()
-        if command == "u":
-            player_commands.use_an_item(item_compendium.generate_hp_potions())
+        if command == "test":
+            print(enemy.hp)
+        if command == "p":
+            enemy_turn()
+        if command == "c":
+            player_commands.cleanse_an_effect()
         if command == "f":
             global_variables.RUNNING = False
             player_commands.flee()
@@ -164,8 +175,8 @@ def link_start(enemy:mob.Mob) -> None:
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
-    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
+    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
