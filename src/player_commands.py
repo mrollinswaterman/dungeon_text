@@ -78,7 +78,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     if GOD_MODE is True:
         attack_roll = 1000000
     else:
-        attack_roll = PLAYER.roll_attack()
+        attack_roll = 1#PLAYER.roll_attack()
         PLAYER.spend_ap()
 
     global_commands.type_with_lines(f"You attack the {ENEMY.id}, rolling a {attack_roll}.\n")

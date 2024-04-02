@@ -104,7 +104,6 @@ class On_Fire(Status_Effect):
     def attempt_cleanse(self) -> bool:
         global_commands.type_text(" You put out the fire.\n")
         return self._target.remove_status_effect(self)
-        
 
 class Stat_Buff(Status_Effect):
 
@@ -126,6 +125,7 @@ class Stat_Buff(Status_Effect):
     def apply(self):
         super().apply()
         self._target.stats[self._stat] += self._potency
+        print(self._target.stats[self._stat])
 
     def cleanse(self) -> None:
         self._target.stats[self._stat] -= self._potency
@@ -134,8 +134,12 @@ class Stat_Buff(Status_Effect):
 class Stat_Debuff(Stat_Buff):
     def __init__(self, src, target, id="Debuff"):
         super().__init__(src, target, id)
-        self._potency = -self._potency
         self._message = f"Your {self._stat} is being decreased by {self._potency} by the {self._src.id}'s {self._id}."
+
+    def apply(self):
+        super().apply()
+        self._target.stats[self._stat] -= self._potency
+        print(self._target.stats[self._stat])
 
 class Entangled(Status_Effect):
 
@@ -163,3 +167,12 @@ class Entangled(Status_Effect):
         global_commands.type_text("You failed.\n")
         return False
 
+class Vulnerable(Stat_Debuff):
+
+    def __init__(self, src, target, id="Vulnerable"):
+        super().__init__(src, target, id)
+
+        self._message = f"You are now {self._id}."
+        self._cleanse_message = f"You are no longer {self._id}."
+        self._stat = "damage-taken-multiplier"
+        self._potency = -1

@@ -109,7 +109,6 @@ def generate_firebombs(num):
     fb.set_quantity(num)
     return fb
 
-
 #tag, id, (num dice, dice type, crit)
 WEAPONS_DICTIONARY = [
 

@@ -24,14 +24,13 @@ class Mob():
 
         self._max_hp = 8 + self.bonus("con")
         self._hp = self._max_hp
+
         self._max_ap = 1 + (self._level // 5)
         self._ap = self._max_ap
-        self._damage_taken_multiplier = 1
 
+        self._damage_taken_multiplier = 1
+        self._damage_multiplier = 1
         self._stats["evasion"] = 9
-        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
-        self._stats["hp"] = self._hp
-        self._stats["ap"] = self._max_ap
 
         #calculated stats
         self._max_hp = 8 + self.bonus("con")
@@ -41,9 +40,7 @@ class Mob():
         self._ap = self._max_ap
 
         self._damage = 0
-        self._evasion = self._stats["evasion"] + self.bonus("dex")
-        self._armor= 0
-
+        self._armor = 0
         self._dc = 10
 
         self._loot = {
@@ -146,12 +143,13 @@ class Mob():
         """
         Rolls damage (damage dice)
         """
-        return random.randrange(1, self._damage) + self.bonus("str")
+        return random.randrange(1, self._damage) * self._damage_multiplier + self.bonus("str")
     
     def take_damage(self, damage:int) -> int:
         """
         Takes a given amount of damage, reduced by armor
         """
+        damage *= self._damage_taken_multiplier
         if (damage - self._armor) < 0:
             return 0
         else:
@@ -201,19 +199,26 @@ class Mob():
         self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
         self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
 
-        self._max_ap = 1 + self._level // 5
-        self._ap = self._max_ap
-
         for effect in self._status_effects:
             effect.update()
             if effect.active is False:
                 #removes effect
                 self.remove_status_effect(effect)
 
+        #recheck all calculated stats
+        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["damage-multiplier"] = self._damage_multiplier
+        self._stats["hp"] = self._hp
+        self._stats["ap"] = self._max_ap
+        self._evasion = self._stats["evasion"] + self.bonus("dex")
+        self._stats["armor"] = self._armor
+
     def level_up(self):
         for _ in range(self._level-1):
             self._max_hp += random.randrange(1, self._max_hp) + round(self._level + 0.1 / 2)
             self._hp = self._max_hp
+        self._max_ap = 1 + self._level // 5
+        self._ap = self._max_ap
         self.update()
     
     def bonus(self, stat:str) -> int:

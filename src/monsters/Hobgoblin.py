@@ -17,24 +17,19 @@ class Hobgoblin(mob.Mob):
 
         self._max_hp = 6 + self.bonus("con")
         self._hp = self._max_hp
-        self._max_ap = 1 + (self._level // 5)
-        self._ap = self._max_ap
-        self._damage_taken_multiplier = 1
-
         self._stats["evasion"] = 8
-        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
-        self._stats["hp"] = self._hp
-        self._stats["ap"] = self._max_ap
 
         self._damage = 5
         self._armor = 1
-        self._dc = 50 + self.bonus("cha") # 12 + cha
+        self._dc = 12 + self.bonus("cha")
 
         self._loot = {
             "gold": 8,
             "xp": 6,
             "drops": None
         }
+
+        self.update()
 
     def trigger(self):
         """
@@ -45,8 +40,9 @@ class Hobgoblin(mob.Mob):
         10, and that the Hobgoblin has not recently applied a
         status effect 
         """
-        #return self._player.evasion > 10 and len(self._applied_status_effects) == 0
-        return len(self._applied_status_effects) == 0
+        return True
+        return self._player.evasion > 10 and len(self._applied_status_effects) == 0
+
 
     def special(self) -> bool:
         """
@@ -63,7 +59,8 @@ class Hobgoblin(mob.Mob):
                 if len(self._applied_status_effects) > 0:
                     return False
                 global_commands.type_text(f"The {self.id}'s insults distract you, making you an easier target.\n")
-                taunt = status_effects.Stat_Debuff(self, self._player, "evasion")
+                taunt = status_effects.Stat_Debuff(self, self._player)
+                taunt.set_stat("evasion")
                 taunt.set_duration(3)
                 taunt.set_potency(2)
                 self._player.add_status_effect(taunt)

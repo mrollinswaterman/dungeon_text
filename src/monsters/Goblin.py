@@ -15,15 +15,8 @@ class Goblin(mob.Mob):
         }
 
         self._max_hp = 5 + self.bonus("con")
-        self._hp = self._max_hp
-        self._max_ap = 1 + (self._level // 5)
-        self._ap = self._max_ap
-        self._damage_taken_multiplier = 1
 
         self._stats["evasion"] = 9
-        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
-        self._stats["hp"] = self._hp
-        self._stats["ap"] = self._max_ap
 
         self._damage = 4
         self._loot = {

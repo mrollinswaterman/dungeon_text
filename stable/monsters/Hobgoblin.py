@@ -28,7 +28,7 @@ class Hobgoblin(mob.Mob):
 
         self._damage = 5
         self._armor = 1
-        self._dc = 50 + self.bonus("cha") # 12 + cha
+        self._dc = 12 + self.bonus("cha")
 
         self._loot = {
             "gold": 8,
@@ -45,8 +45,7 @@ class Hobgoblin(mob.Mob):
         10, and that the Hobgoblin has not recently applied a
         status effect 
         """
-        #return self._player.evasion > 10 and len(self._applied_status_effects) == 0
-        return len(self._applied_status_effects) == 0
+        return self._player.evasion > 10 and len(self._applied_status_effects) == 0
 
     def special(self) -> bool:
         """
