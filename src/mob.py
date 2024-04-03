@@ -128,7 +128,10 @@ class Mob():
         """
         Spend an amount of AP
         """
-        if self.can_act:
+        if num == 0:#spend_ap(0) indicates a full round action, uses all AP
+            self._ap = 0
+            return None
+        if self.can_act is True:
             self._ap -= 1
         else:
             raise ValueError("No AP to spend")

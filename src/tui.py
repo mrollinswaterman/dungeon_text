@@ -4,10 +4,12 @@ import narrator, player_commands, enemy_commands
 import item_compendium
 import dms_guide, events
 import global_commands, global_variables
+import status_effects
 
 PLAYER = global_variables.PLAYER
 
 item_compendium.PLAYER = PLAYER
+status_effects.PLAYER = PLAYER
 
 #notes on formatting
 
@@ -176,7 +178,7 @@ def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
     #STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Land Shark")
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")

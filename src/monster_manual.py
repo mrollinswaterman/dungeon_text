@@ -2,6 +2,7 @@ import random
 import mob
 import global_variables
 from monsters import Goblin, Hobgoblin, Bandit, Goblin_Gang
+from monsters import Land_Shark
 
 LEVELCAP = 7
 
@@ -9,7 +10,7 @@ PLAYER = global_variables.PLAYER
 
 mobs = [
     Goblin.object, Hobgoblin.object, Bandit.object,
-    Goblin_Gang.object,
+    Goblin_Gang.object, Land_Shark.object
 ]
 
 def spawn_mob(name:str):

@@ -48,22 +48,33 @@ class Land_Shark(mob.Mob):
         status effect 
         """
 
+        return True
+        if self._burrowed is True and len(self._status_effects) == 0:
+            return True
+        
+        if global_commands.probability(abs(self._hp - self._max_hp) * 10):#higher HP == less chance of burrowing
+            return True
+        
+        return len(self._status_effects) > 0#if I have status effects, burrow
 
     def special(self) -> bool:
         """
         Burrow: increases evasion temporarily
 
-        Erupt: can only be used when 'burrowed'  
+        Erupt: can only be used when 'burrowed',
+        doubles all damage done and taken after use, reverts evasion
+        changes made by burrow 
         """
 
         if self.trigger() is True:
-            self.spend_ap()
             if self._burrowed is False:
-                global_commands.type_with_lines(f"The {self._id} burrows underground, increasing it's evasion by 3.\n")
+                self.spend_ap(0) #indicates a full round action
+                global_commands.type_with_lines(f"The {self._id} burrows underground, increasing it's evasion by 3.")
                 self._evasion += 3
                 self._burrowed = True
-                return None
+                return True
             else:
+                self.spend_ap()
                 global_commands.type_with_lines(f"The {self._id} erupts from the ground.")
                 self._evasion -= 3
                 #double all damage done for 2 turns 
@@ -72,9 +83,11 @@ class Land_Shark(mob.Mob):
                 damage_buff.set_duration(2)
                 damage_buff.set_potency(2)
                 self.add_status_effect(damage_buff)
+                #double all damage taken for 3 turns
                 vul = status_effects.Vulnerable
                 vul.set_duration(3)
-                
-        
+                self.add_status_effect(vul)
+                return True
+        return False
 
 object = Land_Shark()

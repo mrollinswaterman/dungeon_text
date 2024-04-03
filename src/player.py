@@ -39,7 +39,7 @@ class Player():
     def __init__(self, id: str="Player", name:str = ""):
         self._id = id
         self._name = name
-        self._level = 1
+        self._level = 5
 
         self._stats = {
             "str": 12,
