@@ -19,7 +19,7 @@ PLAYER_DEATH = None
 
 NEXT_SCENE = None
 
-def player_turn_options():
+def turn_options():
     global_commands.type_with_lines(f"What would you like to do? Action Points: {PLAYER.ap}/{PLAYER.max_ap}\n")
     options = "\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Pass Turn - (p) | Cleanse a Status Effect - (c)"
     print(options)
@@ -38,7 +38,7 @@ def cleanse_an_effect():
         PLAYER.spend_ap()
         if effect.attempt_cleanse(PLAYER.roll_a_check(effect.cleanse_stat)) is True:
             if PLAYER.can_act is True:
-                PLAYER_TURN()
+                turn_options()
                 return None
             ENEMY_TURN()
             return None
@@ -50,7 +50,7 @@ def cleanse_an_effect():
         if cmd == "exit":
             sys.exit()
         elif cmd == "c":
-            PLAYER_TURN()
+            turn_options()
         else:
             #invalid entry
             pass 
@@ -67,7 +67,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     """
     if PLAYER.can_act is False:
         global_commands.type_text("No AP available.")
-        PLAYER_TURN()
+        turn_options()
         return None
 
     if run_on_miss is None:
@@ -97,22 +97,22 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
             taken = ENEMY.take_damage(PLAYER.roll_damage())
 
         if ENEMY.dead is False and PLAYER.can_act is False:
-            PLAYER.reset_ap()
+            #PLAYER.reset_ap()
             global_commands.type_text(f"You hit the {ENEMY.id} for {taken} damage.") #last thing printed = no \n
             run_on_hit()
         elif ENEMY.dead is True:
             global_commands.type_text(f"You hit the {ENEMY.id} for {taken} damage.\n")
             END_SCENE()
         else:
-            player_turn_options()
+            turn_options()
 
     elif attack_roll < ENEMY.evasion:
         global_commands.type_text("You missed.") #last thing printed = no \n
         if PLAYER.can_act is False:
-            PLAYER.reset_ap()
+            #PLAYER.reset_ap()
             run_on_miss()
         else: 
-            player_turn_options()
+            turn_options()
 
 def hp() -> None:
     """
@@ -120,7 +120,7 @@ def hp() -> None:
     """
     global_commands.print_with_lines(f' HP: {PLAYER.hp}/{PLAYER.max_hp}')
     print(" ["+"/"*PLAYER.hp+" "*(PLAYER.max_hp-PLAYER.hp)+"]")
-    PLAYER_TURN()
+    turn_options()
 
 def inventory() -> None:
     """
@@ -146,9 +146,9 @@ def select_an_item() -> None:
         print(" Please enter a valid number.")
         select_an_item()
         return None
-    use_an_item(item)
+    use_an_item(item, ENEMY)
 
-def use_an_item(item: items.Consumable, target=PLAYER) -> None:
+def use_an_item(item: items.Consumable, target=None) -> None:
     """
     Uses an item on the Player, if the player has the item in their inventory
     """
@@ -169,17 +169,18 @@ def use_an_item(item: items.Consumable, target=PLAYER) -> None:
                 select_an_item()
                 return None
             held_item.use(target)
+
             if PLAYER.can_act is False:
-                PLAYER.reset_ap()
+                #PLAYER.reset_ap()
                 ENEMY_TURN()
             else:
-                PLAYER_TURN()
+                turn_options()
         else:
             global_commands.type_text(f"{item.name} is not a consumable.")
             select_an_item()
     else:
         global_commands.type_with_lines(f"No {item.name} avaliable!")
-        PLAYER_TURN()
+        turn_options()
 
 def stop_flee_attempt() -> None:
     """
@@ -200,7 +201,7 @@ def flee() -> None:
     """
     if PLAYER.can_act is False:
         global_commands.type_text("No AP available.")
-        PLAYER_TURN()
+        turn_options()
 
     global_commands.type_with_lines("You attempt to flee...\n")
     

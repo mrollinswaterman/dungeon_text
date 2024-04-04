@@ -107,7 +107,24 @@ class Mob():
     @property
     def stats(self) -> dict:
         return self._stats
+
     #methods
+
+    #SETTERS
+    def set_level(self, level:int)-> None:
+        """
+        Sets the mobs levels then calculates HP and loot based on level
+        """
+        self._level = level
+        self.level_up()
+
+    def set_damage_multiplier(self, num:int) -> None:
+        self._damage_multiplier = num
+
+    def reset_damage_multiplier(self) -> None:
+        self.set_damage_multiplier(0)
+
+    #ROLLS
     def roll_attack(self) -> int:
         """
         Rolls an attack (d20)
@@ -124,35 +141,21 @@ class Mob():
     def roll_a_check(self, stat:str):
         return random.randrange(1, 20) + self.bonus(stat)
     
-    def spend_ap(self, num:int=1) -> None:
-        """
-        Spend an amount of AP
-        """
-        if num == 0:#spend_ap(0) indicates a full round action, uses all AP
-            self._ap = 0
-            return None
-        if self.can_act is True:
-            self._ap -= 1
-        else:
-            raise ValueError("No AP to spend")
-        
-    def reset_ap(self):
-        """
-        Resets mob's AP to max value
-        """
-        self._ap = self._max_ap
-    
     def roll_damage(self) -> int:
         """
         Rolls damage (damage dice)
         """
         return random.randrange(1, self._damage) * self._damage_multiplier + self.bonus("str")
     
-    def take_damage(self, damage:int) -> int:
+    def take_damage(self, damage:int, armor_piercing=False) -> int:
         """
         Takes a given amount of damage, reduced by armor
         """
         damage *= self._damage_taken_multiplier
+        if armor_piercing:
+            self._hp -= damage
+            return damage
+
         if (damage - self._armor) < 0:
             return 0
         else:
@@ -173,6 +176,26 @@ class Mob():
             return True
         return False
     
+    #AP
+    def spend_ap(self, num:int=1) -> None:
+        """
+        Spend an amount of AP
+        """
+        if num == 0:#spend_ap(0) indicates a full round action, uses all AP
+            self._ap = 0
+            return None
+        if self.can_act is True:
+            self._ap -= 1
+        else:
+            raise ValueError("No AP to spend")
+        
+    def reset_ap(self):
+        """
+        Resets mob's AP to max value
+        """
+        self._ap = self._max_ap
+    
+    #STATUS EFFECTS
     def add_status_effect(self, effect:status_effects.Status_Effect) -> None:
         """
         Adds a status effect to the mob
@@ -188,17 +211,12 @@ class Mob():
         effect.cleanse()
         return None
 
-    def set_level(self, level:int)-> None:
-        """
-        Sets the mobs levels then calculates HP and loot based on level
-        """
-        self._level = level
-        self.level_up()
-
     def update(self):
         """
         Updates all relevant stats when a mob's level is changed
         """
+        self.reset_ap()
+
         self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
         self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
 
@@ -210,7 +228,6 @@ class Mob():
 
         #recheck all calculated stats
         self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
-        self._stats["damage-multiplier"] = self._damage_multiplier
         self._stats["hp"] = self._hp
         self._stats["ap"] = self._max_ap
         self._evasion = self._stats["evasion"] + self.bonus("dex")

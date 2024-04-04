@@ -90,15 +90,15 @@ class On_Fire(Status_Effect):
 
     def __init__(self, src, target, id="On Fire"):
         super().__init__(src, target, id)
-        self._message = f"The {self._target} is now {id}."
-        self._cleanse_message = f"The {self._target} is not longer {id}."
+        self._message = f"The {self._target.id} is now {id}.\n"
+        self._cleanse_message = f"The {self._target.id} is not longer {id}."
     
     def update(self):
         self._duration -= 1
 
         taken = self._target.take_damage(self._potency, True)
 
-        global_commands.type_text(f"The {self._target} took {taken} damage from from the fire.\n")
+        global_commands.type_text(f"The {self._target.id} took {taken} damage from from the fire.\n")
 
         if self._duration <= 0:
             self._target.remove_status_effect(self)
@@ -122,8 +122,8 @@ class Stat_Buff(Status_Effect):
         super().__init__(src, target, id)
         self._stat = ""
         self._id = self._stat + id
-        self._message = f"The {self._target}'s {self._stat} is being increased by {self._potency} by the {self._src}'s {self._id}."
-        self._cleanse_message = f"The {self._target}'s {self._stat} has returned to normal."
+        self._message = f"The {self._target.id}'s {self._stat} increased by {self._potency}."
+        self._cleanse_message = f"The {self._target.id}'s {self._stat} has returned to normal."
 
     @property
     def stat(self) -> str:
@@ -132,11 +132,12 @@ class Stat_Buff(Status_Effect):
     def set_stat(self, stat:str) -> None:
         self._stat = stat
         self._id = stat + self._id
+        self._message = f"The {self._target.id}'s {global_commands.TAG_TO_STAT[self._stat]} increased by {self._potency}."
+        self._cleanse_message = f"The {self._target.id}'s {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
 
     def apply(self):
         super().apply()
         self._target.stats[self._stat] += self._potency
-        print(self._target.stats[self._stat])
 
     def cleanse(self) -> None:
         self._target.stats[self._stat] -= self._potency
@@ -150,7 +151,6 @@ class Stat_Debuff(Stat_Buff):
     def apply(self):
         super().apply()
         self._target.stats[self._stat] -= self._potency
-        print(self._target.stats[self._stat])
 
 class Player_Stat_Buff(Stat_Buff):
     """
@@ -158,10 +158,18 @@ class Player_Stat_Buff(Stat_Buff):
     """
     def __init__(self, src, target=PLAYER, id="Buff"):
         super().__init__(src, target, id)
-        self._message = f"Your {self._stat} is being increased by {self._potency} by the {self._src}'s {self._id}."
-        self._cleanse_message = f"Your {self._stat} has returned to normal."
+        self._message = f"Your {global_commands.TAG_TO_STAT[self._stat]} is being increased by {self._potency} by the {self._src}'s {self._id}."
+        self._cleanse_message = f"Your {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
 
-class Entangled(Status_Effect):
+class Player_Stat_Debuff(Stat_Debuff):
+    """
+    Stat debuff class only to be applied to PLAYER
+    """
+    def __init__(self, src, target=PLAYER, id="Debuff"):
+        super().__init__(src, target, id)
+        self._message = f"Your {global_commands.TAG_TO_STAT[self._stat]} is being decreased by {self._potency} by the {self._src}'s {self._id}."
+
+class Player_Entangled(Status_Effect):
 
     def __init__(self, src, target, id="Entangled"):
         super().__init__(src, target, id)
@@ -192,14 +200,22 @@ class Vulnerable(Stat_Buff):
     Makes the target vulnerable,
     meaning they take x2 damage for the duration
     """
-
     def __init__(self, src, target, id="Vulnerable"):
         super().__init__(src, target, id)
-        self._message = f"You are now {self._id}."
-        self._cleanse_message = f"You are no longer {self._id}."
+        self._message = f"The {self._target.id} is now {self._id}."
+        if src == target:
+            self._message = f"The {self._target.id} made itself {self._id}."
+        self._cleanse_message = f"The {self._target.id} is no longer {self._id}."
         self._stat = "damage-taken-multiplier"
         self._potency = 1# this is because the apply function adds to the stat,
         #so a potency of 2 would result in a damage-taken of 3, not 2 like we want
 
-
-    
+class Player_Vulnerable(Vulnerable):
+    """
+    Makes the PLAYER vulnerable,
+    meaning they take x2 damage for the duration
+    """
+    def __init__(self, src, target=PLAYER, id="Vulnerable"):
+        super().__init__(src, target, id)
+        self._message = f"You are now {self._id}."
+        self._cleanse_message = f"You are no longer {self._id}."

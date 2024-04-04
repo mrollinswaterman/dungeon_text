@@ -23,23 +23,12 @@ BONUS = {
     20: 5
 }
 
-TAG_TO_STAT = {
-    "str": "Strength",
-    "dex": "Dexterity",
-    "con": "Constitution",
-    "int": "Intelligence",
-    "wis": "Wisdom",
-    "cha": "Charisma",
-    "evasion": "Evasion",
-    "damage-taken-multiplier": "Vulnerability"
-}
-
 class Player():
 
     def __init__(self, id: str="Player", name:str = ""):
         self._id = id
         self._name = name
-        self._level = 5
+        self._level = 1
 
         self._stats = {
             "str": 12,
@@ -55,6 +44,7 @@ class Player():
         self._max_ap = 1 + (self._level // 5)
         self._ap = self._max_ap
         self._damage_taken_multiplier = 1
+        self._damage_multiplier = 1
 
         self._stats["evasion"] = 9
         self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
@@ -208,6 +198,12 @@ class Player():
     def set_level(self, num:int) -> None:
         self._level = num
 
+    def set_damage_multiplier(self, num:int) -> None:
+        self._damage_multiplier = num
+
+    def reset_damage_multiplier(self) -> None:
+        self.set_damage_multiplier(0)
+
 
     #ROLLS
     def roll_attack(self) -> int:
@@ -235,7 +231,7 @@ class Player():
         weapon_damage = 0
         for _ in range(weapon.num_damage_dice):
             weapon_damage += random.randrange(1, weapon.damage_dice)
-        return weapon_damage + self.bonus(self.str)
+        return weapon_damage * self._damage_multiplier + self.bonus(self.str)
 
     def roll_a_check(self, stat: str) -> int:
         """
@@ -506,6 +502,7 @@ class Player():
             raise ValueError("Stat to be removed cannot be found")
 
     def update(self) -> None:
+        self.reset_ap()
         for effect in self._status_effects_list:
             effect.update()
             if effect.active is False:

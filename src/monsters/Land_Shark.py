@@ -47,15 +47,13 @@ class Land_Shark(mob.Mob):
         10, and that the Hobgoblin has not recently applied a
         status effect 
         """
-
-        return True
         if self._burrowed is True and len(self._status_effects) == 0:
             return True
         
-        if global_commands.probability(abs(self._hp - self._max_hp) * 10):#higher HP == less chance of burrowing
+        if global_commands.probability(abs(self._hp - self._max_hp) * 10):#higher HP == lower chance of burrowing
             return True
         
-        return len(self._status_effects) > 0#if I have status effects, burrow
+        return len(self._status_effects) > 0 and self._burrowed is False#if I have status effects and not burrowed, burrow
 
     def special(self) -> bool:
         """
@@ -69,24 +67,19 @@ class Land_Shark(mob.Mob):
         if self.trigger() is True:
             if self._burrowed is False:
                 self.spend_ap(0) #indicates a full round action
-                global_commands.type_with_lines(f"The {self._id} burrows underground, increasing it's evasion by 3.")
+                global_commands.type_with_lines(f"The {self._id} burrows underground, making it harder to hit.")
                 self._evasion += 3
                 self._burrowed = True
                 return True
             else:
                 self.spend_ap()
-                global_commands.type_with_lines(f"The {self._id} erupts from the ground.")
+                global_commands.type_with_lines(f"The {self._id} erupts from the ground.\n")
                 self._evasion -= 3
-                #double all damage done for 2 turns 
-                damage_buff = status_effects.Stat_Buff(self, self)
-                damage_buff.set_stat("damage-multiplier")
-                damage_buff.set_duration(2)
-                damage_buff.set_potency(2)
-                self.add_status_effect(damage_buff)
                 #double all damage taken for 3 turns
-                vul = status_effects.Vulnerable
+                vul = status_effects.Vulnerable(self, self)
                 vul.set_duration(3)
                 self.add_status_effect(vul)
+                self._burrowed = False
                 return True
         return False
 

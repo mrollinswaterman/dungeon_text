@@ -18,6 +18,7 @@ class Health_Potion(items.Consumable):
         """
         Heals the target for a given amount
         """
+        self._target = PLAYER
         if self._target.hp < self._target.max_hp:
             self.decrease_quantity(1)
             global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
@@ -70,6 +71,7 @@ class Firebomb(items.Consumable):
         dodge = target.roll_a_check("dex")
 
         self._owner.spend_ap()
+        self._quantity -= 1
 
         global_commands.type_with_lines(f"You throw a {self._id} at the {self._target.id}.\n")
 
@@ -80,7 +82,7 @@ class Firebomb(items.Consumable):
         if dodge >= throw:
             global_commands.type_text(f"The {self._target.id} partially dodged your {self._id}.\n")
             taken = self._target.take_damage(int(self._damage / 2))
-            if global_commands.probability(50 - dodge): #--> this is a formattting thing the message doesn't change 
+            if global_commands.probability(50 - dodge): #--> if statement is a formattting thing the message doesn't change 
                 global_commands.type_text(f"The {self._id} did {taken} damage to the {self._target.id}.\n")
                 self.set_on_fire()
             else:
@@ -90,7 +92,7 @@ class Firebomb(items.Consumable):
         if throw > dodge:
             global_commands.type_text(f"You hit the {self._target.id}.\n")
             taken = self._target.take_damage(int(self._damage))
-            if global_commands.probability(50):#--> this is a formattting thing the message doesn't change 
+            if global_commands.probability(75):#--> if statement is a formattting thing the message doesn't change 
                 global_commands.type_text(f"Your {self._id} did {taken} damage to the {self._target.id}.\n")
                 self.set_on_fire()
             else:
@@ -98,10 +100,12 @@ class Firebomb(items.Consumable):
             return True
 
     def set_on_fire(self) -> None:
-        firebomb = status_effects.On_Fire(self._owner, self._target)
+        if isinstance(self._target, player.Player):
+            firebomb = status_effects.Player_On_Fire(self._owner)
+        else:
+            firebomb = status_effects.On_Fire(self._owner, self._target)
         firebomb.set_duration(3)
         firebomb.set_potency(self._numerical_rarity)
-        firebomb.set_message(f"The {self._target.id} is now On Fire!")
         self._target.add_status_effect(firebomb)
        
 def generate_firebombs(num):

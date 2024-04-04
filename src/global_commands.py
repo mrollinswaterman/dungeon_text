@@ -2,6 +2,17 @@ import time
 import random
 import global_variables
 
+TAG_TO_STAT = {
+    "str": "Strength",
+    "dex": "Dexterity",
+    "con": "Constitution",
+    "int": "Intelligence",
+    "wis": "Wisdom",
+    "cha": "Charisma",
+    "evasion": "Evasion",
+    "damage-taken-multiplier": "Vulnerability",
+    "damage-multiplier": "Damage"
+}
 
 def generate_item_rarity() -> str:
     """

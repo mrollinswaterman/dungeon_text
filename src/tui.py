@@ -49,46 +49,26 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the Player turn
         """
+        PLAYER.update()
+        #PLAYER.reset_ap()
+        player_commands.turn_options()
+
+    def enemy_turn():
+        """
+        Begins the enemy turn
+        """
         enemy.update()
-        PLAYER.reset_ap()
-        player_commands.player_turn_options()
+        enemy_commands.turn_options()
 
     def player_death():
         #some text probably too
         global_variables.RUNNING = False
         sys.exit()
 
-    def enemy_turn():
-        """
-        Begins the enemy turn
-        """
-        PLAYER.update()
-        if enemy.dead:
-            end_scene()
-        if enemy.fleeing:
-            enemy_commands.enemy_flee_attempt()
-            return None
-        #if trigger is active, 75% chance of special
-        if enemy.trigger() is True:
-            if global_commands.probability(100) is True:#75
-                if enemy.special() is True:
-                    enemy_commands.run_enemy_next()
-                    return None
-            else:
-                enemy_commands.enemy_attack()
-                return None
-        else: #if trigger not active, 25% of doing special
-            if global_commands.probability(25) is True:
-                if enemy.special() is True:
-                    enemy_commands.run_enemy_next()
-                    return None
-            enemy_commands.enemy_attack()
-            return None
-
     def end_scene():
         global_commands.type_text(f"You killed the {enemy.id}!\n")
         PLAYER.recieve_reward(enemy.loot)
-        PLAYER.reset_ap()
+        PLAYER.update()
         narrator.continue_run(next_scene)
 
     def run_event(event: events.Event):
