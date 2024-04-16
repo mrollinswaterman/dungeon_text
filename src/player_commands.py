@@ -1,4 +1,5 @@
 import random
+import csv
 import sys
 import global_commands
 import global_variables
@@ -211,3 +212,14 @@ def flee() -> None:
     else:
         global_commands.type_text(f"The {ENEMY.id} lets you go.")
         narrator.exit_the_dungeon()
+
+def save() -> None:
+    """
+    Saves the player's current state (inventory, hp, etc)
+    as a CSV file.
+    """
+    with open('player.csv', 'r+', newline='') as file:
+            writer = csv.writer(file)
+            field = ["id", "name", "level","max_hp", "hp", "xp", "gold"]
+            writer.writerow(file)
+            writer.writerow([PLAYER.id, PLAYER.name, PLAYER.level,PLAYER.max_hp, PLAYER.hp, PLAYER.xp, PLAYER.gold])

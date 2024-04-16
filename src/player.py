@@ -141,6 +141,9 @@ class Player():
     def id(self):
         return self._id
     @property
+    def name(self):
+        return self._name
+    @property
     def max_hp(self):
         return self._max_hp
     @property
