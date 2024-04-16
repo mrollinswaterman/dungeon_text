@@ -25,7 +25,7 @@ BONUS = {
 
 class Player():
 
-    def __init__(self, id: str="Player", name:str = ""):
+    def __init__(self, id: str="Player", name:str = "New Player"):
         self._id = id
         self._name = name
         self._level = 1
