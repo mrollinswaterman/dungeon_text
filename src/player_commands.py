@@ -218,32 +218,5 @@ def save() -> None:
     Saves the player's current state (inventory, hp, etc)
     as a CSV file.
     """
-    with open('player.csv', 'r+', newline='') as file:
-            file.truncate(0)
-            writer = csv.writer(file)
-            stat_keys = []
-            stat_vals = []
-            for key in PLAYER.stats:
-                stat_keys.append(key)
-                stat_vals.append(PLAYER.stats[key])
-            field = ["id", "name", "level", "max_hp", "hp", "xp", "gold"]
-            field = field + stat_keys
-            writer.writerow(file)
-            writer.writerow([PLAYER.id, PLAYER.name, PLAYER.level, PLAYER.max_hp, PLAYER.hp, PLAYER.xp, PLAYER.gold])#write everything up to stats
-            writer.writerow(stat_vals)#write statblock
-            file.close()
-    
-    with open("inventory.csv", "r+", newline='') as ifile:
-        ifile.truncate(0)
-        writer = csv.writer(ifile)
-        field = ["type", "id", "name", "rarity", ]
-
-        for num in range(0, len(PLAYER.inventory)):
-            field[num] = str(num)
-
-        field.append("Equipped Weapon")
-        field.append("Equipped Armor")
-
-        writer.writerow(file)
-        writer.writerow()
+    pass
 

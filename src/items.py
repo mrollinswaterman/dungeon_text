@@ -48,6 +48,7 @@ class Item():
         self._durability = self._max_durability
         self._is_consumable = False
         self._weight = 0
+        self._quantity = 1
         self._pickup_message = f"You picked up a {self._id}."
         self._description = ""
         self._broken = False
@@ -92,6 +93,9 @@ class Item():
     @property
     def weight(self) -> int:
         return self._weight
+    @property
+    def quantity(self) -> int:
+        return self._quantity
     @property
     def total_weight(self) -> int:
         return self._weight

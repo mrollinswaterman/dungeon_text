@@ -13,6 +13,7 @@ class Health_Potion(items.Consumable):
         super().__init__(id, rarity, quantity)
         self._unit_weight = 0.5
         self._target:player.Player = PLAYER
+        self._type = "Health_Potion"
 
     def use(self, target=PLAYER) -> bool:
         """
@@ -39,6 +40,7 @@ class Repair_Kit(items.Consumable):
         super().__init__(id, rarity, quantity)
         self._unit_value = 10 * self._numerical_rarity
         self._unit_weight = .5
+        self._type = "Repair_Kit"
 
     def use(self, target: items.Item) -> bool:
         """
@@ -64,6 +66,7 @@ class Firebomb(items.Consumable):
         self._unit_weight = 1 
         self._target = None
         self._damage = self._strength
+        self._type = "Firebomb"
 
     def use(self, target):
         self._target = target
