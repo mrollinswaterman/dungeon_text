@@ -48,7 +48,6 @@ class Item():
         self._durability = self._max_durability
         self._is_consumable = False
         self._weight = 0
-        self._quantity = 1
         self._pickup_message = f"You picked up a {self._id}."
         self._description = ""
         self._broken = False
@@ -56,6 +55,7 @@ class Item():
 
         self._owner:player.Player = None
 
+        self._tod = {}
     #properties
     @property
     def id(self) -> str:
@@ -114,6 +114,9 @@ class Item():
     @property
     def pickup_message(self) -> str:
         return self._pickup_message
+    @property
+    def tod(self) -> dict:
+        return self._tod
     #methods
     def lose_durability(self) -> None:
         prob = random.randrange(100)
@@ -153,10 +156,28 @@ class Item():
     def set_owner(self, owner) -> None:
         self._owner = owner
 
-
     def __str__(self) -> str:
         return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
+    def item_to_dict(self) -> dict:
+        self._tod = {
+            "type": self._type,
+            "id": self._id,
+            "name": self._id,
+            "rarity": self._rarity,
+            "durability": self._durability,
+            "consumable": self._is_consumable
+        }
+        #weapons special stats
+        self._tod["damage_dice"] = None
+        self._tod["num_damage_dice"] = None
+        self._tod["crit"] = None
+        #armor special stats
+        self._tod["weight_class"] = None
+        #consumable special stats
+        self._tod["quantity"] = None
+        self._tod["unit_weight"] = None
+        self._tod["unit_value"] = None
 
 class Weapon(Item):
 
@@ -220,6 +241,12 @@ class Weapon(Item):
     def __str__(self) -> str:
         return (f"""{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n""")
 
+    def item_to_dict(self) -> dict:
+        super().item_to_dict()
+        self._tod["damage_dice"] = self._damage_dice
+        self._tod["num_damage_dice"] = self._num_damage_dice
+        self._tod["crit"] = self._crit
+
 
 class Armor(Item):
 
@@ -274,6 +301,9 @@ class Armor(Item):
     def __str__(self) -> str:
         return f"{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n"
 
+    def item_to_dict(self) -> dict:
+        super().item_to_dict()
+        self._tod["weight_class"] = self._weight_class
 
 class Consumable(Item):
 
@@ -335,3 +365,9 @@ class Consumable(Item):
 
     def __str__(self) -> str:
         return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}\n"
+
+    def item_to_dict(self) -> dict:
+        super().item_to_dict()
+        self._tod["quantity"] = self._quantity
+        self._tod["unit_weight"] = self._unit_weight
+        self._tod["unit_value"] = self._unit_value

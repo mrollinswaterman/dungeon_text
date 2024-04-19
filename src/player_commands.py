@@ -218,5 +218,29 @@ def save() -> None:
     Saves the player's current state (inventory, hp, etc)
     as a CSV file.
     """
-    pass
+    player_dict = PLAYER.player_to_dict()
+    with open('player.csv', 'r+') as file:
+        w = csv.DictWriter(file, player_dict.keys())
+        w.writeheader()
+        w.writerow(player_dict)
+        file.close()
+
+    item_dict_list = []
+    #append all inventory item_to_dicts to list
+    for item in PLAYER.inventory:
+        item: items.Item = item
+        item.item_to_dict()
+        item_dict_list.append(item.tod)
+    #append equipped weapon and armor as dicts to the list
+    PLAYER.weapon.item_to_dict()
+    PLAYER.armor.item_to_dict()
+    item_dict_list.append(PLAYER.weapon.tod)
+    item_dict_list.append(PLAYER.armor.tod)
+    #create fieldnames list from item_to_dict keys
+    fields = list(PLAYER.weapon.tod.keys())
+    with open("inventory.csv", "r+") as file:
+            w = csv.DictWriter(file, fieldnames=fields)
+            w.writeheader()
+            w.writerows(item_dict_list)
+            file.close()
 

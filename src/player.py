@@ -513,6 +513,20 @@ class Player():
                 self.remove_status_effect(effect)
                 break
 
+    def player_to_dict(self) -> dict:
+        player_tod = {
+            "name": self._name,
+            "level": self._level
+        }
+        for stat in self._stats:
+            player_tod[stat] = self._stats[stat]
+        player_tod["max_hp"] = self._max_hp
+        #player_tod["hp"] = self._hp
+        player_tod["xp"] = self._xp
+        player_tod["gold"] = self._gold 
+
+        return player_tod
+
 
         
 
