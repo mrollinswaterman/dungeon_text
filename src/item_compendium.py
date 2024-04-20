@@ -7,6 +7,7 @@ import status_effects
 
 PLAYER = None
 
+
 class Health_Potion(items.Consumable):
 
     def __init__(self, rarity="Common", id="Health Potion", quantity=0):
@@ -144,3 +145,7 @@ ARMOR_DICTIONARY = [
     (("AR"), "Branded Mail", ("Heavy", None)),
     (("AR"), "Full-plate", ("Heavy", 9)),
 ]
+
+#set player statics 
+player.FIREBOMB = Firebomb
+player.HP_POT = Health_Potion

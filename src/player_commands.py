@@ -218,6 +218,7 @@ def save() -> None:
     Saves the player's current state (inventory, hp, etc)
     as a CSV file.
     """
+
     player_dict = PLAYER.player_to_dict()
     with open('player.csv', 'r+') as file:
         w = csv.DictWriter(file, player_dict.keys())
@@ -244,3 +245,9 @@ def save() -> None:
             w.writerows(item_dict_list)
             file.close()
 
+
+def load():
+    print("LOADING")
+    print(PLAYER.stats["str"])
+    PLAYER.load_file("player.csv")
+    print(f"NEW STR: {PLAYER.stats['str']}")

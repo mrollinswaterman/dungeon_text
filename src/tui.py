@@ -169,6 +169,7 @@ def begin():
     command = input(">").lower()
     print("")#newline after command prompt
     if command == "y":
+        player_commands.load()
         global_variables.RUNNING = True#
         link_start(STARTING_ENEMY)
     elif command == "t":

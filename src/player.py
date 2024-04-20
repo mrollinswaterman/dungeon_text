@@ -1,4 +1,5 @@
 import random
+import csv
 import items
 import global_commands
 from events import Event
@@ -23,6 +24,18 @@ BONUS = {
     20: 5
 }
 
+HP_POT = None
+FIREBOMB = None
+
+ITEM_TYPES = {
+    "Weapon": items.Weapon,
+    "Armor": items.Armor,
+    "Item": items.Item,
+    "Consumable": items.Consumable,
+    "Health_Potion": HP_POT,
+    "Firebomb": FIREBOMB
+}
+
 class Player():
 
     def __init__(self, id: str="Player", name:str = "New Player"):
@@ -31,12 +44,12 @@ class Player():
         self._level = 1
 
         self._stats = {
-            "str": 12,
-            "dex": 12,
-            "con": 12,
-            "int": 12,
-            "wis": 12,
-            "cha": 12,
+            "str": 10,
+            "dex": 10,
+            "con": 10,
+            "int": 10,
+            "wis": 10,
+            "cha": 10,
         }
 
         self._max_hp = 10 + self.bonus("con")
@@ -421,7 +434,7 @@ class Player():
             armor_debuff = status_effects.Stat_Debuff(armor, self)
             armor_debuff.set_stat("dex")
             armor_debuff.set_id("Maximum Dexterity Bonus")#placeholder id --> just a flag to find and remove it when equipped armor changes
-            armor_debuff.set_power(-(armor.numerical_weight_class - 2))
+            armor_debuff.set_potency(-(armor.numerical_weight_class - 2))
             armor_debuff.set_duration(10000)
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 9 + self.bonus("dex")
@@ -526,9 +539,43 @@ class Player():
         player_tod["gold"] = self._gold 
 
         return player_tod
+    
+    def load_file(self, stats_file, inventory_file) -> None:
+        loader = {}
+        #build a dictionary from the CSV file
+        with open(stats_file, "r") as file:
+            r = csv.reader(file)
 
+            header = next(r)
+            for row in r:
+                rows = row
 
+            for idx, head in enumerate(header):
+                loader[head] = rows[idx]
+            file.close()
         
+        self._name = loader["name"]
+        self._level = loader["level"]
+        for i in range(2, 11):
+            key = list(loader.keys())[i]
+            self._stats[key] = loader[key]
+
+        self._max_hp = loader["max_hp"]
+        self._xp = loader["xp"]
+        self._gold = loader["gold"]
+
+        self.load_iventory(inventory_file)
+    
+    def load_inventory(self, filename) -> None:
+
+
+        with open(filename, encoding="utf-8") as file:
+            r = csv.reader(file)
+            for idx, row in enumerate(r):
+                print(row)
+                if row["type"] in ITEM_TYPES:
+                    item = ITEM_TYPES[row["type"]]()
+                    item.load(filename, idx)
 
 # arush wrote this while drunk, he won't let me delete it
 class bitch(Event):

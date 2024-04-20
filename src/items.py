@@ -1,4 +1,5 @@
 import random
+import csv
 import global_commands
 import player
 
@@ -178,6 +179,13 @@ class Item():
         self._tod["quantity"] = None
         self._tod["unit_weight"] = None
         self._tod["unit_value"] = None
+
+    def load(self, stats_file, idx) -> None:
+        with open(stats_file, encoding = 'utf-8') as file:
+            r = csv.reader(file)
+            info = r[idx]
+            self._id = info["id"]
+            self._name = info["name"]
 
 class Weapon(Item):
 
