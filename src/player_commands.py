@@ -230,11 +230,11 @@ def save() -> None:
     #append all inventory item_to_dicts to list
     for item in PLAYER.inventory:
         item: items.Item = item
-        item.item_to_dict()
+        item.save()
         item_dict_list.append(item.tod)
     #append equipped weapon and armor as dicts to the list
-    PLAYER.weapon.item_to_dict()
-    PLAYER.armor.item_to_dict()
+    PLAYER.weapon.save()
+    PLAYER.armor.save()
     item_dict_list.append(PLAYER.weapon.tod)
     item_dict_list.append(PLAYER.armor.tod)
     #create fieldnames list from item_to_dict keys
@@ -247,7 +247,5 @@ def save() -> None:
 
 
 def load():
-    print("LOADING")
-    print(PLAYER.stats["str"])
-    PLAYER.load_file("player.csv")
-    print(f"NEW STR: {PLAYER.stats['str']}")
+    print("LOADING\n")
+    PLAYER.load("player.csv", "inventory.csv")

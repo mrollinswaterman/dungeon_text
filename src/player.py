@@ -136,10 +136,12 @@ class Player():
     def current_weight(self) -> int:
         total_weight = 0
         for entry in self._inventory:
-            held_item:items.Item = entry
-            total_weight += held_item.total_weight
+            if entry is not None:#check to make sure the entry is valid
+                held_item:items.Item = entry
+                total_weight += held_item.total_weight
         for item in self._equipped:
-            total_weight += self._equipped[item].weight
+            if self._equipped[item] is not None: #check to make sure an item is equipped, add its weight to the total if it is
+                total_weight += self._equipped[item].weight
         return total_weight
     @property
     def gold(self):
@@ -540,7 +542,7 @@ class Player():
 
         return player_tod
     
-    def load_file(self, stats_file, inventory_file) -> None:
+    def load(self, stats_file, inventory_file) -> None:
         loader = {}
         #build a dictionary from the CSV file
         with open(stats_file, "r") as file:
@@ -564,18 +566,22 @@ class Player():
         self._xp = loader["xp"]
         self._gold = loader["gold"]
 
-        self.load_iventory(inventory_file)
+        self.load_inventory(inventory_file)
     
     def load_inventory(self, filename) -> None:
-
-
         with open(filename, encoding="utf-8") as file:
-            r = csv.reader(file)
+            r = csv.DictReader(file)
             for idx, row in enumerate(r):
-                print(row)
+                print(f"{row['type']}")
+                print(ITEM_TYPES["Health_Potion"])
                 if row["type"] in ITEM_TYPES:
-                    item = ITEM_TYPES[row["type"]]()
+                    item:items.Item = ITEM_TYPES[row["type"]]()
                     item.load(filename, idx)
+                if idx == len(r) - 1 or idx == len(r) - 2:
+                    self.equip(item, True)
+                else:
+                    self.pick_up(item, True)
+            file.close()
 
 # arush wrote this while drunk, he won't let me delete it
 class bitch(Event):

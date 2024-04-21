@@ -28,6 +28,11 @@ RUNNING = False
 
 PLAYER = player.Player()
 
+#set player static variables
+print("setting player vars\n")
+player.FIREBOMB = item_compendium.Firebomb
+player.HP_POT = item_compendium.Health_Potion
+
 long_sword = items.Weapon("Long Sword", "Common")
 long_sword.set_damage_dice((1,8))
 long_sword.set_crit_multiplier(2)
@@ -36,12 +41,12 @@ leather_armor = items.Armor("Leather Armor", "Light", "Common")
 leather_armor.set_armor_value(2)
 
 print("")#newline for formatting
-PLAYER.equip(leather_armor, True)
-PLAYER.equip(long_sword, True)
+#PLAYER.equip(leather_armor, True)
+#PLAYER.equip(long_sword, True)
 
-PLAYER.gain_gold(300, True)
+#PLAYER.gain_gold(300, True)
 PLAYER.pick_up(item_compendium.generate_hp_potions("Common", 5), True)
-PLAYER.pick_up(item_compendium.generate_firebombs(5), True)
+#PLAYER.pick_up(item_compendium.generate_firebombs(5), True)
 
 SHOPKEEP = shopkeep.Shopkeep()
 BLACKSMITH = shopkeep.Blacksmith()

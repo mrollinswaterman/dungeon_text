@@ -7,7 +7,6 @@ import status_effects
 
 PLAYER = None
 
-
 class Health_Potion(items.Consumable):
 
     def __init__(self, rarity="Common", id="Health Potion", quantity=0):
@@ -29,7 +28,7 @@ class Health_Potion(items.Consumable):
             return True
         global_commands.type_with_lines("You are already full HP.")
         return False
-    
+
 def generate_hp_potions(rarity="Common", num=1):
     hp = Health_Potion(rarity)
     hp.set_quantity(num)
@@ -112,6 +111,12 @@ class Firebomb(items.Consumable):
         firebomb.set_potency(self._numerical_rarity)
         self._target.add_status_effect(firebomb)
        
+    def update(self) -> None:
+        super().update()
+        self._damage = self._strength
+        self._unit_value = 20 * self._numerical_rarity
+        self._unit_weight = 1
+
 def generate_firebombs(num):
     fb = Firebomb()
     fb.set_quantity(num)
@@ -145,7 +150,3 @@ ARMOR_DICTIONARY = [
     (("AR"), "Branded Mail", ("Heavy", None)),
     (("AR"), "Full-plate", ("Heavy", 9)),
 ]
-
-#set player statics 
-player.FIREBOMB = Firebomb
-player.HP_POT = Health_Potion

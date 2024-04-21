@@ -157,10 +157,17 @@ class Item():
     def set_owner(self, owner) -> None:
         self._owner = owner
 
-    def __str__(self) -> str:
-        return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
+    def update(self) -> None:
+        """
+        Recalculates numerical rarity, value and max durability
+        Only intended to be used after loading an item from
+        a save file
+        """
+        self._numerical_rarity = RARITY[self._rarity]
+        self._value = 10 * self._numerical_rarity
+        self._max_durability = 10 * self._numerical_rarity
 
-    def item_to_dict(self) -> dict:
+    def save(self) -> dict:
         self._tod = {
             "type": self._type,
             "id": self._id,
@@ -186,6 +193,15 @@ class Item():
             info = r[idx]
             self._id = info["id"]
             self._name = info["name"]
+            self._type = info["type"]
+            self._rarity = info["rarity"]
+            self._durability = info["durability"]
+            self._is_consumable = info["consumable"]
+            file.close()
+        self.update()
+
+    def __str__(self) -> str:
+        return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 class Weapon(Item):
 
@@ -198,7 +214,6 @@ class Weapon(Item):
         self._num_damage_dice = 0
         self._crit = 0
         self._type = "Weapon"
-        
 
     #properties
     @property
@@ -245,15 +260,32 @@ class Weapon(Item):
 
     def set_crit_multiplier(self, crit)->None:
         self._crit = crit
-    
-    def __str__(self) -> str:
-        return (f"""{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n""")
 
-    def item_to_dict(self) -> dict:
-        super().item_to_dict()
+    def update(self) -> None:
+        self._value = 15 * self._numerical_rarity
+        self._max_durability = 10 * self._numerical_rarity
+        self._weight = int(2.5 * self._num_damage_dice + (self._damage_dice // 2))
+
+    def save(self) -> dict:
+        super().save()
         self._tod["damage_dice"] = self._damage_dice
         self._tod["num_damage_dice"] = self._num_damage_dice
         self._tod["crit"] = self._crit
+
+    def load(self, stats_file, idx) -> None:
+        super().load(stats_file, idx)
+        with open(stats_file, encoding = 'utf-8') as file:
+            r = csv.reader(file)
+            info = r[idx]
+
+            self._damage_dice = info["damage_dice"]
+            self._num_damage_dice = info["num_damage_dice"]
+            self._crit = info["crit"]
+            file.close()
+        self.update()
+    
+    def __str__(self) -> str:
+        return (f"""{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n""")
 
 
 class Armor(Item):
@@ -305,13 +337,28 @@ class Armor(Item):
             self.set_armor_value(int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2)))
         self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
         self._weight = (10 * self._numerical_weight_class) + self._armor_value
-    
+
+    def update(self) -> None:
+        super().update()
+        self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
+        self._armor_value = int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2))
+        self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
+
+    def save(self) -> dict:
+        super().save()
+        self._tod["weight_class"] = self._weight_class
+
+    def load(self, stats_file, idx) -> None:
+        super().load(stats_file, idx)
+        with open(stats_file, encoding = 'utf-8') as file:
+            r = csv.reader(file)
+            info = r[idx]
+            self._weight_class = info["weight_class"]
+            file.close()
+        self.update()
+
     def __str__(self) -> str:
         return f"{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n"
-
-    def item_to_dict(self) -> dict:
-        super().item_to_dict()
-        self._tod["weight_class"] = self._weight_class
 
 class Consumable(Item):
 
@@ -371,11 +418,22 @@ class Consumable(Item):
         self._value = self._unit_value * self._quantity
         self._weight = self._unit_weight * self._quantity
 
-    def __str__(self) -> str:
-        return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}\n"
-
-    def item_to_dict(self) -> dict:
-        super().item_to_dict()
+    def save(self) -> dict:
+        super().save()
         self._tod["quantity"] = self._quantity
         self._tod["unit_weight"] = self._unit_weight
         self._tod["unit_value"] = self._unit_value
+
+    def load(self, stats_file, idx) -> None:
+        super().load(stats_file, idx)
+        with open(stats_file, encoding = 'utf-8') as file:
+            r = csv.reader(file)
+            info = r[idx]
+            self._quantity = info["quantity"]
+            self._unit_weight = info["unit_weight"]
+            self._unit_value = info["unit_value"]
+            file.close()
+        self.update()
+
+    def __str__(self) -> str:
+        return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}\n"
