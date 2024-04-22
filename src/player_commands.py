@@ -219,7 +219,7 @@ def save() -> None:
     as a CSV file.
     """
 
-    player_dict = PLAYER.player_to_dict()
+    player_dict = PLAYER.save_to_dict()
     with open('player.csv', 'r+') as file:
         w = csv.DictWriter(file, player_dict.keys())
         w.writeheader()
@@ -244,7 +244,6 @@ def save() -> None:
             w.writeheader()
             w.writerows(item_dict_list)
             file.close()
-
 
 def load():
     print("LOADING\n")

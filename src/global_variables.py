@@ -22,16 +22,11 @@ BONUS = {
     19: 4,
     20: 5
 }
-
+#create constants
 START_CMD = True
 RUNNING = False
 
 PLAYER = player.Player()
-
-#set player static variables
-print("setting player vars\n")
-player.FIREBOMB = item_compendium.Firebomb
-player.HP_POT = item_compendium.Health_Potion
 
 long_sword = items.Weapon("Long Sword", "Common")
 long_sword.set_damage_dice((1,8))
@@ -52,7 +47,7 @@ SHOPKEEP = shopkeep.Shopkeep()
 BLACKSMITH = shopkeep.Blacksmith()
 
 BLACKSMITH.add_to_forge_list(item_compendium.WEAPONS_DICTIONARY)#add weapons to forge list
-BLACKSMITH.add_to_forge_list(item_compendium.ARMOR_DICTIONARY)#add armors to forge lis
+BLACKSMITH.add_to_forge_list(item_compendium.ARMOR_DICTIONARY)#add armors to forge list
 
 def restock_the_shop():
     """

@@ -1,4 +1,5 @@
 import random
+import os
 import csv
 import items
 import global_commands
@@ -32,8 +33,8 @@ ITEM_TYPES = {
     "Armor": items.Armor,
     "Item": items.Item,
     "Consumable": items.Consumable,
-    "Health_Potion": HP_POT,
-    "Firebomb": FIREBOMB
+    "Health_Potion": items.Health_Potion,
+    "Firebomb": items.Firebomb
 }
 
 class Player():
@@ -528,7 +529,7 @@ class Player():
                 self.remove_status_effect(effect)
                 break
 
-    def player_to_dict(self) -> dict:
+    def save_to_dict(self) -> dict:
         player_tod = {
             "name": self._name,
             "level": self._level
@@ -536,52 +537,62 @@ class Player():
         for stat in self._stats:
             player_tod[stat] = self._stats[stat]
         player_tod["max_hp"] = self._max_hp
-        #player_tod["hp"] = self._hp
         player_tod["xp"] = self._xp
         player_tod["gold"] = self._gold 
 
         return player_tod
     
     def load(self, stats_file, inventory_file) -> None:
-        loader = {}
-        #build a dictionary from the CSV file
+        #set values to save file values
         with open(stats_file, "r") as file:
-            r = csv.reader(file)
-
-            header = next(r)
-            for row in r:
-                rows = row
-
-            for idx, head in enumerate(header):
-                loader[head] = rows[idx]
-            file.close()
-        
-        self._name = loader["name"]
-        self._level = loader["level"]
-        for i in range(2, 11):
-            key = list(loader.keys())[i]
-            self._stats[key] = loader[key]
-
-        self._max_hp = loader["max_hp"]
-        self._xp = loader["xp"]
-        self._gold = loader["gold"]
+            reader = csv.DictReader(file)
+            for row in reader:
+                self._name = row["name"]
+                self._level = int(row["level"])
+                for i in range(2, 11):#magic number, the range of 
+                #loaded values that corresponds to the player's stats dictionary
+                    key = list(row.keys())[i]
+                    self._stats[key] = int(row[key])
+                self._max_hp = int(row["max_hp"])
+                self._hp = int(row["hp"])
+                self._xp = int(row["xp"])
+                self._ap = int(row["ap"])
+                self._gold = int(row["gold"])
 
         self.load_inventory(inventory_file)
     
     def load_inventory(self, filename) -> None:
+        self._inventory = []
+        size = 0
         with open(filename, encoding="utf-8") as file:
-            r = csv.DictReader(file)
-            for idx, row in enumerate(r):
-                print(f"{row['type']}")
-                print(ITEM_TYPES["Health_Potion"])
-                if row["type"] in ITEM_TYPES:
-                    item:items.Item = ITEM_TYPES[row["type"]]()
-                    item.load(filename, idx)
-                if idx == len(r) - 1 or idx == len(r) - 2:
-                    self.equip(item, True)
-                else:
-                    self.pick_up(item, True)
+            reader = csv.DictReader(file)
+            for row in reader:
+                size += 1
             file.close()
+        with open(filename, encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for idx, row in enumerate(reader):
+                if row["type"] in ITEM_TYPES:
+                    item:items.Item = ITEM_TYPES[row["type"]](row["id"])
+                    item.save()
+                    with open("temp.csv", "w", newline='') as temp_file:
+                        temp_file.truncate(0)
+                        w = csv.DictWriter(temp_file, fieldnames=list(item.tod.keys()))
+                        w.writeheader()
+                        w.writerow(row)
+                        temp_file.close()
+
+                    item.load("temp.csv")
+                if idx == size or idx == size - 1:
+                    self.equip(item)
+                else:
+                    self.pick_up(item)
+            file.close()
+
+        if os.path.exists("temp.csv"):
+            os.remove("temp.csv")
+        else:
+           pass
 
 # arush wrote this while drunk, he won't let me delete it
 class bitch(Event):

@@ -136,6 +136,7 @@ def link_start(enemy:mob.Mob) -> None:
         #command interpretation
         if command == "exit":
             global_variables.RUNNING = False
+            player_commands.save()
             sys.exit()
         if command == "a":
             player_commands.attack()
@@ -178,7 +179,4 @@ def begin():
         player_commands.save()
         sys.exit()
 
-while global_variables.START_CMD is True:
-    global_variables.START_CMD = False
-    print("")
-    begin()
+begin()
