@@ -58,7 +58,7 @@ def event_options():
 
 def continue_run(next):
     global_commands.type_with_lines("Continue? y/n\n")
-    command = input(">").lower()
+    command = input(">> ").lower()
     print("")#newline after cmd prompt
     if command == "y":
         next()
@@ -77,7 +77,7 @@ def exit_the_dungeon():
 
 def buy_something():
     global_commands.type_with_lines("Enter an item's number to purchase it OR (c) - Cancel Order\n")
-    command = input(">").lower()
+    command = input(">> ").lower()
     #print("")#newline after cmd prompt
 
     if command == "exit":
@@ -100,7 +100,7 @@ def buy_something():
             else:
                 def ask_quantity():
                     global_commands.type_text(f"Please enter desired quantity:\n")
-                    command = input(">").lower()
+                    command = input(">> ").lower()
                     print("")#newline after... you get the idea
                     if command == "exit":
                         sys.exit()
@@ -126,7 +126,7 @@ def shopkeep_options():
     global_commands.type_with_lines(random.choice(ENTER_THE_SHOP))
     global_commands.type_with_lines("What would you like to do?\n")
     print("\t Buy Something - (b) | Leave - (l) | Sell something - (s) | Inventory - (i)\n")
-    command = input(">").lower()
+    command = input(">> ").lower()
     print("")
     if command == "b":
         global_variables.SHOPKEEP.print_inventory()
@@ -151,7 +151,7 @@ def check_player_inventory(next):
     global_variables.PLAYER.print_inventory()
     def select_item():
         global_commands.type_with_lines("Enter an item's number to equip it OR (b) - Go Back\n")
-        command = input(">").lower()
+        command = input(">> ").lower()
         print("")#newline after cmd prompt
         if command == "b":
             next()
@@ -174,7 +174,7 @@ def check_player_inventory(next):
 def menu_options():
     global_commands.type_with_lines("What would you like to do?\n")
     print("\t Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v) | Inventory - (i) \n")
-    command = input(">").lower()
+    command = input(">> ").lower()
     #print("")#newline after cmd prompt
     if command == "e":
         global_variables.START_CMD = True

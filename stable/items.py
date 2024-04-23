@@ -1,6 +1,7 @@
 import random
+import csv
 import global_commands
-import player
+import status_effects
 
 RARITY = {
     "Common": 1,
@@ -53,8 +54,9 @@ class Item():
         self._broken = False
         self._type = "Item"
 
-        self._owner:player.Player = None
+        self._owner = None
 
+        self._tod = {}
     #properties
     @property
     def id(self) -> str:
@@ -93,6 +95,9 @@ class Item():
     def weight(self) -> int:
         return self._weight
     @property
+    def quantity(self) -> int:
+        return self._quantity
+    @property
     def total_weight(self) -> int:
         return self._weight
     @property
@@ -110,6 +115,9 @@ class Item():
     @property
     def pickup_message(self) -> str:
         return self._pickup_message
+    @property
+    def tod(self) -> dict:
+        return self._tod
     #methods
     def lose_durability(self) -> None:
         prob = random.randrange(100)
@@ -149,10 +157,49 @@ class Item():
     def set_owner(self, owner) -> None:
         self._owner = owner
 
+    def update(self) -> None:
+        """
+        Recalculates numerical rarity, value and max durability
+        Only intended to be used after loading an item from
+        a save file
+        """
+        self._numerical_rarity = RARITY[self._rarity]
+        self._value = 10 * self._numerical_rarity
+        self._max_durability = 10 * self._numerical_rarity
+
+    def save(self) -> dict:
+        self._tod = {
+            "type": self._type,
+            "id": self._id,
+            "name": self._id,
+            "rarity": self._rarity,
+            "durability": self._durability,
+        }
+        #weapons special stats
+        self._tod["damage_dice"] = None
+        self._tod["num_damage_dice"] = None
+        self._tod["crit"] = None
+        #armor special stats
+        self._tod["weight_class"] = None
+        #consumable special stats
+        self._tod["quantity"] = None
+        self._tod["unit_weight"] = None
+        self._tod["unit_value"] = None
+
+    def load(self, stats_file) -> None:
+        with open(stats_file, encoding = 'utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                self._id = row["id"]
+                self._name = row["name"]
+                self._type = row["type"]
+                self._rarity = row["rarity"]
+                self._durability = int(row["durability"])
+            file.close()
+        self.update()
 
     def __str__(self) -> str:
         return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
-
 
 class Weapon(Item):
 
@@ -165,7 +212,6 @@ class Weapon(Item):
         self._num_damage_dice = 0
         self._crit = 0
         self._type = "Weapon"
-        
 
     #properties
     @property
@@ -212,6 +258,28 @@ class Weapon(Item):
 
     def set_crit_multiplier(self, crit)->None:
         self._crit = crit
+
+    def update(self) -> None:
+        self._value = 15 * self._numerical_rarity
+        self._max_durability = 10 * self._numerical_rarity
+        self._weight = int(2.5 * self._num_damage_dice + (self._damage_dice // 2))
+
+    def save(self) -> dict:
+        super().save()
+        self._tod["damage_dice"] = self._damage_dice
+        self._tod["num_damage_dice"] = self._num_damage_dice
+        self._tod["crit"] = self._crit
+
+    def load(self, stats_file, ) -> None:
+        super().load(stats_file, )
+        with open(stats_file, encoding = 'utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                self._damage_dice = int(row["damage_dice"])
+                self._num_damage_dice = int(row["num_damage_dice"])
+                self._crit = int(row["crit"])
+            file.close()
+        self.update()
     
     def __str__(self) -> str:
         return (f"""{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n""")
@@ -266,10 +334,28 @@ class Armor(Item):
             self.set_armor_value(int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2)))
         self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
         self._weight = (10 * self._numerical_weight_class) + self._armor_value
-    
+
+    def update(self) -> None:
+        super().update()
+        self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
+        self._armor_value = int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2))
+        self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
+
+    def save(self) -> dict:
+        super().save()
+        self._tod["weight_class"] = self._weight_class
+
+    def load(self, stats_file) -> None:
+        super().load(stats_file)
+        with open(stats_file, encoding = 'utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                self._weight_class = row["weight_class"]
+            file.close()
+        self.update()
+
     def __str__(self) -> str:
         return f"{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n"
-
 
 class Consumable(Item):
 
@@ -316,6 +402,9 @@ class Consumable(Item):
     def set_quantity(self, num:int) -> None:
         self._quantity = num
         self.update()
+    
+    def set_target(self, tar) -> None:
+        self._target = tar
 
     def update(self) -> None:
         if self._quantity > 1:
@@ -329,5 +418,123 @@ class Consumable(Item):
         self._value = self._unit_value * self._quantity
         self._weight = self._unit_weight * self._quantity
 
+    def save(self) -> dict:
+        super().save()
+        self._tod["quantity"] = self._quantity
+        self._tod["unit_weight"] = self._unit_weight
+        self._tod["unit_value"] = self._unit_value
+
+    def load(self, stats_file) -> None:
+        super().load(stats_file)
+        with open(stats_file, encoding = 'utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                self._quantity = int(row["quantity"])
+                self._unit_weight = float(row["unit_weight"])
+                self._unit_value = float(row["unit_value"])
+            file.close()
+        self.update()
+
     def __str__(self) -> str:
         return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}\n"
+    
+class Health_Potion(Consumable):
+
+    def __init__(self, id="Health Potion", rarity="Common", quantity=0):
+        super().__init__(id, rarity, quantity)
+        self._unit_weight = 0.5
+        self._target = status_effects.PLAYER
+        self._type = "Health_Potion"
+
+    def use(self, target=None) -> bool:
+        """
+        Heals the target for a given amount
+        """
+        if self._target.hp < self._target.max_hp:
+            print(self._target.hp, self._target.max_hp)
+            self.decrease_quantity(1)
+            global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
+            self._target.heal(self._strength)
+            self._owner.spend_ap(1)
+            return True
+        global_commands.type_with_lines("You are already full HP.")
+        return False
+    
+class Repair_Kit(Consumable):
+
+    def __init__(self, id="Repair Kit", rarity="Uncommon", quantity=0):
+        super().__init__(id, rarity, quantity)
+        self._unit_value = 10 * self._numerical_rarity
+        self._unit_weight = .5
+        self._type = "Repair_Kit"
+
+    def use(self, target: Item) -> bool:
+        """
+        Repairs the item to full durability
+        """
+        if target.durability[0] < target._durability[1]:#ie item is damaged
+            self.decrease_quantity(1)
+            global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
+            target.repair()
+            return True
+        return False
+
+class Firebomb(Consumable):
+    
+    def __init__(self, id="Firebomb", rarity="Uncommon", quantity=0):
+        super().__init__(id, rarity, quantity)
+        self._unit_value = 20 * self._numerical_rarity
+        self._unit_weight = 1 
+        self._target = None
+        self._damage = self._strength
+        print(self._damage)
+        self._type = "Firebomb"
+
+    def use(self, target=None):
+        self._target = target
+        throw = self._owner.roll_a_check("dex")
+        dodge = target.roll_a_check("dex")
+
+        self._owner.spend_ap()
+        self._quantity -= 1
+
+        global_commands.type_with_lines(f"You throw a {self._id} at the {self._target.id}.\n")
+
+        if dodge >= throw + 10:
+            global_commands.type_text(f"The {self._target.id} dodged your {self._id} entirely!")
+            return True
+        
+        if dodge >= throw:
+            global_commands.type_text(f"The {self._target.id} partially dodged your {self._id}.\n")
+            taken = self._target.take_damage(int(self._damage / 2))
+            if global_commands.probability(50 - dodge): #--> if statement is a formattting thing the message doesn't change 
+                global_commands.type_text(f"The {self._id} did {taken} damage to the {self._target.id}.\n")
+                self.set_on_fire()
+            else:
+                global_commands.type_text(f"The {self._id} did {taken} damage to the {self._target.id}.")
+            return True
+        
+        if throw > dodge:
+            global_commands.type_text(f"You hit the {self._target.id}.\n")
+            taken = self._target.take_damage(int(self._damage))
+            if global_commands.probability(75):#--> if statement is a formattting thing the message doesn't change 
+                global_commands.type_text(f"Your {self._id} did {taken} damage to the {self._target.id}.\n")
+                self.set_on_fire()
+            else:
+                global_commands.type_text(f"Your {self._id} did {taken} damage to the {self._target.id}.")
+            return True
+
+    def set_on_fire(self) -> None:
+        if self.target == None:
+            firebomb = status_effects.Player_On_Fire(self._owner)
+        else:
+            firebomb = status_effects.On_Fire(self._owner, self._target)
+        firebomb.set_duration(3)
+        firebomb.set_potency(self._numerical_rarity)
+        self._target.add_status_effect(firebomb)
+       
+    def update(self) -> None:
+        super().update()
+        self._damage = self._strength
+        self._unit_value = 20 * self._numerical_rarity
+        self._unit_weight = 1

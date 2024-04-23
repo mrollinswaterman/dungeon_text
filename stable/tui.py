@@ -4,10 +4,12 @@ import narrator, player_commands, enemy_commands
 import item_compendium
 import dms_guide, events
 import global_commands, global_variables
+import status_effects
 
 PLAYER = global_variables.PLAYER
 
 item_compendium.PLAYER = PLAYER
+status_effects.PLAYER = PLAYER
 
 #notes on formatting
 
@@ -47,51 +49,31 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the Player turn
         """
+        enemy.set_header(False)#reset enemy's formatting header
+        PLAYER.update()
+        player_commands.turn_options()
+
+    def enemy_turn():
+        """
+        Begins the enemy turn
+        """
         enemy.update()
-        PLAYER.reset_ap()
-        player_commands.player_turn_options()
+        enemy_commands.turn_options()
 
     def player_death():
         #some text probably too
         global_variables.RUNNING = False
         sys.exit()
 
-    def enemy_turn():
-        """
-        Begins the enemy turn
-        """
-        PLAYER.update()
-        if enemy.dead:
-            end_scene()
-        if enemy.fleeing:
-            enemy_commands.enemy_flee_attempt()
-            return None
-        #if trigger is active, 75% chance of special
-        if enemy.trigger() is True:
-            if global_commands.probability(100) is True:#75
-                if enemy.special() is True:
-                    enemy_commands.run_enemy_next()
-                    return None
-            else:
-                enemy_commands.enemy_attack()
-                return None
-        else: #if trigger not active, 25% of doing special
-            if global_commands.probability(25) is True:
-                if enemy.special() is True:
-                    enemy_commands.run_enemy_next()
-                    return None
-            enemy_commands.enemy_attack()
-            return None
-
     def end_scene():
         global_commands.type_text(f"You killed the {enemy.id}!\n")
         PLAYER.recieve_reward(enemy.loot)
-        PLAYER.reset_ap()
+        PLAYER.update()
         narrator.continue_run(next_scene)
 
     def run_event(event: events.Event):
         narrator.event_options()
-        command = input(">")
+        command = input(">> ")
         print("")#newline after cmd prompt
         if command.lower() in events.FAILURE_LINES:
             event.run(command, PLAYER.roll_a_check(command))
@@ -114,7 +96,7 @@ def link_start(enemy:mob.Mob) -> None:
 
     def level_up_player():
         narrator.level_up_options()
-        command = input(">")
+        command = input(">> ")
         print("")#newline after cmd prompt
         PLAYER.spend_xp(command)
         global_commands.type_text(f"Your {command} increased by 1. You are now Level {PLAYER.level}")
@@ -148,35 +130,46 @@ def link_start(enemy:mob.Mob) -> None:
 
     while global_variables.RUNNING is True:
 
-        command = input(">").lower()
+        command = input(">> ").lower()
         print("")
 
         #command interpretation
         if command == "exit":
             global_variables.RUNNING = False
+            player_commands.save()
             sys.exit()
-        if command == "a":
-            player_commands.attack()
-        if command == "hp":
-            player_commands.hp()
-        if command == "i":
-            player_commands.inventory()
-        if command == "test":
-            print(enemy.hp)
-        if command == "p":
-            enemy_turn()
-        if command == "c":
-            player_commands.cleanse_an_effect()
-        if command == "f":
-            global_variables.RUNNING = False
-            player_commands.flee()
-            enemy = None
+        try:
+            command = int(command)
+            try:
+                item = PLAYER.inventory[command - 1]
+            except IndexError:
+                item = None
+            player_commands.use_an_item(item, enemy)
+        except ValueError:
+            pass
+        match command:
+            case "a": #attack
+                player_commands.attack()
+            case "hp": #check hp
+                player_commands.show_hp()
+            case "i": #show inventory
+                player_commands.show_inventory()
+            case "test": #test suite
+                print(enemy.hp)
+            case "p": #pass the turn
+                enemy_turn()
+            case "c": #cleans an effect
+                player_commands.cleanse_an_effect()
+            case "f": #attempt to flee
+                global_variables.RUNNING = False
+                player_commands.flee()
+                enemy = None
 
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Hobgoblin")
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
+    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Land Shark")
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
@@ -184,17 +177,16 @@ def begin():
 
     STARTING_ENEMY.set_level(PLAYER.level)
 
-    command = input(">").lower()
+    command = input(">> ").lower()
     print("")#newline after command prompt
     if command == "y":
+        player_commands.load()
         global_variables.RUNNING = True#
         link_start(STARTING_ENEMY)
     elif command == "t":
         narrator.exit_the_dungeon()
     elif command == "n":
+        player_commands.save()
         sys.exit()
 
-while global_variables.START_CMD is True:
-    global_variables.START_CMD = False
-    print("")
-    begin()
+begin()

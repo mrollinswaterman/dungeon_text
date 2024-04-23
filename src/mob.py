@@ -20,6 +20,7 @@ class Mob():
             "int": 10,
             "wis": 10,
             "cha": 10,
+            "damage-taken-multiplier": 1
         }
 
         self._max_hp = 8 + self.bonus("con")
@@ -53,7 +54,7 @@ class Mob():
         self._flee_threshold = 15 - self.bonus("cha") * 2
         self._player = global_variables.PLAYER
 
-        self._status_effects: set[player.Status_Effect] = set()
+        self._status_effects: dict[str, status_effects.Status_Effect] = {}
         self._applied_status_effects = set()
 
         #tracks if the header for the turn has been printed yet
@@ -208,44 +209,57 @@ class Mob():
         """
         Adds a status effect to the mob
         """
-        self._status_effects.add(effect)
+        if effect.id in self._status_effects:
+            #if we have the effect already, kick out of the function
+            return None
+        self._status_effects[effect.id] = effect
         effect.apply()
+
+        self.update_stats()
 
     def remove_status_effect(self, effect:status_effects.Status_Effect) -> None:
         """
         Removes a status effect from the mob
         """
-        self._status_effects.remove(effect)
+        del self._status_effects[effect.id]
         effect.cleanse()
         return None
 
+    #MISC.
     def update(self):
         """
         Updates all relevant stats when a mob's level is changed,
         updates status effects and removes them when their duration
         expires. 
         """
-        #print("_"*110+"\n")
         self.reset_ap()
 
-        self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
-        self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
+        self.update_stats()
+       
+        #update all status effects
         inactive = []
-        for effect in self._status_effects:
+        for entry in self._status_effects:
+            effect: status_effects.Status_Effect = self._status_effects[entry]
             effect.update()
             if effect.active is False:
-                #removes effect
                 inactive.append(effect)
         for effect in inactive:
             self.remove_status_effect(effect)
         inactive = []
 
-        #recheck all calculated stats
-        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
-        self._stats["hp"] = self._hp
-        self._stats["ap"] = self._max_ap
+    def update_stats(self) -> None:
+        """
+        Updates mobs stats seperately
+        """
+         #update calculated stats
+        self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
+        self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
+        try:
+            self._damage_taken_multiplier = self._stats["damage-taken-multiplier"]
+        except KeyError:
+            self._stats["damage-taken-multiplier"] = 1
+            self._damage_taken_multiplier = self._stats["damage-taken-multiplier"]
         self._evasion = self._stats["evasion"] + self.bonus("dex")
-        self._stats["armor"] = self._armor
 
     def level_up(self):
         for _ in range(self._level-1):

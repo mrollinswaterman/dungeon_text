@@ -2,6 +2,29 @@ import time
 import random
 import global_variables
 
+TAG_TO_STAT = {
+    "str": "Strength",
+    "dex": "Dexterity",
+    "con": "Constitution",
+    "int": "Intelligence",
+    "wis": "Wisdom",
+    "cha": "Charisma",
+    "evasion": "Evasion",
+    "damage-taken-multiplier": "Vulnerability",
+    "damage-multiplier": "Damage"
+}
+
+def switch(header, text):
+    """
+    Prints the given text with lines if header is false
+    and without lines if header is true
+    """
+    if header is True:
+        type_text(text)
+    elif header is False:
+        type_with_lines(text)
+    else:
+        raise ValueError("header val not bool")
 
 def generate_item_rarity() -> str:
     """

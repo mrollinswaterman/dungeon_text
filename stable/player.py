@@ -1,4 +1,6 @@
 import random
+import os
+import csv
 import items
 import global_commands
 from events import Event
@@ -23,31 +25,32 @@ BONUS = {
     20: 5
 }
 
-TAG_TO_STAT = {
-    "str": "Strength",
-    "dex": "Dexterity",
-    "con": "Constitution",
-    "int": "Intelligence",
-    "wis": "Wisdom",
-    "cha": "Charisma",
-    "evasion": "Evasion",
-    "damage-taken-multiplier": "Vulnerability"
+HP_POT = None
+FIREBOMB = None
+
+ITEM_TYPES = {
+    "Weapon": items.Weapon,
+    "Armor": items.Armor,
+    "Item": items.Item,
+    "Consumable": items.Consumable,
+    "Health_Potion": items.Health_Potion,
+    "Firebomb": items.Firebomb
 }
 
 class Player():
 
-    def __init__(self, id: str="Player", name:str = ""):
+    def __init__(self, id: str="Player", name:str = "New Player"):
         self._id = id
         self._name = name
         self._level = 1
 
         self._stats = {
-            "str": 12,
-            "dex": 12,
-            "con": 12,
-            "int": 12,
-            "wis": 12,
-            "cha": 12,
+            "str": 10,
+            "dex": 10,
+            "con": 10,
+            "int": 10,
+            "wis": 10,
+            "cha": 10,
         }
 
         self._max_hp = 10 + self.bonus("con")
@@ -55,9 +58,11 @@ class Player():
         self._max_ap = 1 + (self._level // 5)
         self._ap = self._max_ap
         self._damage_taken_multiplier = 1
+        self._damage_multiplier = 1
 
-        self._stats["evasion"] = 9
+        self._stats["base-evasion"] = 9
         self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["damage-multiplier"] = self._damage_multiplier
         self._stats["hp"] = self._hp
         self._stats["ap"] = self._max_ap
         
@@ -65,7 +70,7 @@ class Player():
         self._xp = 0
         self._gold = 0
         self._inventory = []
-        self._status_effects_list:list[status_effects.Status_Effect] = []
+        self._status_effects:dict[str, status_effects.Status_Effect] = {}
         self._level_up_function = None
 
         #equipment
@@ -125,7 +130,7 @@ class Player():
         return self._equipped["Weapon"]
     @property
     def evasion(self):
-        return self._stats["evasion"] + self.bonus("dex")
+        return self._stats["base-evasion"] + self.bonus("dex")
     @property
     def carrying_capacity(self) -> int:
         return int(5.5 * self._stats["str"])
@@ -133,10 +138,12 @@ class Player():
     def current_weight(self) -> int:
         total_weight = 0
         for entry in self._inventory:
-            held_item:items.Item = entry
-            total_weight += held_item.total_weight
+            if entry is not None:#check to make sure the entry is valid
+                held_item:items.Item = entry
+                total_weight += held_item.total_weight
         for item in self._equipped:
-            total_weight += self._equipped[item].weight
+            if self._equipped[item] is not None: #check to make sure an item is equipped, add its weight to the total if it is
+                total_weight += self._equipped[item].weight
         return total_weight
     @property
     def gold(self):
@@ -150,6 +157,9 @@ class Player():
     @property
     def id(self):
         return self._id
+    @property
+    def name(self):
+        return self._name
     @property
     def max_hp(self):
         return self._max_hp
@@ -169,7 +179,7 @@ class Player():
         return self.xp > (15 * self._level)
     @property
     def status_effects(self):
-        return self._status_effects_list
+        return self._status_effects
     @property
     def max_ap(self) -> None:
         """
@@ -208,6 +218,12 @@ class Player():
     def set_level(self, num:int) -> None:
         self._level = num
 
+    def set_damage_multiplier(self, num:int) -> None:
+        self._damage_multiplier = num
+
+    def reset_damage_multiplier(self) -> None:
+        self.set_damage_multiplier(0)
+
 
     #ROLLS
     def roll_attack(self) -> int:
@@ -235,7 +251,7 @@ class Player():
         weapon_damage = 0
         for _ in range(weapon.num_damage_dice):
             weapon_damage += random.randrange(1, weapon.damage_dice)
-        return weapon_damage + self.bonus(self.str)
+        return weapon_damage * self._damage_multiplier + self.bonus(self.str)
 
     def roll_a_check(self, stat: str) -> int:
         """
@@ -411,7 +427,7 @@ class Player():
         """
         Same as above but for armor
         """
-        for effect in self._status_effects_list:
+        for effect in self._status_effects:
             effect:status_effects.Status_Effect = effect
             if effect.id == "Maximum Dexterity Bonus":
                 self.remove_status_effect(effect)
@@ -422,7 +438,7 @@ class Player():
             armor_debuff = status_effects.Stat_Debuff(armor, self)
             armor_debuff.set_stat("dex")
             armor_debuff.set_id("Maximum Dexterity Bonus")#placeholder id --> just a flag to find and remove it when equipped armor changes
-            armor_debuff.set_power(-(armor.numerical_weight_class - 2))
+            armor_debuff.set_potency(-(armor.numerical_weight_class - 2))
             armor_debuff.set_duration(10000)
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 9 + self.bonus("dex")
@@ -485,36 +501,109 @@ class Player():
                 self.gain_xp(reward[entry])
             if entry == "drop":
                 self.pick_up(reward[entry])
+        return None
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
-    def add_status_effect(self, effect) -> None:
+    def add_status_effect(self, effect:"status_effects.Status_Effect") -> None:
         """
         Adds a status effect to the player's status effect list
         and changes the corresponding stat
         """
-        effect: status_effects.Status_Effect = effect
-        effect.apply()
-        self._status_effects_list.append(effect)
+        if effect.id not in self._status_effects:
+            self._status_effects[effect.id] = effect
+            effect.apply()
+            self.update_stats()
+        return None
 
-    def remove_status_effect(self, effect) -> bool:
-        effect: status_effects.Status_Effect = effect
-        if effect in self._status_effects_list:
-            self._status_effects_list.remove(effect)
+    def remove_status_effect(self, effect:"status_effects.Status_Effect") -> bool:
+        if effect.id in self._status_effects:
+            del self._status_effects[effect.id]
             effect.cleanse()
             return True
         else:
             raise ValueError("Stat to be removed cannot be found")
 
     def update(self) -> None:
-        for effect in self._status_effects_list:
+        self.reset_ap()
+        self.update_stats()
+        for effect in self._status_effects:
             effect.update()
             if effect.active is False:
                 #removes effect
                 self.remove_status_effect(effect)
                 break
 
+    def update_stats(self) -> None:
+        """
+        Updates player stats seperately
+        """
+        self._damage_multiplier = self._stats["damage-multiplier"]
+        self._damage_taken_multiplier = self._stats["damage-taken-multiplier"]
 
-        
+    def save_to_dict(self) -> dict:
+        player_tod = {
+            "name": self._name,
+            "level": self._level
+        }
+        for stat in self._stats:
+            player_tod[stat] = self._stats[stat]
+        player_tod["max_hp"] = self._max_hp
+        player_tod["xp"] = self._xp
+        player_tod["gold"] = self._gold 
+
+        return player_tod
+    
+    def load(self, stats_file, inventory_file) -> None:
+        #set values to save file values
+        with open(stats_file, "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                self._name = row["name"]
+                self._level = int(row["level"])
+                for i in range(2, 11):#magic number, the range of 
+                #loaded values that corresponds to the player's stats dictionary
+                    key = list(row.keys())[i]
+                    self._stats[key] = int(row[key])
+                self._max_hp = int(row["max_hp"])
+                self._hp = int(row["hp"])
+                self._xp = int(row["xp"])
+                self._ap = int(row["ap"])
+                self._gold = int(row["gold"])
+
+        self.load_inventory(inventory_file)
+    
+    def load_inventory(self, filename) -> None:
+        self._inventory = []
+        size = 0
+        with open(filename, encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                size += 1
+            file.close()
+        with open(filename, encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for idx, row in enumerate(reader):
+                if row["type"] in ITEM_TYPES:
+                    item:items.Item = ITEM_TYPES[row["type"]](row["id"])
+                    item.save()
+                    with open("temp.csv", "w", newline='') as temp_file:
+                        temp_file.truncate(0)
+                        w = csv.DictWriter(temp_file, fieldnames=list(item.tod.keys()))
+                        w.writeheader()
+                        w.writerow(row)
+                        temp_file.close()
+
+                    item.load("temp.csv")
+                if idx == size - 2 or idx == size - 1:
+                    self.equip(item, True)
+                else:
+                    self.pick_up(item, True)
+            file.close()
+
+        if os.path.exists("temp.csv"):
+            os.remove("temp.csv")
+        else:
+           pass
 
 # arush wrote this while drunk, he won't let me delete it
 class bitch(Event):

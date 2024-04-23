@@ -1,4 +1,5 @@
 import random
+import csv
 import sys
 import global_commands
 import global_variables
@@ -19,7 +20,7 @@ PLAYER_DEATH = None
 
 NEXT_SCENE = None
 
-def player_turn_options():
+def turn_options():
     global_commands.type_with_lines(f"What would you like to do? Action Points: {PLAYER.ap}/{PLAYER.max_ap}\n")
     options = "\t Attack - (a) | Check HP - (hp) | Flee - (f) | Inventory - (i) | Pass Turn - (p) | Cleanse a Status Effect - (c)"
     print(options)
@@ -30,7 +31,7 @@ def cleanse_an_effect():
         effect: status_effects.Status_Effect = effect
         print(f"{idx+1}. {effect.id}\n")
 
-    cmd = input(">").lower()
+    cmd = input(">> ").lower()
     print("")
     try:
         num = int(cmd)
@@ -38,7 +39,7 @@ def cleanse_an_effect():
         PLAYER.spend_ap()
         if effect.attempt_cleanse(PLAYER.roll_a_check(effect.cleanse_stat)) is True:
             if PLAYER.can_act is True:
-                PLAYER_TURN()
+                turn_options()
                 return None
             ENEMY_TURN()
             return None
@@ -50,7 +51,7 @@ def cleanse_an_effect():
         if cmd == "exit":
             sys.exit()
         elif cmd == "c":
-            PLAYER_TURN()
+            turn_options()
         else:
             #invalid entry
             pass 
@@ -67,7 +68,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     """
     if PLAYER.can_act is False:
         global_commands.type_text("No AP available.")
-        PLAYER_TURN()
+        turn_options()
         return None
 
     if run_on_miss is None:
@@ -97,32 +98,30 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
             taken = ENEMY.take_damage(PLAYER.roll_damage())
 
         if ENEMY.dead is False and PLAYER.can_act is False:
-            PLAYER.reset_ap()
             global_commands.type_text(f"You hit the {ENEMY.id} for {taken} damage.") #last thing printed = no \n
             run_on_hit()
         elif ENEMY.dead is True:
             global_commands.type_text(f"You hit the {ENEMY.id} for {taken} damage.\n")
             END_SCENE()
         else:
-            player_turn_options()
+            turn_options()
 
     elif attack_roll < ENEMY.evasion:
         global_commands.type_text("You missed.") #last thing printed = no \n
         if PLAYER.can_act is False:
-            PLAYER.reset_ap()
             run_on_miss()
         else: 
-            player_turn_options()
+            turn_options()
 
-def hp() -> None:
+def show_hp() -> None:
     """
     Prints the player's HP then runs the given function
     """
     global_commands.print_with_lines(f' HP: {PLAYER.hp}/{PLAYER.max_hp}')
     print(" ["+"/"*PLAYER.hp+" "*(PLAYER.max_hp-PLAYER.hp)+"]")
-    PLAYER_TURN()
+    turn_options()
 
-def inventory() -> None:
+def show_inventory() -> None:
     """
     Prints the player's inventory then runs the given function
     """
@@ -131,24 +130,27 @@ def inventory() -> None:
     select_an_item()
 
 def select_an_item() -> None:
-    global_commands.type_with_lines("Enter an Item's number to use it\n")
-    command = input(">")
+    global_commands.type_with_lines("Enter an Item's number to use it | Go Back - (b)\n")
+    command = input(">> ")
     print("")
+
+    if command.lower() == "b":
+        PLAYER_TURN()
     try:
         command = int(command)
         try:
             item = PLAYER.inventory[command - 1]
         except IndexError:
-            print(" Please enter a valid number.")
+            print(" Please enter a valid item number.")
             select_an_item()
             return None
-    except TypeError:
-        print(" Please enter a valid number.")
+    except ValueError:
+        print(" Please enter a valid command.")
         select_an_item()
         return None
-    use_an_item(item)
+    use_an_item(item, ENEMY)
 
-def use_an_item(item: items.Consumable, target=PLAYER) -> None:
+def use_an_item(item: items.Consumable, target=None) -> None:
     """
     Uses an item on the Player, if the player has the item in their inventory
     """
@@ -157,7 +159,9 @@ def use_an_item(item: items.Consumable, target=PLAYER) -> None:
         PLAYER_TURN()
         return None
     if item is None:
-        raise ValueError("")
+        global_commands.type_text("Invalid item selected. Please try again.")
+        PLAYER_TURN()
+        return None
     if PLAYER.has_item(item) is True:#check the player has the item
         if item.is_consumable is True:
             item = PLAYER.find_item_by_name(item.name)
@@ -169,17 +173,18 @@ def use_an_item(item: items.Consumable, target=PLAYER) -> None:
                 select_an_item()
                 return None
             held_item.use(target)
+
             if PLAYER.can_act is False:
-                PLAYER.reset_ap()
+                #PLAYER.reset_ap()
                 ENEMY_TURN()
             else:
-                PLAYER_TURN()
+                turn_options()
         else:
             global_commands.type_text(f"{item.name} is not a consumable.")
             select_an_item()
     else:
         global_commands.type_with_lines(f"No {item.name} avaliable!")
-        PLAYER_TURN()
+        turn_options()
 
 def stop_flee_attempt() -> None:
     """
@@ -200,7 +205,7 @@ def flee() -> None:
     """
     if PLAYER.can_act is False:
         global_commands.type_text("No AP available.")
-        PLAYER_TURN()
+        turn_options()
 
     global_commands.type_with_lines("You attempt to flee...\n")
     
@@ -210,3 +215,38 @@ def flee() -> None:
     else:
         global_commands.type_text(f"The {ENEMY.id} lets you go.")
         narrator.exit_the_dungeon()
+
+def save() -> None:
+    """
+    Saves the player's current state (inventory, hp, etc)
+    as a CSV file.
+    """
+
+    player_dict = PLAYER.save_to_dict()
+    with open('player.csv', 'r+') as file:
+        w = csv.DictWriter(file, player_dict.keys())
+        w.writeheader()
+        w.writerow(player_dict)
+        file.close()
+
+    item_dict_list = []
+    #append all inventory item_to_dicts to list
+    for item in PLAYER.inventory:
+        item: items.Item = item
+        item.save()
+        item_dict_list.append(item.tod)
+    #append equipped weapon and armor as dicts to the list
+    PLAYER.weapon.save()
+    PLAYER.armor.save()
+    item_dict_list.append(PLAYER.weapon.tod)
+    item_dict_list.append(PLAYER.armor.tod)
+    #create fieldnames list from item_to_dict keys
+    fields = list(PLAYER.weapon.tod.keys())
+    with open("inventory.csv", "r+") as file:
+            w = csv.DictWriter(file, fieldnames=fields)
+            w.writeheader()
+            w.writerows(item_dict_list)
+            file.close()
+
+def load():
+    PLAYER.load("player.csv", "inventory.csv")

@@ -73,7 +73,7 @@ def link_start(enemy:mob.Mob) -> None:
 
     def run_event(event: events.Event):
         narrator.event_options()
-        command = input(">")
+        command = input(">> ")
         print("")#newline after cmd prompt
         if command.lower() in events.FAILURE_LINES:
             event.run(command, PLAYER.roll_a_check(command))
@@ -96,7 +96,7 @@ def link_start(enemy:mob.Mob) -> None:
 
     def level_up_player():
         narrator.level_up_options()
-        command = input(">")
+        command = input(">> ")
         print("")#newline after cmd prompt
         PLAYER.spend_xp(command)
         global_commands.type_text(f"Your {command} increased by 1. You are now Level {PLAYER.level}")
@@ -130,7 +130,7 @@ def link_start(enemy:mob.Mob) -> None:
 
     while global_variables.RUNNING is True:
 
-        command = input(">").lower()
+        command = input(">> ").lower()
         print("")
 
         #command interpretation
@@ -148,19 +148,19 @@ def link_start(enemy:mob.Mob) -> None:
         except ValueError:
             pass
         match command:
-            case "a":
+            case "a": #attack
                 player_commands.attack()
-            case "hp":
-                player_commands.hp()
-            case "i":
-                player_commands.inventory()
-            case "test":
+            case "hp": #check hp
+                player_commands.show_hp()
+            case "i": #show inventory
+                player_commands.show_inventory()
+            case "test": #test suite
                 print(enemy.hp)
-            case "p":
+            case "p": #pass the turn
                 enemy_turn()
-            case "c":
+            case "c": #cleans an effect
                 player_commands.cleanse_an_effect()
-            case "f":
+            case "f": #attempt to flee
                 global_variables.RUNNING = False
                 player_commands.flee()
                 enemy = None
@@ -168,8 +168,8 @@ def link_start(enemy:mob.Mob) -> None:
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Land Shark")
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
+    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Land Shark")
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
@@ -177,7 +177,7 @@ def begin():
 
     STARTING_ENEMY.set_level(PLAYER.level)
 
-    command = input(">").lower()
+    command = input(">> ").lower()
     print("")#newline after command prompt
     if command == "y":
         player_commands.load()

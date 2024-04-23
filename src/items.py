@@ -487,6 +487,7 @@ class Firebomb(Consumable):
         self._unit_weight = 1 
         self._target = None
         self._damage = self._strength
+        print(self._damage)
         self._type = "Firebomb"
 
     def use(self, target=None):
@@ -522,8 +523,6 @@ class Firebomb(Consumable):
             else:
                 global_commands.type_text(f"Your {self._id} did {taken} damage to the {self._target.id}.")
             return True
-        
-        
 
     def set_on_fire(self) -> None:
         if self.target == None:

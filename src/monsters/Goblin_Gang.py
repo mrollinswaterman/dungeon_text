@@ -34,4 +34,4 @@ class Goblin_Gang(mob.Mob):
     def special(self) -> bool:
         return False
 
-object = Goblin_Gang()
+object = Goblin_Gang

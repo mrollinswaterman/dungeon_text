@@ -14,6 +14,28 @@ PLAYER_DEATH = None
 
 NEXT_SCENE = None
 
+def turn_options():
+    if ENEMY.dead:
+        END_SCENE()
+    if ENEMY.fleeing:
+        enemy_flee_attempt()
+        return None
+    #if trigger is active, 75% chance of special
+    if ENEMY.trigger() is True:
+        if global_commands.probability(100) is True:#75
+            if ENEMY.special() is True:
+                run_enemy_next()
+                return None
+        else:
+            enemy_attack()
+            return None
+    else: #if trigger not active, 25% of doing special
+        if global_commands.probability(25) is True:
+            if ENEMY.special() is True:
+                run_enemy_next()
+                return None
+        enemy_attack()
+        return None
 
 def enemy_flee_attempt():
     """
@@ -28,7 +50,7 @@ def enemy_flee_attempt():
     def enemy_flee_failure():
         global_commands.type_text(f"You stopped the {ENEMY.id}. It is forced to continue fighting.")
         PLAYER_TURN()
-    global_commands.type_with_lines(f"The {ENEMY.id} attempts to flee...\n")
+    global_commands.switch(ENEMY.header, f"The {ENEMY.id} attempts to flee...\n")
     print(" Try to stop them? y/n\n")
     command = input(">").lower()
     #print("")#newline after cmd prompt
@@ -47,10 +69,10 @@ def run_enemy_next():
     enemy_next = ditto but for enemy
     """
     if ENEMY.can_act is False:
-        ENEMY.reset_ap()
+        #ENEMY.reset_ap()
         PLAYER_TURN()
     else:
-        ENEMY_TURN()
+        turn_options()
 
 def enemy_attack():
     """
@@ -58,7 +80,7 @@ def enemy_attack():
     """
     ENEMY.spend_ap()
     attack = ENEMY.roll_attack()
-    global_commands.type_with_lines(f"The {ENEMY.id} attacks you, rolling a {attack}\n")
+    global_commands.switch(ENEMY.header, f"The {ENEMY.id} attacks you, rolling a {attack}\n")
     if attack == 0:
         global_commands.type_text(f"A critical hit! Uh oh.\n")
         taken = global_variables.PLAYER.take_damage(ENEMY.roll_damage() * 2)

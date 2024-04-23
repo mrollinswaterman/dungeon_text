@@ -20,18 +20,18 @@ class Mob():
             "int": 10,
             "wis": 10,
             "cha": 10,
+            "damage-taken-multiplier": 1
         }
 
         self._max_hp = 8 + self.bonus("con")
         self._hp = self._max_hp
+
         self._max_ap = 1 + (self._level // 5)
         self._ap = self._max_ap
-        self._damage_taken_multiplier = 1
 
+        self._damage_taken_multiplier = 1
+        self._damage_multiplier = 1
         self._stats["evasion"] = 9
-        self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
-        self._stats["hp"] = self._hp
-        self._stats["ap"] = self._max_ap
 
         #calculated stats
         self._max_hp = 8 + self.bonus("con")
@@ -41,9 +41,7 @@ class Mob():
         self._ap = self._max_ap
 
         self._damage = 0
-        self._evasion = self._stats["evasion"] + self.bonus("dex")
-        self._armor= 0
-
+        self._armor = 0
         self._dc = 10
 
         self._loot = {
@@ -56,8 +54,11 @@ class Mob():
         self._flee_threshold = 15 - self.bonus("cha") * 2
         self._player = global_variables.PLAYER
 
-        self._status_effects: set[player.Status_Effect] = set()
+        self._status_effects: dict[str, status_effects.Status_Effect] = {}
         self._applied_status_effects = set()
+
+        #tracks if the header for the turn has been printed yet
+        self._header_printed = False
 
         self.update()
 
@@ -110,7 +111,29 @@ class Mob():
     @property
     def stats(self) -> dict:
         return self._stats
+    @property
+    def header(self) -> bool:
+        return self._header_printed
     #methods
+
+    #SETTERS
+    def set_level(self, level:int)-> None:
+        """
+        Sets the mobs levels then calculates HP and loot based on level
+        """
+        self._level = level
+        self.level_up()
+
+    def set_damage_multiplier(self, num:int) -> None:
+        self._damage_multiplier = num
+
+    def reset_damage_multiplier(self) -> None:
+        self.set_damage_multiplier(0)
+
+    def set_header(self, val:bool) -> None:
+        self._header_printed = val
+
+    #ROLLS
     def roll_attack(self) -> int:
         """
         Rolls an attack (d20)
@@ -127,31 +150,21 @@ class Mob():
     def roll_a_check(self, stat:str):
         return random.randrange(1, 20) + self.bonus(stat)
     
-    def spend_ap(self, num:int=1) -> None:
-        """
-        Spend an amount of AP
-        """
-        if self.can_act:
-            self._ap -= 1
-        else:
-            raise ValueError("No AP to spend")
-        
-    def reset_ap(self):
-        """
-        Resets mob's AP to max value
-        """
-        self._ap = self._max_ap
-    
     def roll_damage(self) -> int:
         """
         Rolls damage (damage dice)
         """
-        return random.randrange(1, self._damage) + self.bonus("str")
+        return random.randrange(1, self._damage) * self._damage_multiplier + self.bonus("str")
     
-    def take_damage(self, damage:int) -> int:
+    def take_damage(self, damage:int, armor_piercing=False) -> int:
         """
         Takes a given amount of damage, reduced by armor
         """
+        damage *= self._damage_taken_multiplier
+        if armor_piercing:
+            self._hp -= damage
+            return damage
+
         if (damage - self._armor) < 0:
             return 0
         else:
@@ -172,48 +185,88 @@ class Mob():
             return True
         return False
     
+    #AP
+    def spend_ap(self, num:int=1) -> None:
+        """
+        Spend an amount of AP
+        """
+        if num == 0:#spend_ap(0) indicates a full round action, uses all AP
+            self._ap = 0
+            return None
+        if self.can_act is True:
+            self._ap -= 1
+        else:
+            raise ValueError("No AP to spend")
+        
+    def reset_ap(self):
+        """
+        Resets mob's AP to max value
+        """
+        self._ap = self._max_ap
+    
+    #STATUS EFFECTS
     def add_status_effect(self, effect:status_effects.Status_Effect) -> None:
         """
         Adds a status effect to the mob
         """
-        self._status_effects.add(effect)
+        if effect.id in self._status_effects:
+            #if we have the effect already, kick out of the function
+            return None
+        self._status_effects[effect.id] = effect
         effect.apply()
+
+        self.update_stats()
 
     def remove_status_effect(self, effect:status_effects.Status_Effect) -> None:
         """
         Removes a status effect from the mob
         """
-        self._status_effects.remove(effect)
+        del self._status_effects[effect.id]
         effect.cleanse()
         return None
 
-    def set_level(self, level:int)-> None:
-        """
-        Sets the mobs levels then calculates HP and loot based on level
-        """
-        self._level = level
-        self.level_up()
-
+    #MISC.
     def update(self):
         """
-        Updates all relevant stats when a mob's level is changed
+        Updates all relevant stats when a mob's level is changed,
+        updates status effects and removes them when their duration
+        expires. 
         """
-        self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
-        self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
+        self.reset_ap()
 
-        self._max_ap = 1 + self._level // 5
-        self._ap = self._max_ap
-
-        for effect in self._status_effects:
+        self.update_stats()
+       
+        #update all status effects
+        inactive = []
+        for entry in self._status_effects:
+            effect: status_effects.Status_Effect = self._status_effects[entry]
             effect.update()
             if effect.active is False:
-                #removes effect
-                self.remove_status_effect(effect)
+                inactive.append(effect)
+        for effect in inactive:
+            self.remove_status_effect(effect)
+        inactive = []
+
+    def update_stats(self) -> None:
+        """
+        Updates mobs stats seperately
+        """
+         #update calculated stats
+        self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
+        self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
+        try:
+            self._damage_taken_multiplier = self._stats["damage-taken-multiplier"]
+        except KeyError:
+            self._stats["damage-taken-multiplier"] = 1
+            self._damage_taken_multiplier = self._stats["damage-taken-multiplier"]
+        self._evasion = self._stats["evasion"] + self.bonus("dex")
 
     def level_up(self):
         for _ in range(self._level-1):
             self._max_hp += random.randrange(1, self._max_hp) + round(self._level + 0.1 / 2)
             self._hp = self._max_hp
+        self._max_ap = 1 + self._level // 5
+        self._ap = self._max_ap
         self.update()
     
     def bonus(self, stat:str) -> int:

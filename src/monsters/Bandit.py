@@ -32,4 +32,4 @@ class Bandit(mob.Mob):
     def special(self) -> bool:
         return False
 
-object = Bandit()
+object = Bandit

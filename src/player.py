@@ -60,8 +60,9 @@ class Player():
         self._damage_taken_multiplier = 1
         self._damage_multiplier = 1
 
-        self._stats["evasion"] = 9
+        self._stats["base-evasion"] = 9
         self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier
+        self._stats["damage-multiplier"] = self._damage_multiplier
         self._stats["hp"] = self._hp
         self._stats["ap"] = self._max_ap
         
@@ -69,7 +70,7 @@ class Player():
         self._xp = 0
         self._gold = 0
         self._inventory = []
-        self._status_effects_list:list[status_effects.Status_Effect] = []
+        self._status_effects:dict[str, status_effects.Status_Effect] = {}
         self._level_up_function = None
 
         #equipment
@@ -129,7 +130,7 @@ class Player():
         return self._equipped["Weapon"]
     @property
     def evasion(self):
-        return self._stats["evasion"] + self.bonus("dex")
+        return self._stats["base-evasion"] + self.bonus("dex")
     @property
     def carrying_capacity(self) -> int:
         return int(5.5 * self._stats["str"])
@@ -178,7 +179,7 @@ class Player():
         return self.xp > (15 * self._level)
     @property
     def status_effects(self):
-        return self._status_effects_list
+        return self._status_effects
     @property
     def max_ap(self) -> None:
         """
@@ -426,7 +427,7 @@ class Player():
         """
         Same as above but for armor
         """
-        for effect in self._status_effects_list:
+        for effect in self._status_effects:
             effect:status_effects.Status_Effect = effect
             if effect.id == "Maximum Dexterity Bonus":
                 self.remove_status_effect(effect)
@@ -500,21 +501,23 @@ class Player():
                 self.gain_xp(reward[entry])
             if entry == "drop":
                 self.pick_up(reward[entry])
+        return None
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
-    def add_status_effect(self, effect) -> None:
+    def add_status_effect(self, effect:"status_effects.Status_Effect") -> None:
         """
         Adds a status effect to the player's status effect list
         and changes the corresponding stat
         """
-        effect: status_effects.Status_Effect = effect
-        effect.apply()
-        self._status_effects_list.append(effect)
+        if effect.id not in self._status_effects:
+            self._status_effects[effect.id] = effect
+            effect.apply()
+            self.update_stats()
+        return None
 
-    def remove_status_effect(self, effect) -> bool:
-        effect: status_effects.Status_Effect = effect
-        if effect in self._status_effects_list:
-            self._status_effects_list.remove(effect)
+    def remove_status_effect(self, effect:"status_effects.Status_Effect") -> bool:
+        if effect.id in self._status_effects:
+            del self._status_effects[effect.id]
             effect.cleanse()
             return True
         else:
@@ -522,12 +525,20 @@ class Player():
 
     def update(self) -> None:
         self.reset_ap()
-        for effect in self._status_effects_list:
+        self.update_stats()
+        for effect in self._status_effects:
             effect.update()
             if effect.active is False:
                 #removes effect
                 self.remove_status_effect(effect)
                 break
+
+    def update_stats(self) -> None:
+        """
+        Updates player stats seperately
+        """
+        self._damage_multiplier = self._stats["damage-multiplier"]
+        self._damage_taken_multiplier = self._stats["damage-taken-multiplier"]
 
     def save_to_dict(self) -> dict:
         player_tod = {

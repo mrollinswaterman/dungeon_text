@@ -52,4 +52,4 @@ class Goblin(mob.Mob):
             return True
         return False
 
-object = Goblin()
+object = Goblin

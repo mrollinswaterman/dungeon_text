@@ -22,7 +22,7 @@ BONUS = {
     19: 4,
     20: 5
 }
-
+#create constants
 START_CMD = True
 RUNNING = False
 
@@ -36,18 +36,18 @@ leather_armor = items.Armor("Leather Armor", "Light", "Common")
 leather_armor.set_armor_value(2)
 
 print("")#newline for formatting
-PLAYER.equip(leather_armor, True)
-PLAYER.equip(long_sword, True)
+#PLAYER.equip(leather_armor, True)
+#PLAYER.equip(long_sword, True)
 
-PLAYER.gain_gold(300, True)
+#PLAYER.gain_gold(300, True)
 PLAYER.pick_up(item_compendium.generate_hp_potions("Common", 5), True)
-PLAYER.pick_up(item_compendium.generate_firebombs(5), True)
+#PLAYER.pick_up(item_compendium.generate_firebombs(5), True)
 
 SHOPKEEP = shopkeep.Shopkeep()
 BLACKSMITH = shopkeep.Blacksmith()
 
 BLACKSMITH.add_to_forge_list(item_compendium.WEAPONS_DICTIONARY)#add weapons to forge list
-BLACKSMITH.add_to_forge_list(item_compendium.ARMOR_DICTIONARY)#add armors to forge lis
+BLACKSMITH.add_to_forge_list(item_compendium.ARMOR_DICTIONARY)#add armors to forge list
 
 def restock_the_shop():
     """

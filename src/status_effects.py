@@ -91,7 +91,7 @@ class On_Fire(Status_Effect):
     def __init__(self, src, target, id="On Fire"):
         super().__init__(src, target, id)
         self._message = f"The {self._target.id} is now {id}."
-        self._cleanse_message = f"The {self._target.id} is not longer {id}."
+        self._cleanse_message = f"The {self._target.id} is not longer {id}.\n"
     
     def update(self):
         self._duration -= 1
@@ -103,10 +103,7 @@ class On_Fire(Status_Effect):
 
         if self._duration <= 0:
             self._active = False
-    
-    def attempt_cleanse(self) -> bool:
-        global_commands.type_text(" You put out the fire.\n")
-        return self._target.remove_status_effect(self)
+
     
 class Player_On_Fire(On_Fire):
     """
@@ -116,6 +113,10 @@ class Player_On_Fire(On_Fire):
         super().__init__(src, target, id)
         self._message = f"You are now {id}."
         self._cleanse_message = f"You are not longer {id}."
+
+    def attempt_cleanse(self) -> bool:
+        global_commands.type_text(" You put out the fire.\n")
+        return self._target.remove_status_effect(self)
 
 class Stat_Buff(Status_Effect):
 
@@ -210,6 +211,9 @@ class Vulnerable(Stat_Buff):
         self._stat = "damage-taken-multiplier"
         self._potency = 1# this is because the apply function adds to the stat,
         #so a potency of 2 would result in a damage-taken of 3, not 2 like we want
+
+    def apply(self) -> None:
+        super().apply()
 
 class Player_Vulnerable(Vulnerable):
     """

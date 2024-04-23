@@ -31,7 +31,7 @@ def cleanse_an_effect():
         effect: status_effects.Status_Effect = effect
         print(f"{idx+1}. {effect.id}\n")
 
-    cmd = input(">").lower()
+    cmd = input(">> ").lower()
     print("")
     try:
         num = int(cmd)
@@ -79,7 +79,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     if GOD_MODE is True:
         attack_roll = 1000000
     else:
-        attack_roll = 1#PLAYER.roll_attack()
+        attack_roll = PLAYER.roll_attack()
         PLAYER.spend_ap()
 
     global_commands.type_with_lines(f"You attack the {ENEMY.id}, rolling a {attack_roll}.\n")
@@ -113,7 +113,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
         else: 
             turn_options()
 
-def hp() -> None:
+def show_hp() -> None:
     """
     Prints the player's HP then runs the given function
     """
@@ -121,7 +121,7 @@ def hp() -> None:
     print(" ["+"/"*PLAYER.hp+" "*(PLAYER.max_hp-PLAYER.hp)+"]")
     turn_options()
 
-def inventory() -> None:
+def show_inventory() -> None:
     """
     Prints the player's inventory then runs the given function
     """
@@ -130,19 +130,22 @@ def inventory() -> None:
     select_an_item()
 
 def select_an_item() -> None:
-    global_commands.type_with_lines("Enter an Item's number to use it\n")
-    command = input(">")
+    global_commands.type_with_lines("Enter an Item's number to use it | Go Back - (b)\n")
+    command = input(">> ")
     print("")
+
+    if command.lower() == "b":
+        PLAYER_TURN()
     try:
         command = int(command)
         try:
             item = PLAYER.inventory[command - 1]
         except IndexError:
-            print(" Please enter a valid number.")
+            print(" Please enter a valid item number.")
             select_an_item()
             return None
-    except TypeError:
-        print(" Please enter a valid number.")
+    except ValueError:
+        print(" Please enter a valid command.")
         select_an_item()
         return None
     use_an_item(item, ENEMY)

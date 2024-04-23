@@ -29,7 +29,7 @@ def spawn_random_mob():
     if PLAYER.level >= LEVELCAP:
         raise ValueError("Player level too high!")
 
-    enemy:mob.Mob = random.choice(mobs)
+    enemy:mob.Mob = random.choice(mobs)()
 
     if PLAYER.level in range(enemy.range[0],enemy.range[1]):
         return enemy
