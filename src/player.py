@@ -583,10 +583,10 @@ class Player():
                         temp_file.close()
 
                     item.load("temp.csv")
-                if idx == size or idx == size - 1:
-                    self.equip(item)
+                if idx == size - 2 or idx == size - 1:
+                    self.equip(item, True)
                 else:
-                    self.pick_up(item)
+                    self.pick_up(item, True)
             file.close()
 
         if os.path.exists("temp.csv"):
