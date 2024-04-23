@@ -50,7 +50,7 @@ def enemy_flee_attempt():
     def enemy_flee_failure():
         global_commands.type_text(f"You stopped the {ENEMY.id}. It is forced to continue fighting.")
         PLAYER_TURN()
-    global_commands.type_with_lines(f"The {ENEMY.id} attempts to flee...\n")
+    global_commands.switch(ENEMY.header, f"The {ENEMY.id} attempts to flee...\n")
     print(" Try to stop them? y/n\n")
     command = input(">").lower()
     #print("")#newline after cmd prompt
@@ -80,7 +80,7 @@ def enemy_attack():
     """
     ENEMY.spend_ap()
     attack = ENEMY.roll_attack()
-    global_commands.type_with_lines(f"The {ENEMY.id} attacks you, rolling a {attack}\n")
+    global_commands.switch(ENEMY.header, f"The {ENEMY.id} attacks you, rolling a {attack}\n")
     if attack == 0:
         global_commands.type_text(f"A critical hit! Uh oh.\n")
         taken = global_variables.PLAYER.take_damage(ENEMY.roll_damage() * 2)

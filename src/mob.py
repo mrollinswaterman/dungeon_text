@@ -56,6 +56,9 @@ class Mob():
         self._status_effects: set[player.Status_Effect] = set()
         self._applied_status_effects = set()
 
+        #tracks if the header for the turn has been printed yet
+        self._header_printed = False
+
         self.update()
 
     #properties
@@ -107,7 +110,9 @@ class Mob():
     @property
     def stats(self) -> dict:
         return self._stats
-
+    @property
+    def header(self) -> bool:
+        return self._header_printed
     #methods
 
     #SETTERS
@@ -123,6 +128,9 @@ class Mob():
 
     def reset_damage_multiplier(self) -> None:
         self.set_damage_multiplier(0)
+
+    def set_header(self, val:bool) -> None:
+        self._header_printed = val
 
     #ROLLS
     def roll_attack(self) -> int:
@@ -213,18 +221,24 @@ class Mob():
 
     def update(self):
         """
-        Updates all relevant stats when a mob's level is changed
+        Updates all relevant stats when a mob's level is changed,
+        updates status effects and removes them when their duration
+        expires. 
         """
+        #print("_"*110+"\n")
         self.reset_ap()
 
         self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
         self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
-
+        inactive = []
         for effect in self._status_effects:
             effect.update()
             if effect.active is False:
                 #removes effect
-                self.remove_status_effect(effect)
+                inactive.append(effect)
+        for effect in inactive:
+            self.remove_status_effect(effect)
+        inactive = []
 
         #recheck all calculated stats
         self._stats["damage-taken-multiplier"] = self._damage_taken_multiplier

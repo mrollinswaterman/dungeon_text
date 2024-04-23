@@ -90,7 +90,7 @@ class On_Fire(Status_Effect):
 
     def __init__(self, src, target, id="On Fire"):
         super().__init__(src, target, id)
-        self._message = f"The {self._target.id} is now {id}.\n"
+        self._message = f"The {self._target.id} is now {id}."
         self._cleanse_message = f"The {self._target.id} is not longer {id}."
     
     def update(self):
@@ -98,10 +98,11 @@ class On_Fire(Status_Effect):
 
         taken = self._target.take_damage(self._potency, True)
 
-        global_commands.type_text(f"The {self._target.id} took {taken} damage from from the fire.\n")
+        global_commands.switch(self._target.header, f"The {self._target.id} took {taken} damage from from the fire.\n")
+        self._target.set_header(True)
 
         if self._duration <= 0:
-            self._target.remove_status_effect(self)
+            self._active = False
     
     def attempt_cleanse(self) -> bool:
         global_commands.type_text(" You put out the fire.\n")

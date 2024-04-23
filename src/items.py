@@ -522,6 +522,8 @@ class Firebomb(Consumable):
             else:
                 global_commands.type_text(f"Your {self._id} did {taken} damage to the {self._target.id}.")
             return True
+        
+        
 
     def set_on_fire(self) -> None:
         if self.target == None:

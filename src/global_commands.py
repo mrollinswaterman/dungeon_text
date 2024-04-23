@@ -14,6 +14,18 @@ TAG_TO_STAT = {
     "damage-multiplier": "Damage"
 }
 
+def switch(header, text):
+    """
+    Prints the given text with lines if header is false
+    and without lines if header is true
+    """
+    if header is True:
+        type_text(text)
+    elif header is False:
+        type_with_lines(text)
+    else:
+        raise ValueError("header val not bool")
+
 def generate_item_rarity() -> str:
     """
     Generates item rarity based on player level

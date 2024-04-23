@@ -49,8 +49,8 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Begins the Player turn
         """
+        enemy.set_header(False)#reset enemy's formatting header
         PLAYER.update()
-        #PLAYER.reset_ap()
         player_commands.turn_options()
 
     def enemy_turn():
@@ -138,22 +138,32 @@ def link_start(enemy:mob.Mob) -> None:
             global_variables.RUNNING = False
             player_commands.save()
             sys.exit()
-        if command == "a":
-            player_commands.attack()
-        if command == "hp":
-            player_commands.hp()
-        if command == "i":
-            player_commands.inventory()
-        if command == "test":
-            print(enemy.hp)
-        if command == "p":
-            enemy_turn()
-        if command == "c":
-            player_commands.cleanse_an_effect()
-        if command == "f":
-            global_variables.RUNNING = False
-            player_commands.flee()
-            enemy = None
+        try:
+            command = int(command)
+            try:
+                item = PLAYER.inventory[command - 1]
+            except IndexError:
+                item = None
+            player_commands.use_an_item(item, enemy)
+        except ValueError:
+            pass
+        match command:
+            case "a":
+                player_commands.attack()
+            case "hp":
+                player_commands.hp()
+            case "i":
+                player_commands.inventory()
+            case "test":
+                print(enemy.hp)
+            case "p":
+                enemy_turn()
+            case "c":
+                player_commands.cleanse_an_effect()
+            case "f":
+                global_variables.RUNNING = False
+                player_commands.flee()
+                enemy = None
 
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")

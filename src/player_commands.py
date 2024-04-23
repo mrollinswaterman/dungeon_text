@@ -98,7 +98,6 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
             taken = ENEMY.take_damage(PLAYER.roll_damage())
 
         if ENEMY.dead is False and PLAYER.can_act is False:
-            #PLAYER.reset_ap()
             global_commands.type_text(f"You hit the {ENEMY.id} for {taken} damage.") #last thing printed = no \n
             run_on_hit()
         elif ENEMY.dead is True:
@@ -110,7 +109,6 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     elif attack_roll < ENEMY.evasion:
         global_commands.type_text("You missed.") #last thing printed = no \n
         if PLAYER.can_act is False:
-            #PLAYER.reset_ap()
             run_on_miss()
         else: 
             turn_options()
@@ -158,7 +156,9 @@ def use_an_item(item: items.Consumable, target=None) -> None:
         PLAYER_TURN()
         return None
     if item is None:
-        raise ValueError("")
+        global_commands.type_text("Invalid item selected. Please try again.")
+        PLAYER_TURN()
+        return None
     if PLAYER.has_item(item) is True:#check the player has the item
         if item.is_consumable is True:
             item = PLAYER.find_item_by_name(item.name)
@@ -246,5 +246,4 @@ def save() -> None:
             file.close()
 
 def load():
-    print("LOADING\n")
     PLAYER.load("player.csv", "inventory.csv")

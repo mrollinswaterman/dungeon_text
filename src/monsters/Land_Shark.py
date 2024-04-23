@@ -67,13 +67,13 @@ class Land_Shark(mob.Mob):
         if self.trigger() is True:
             if self._burrowed is False:
                 self.spend_ap(0) #indicates a full round action
-                global_commands.type_with_lines(f"The {self._id} burrows underground, making it harder to hit.")
+                global_commands.switch(self.header, f"The {self._id} burrows underground, making it harder to hit.")
                 self._evasion += 3
                 self._burrowed = True
                 return True
             else:
                 self.spend_ap()
-                global_commands.type_with_lines(f"The {self._id} erupts from the ground.\n")
+                global_commands.switch(self.header, f"The {self._id} erupts from the ground.\n")
                 self._evasion -= 3
                 #double all damage taken for 3 turns
                 vul = status_effects.Vulnerable(self, self)
