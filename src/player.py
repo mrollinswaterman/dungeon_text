@@ -495,12 +495,14 @@ class Player():
 
     def recieve_reward(self, reward:dict) -> None:
         for entry in reward:
-            if entry == "gold":
-                self.gain_gold(reward[entry])
-            if entry == "xp":
-                self.gain_xp(reward[entry])
-            if entry == "drop":
-                self.pick_up(reward[entry])
+            match entry:
+                case "gold":
+                    self.gain_gold(reward[entry])
+                case "xp":
+                    self.gain_xp(reward[entry])
+                case "drop":
+                    for item in reward[entry]:
+                        self.pick_up(item)        
         return None
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#

@@ -8,8 +8,11 @@ import status_effects
 
 PLAYER = global_variables.PLAYER
 
+TEST = True
+
 item_compendium.PLAYER = PLAYER
 status_effects.PLAYER = PLAYER
+player_commands.TEST = TEST
 
 #notes on formatting
 
@@ -168,8 +171,7 @@ def link_start(enemy:mob.Mob) -> None:
 def begin():
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
-    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Land Shark")
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob() if TEST is False else monster_manual.spawn_mob("Land Shark")
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")

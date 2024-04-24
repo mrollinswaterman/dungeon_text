@@ -454,7 +454,7 @@ class Health_Potion(Consumable):
             print(self._target.hp, self._target.max_hp)
             self.decrease_quantity(1)
             global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
-            self._target.heal(self._strength)
+            self._target.heal(self._strength*2)
             self._owner.spend_ap(1)
             return True
         global_commands.type_with_lines("You are already full HP.")
