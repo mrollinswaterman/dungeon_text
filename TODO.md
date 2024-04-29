@@ -17,6 +17,7 @@ This file contains a list of tasks and ideas
 - [ ] Player special moves (power attack, feint, etc)
 - [X] Add mob specific attack narration (ie the ___ swings it’s dagger at you, the dragon breathes a gout of flame []in your direction, etc)
 - [ ] Give status effect their own file like item compendium where each individual effect is made its own subclass of status effect
+- [ ] Add a companion, Gears the friendly Clockwork Hound. If you have a Clockwork Heart and some scrap, you have a chance to encounter him, can repair him with an int check, he joins you. Increases loot chances???
 
 ## Mechanics
 
