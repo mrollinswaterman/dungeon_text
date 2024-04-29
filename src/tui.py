@@ -8,7 +8,7 @@ import status_effects
 
 PLAYER = global_variables.PLAYER
 
-TEST = True
+TEST = False
 
 item_compendium.PLAYER = PLAYER
 status_effects.PLAYER = PLAYER
@@ -27,7 +27,7 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        if global_commands.probability(80): #80% chance of an enemy spawning next
+        if global_commands.probability(1): #80% chance of an enemy spawning next
             next_enemy: mob.Mob = monster_manual.spawn_random_mob()
             global_variables.RUNNING = False
             link_start(next_enemy)

@@ -8,7 +8,7 @@ import items
 import narrator
 import status_effects
 
-GOD_MODE = False
+GOD_MODE = True
 TEST = None
 
 ENEMY:mob.Mob = None

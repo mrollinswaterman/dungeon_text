@@ -58,7 +58,7 @@ class Event():
         self._loot = {
             "xp": 0,
             "gold": 0,
-            "drop": None
+            "drops": None
         }
 
     #properties
@@ -137,11 +137,16 @@ class Event():
         self._loot["xp"] = num
 
     def set_drop(self, item) -> None:
-        self._loot["drop"] = item
+        self._loot["drops"] = [item]
+
+    def add_drop(self, item) -> None:
+        if self._loot["drops"] is None:
+            self.set_drop(item)
+        else:
+            self._loot["drops"].append(item)
 
     def set_passed(self, val:bool) -> None:
         self._passed = val
-
 
     #EVENT INFO
     def has_stat(self, stat:str) -> bool:
