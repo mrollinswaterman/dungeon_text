@@ -36,8 +36,8 @@ leather_armor = items.Armor("Leather Armor", "Light", "Common")
 leather_armor.set_armor_value(2)
 
 print("")#newline for formatting
-PLAYER.equip(leather_armor, True)
-PLAYER.equip(long_sword, True)
+#PLAYER.equip(leather_armor, True)
+#PLAYER.equip(long_sword, True)
 
 #PLAYER.gain_gold(300, True)
 PLAYER.pick_up(item_compendium.generate_hp_potions("Common", 5), True)

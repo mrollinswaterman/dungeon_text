@@ -435,11 +435,11 @@ class Player():
         self._equipped["Armor"] = armor
 
         if self.bonus("str") + 1 < armor.numerical_weight_class:
-            armor_debuff = status_effects.Stat_Debuff(armor, self)
+            armor_debuff = status_effects.Player_Stat_Debuff(armor)
             armor_debuff.set_stat("dex")
             armor_debuff.set_id("Maximum Dexterity Bonus")#placeholder id --> just a flag to find and remove it when equipped armor changes
-            armor_debuff.set_potency(-(armor.numerical_weight_class - 2))
-            armor_debuff.set_duration(10000)
+            armor_debuff.set_potency((armor.numerical_weight_class - 2))
+            armor_debuff.set_duration(1000000000000)
             self.add_status_effect(armor_debuff)
             self._stats["evasion"] = 9 + self.bonus("dex")
 

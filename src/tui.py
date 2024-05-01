@@ -14,6 +14,8 @@ item_compendium.PLAYER = PLAYER
 status_effects.PLAYER = PLAYER
 player_commands.TEST = TEST
 
+print(f"Assigning var: {PLAYER}")
+
 #notes on formatting
 
 def link_start(enemy:mob.Mob) -> None:
@@ -175,7 +177,7 @@ def begin():
 
     if STARTING_ENEMY is None:
         print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
-        STARTING_ENEMY = monster_manual.mobs[0]
+        STARTING_ENEMY = monster_manual.mobs[0]()
 
     STARTING_ENEMY.set_level(PLAYER.level)
 

@@ -487,7 +487,6 @@ class Firebomb(Consumable):
         self._unit_weight = 1 
         self._target = None
         self._damage = self._strength
-        print(self._damage)
         self._type = "Firebomb"
 
     def use(self, target=None):

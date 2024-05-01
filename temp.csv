@@ -1,0 +1,2 @@
+type,id,name,rarity,durability,damage_dice,num_damage_dice,crit,weight_class,quantity,unit_weight,unit_value
+Armor,Leather Armor,Leather Armor,Common,10,,,,Light,,,
