@@ -1,7 +1,7 @@
 #Rock Wall Event class
 import events
 
-object = events.Event()
+object = events.Event("RockWall")
 
 success = {
     "str": ["With nothing but your own brute strength, you haul yourself up the wall.", 
@@ -29,12 +29,10 @@ end = ["You are forced to double back and find another way through.",
 object.add_stat(("str", 20))
 object.add_stat(("dex", 10))
 
-object.add_text(' The path abruptly ends in a sheer rock wall.')
+object.add_text("The path abruptly ends in a sheer rock wall.")
 
-object.add_message((True, "str", success["str"]))
-object.add_message((True, "dex", success["dex"]))
+object.add_message(True, success)
 
-object.add_message((False, "str", failure["str"]))
-object.add_message((False, "dex", failure["dex"]))
+object.add_message(False, failure)
 
 object.add_end_message(end)

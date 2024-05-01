@@ -32,7 +32,7 @@ def link_start(enemy:mob.Mob) -> None:
             global_variables.RUNNING = False
             link_start(next_enemy)
         else: #remainging 20% chance of an event spawning
-            next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
+            next_event: events.Event = dms_guide.EVENTS["Mysterious_Berries"]#random.choice(list(dms_guide.EVENTS.values()))
             next_event.set_tries(2)
             next_event.set_passed(False)
             next_event.start()#prints event start text

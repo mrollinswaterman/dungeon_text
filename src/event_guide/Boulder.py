@@ -1,7 +1,7 @@
 #Boulder Event class
 import events
 
-object = events.Event()
+object = events.Event("Boulder")
 
 success = {
     "str": ["You push the boulder aside and continue on your way.", 

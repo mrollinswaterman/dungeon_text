@@ -1,6 +1,7 @@
 #Mysterious Berries event class
 import events
 import global_commands
+import random
 
 success_poison = {
     "int": ["You identify the berries as a poisonous species. Best to steer clear.",
@@ -39,7 +40,7 @@ end = [
 
 class Mysterious_Berries(events.Event):
 
-    def __init__(self):
+    def __init__(self, id="Mysterious_Berries"):
         super().__init__()
 
         #determines if the berries are poisonous
@@ -63,17 +64,34 @@ class Mysterious_Berries(events.Event):
 
     def success(self) -> None:
         if self._poisonous:
-            #print dont eat
+            global_commands.type_text("You pass on the poisonous snacks.")
             return None
         
-        #heal the player
+        global_commands.type_text(random.choice(self._end_messages))
+        global_commands.type_text("Delicious! You can feel your strength returning.")
+        self._player.heal(5)
         return None
 
     def failure(self) -> None:
+        global_commands.type_text(random.choice(self._end_messages))
         if self._poisonous:
-            #damage the player
+            global_commands.type_text("You probably shouldn't have eaten those...")
+            if self._player.hp >= 4*2:
+                self._player.hp -= 4
+                global_commands.type_text("The posion berries did 4 damage to you.")
+            else:
+                global_commands.type_text("You don't feel so good, but there have been no negative effects so far...")
             return None
         
-        #heal the player
+        global_commands.type_text("You got lucky this time. The berries turned out to be edible.")
+        self._player.heal(2)
         return None
     
+    def end(self) -> None:
+        print("")#formatting
+        if self._passed is True:
+            self.success()
+        else:
+            self.failure()
+
+object = Mysterious_Berries()

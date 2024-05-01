@@ -48,8 +48,9 @@ FAILURE_LINES = {
 
 class Event():
 
-    def __init__(self):
+    def __init__(self, id=""):
 
+        self._id = id
         self._stats = set()
         self._tries = 0
         self._text = ""
@@ -69,6 +70,9 @@ class Event():
     def stats(self) -> None:
         return self._stats
     @property
+    def id(self) -> None:
+        return self._id
+    @property
     def tries(self) -> bool:
         return self._tries > 0
     @property
@@ -86,7 +90,7 @@ class Event():
 
     #methods
 
-    #ADDERS
+    #ADD
     def add_stat(self, stat: tuple[str, int]) -> None:
         """
         Adds a stat to the events stat list
