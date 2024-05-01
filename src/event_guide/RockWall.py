@@ -2,28 +2,39 @@
 import events
 
 object = events.Event()
-rock_wall_lines_true = {
+
+success = {
     "str": ["With nothing but your own brute strength, you haul yourself up the wall.", 
             "You manage to clamber over the wall."],
 
     "dex": ["You find hand and footholds in wall's nooks and crannies, enough to make your way up.", 
             "You scurry up the wall with ease."]
 }
-rock_wall_line_false = {
+
+failure = {
     "str": ["You try a few times to pull yourself up the wall, but you aren't quite strong enough this time."],
  
 
     "dex": ["You try your hand at freesoloing the wall. It doesn't go well."]
 }
+
+end = ["You are forced to double back and find another way through.", 
+       "You turn back, dejected."
+       "It's no use, better find another way.", 
+       "Not this time.", 
+       "Your skills failed you on this one.",
+       "Time to throw in the towel.", 
+       "Better luck next time champ."]
+
 object.add_stat(("str", 20))
 object.add_stat(("dex", 10))
 
 object.add_text(' The path abruptly ends in a sheer rock wall.')
 
-object.add_message((True, "str", rock_wall_lines_true["str"]))
-object.add_message((True, "dex", rock_wall_lines_true["dex"]))
+object.add_message((True, "str", success["str"]))
+object.add_message((True, "dex", success["dex"]))
 
-object.add_message((False, "str", rock_wall_line_false["str"]))
-object.add_message((False, "dex", rock_wall_line_false["dex"]))
+object.add_message((False, "str", failure["str"]))
+object.add_message((False, "dex", failure["dex"]))
 
-object.add_end_message("You are forced to double back and find another way through.")
+object.add_end_message(end)

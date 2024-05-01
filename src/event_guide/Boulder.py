@@ -17,18 +17,25 @@ failure = {
             "You try to squeeze past, but don't quite make it. You wriggle yourself out before you get stuck."]
 }
 
+end = ["You are forced to double back and find another way through.", 
+       "You turn back, dejected."
+       "It's no use, better find another way.", 
+       "Not this time.", 
+       "Your skills failed you on this one.",
+       "Time to throw in the towel.", 
+       "Better luck next time champ."]
+
 object.add_stat(("str", 10))
 object.add_stat(("dex", 15))
+
 #event text
-object.add_text(' A boulder blocks your way.')
+object.add_text('A boulder blocks your way.')
 
 #success lines
-object.add_message((True, "str", success["str"]))
-object.add_message((True, "dex", success["dex"]))
+object.add_message(True, success)
 
 #failure lines
-object.add_message((False, "str", failure["str"]))
-object.add_message((False, "dex", failure["dex"]))
+object.add_message(False, failure)
 
 #out of tries
-object.add_end_message("You are forced to double back and find another way through.")
+object.add_end_message(end)

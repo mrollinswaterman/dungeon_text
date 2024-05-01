@@ -54,7 +54,7 @@ class Event():
         self._text = ""
         self._messages: dict[bool, list[tuple[str, list[str]]]] = {True: [], False: []}
         self._passed = False
-        self._end_message = ""
+        self._end_messages:list[str] = []
         self._loot = {
             "xp": 0,
             "gold": 0,
@@ -75,8 +75,8 @@ class Event():
     def passed(self) -> bool:
         return self._passed
     @property
-    def end_message(self) -> str:
-        return self._end_message
+    def end_messages(self) -> str:
+        return self._end_messages
     @property
     def loot(self):
         return self._loot
@@ -96,7 +96,7 @@ class Event():
         """
         self._text = text
 
-    def add_message(self, message:tuple[bool, str, list[str]]) -> None:
+    def add_message(self, type:bool, message:dict[str, str]) -> None:
         """
         Adds a message to the event's message list. 
         
@@ -106,14 +106,19 @@ class Event():
 
         Returns nothing
         """
-        msg_type, stat, msg = message
-        self._messages[msg_type].append((stat, msg))
+        for entry in message:
+            if self.has_stat(entry):
+                self._messages[type].append((message, message[entry]))
 
-    def add_end_message(self, msg:str) -> None:
+    def add_end_message(self, msg) -> None:
         """
         Adds an end message to the event
         """
-        self._end_message = msg
+        if isinstance(msg, list):
+            self._end_messages = msg
+            return None
+        self._end_messages.append(msg)
+
 
 
     #SETTERS
@@ -210,4 +215,4 @@ class Event():
         Prints the end text and associated formatting of the event
         """
         print("")#newline b4 end
-        global_commands.type_text(self.end_message)
+        global_commands.type_text(random.choice(self._end_messages))
