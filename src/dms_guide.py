@@ -9,6 +9,3 @@ EVENT_LIST = []
 
 EVENT_LIST.append(Boulder.object)
 EVENT_LIST.append(RockWall.object)
-
-
-

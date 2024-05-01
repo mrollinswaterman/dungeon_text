@@ -2,6 +2,7 @@
 from typing import Optional
 import random
 import global_commands
+import global_variables
 
 FAILURE_LINES = {
     "str": [
@@ -60,6 +61,8 @@ class Event():
             "gold": 0,
             "drops": None
         }
+
+        self._player = global_variables.PLAYER
 
     #properties
     @property
@@ -181,6 +184,18 @@ class Event():
         """
         global_commands.type_with_lines(self.text)
 
+    def success(self) -> None:
+        """
+        Runs if the player has succeded the check
+        """
+        return None
+    
+    def failure(self) -> None:
+        """
+        Runs if the player fails the event
+        """
+        return None
+    
     def run(self, stat:str, roll:int) -> str:
         """
         Runs the event for a given stat and roll
@@ -216,3 +231,7 @@ class Event():
         """
         print("")#newline b4 end
         global_commands.type_text(random.choice(self._end_messages))
+        if self._passed is True:
+            self.success()
+        else:
+            self.failure()
