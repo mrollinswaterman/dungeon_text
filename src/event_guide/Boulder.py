@@ -25,8 +25,8 @@ end = ["You are forced to double back and find another way through.",
        "Time to throw in the towel.", 
        "Better luck next time champ."]
 
-object.add_stat(("str", 10))
-object.add_stat(("dex", 15))
+object.add_stat("str", 10)
+object.add_stat("dex", 15)
 
 #event text
 object.add_text('A boulder blocks your way.')

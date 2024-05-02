@@ -41,14 +41,14 @@ end = [
 class Mysterious_Berries(events.Event):
 
     def __init__(self, id="Mysterious_Berries"):
-        super().__init__()
+        super().__init__(id)
 
         #determines if the berries are poisonous
         self._poisonous = global_commands.probability(50)
         #checks whether the player eats the berries or not
 
-        self.add_stat(("int", 15))
-        self.add_stat(("wis", 20))
+        self.add_stat("int", 15)
+        self.add_stat("wis", 20)
 
         self.add_text("You happen upon some mysterious berries. They look delicious...")
         #poison changes the success messages

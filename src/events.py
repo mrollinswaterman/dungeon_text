@@ -51,10 +51,10 @@ class Event():
     def __init__(self, id=""):
 
         self._id = id
-        self._stats = set()
+        self._stats:dict[str, int] = {}
         self._tries = 0
         self._text = ""
-        self._messages: dict[bool, list[tuple[str, list[str]]]] = {True: [], False: []}
+        self._messages = {True: {}, False: {}}
         self._passed = False
         self._end_messages:list[str] = []
         self._loot = {
@@ -91,11 +91,11 @@ class Event():
     #methods
 
     #ADD
-    def add_stat(self, stat: tuple[str, int]) -> None:
+    def add_stat(self, stat:str, dc:int) -> None:
         """
         Adds a stat to the events stat list
         """
-        self._stats.add(stat)
+        self._stats[stat] = dc
 
     def add_text(self, text:str) -> None:
         """
@@ -103,7 +103,7 @@ class Event():
         """
         self._text = text
 
-    def add_message(self, type:bool, message:dict[str, str]) -> None:
+    def add_message(self, type:bool, message_dict:dict[str, str]) -> None:
         """
         Adds a message to the event's message list. 
         
@@ -113,9 +113,12 @@ class Event():
 
         Returns nothing
         """
-        for entry in message:
-            if self.has_stat(entry):
-                self._messages[type].append((message, message[entry]))
+        for stat in message_dict:
+            if stat in self._stats[type]:
+                self._stats[type][stat].append(message_dict[stat])
+            else:
+                self._stats[type][stat] = message_dict[stat]
+            
 
     def add_end_message(self, msg) -> None:
         """
@@ -167,20 +170,20 @@ class Event():
 
         Return True if it does, False if it does not
         """
-        for pair in self._stats:
-            if pair[0] == stat:
+        for key in self._stats:
+            print(key, stat)
+            if key == stat:
                 return True
         return False
     
-    def stat_dc(self, stat:str) -> None | tuple[str, int]:
+    def stat_dc(self, stat:str) -> int:
         """
         Returns the DC associated with a given stat
         """
-        for pair in self._stats:
-            if pair[0] == stat:
-                return self._stats[pair]
-            
-    
+        if stat not in self._stats:
+            return 0
+        return self._stats[stat]
+
     #RUN
     def start(self) -> None:
         """
@@ -211,14 +214,14 @@ class Event():
             raise ValueError("No more tries")
         self._tries -= 1
         if self.has_stat(stat) is True:
-            for item in self._stats:
-                code, check = item
-                if code == stat and roll >= check:
+            for key in self._stats:
+                dc = self.stat_dc(key)
+                if key == stat and roll >= dc:
                     for msg in self._messages[True]: #SUCCESS
                         if msg[0] == stat:
                             self._passed = True
                             if self._loot["xp"] <= 0:
-                                self.set_xp(int(check / 1.5))
+                                self.set_xp(int(dc / 1.5))
                             global_commands.type_text(random.choice(msg[1])+"\n")
                             return True
             for msg in self._messages[False]: #FAILURE
@@ -226,6 +229,7 @@ class Event():
                     global_commands.type_text(random.choice(msg[1]))
                     return self.tries
 
+        #print(stat, self._stats)
         global_commands.type_text(random.choice(FAILURE_LINES[stat])) #WRONG STAT
         return self.tries
 

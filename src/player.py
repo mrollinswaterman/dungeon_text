@@ -440,7 +440,7 @@ class Player():
             armor_debuff.set_id("Maximum Dexterity Bonus")#placeholder id --> just a flag to find and remove it when equipped armor changes
             armor_debuff.set_potency((armor.numerical_weight_class - 2))
             armor_debuff.set_duration(1000000000000)
-            self.add_status_effect(armor_debuff)
+            self.add_status_effect(armor_debuff, True)
             self._stats["evasion"] = 9 + self.bonus("dex")
 
     def can_carry(self, item:items.Item) -> bool:
@@ -506,13 +506,15 @@ class Player():
         return None
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
-    def add_status_effect(self, effect:"status_effects.Status_Effect") -> None:
+    def add_status_effect(self, effect:"status_effects.Status_Effect", silent=False) -> None:
         """
         Adds a status effect to the player's status effect list
         and changes the corresponding stat
         """
         if effect.id not in self._status_effects:
             self._status_effects[effect.id] = effect
+            if silent is True:
+                effect.set_message("")
             effect.apply()
             self.update_stats()
         return None
@@ -528,12 +530,13 @@ class Player():
     def update(self) -> None:
         self.reset_ap()
         self.update_stats()
-        for effect in self._status_effects:
+        for entry in self._status_effects:
+            effect:status_effects.Status_Effect = self._status_effects[entry]
             effect.update()
             if effect.active is False:
                 #removes effect
                 self.remove_status_effect(effect)
-                break
+                #break
 
     def update_stats(self) -> None:
         """
