@@ -107,17 +107,19 @@ class Event():
         """
         Adds a message to the event's message list. 
         
-        message: a tuple containing a bool indicating success or failure message,
-        a str denoting the stat the message is associated with, and a list of strings 
-        containing the messages to be displayed
+        type: a bool indicating if the messages in the dict are for
+        success (True) or failure (False)
+
+        message_dict: a dictionary of messsages, with stats as keys
+        (ie 'str', 'dex', etc) and message text as values
 
         Returns nothing
         """
         for stat in message_dict:
-            if stat in self._stats[type]:
-                self._stats[type][stat].append(message_dict[stat])
+            if stat in self._messages[type]:
+                self._messages[type][stat].append(message_dict[stat])
             else:
-                self._stats[type][stat] = message_dict[stat]
+                self._messages[type][stat] = message_dict[stat]
             
 
     def add_end_message(self, msg) -> None:

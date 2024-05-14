@@ -35,7 +35,6 @@ long_sword.set_crit_multiplier(2)
 leather_armor = items.Armor("Leather Armor", "Light", "Common")
 leather_armor.set_armor_value(2)
 
-print("")#newline for formatting
 #PLAYER.equip(leather_armor, True)
 #PLAYER.equip(long_sword, True)
 
