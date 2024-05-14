@@ -123,15 +123,15 @@ class Stat_Buff(Status_Effect):
     def __init__(self, src, target, id="Buff"):
         super().__init__(src, target, id)
         self._stat = ""
-        self._id = self._stat + id
-        self._message = f"The {self._target.id}'s {self._stat} increased by {self._potency}."
-        self._cleanse_message = f"The {self._target.id}'s {self._stat} has returned to normal."
+        self._id = self._stat +" " + id
 
     @property
     def stat(self) -> str:
         return self._stat
 
     def set_stat(self, stat:str) -> None:
+        if self._target is None:
+            self._target = PLAYER
         self._stat = stat
         self._id = stat + self._id
         self._message = f"The {self._target.id}'s {global_commands.TAG_TO_STAT[self._stat]} increased by {self._potency}."
@@ -148,11 +148,14 @@ class Stat_Buff(Status_Effect):
 class Stat_Debuff(Stat_Buff):
     def __init__(self, src, target, id="Debuff"):
         super().__init__(src, target, id)
-        self._message = f"Your {self._stat} is being decreased by {self._potency} by the {self._src.id}'s {self._id}."
 
     def apply(self):
         super().apply()
         self._target.stats[self._stat] -= self._potency
+
+    def set_stat(self, stat: str) -> None:
+        super().set_stat(stat)
+        self._message = f"The {self._src.id}'s {self._stat} is being decreased by {self._potency} by the {self._src.id}'s {self._id}."
 
 class Player_Stat_Buff(Stat_Buff):
     """
@@ -160,16 +163,25 @@ class Player_Stat_Buff(Stat_Buff):
     """
     def __init__(self, src, target=PLAYER, id="Buff"):
         super().__init__(src, target, id)
+
+    def set_stat(self, stat: str) -> None:
+        if self._target is None:
+            self._target = PLAYER
+        super().set_stat(stat)
         self._message = f"Your {global_commands.TAG_TO_STAT[self._stat]} is being increased by {self._potency} by the {self._src}'s {self._id}."
         self._cleanse_message = f"Your {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
 
-class Player_Stat_Debuff(Stat_Debuff):
+class Player_Stat_Debuff(Player_Stat_Buff):
     """
     Stat debuff class only to be applied to PLAYER
     """
     def __init__(self, src, target=PLAYER, id="Debuff"):
         super().__init__(src, target, id)
-        self._message = f"Your {global_commands.TAG_TO_STAT[self._stat]} is being decreased by {self._potency} by the {self._src}'s {self._id}."
+
+    def set_stat(self, stat: str) -> None:
+        super().set_stat(stat)
+        self._message = f"Your {global_commands.TAG_TO_STAT[self._stat]} is being decreased by {self._potency} by the {self._src.id}'s {self._id}."
+        self._cleanse_message = f"Your {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
 
 class Player_Entangled(Status_Effect):
 

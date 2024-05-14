@@ -9,6 +9,7 @@ import narrator
 import status_effects
 
 GOD_MODE = False
+TEST = None
 
 ENEMY:mob.Mob = None
 ENEMY_TURN = None
@@ -79,7 +80,7 @@ def attack(run_on_hit=None, run_on_miss=None) -> None:
     if GOD_MODE is True:
         attack_roll = 1000000
     else:
-        attack_roll = PLAYER.roll_attack()
+        attack_roll = PLAYER.roll_attack() if TEST is False else 1
         PLAYER.spend_ap()
 
     global_commands.type_with_lines(f"You attack the {ENEMY.id}, rolling a {attack_roll}.\n")
