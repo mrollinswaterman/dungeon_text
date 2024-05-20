@@ -2,7 +2,7 @@ type,id,name,rarity,durability,damage_dice,num_damage_dice,crit,weight_class,qua
 Health_Potion,Health Potion,Health Potion,Common,10,,,,,5,0.5,8.0
 Firebomb,Firebomb,Firebomb,Uncommon,20,,,,,4,1,40
 Weapon,Long Sword,Long Sword,Common,9,8,1,2,,,,
-Armor,Leather Armor,Leather Armor,Common,9,,,,Light,,,
+Armor,Leather Armor,Leather Armor,Common,8,,,,Light,,,
 
 
 

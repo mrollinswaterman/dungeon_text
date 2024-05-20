@@ -186,7 +186,7 @@ def begin():
     elif command == "t":
         narrator.exit_the_dungeon()
     elif command == "n":
-        player_commands.save()
+        #player_commands.save()
         sys.exit()
 
 begin()
