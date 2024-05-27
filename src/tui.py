@@ -25,7 +25,7 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        if global_commands.probability(1): #80% chance of an enemy spawning next
+        if global_commands.probability(75): #75% chance of an enemy spawning next
             next_enemy: mob.Mob = monster_manual.spawn_random_mob()
             global_variables.RUNNING = False
             link_start(next_enemy)
@@ -167,18 +167,18 @@ def link_start(enemy:mob.Mob) -> None:
                 enemy = None
 
 def begin():
+    print("")#newline for formatting
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
     STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob() if TEST is False else monster_manual.spawn_mob("Land Shark")
 
     if STARTING_ENEMY is None:
-        print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
+        #print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
         STARTING_ENEMY = monster_manual.mobs[0]()
 
     STARTING_ENEMY.set_level(PLAYER.level)
 
     command = input(">> ").lower()
-    print("")#newline after command prompt
     if command == "y":
         player_commands.load()
         global_variables.RUNNING = True#
@@ -186,7 +186,7 @@ def begin():
     elif command == "t":
         narrator.exit_the_dungeon()
     elif command == "n":
-        player_commands.save()
+        #player_commands.save()
         sys.exit()
 
 begin()

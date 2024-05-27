@@ -8,10 +8,11 @@ import status_effects
 
 PLAYER = global_variables.PLAYER
 
+TEST = False
+
 item_compendium.PLAYER = PLAYER
 status_effects.PLAYER = PLAYER
-
-#notes on formatting
+player_commands.TEST = TEST
 
 def link_start(enemy:mob.Mob) -> None:
     global_variables.RUNNING = True
@@ -24,12 +25,12 @@ def link_start(enemy:mob.Mob) -> None:
         Starts a new scene with a new enemy
         """
         narrator.next_scene_options()
-        if global_commands.probability(80): #80% chance of an enemy spawning next
+        if global_commands.probability(75): #75% chance of an enemy spawning next
             next_enemy: mob.Mob = monster_manual.spawn_random_mob()
             global_variables.RUNNING = False
             link_start(next_enemy)
         else: #remainging 20% chance of an event spawning
-            next_event: events.Event = random.choice(dms_guide.EVENT_LIST)
+            next_event: events.Event = dms_guide.EVENTS["Mysterious_Berries"]#random.choice(list(dms_guide.EVENTS.values()))
             next_event.set_tries(2)
             next_event.set_passed(False)
             next_event.start()#prints event start text
@@ -166,19 +167,18 @@ def link_start(enemy:mob.Mob) -> None:
                 enemy = None
 
 def begin():
+    print("")#newline for formatting
     global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
 
-    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob()
-    #STARTING_ENEMY: mob.Mob = monster_manual.spawn_mob("Land Shark")
+    STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob() if TEST is False else monster_manual.spawn_mob("Land Shark")
 
     if STARTING_ENEMY is None:
-        print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
-        STARTING_ENEMY = monster_manual.mobs[0]
+        #print(f"Error: Enemy was {STARTING_ENEMY}, generating default starting enemy...")
+        STARTING_ENEMY = monster_manual.mobs[0]()
 
     STARTING_ENEMY.set_level(PLAYER.level)
 
     command = input(">> ").lower()
-    print("")#newline after command prompt
     if command == "y":
         player_commands.load()
         global_variables.RUNNING = True#

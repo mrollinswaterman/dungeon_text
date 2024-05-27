@@ -32,7 +32,7 @@ class Land_Shark(mob.Mob):
         if global_commands.probability(3):
             tooth = items.Item("Land Shark Tooth", "Epic")
             tooth.set_weight(0.5)
-            self._loot["drops"] = tooth
+            self._loot["drops"] = [tooth]
 
         self._burrowed = False
 

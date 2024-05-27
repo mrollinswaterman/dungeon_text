@@ -185,6 +185,10 @@ class Mob():
             return True
         return False
     
+    def heal(self, num:int) -> None:
+        #heals for the given amount up to max hp value
+        self._hp += self._hp + num if (self._hp + num <= self._max_hp) else self._max_hp
+    
     #AP
     def spend_ap(self, num:int=1) -> None:
         """
