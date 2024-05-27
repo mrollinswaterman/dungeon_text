@@ -1,7 +1,7 @@
 #Rock Wall Event class
-import events
+import event
 
-object = events.Event("RockWall")
+object = event.Event("RockWall")
 
 success = {
     "str": ["With nothing but your own brute strength, you haul yourself up the wall.", 

@@ -72,6 +72,9 @@ class Status_Effect():
     def set_id(self, id:str="") -> None:
         self._id = id
 
+    def set_target(self, tar):
+        self._target = tar
+
     def cleanse(self) -> None:
         """
         Sets the effect's duration to 0, and

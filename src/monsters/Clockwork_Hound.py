@@ -1,30 +1,32 @@
 #Clockwork Hound mob file
 import mob, global_commands, items
 
+stats = {
+    "str": 16,
+    "dex": 14,
+    "con": 14,
+    "int": 18,
+    "wis": 10,
+    "cha": 7,
+    "base_evasion": 10,
+    "damage_taken_multiplier": 1,
+    "damage_multiplier": 1,
+    "max_hp": 0,
+    "max_ap": 0,
+    "armor": 3,
+    "damage": 8,
+    "dc": 10,
+    "hit_dice": 10,
+    "loot": {
+        "gold": 30,
+        "xp": 15,
+        "drops": []
+    }
+}
+
 class Clockwork_Hound(mob.Mob):
-    def __init__(self, id="Clockwork Hound", level = (6,13)):
-        super().__init__(id, level)
-        self._stats = {
-            "str": 16,
-            "dex": 14,
-            "con": 14,
-            "int": 18,
-            "wis": 10,
-            "cha": 8,
-        }
-
-        self._max_hp = 12 + self.bonus("con")
-        self._hp = self._max_hp
-
-        self._stats["evasion"] = 10
-
-        self._damage = 8
-        self._armor = 3
-        self._loot = {
-            "gold": 30,
-            "xp": 15,
-            "drops": []
-        }
+    def __init__(self, id="Clockwork Hound", level = (6,13), statblock=stats):
+        super().__init__(id, level, statblock)
 
         if global_commands.probability(50):
             scrap:items.Item = items.Item("Clockwork Scrap", "Uncommon")
@@ -35,25 +37,23 @@ class Clockwork_Hound(mob.Mob):
             heart = items.Item("Clockwork Heart", "Epic")
             heart.set_weight(2)
             self._loot["drops"].append(heart)
-
-        self.update()
     
     def trigger(self) -> None:
-        return self._hp < self._max_hp / 2
+        return self._hp < self.max_hp // 2
 
-    def special(self, target=None) -> bool:
+    def special(self) -> bool:
         
-        if target is None:
+        if self._player is None:
             raise ValueError("No Target.\n")
         
-        weapon = target.equipped["weapon"]
-        armor = target.equipped["armor"]
+        weapon = self._player.equipped["Weapon"]
+        armor = self._player.equipped["Armor"]
 
         meal:items.Item = weapon
         if weapon.durability < armor.durability:
             meal = armor
         
-        if self.roll_attack() > target.evasion:
+        if self.roll_attack() > self._player.evasion:
             #add print statements
             meal.remove_durability(self.bonus("str"))
             self.heal(self.bonus("str"))

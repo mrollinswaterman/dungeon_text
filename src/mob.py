@@ -4,55 +4,55 @@ import global_variables, global_commands
 import player
 import status_effects
 
+default = {
+    "hit_dice": 8,
+    "str": 10,
+    "dex": 10,
+    "con": 10,
+    "int": 10,
+    "wis": 10,
+    "cha": 10,
+    "base_evasion": 9,
+    "damage_taken_multiplier": 1,
+    "damage_multiplier": 1,
+    "max_hp": 0,
+    "max_ap": 1,
+    "armor": 0,
+    "damage": 5,
+    "dc": 10,
+    "loot": {
+        "gold": 0,
+        "xp": 0,
+        "drops": []
+    }
+}
+
 class Mob():
 
-    def __init__(self, id:str="Anonymous_Mob", level:tuple= (1, 20)):
+    def __init__(self, id:str="Anonymous_Mob", level:tuple= (1, 20), statblock=None):
         #identification
         self._id = id
         self._name = self._id
         self._level = random.randrange(min(level), max(level))
         self._range = level
 
-        self._stats = {
-            "str": 10,
-            "dex": 10,
-            "con": 10,
-            "int": 10,
-            "wis": 10,
-            "cha": 10,
-            "damage-taken-multiplier": 1
-        }
+        #if no statblock, use default
+        if not statblock:
+            print("No statblock given.\n")
+            self._stats = default
+        else:
+            self._stats = statblock
+            
 
-        self._max_hp = 8 + self.bonus("con")
-        self._hp = self._max_hp
+        #calculate stats
+        self.calculate_hp()
+        self._stats["max_ap"] = 1 + (self._level // 5)
+        self._ap = self.max_ap
+        self._loot = self._stats["loot"]
 
-        self._max_ap = 1 + (self._level // 5)
-        self._ap = self._max_ap
-
-        self._damage_taken_multiplier = 1
-        self._damage_multiplier = 1
-        self._stats["evasion"] = 9
-
-        #calculated stats
-        self._max_hp = 8 + self.bonus("con")
-        self._hp = self._max_hp
-
-        self._max_ap = 1 + self._level // 5
-        self._ap = self._max_ap
-
-        self._damage = 0
-        self._armor = 0
-        self._dc = 10
-
-        self._loot = {
-            "gold": 0,
-            "xp": 0,
-            "drops": None
-        }
-
-        # %hp threshold at which the enemy flees, higher == more cowardly
-        self._flee_threshold = 15 - self.bonus("cha") * 2
-        self._player = global_variables.PLAYER
+        # percent current HP threshold at which the enemy tries to flee (higher==more cowardly)
+        self._flee_threshold = 0.2
+        self._player:player.Player = global_variables.PLAYER
 
         self._status_effects: dict[str, status_effects.Status_Effect] = {}
         self._applied_status_effects = set()
@@ -74,13 +74,13 @@ class Mob():
         return self._level
     @property
     def damage(self) -> int:
-        return self._damage
+        return self._stats["damage"]
     @property
     def evasion(self) -> int:
-        return self._evasion
+        return self._stats["base_evasion"] + self.bonus("dex")
     @property
     def armor(self) -> int:
-        return self._armor
+        return self._stats["armor"]
     @property
     def hp(self) -> int:
         return self._hp
@@ -91,11 +91,20 @@ class Mob():
     def name(self) -> str:
         return self._name
     @property
+    def damage_multiplier(self):
+        return self._stats["damage_multiplier"]
+    @property
+    def damage_taken_multiplier(self):
+        return self._stats["damage_taken_multiplier"]
+    @property
     def dc(self) -> int:
-        return self._dc
+        return self._stats["dc"]
+    @property
+    def max_hp(self) -> int:
+        return self._stats["max_hp"]
     @property
     def max_ap(self) -> int:
-        return self._max_ap
+        return self._stats["max_ap"]
     @property
     def ap(self) -> int:
         return self._ap
@@ -104,7 +113,7 @@ class Mob():
         return self._ap > 0
     @property
     def fleeing(self) -> bool:
-        return self._hp <= self._max_hp * (self._flee_threshold / 100)
+        return self._hp <= self.max_hp * self._flee_threshold and self.roll_a_check("cha") > 10
     @property
     def range(self) -> int:
         return self._range
@@ -114,21 +123,43 @@ class Mob():
     @property
     def header(self) -> bool:
         return self._header_printed
+    
     #methods
+
+    #MISC.
+    def bonus(self, stat:str) -> int:
+        """
+        Returns the numerical bonus of the given stat
+        """
+        return global_commands.bonus(self._stats[stat])
+    
+    def calculate_hp(self) -> None:
+        """
+        Re-calculates mob's HP based on current level,
+        then sets stats['hp'] and self._hp variables appropriately
+        """
+        self._stats["max_hp"] = 0
+        temp = self._stats["hit_dice"] + self.bonus("con")
+        for _ in range(self._level-1):
+            temp += random.randrange(1, self._stats["hit_dice"]) + self.bonus("con")
+
+        self._stats["max_hp"] = temp
+        self._hp = self.max_hp
 
     #SETTERS
     def set_level(self, level:int)-> None:
         """
-        Sets the mobs levels then calculates HP and loot based on level
+        Sets the mobs levels then re-calculates HP and loot based on level
         """
         self._level = level
-        self.level_up()
+        #reset stast based on new level
+        self._stats["max_ap"] = 1 + self._level // 5
+        self._ap = self.max_ap
 
-    def set_damage_multiplier(self, num:int) -> None:
-        self._damage_multiplier = num
+        self.calculate_hp()
 
-    def reset_damage_multiplier(self) -> None:
-        self.set_damage_multiplier(0)
+        self._loot["gold"] *= max(self._level // 2, 1)
+        self._loot["xp"] *= max(self._level // 2, 1)
 
     def set_header(self, val:bool) -> None:
         self._header_printed = val
@@ -145,7 +176,7 @@ class Mob():
         if roll == 20:
             return 0
         
-        return roll + self.bonus("dex") + self._level // 5
+        return roll + self.bonus("dex") + (self._level // 5)
 
     def roll_a_check(self, stat:str):
         return random.randrange(1, 20) + self.bonus(stat)
@@ -154,22 +185,22 @@ class Mob():
         """
         Rolls damage (damage dice)
         """
-        return random.randrange(1, self._damage) * self._damage_multiplier + self.bonus("str")
+        return random.randrange(1, self.damage) * self.damage_multiplier + self.bonus("str")
     
     def take_damage(self, damage:int, armor_piercing=False) -> int:
         """
         Takes a given amount of damage, reduced by armor
         """
-        damage *= self._damage_taken_multiplier
+        damage *= self.damage_taken_multiplier
         if armor_piercing:
             self._hp -= damage
             return damage
 
-        if (damage - self._armor) < 0:
+        if (damage - self.armor) < 0:
             return 0
         else:
-            self._hp -= damage - self._armor
-            return damage - self._armor
+            self._hp -= damage - self.armor
+            return damage - self.armor
         
     def fumble_table(self) -> Union[str, bool]:
         """
@@ -185,11 +216,11 @@ class Mob():
             return True
         return False
     
+    #Resources
     def heal(self, num:int) -> None:
         #heals for the given amount up to max hp value
-        self._hp += self._hp + num if (self._hp + num <= self._max_hp) else self._max_hp
-    
-    #AP
+        self._hp += self._hp + num if (self._hp + num <= self.max_hp) else self.max_hp
+
     def spend_ap(self, num:int=1) -> None:
         """
         Spend an amount of AP
@@ -206,7 +237,7 @@ class Mob():
         """
         Resets mob's AP to max value
         """
-        self._ap = self._max_ap
+        self._ap = self.max_ap
     
     #STATUS EFFECTS
     def add_status_effect(self, effect:status_effects.Status_Effect) -> None:
@@ -219,8 +250,6 @@ class Mob():
         self._status_effects[effect.id] = effect
         effect.apply()
 
-        self.update_stats()
-
     def remove_status_effect(self, effect:status_effects.Status_Effect) -> None:
         """
         Removes a status effect from the mob
@@ -229,7 +258,7 @@ class Mob():
         effect.cleanse()
         return None
 
-    #MISC.
+    #Update
     def update(self):
         """
         Updates all relevant stats when a mob's level is changed,
@@ -237,8 +266,6 @@ class Mob():
         expires. 
         """
         self.reset_ap()
-
-        self.update_stats()
        
         #update all status effects
         inactive = []
@@ -250,31 +277,6 @@ class Mob():
         for effect in inactive:
             self.remove_status_effect(effect)
         inactive = []
-
-    def update_stats(self) -> None:
-        """
-        Updates mobs stats seperately
-        """
-         #update calculated stats
-        self._loot["gold"] = self._loot["gold"] * max(self._level // 2, 1)
-        self._loot["xp"] = self._loot["xp"] * max(self._level // 2, 1)
-        try:
-            self._damage_taken_multiplier = self._stats["damage-taken-multiplier"]
-        except KeyError:
-            self._stats["damage-taken-multiplier"] = 1
-            self._damage_taken_multiplier = self._stats["damage-taken-multiplier"]
-        self._evasion = self._stats["evasion"] + self.bonus("dex")
-
-    def level_up(self):
-        for _ in range(self._level-1):
-            self._max_hp += random.randrange(1, self._max_hp) + round(self._level + 0.1 / 2)
-            self._hp = self._max_hp
-        self._max_ap = 1 + self._level // 5
-        self._ap = self._max_ap
-        self.update()
-    
-    def bonus(self, stat:str) -> int:
-        return player.BONUS[self._stats[stat]]
 
     def special(self):
         raise NotImplementedError

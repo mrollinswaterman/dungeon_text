@@ -1,5 +1,3 @@
-
-from typing import Optional
 import random
 import global_commands
 import global_variables
@@ -120,7 +118,6 @@ class Event():
                 self._messages[type][stat].append(message_dict[stat])
             else:
                 self._messages[type][stat] = message_dict[stat]
-            
 
     def add_end_message(self, msg) -> None:
         """
@@ -132,8 +129,13 @@ class Event():
         self._end_messages.append(msg)
 
 
-
     #SETTERS
+    def set_id(self, id:str):
+        """
+        Sets event id
+        """
+        self._id = id
+    
     def set_tries(self, tries:int) -> None:
         """
         Sets the number of tries the event has to a given integer
@@ -173,7 +175,6 @@ class Event():
         Return True if it does, False if it does not
         """
         for key in self._stats:
-            print(key, stat)
             if key == stat:
                 return True
         return False
@@ -193,19 +194,32 @@ class Event():
         """
         global_commands.type_with_lines(self.text)
 
-    def success(self) -> None:
+    def success(self, code:str) -> None:
         """
-        Runs if the player has succeded the check
+        Runs if the player has passed the event
         """
-        return None
+        self._tries = -1#set self.tries to False by setting _tries to -1
+        if self._loot["xp"] <= 0:#set xp if it hasnt been
+            self.set_xp(int(self.stat_dc(code) / 1.5))
+        global_commands.type_text(random.choice(self._messages[True][code]))#print a random success message
+        print("")#newline b4 end
+        global_commands.type_text(random.choice(self._end_messages))#random end message
     
-    def failure(self) -> None:
+    def failure(self, code) -> None:
         """
         Runs if the player fails the event
         """
-        return None
+        global_commands.type_text(random.choice(self._messages[False][code]))#print failure line
+        print("")#formatting, unsure why this is needed, but the lines are too close without it
+
+    def not_that_stat(self, code:str):
+        """
+        Runs if the player tries the event with the wrong stat
+        """
+        global_commands.type_text(random.choice(FAILURE_LINES[code]))#print failure line
+        print("")#formatting, unsure why this is needed, but the lines are too close without it
     
-    def run(self, stat:str, roll:int) -> str:
+    def run(self, code:str, roll: int):
         """
         Runs the event for a given stat and roll
 
@@ -215,33 +229,19 @@ class Event():
         if self.tries is False:
             raise ValueError("No more tries")
         self._tries -= 1
-        if self.has_stat(stat) is True:
-            for key in self._stats:
-                dc = self.stat_dc(key)
-                if key == stat and roll >= dc:
-                    for msg in self._messages[True]: #SUCCESS
-                        if msg[0] == stat:
-                            self._passed = True
-                            if self._loot["xp"] <= 0:
-                                self.set_xp(int(dc / 1.5))
-                            global_commands.type_text(random.choice(msg[1])+"\n")
-                            return True
-            for msg in self._messages[False]: #FAILURE
-                if msg[0] == stat:
-                    global_commands.type_text(random.choice(msg[1]))
-                    return self.tries
-
-        #print(stat, self._stats)
-        global_commands.type_text(random.choice(FAILURE_LINES[stat])) #WRONG STAT
+        if self.has_stat(code) is True:
+            if roll >= self.stat_dc(code):#if roll beats the DC
+                self._passed = True
+                self.success(code)
+            else:
+                self.failure(code)
+        else:
+            self.not_that_stat(code)
         return self.tries
 
-    def end(self) -> None:
+    def end(self):
         """
-        Prints the end text and associated formatting of the event
+        Runs if the player has failed the event twice
         """
-        print("")#newline b4 end
+        self._tries = -1
         global_commands.type_text(random.choice(self._end_messages))
-        if self._passed is True:
-            self.success()
-        else:
-            self.failure()

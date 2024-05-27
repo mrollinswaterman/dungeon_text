@@ -9,6 +9,7 @@ ENEMY:mob.Mob = None
 ENEMY_TURN = None
 END_SCENE = None
 
+PLAYER = None
 PLAYER_TURN = None
 PLAYER_DEATH = None
 
@@ -22,7 +23,7 @@ def turn_options():
         return None
     #if trigger is active, 75% chance of special
     if ENEMY.trigger() is True:
-        if global_commands.probability(100) is True:#75
+        if global_commands.probability(75) is True:#75
             if ENEMY.special() is True:
                 run_enemy_next()
                 return None
@@ -55,10 +56,11 @@ def enemy_flee_attempt():
     command = input(">").lower()
     #print("")#newline after cmd prompt
     if command == "y":
+        PLAYER.reset_ap()
         player_commands.attack(enemy_flee_failure, enemy_flee_success)
     if command == "n":
         global_commands.type_text(f"You let the {ENEMY.id} go.")
-        narrator.continue_run()
+        narrator.continue_run(NEXT_SCENE)
 
 def run_enemy_next():
     """

@@ -2,7 +2,8 @@ import sys, random
 import mob, monster_manual
 import narrator, player_commands, enemy_commands
 import item_compendium
-import dms_guide, events
+import dm_guide
+import event as ev
 import global_commands, global_variables
 import status_effects
 
@@ -12,11 +13,15 @@ TEST = False
 
 item_compendium.PLAYER = PLAYER
 status_effects.PLAYER = PLAYER
+enemy_commands.PLAYER = PLAYER
 player_commands.TEST = TEST
 
 def link_start(enemy:mob.Mob) -> None:
-    global_variables.RUNNING = True
 
+    if enemy is None:
+        next_scene()
+
+    global_variables.RUNNING = True
     enemy_commands.ENEMY = enemy
     player_commands.ENEMY = enemy
 
@@ -24,26 +29,26 @@ def link_start(enemy:mob.Mob) -> None:
         """
         Starts a new scene with a new enemy
         """
-        narrator.next_scene_options()
-        if global_commands.probability(75): #75% chance of an enemy spawning next
+        if global_commands.probability(85): #85% chance of an enemy spawning next
             next_enemy: mob.Mob = monster_manual.spawn_random_mob()
             global_variables.RUNNING = False
             link_start(next_enemy)
-        else: #remainging 20% chance of an event spawning
-            next_event: events.Event = dms_guide.EVENTS["Mysterious_Berries"]#random.choice(list(dms_guide.EVENTS.values()))
+        else: #remainging 15% chance of an event spawning
+            next_event: ev.Event = dm_guide.spawn_event("Mysterious_Berries")#dms_guide.spawn_random_event()#
             next_event.set_tries(2)
             next_event.set_passed(False)
             next_event.start()#prints event start text
             run_event(next_event)
 
-    if enemy is None:
-        next_scene()
 
     #functions
     def begin_encounter():
         """
         Begins an encounter
         """
+        if enemy is None:
+            next_scene()
+            return None
         global_commands.type_text(f"You encounter a Level {enemy.level} {enemy.id.upper()}!")
 
     def player_turn():
@@ -62,8 +67,10 @@ def link_start(enemy:mob.Mob) -> None:
         enemy_commands.turn_options()
 
     def player_death():
-        #some text probably too
+        #smth else
+        global_commands.type_with_lines("You have died.", 2)
         global_variables.RUNNING = False
+        player_commands.reset()
         sys.exit()
 
     def end_scene():
@@ -72,11 +79,11 @@ def link_start(enemy:mob.Mob) -> None:
         PLAYER.update()
         narrator.continue_run(next_scene)
 
-    def run_event(event: events.Event):
+    def run_event(event: ev.Event):
         narrator.event_options()
         command = input(">> ")
         print("")#newline after cmd prompt
-        if command.lower() in events.FAILURE_LINES:
+        if command.lower() in ev.FAILURE_LINES:
             event.run(command, PLAYER.roll_a_check(command))
             if event.passed is True:# if passed, reset event tries and next_scene()
                 event.set_tries(2)
@@ -89,8 +96,7 @@ def link_start(enemy:mob.Mob) -> None:
                 event.end()
                 narrator.continue_run(next_scene)
         elif command.lower() == "exit":
-            global_variables.RUNNING = False
-            sys.exit()
+            global_commands.exit()
         else:
             global_commands.type_text(f"Invalid command '{command}', please try again.")
             run_event(event)
@@ -106,8 +112,8 @@ def link_start(enemy:mob.Mob) -> None:
             level_up_player()
         else:
             narrator.continue_run(next_scene)
-    PLAYER.set_level_up_function(level_up_player)
 
+    PLAYER.set_level_up_function(level_up_player)
 
     #Set constants for command files
     enemy_commands.PLAYER_TURN = player_turn
@@ -137,7 +143,9 @@ def link_start(enemy:mob.Mob) -> None:
         #command interpretation
         if command == "exit":
             global_variables.RUNNING = False
-            player_commands.save()
+            global_commands.exit()
+        if command == "reset":
+            player_commands.reset()
             sys.exit()
         try:
             command = int(command)
@@ -156,7 +164,7 @@ def link_start(enemy:mob.Mob) -> None:
             case "i": #show inventory
                 player_commands.show_inventory()
             case "test": #test suite
-                print(enemy.hp)
+                player_death()
             case "p": #pass the turn
                 enemy_turn()
             case "c": #cleans an effect
@@ -167,9 +175,7 @@ def link_start(enemy:mob.Mob) -> None:
                 enemy = None
 
 def begin():
-    print("")#newline for formatting
-    global_commands.type_text(" Would you like to enter the Dungeon? y/n\n")
-
+    global_commands.type_text("Would you like to enter the dungeon? y/n\n")
     STARTING_ENEMY: mob.Mob = monster_manual.spawn_random_mob() if TEST is False else monster_manual.spawn_mob("Land Shark")
 
     if STARTING_ENEMY is None:
@@ -179,14 +185,17 @@ def begin():
     STARTING_ENEMY.set_level(PLAYER.level)
 
     command = input(">> ").lower()
+    print("")
     if command == "y":
-        player_commands.load()
-        global_variables.RUNNING = True#
+        global_variables.RUNNING = True
         link_start(STARTING_ENEMY)
     elif command == "t":
         narrator.exit_the_dungeon()
     elif command == "n":
-        #player_commands.save()
-        sys.exit()
+        narrator.exit_the_dungeon()
 
-begin()
+player_commands.load()
+
+while global_variables.START_CMD is True:
+    global_variables.START_CMD = False
+    begin()

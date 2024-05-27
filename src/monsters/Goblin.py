@@ -2,28 +2,34 @@
 import random
 import mob, global_commands
 
+stats = {
+    "str": 10,
+    "dex": 16,
+    "con": 10,
+    "int": 9,
+    "wis": 7,
+    "cha": 6,
+    "base_evasion": 9,
+    "damage_taken_multiplier": 1,
+    "damage_multiplier": 1,
+    "max_hp": 0,
+    "max_ap": 0,
+    "armor": 0,
+    "damage": 4,
+    "dc": 10,
+    "hit_dice": 10,
+    "loot": {
+        "gold": 10,
+        "xp": 5,
+        "drops": []
+    }
+}
+
 class Goblin(mob.Mob):
-    def __init__(self, id="Goblin", level=(1,3)):
-        super().__init__(id, level)
-        self._stats = {
-            "str": 10,
-            "dex": 14,
-            "con": 10,
-            "int": 9,
-            "wis": 7,
-            "cha": 6,
-        }
+    def __init__(self, id="Goblin", level=(1,3), statblock=stats):
+        super().__init__(id, level, statblock)
 
-        self._max_hp = 5 + self.bonus("con")
-
-        self._stats["evasion"] = 9
-
-        self._damage = 4
-        self._loot = {
-            "gold": 10,
-            "xp": 5,
-            "drops": None
-        }
+        self._flee_threshold = 0.25
     
     def trigger(self):
         """

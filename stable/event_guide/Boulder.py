@@ -1,7 +1,7 @@
 #Boulder Event class
-import events
+import event
 
-object = events.Event("Boulder")
+object = event.Event("Boulder")
 
 success = {
     "str": ["You push the boulder aside and continue on your way.", 

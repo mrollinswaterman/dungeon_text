@@ -1,4 +1,6 @@
 import time
+import sys
+import csv
 import random
 import global_variables
 
@@ -9,10 +11,74 @@ TAG_TO_STAT = {
     "int": "Intelligence",
     "wis": "Wisdom",
     "cha": "Charisma",
-    "evasion": "Evasion",
-    "damage-taken-multiplier": "Vulnerability",
-    "damage-multiplier": "Damage"
+    "base_evasion": "Evasion",
+    "damage_take_multiplier": "Vulnerability",
+    "damage_multiplier": "Damage",
+    "armor": "Armor",
+    "max_hp": "Maximum Health"
 }
+
+BONUS = {
+    5: -4,
+    6: -3,
+    7: -2,
+    8: -1, 
+    9: -1,
+    10: 0,
+    11: 0,
+    12: 1,
+    13: 1,
+    14: 2,
+    15: 2,
+    16: 3,
+    17: 3,
+    18: 4,
+    19: 4,
+    20: 5
+}
+
+end_line = [
+    ".", "!"
+]
+
+def exit():
+    global_variables.RUNNING = False
+    save()
+    sys.exit()
+
+def save():
+    player_dict = global_variables.PLAYER.save_to_dict()
+    with open('player.csv', "w", newline='') as file:
+        w = csv.DictWriter(file, player_dict.keys())
+        w.writeheader()
+        w.writerow(player_dict)
+        file.close()
+
+    item_dict_list = []
+
+    #append all inventory item_to_dicts to list
+    for item in global_variables.PLAYER.inventory:
+        print(item)
+        item.save()
+        item_dict_list.append(item.tod)
+
+    #append equipped weapon and armor as dicts to the list
+    global_variables.PLAYER.weapon.save()
+    global_variables.PLAYER.armor.save()
+    item_dict_list.append(global_variables.PLAYER.weapon.tod)
+    item_dict_list.append(global_variables.PLAYER.armor.tod)
+
+    #create fieldnames list from item_to_dict keys
+    fields = list(global_variables.PLAYER.weapon.tod.keys())
+    with open("inventory.csv", "w", newline='') as file:
+            file.truncate(0)
+            w = csv.DictWriter(file, fieldnames=fields)
+            w.writeheader()
+            w.writerows(item_dict_list)
+            file.close()
+
+def bonus(num:int) -> int:
+    return BONUS[num]
 
 def switch(header, text):
     """
@@ -24,7 +90,7 @@ def switch(header, text):
     elif header is False:
         type_with_lines(text)
     else:
-        raise ValueError("header val not bool")
+        raise ValueError("header val not a boolean")
 
 def generate_item_rarity() -> str:
     """
@@ -74,6 +140,7 @@ def type_text(text: str, speed: int = .03, delay=True) -> None:
     speed: an integer denoting the delay between characters
     """
     text = " " + text
+    count = 0
     
     if delay is True:
         time.sleep(.2)
@@ -86,6 +153,12 @@ def type_text(text: str, speed: int = .03, delay=True) -> None:
         speed = 0.03
         
     for idx, char in enumerate(text):
+        
         time.sleep(speed)
         print(char, end='', flush=True)
+        count += 1
+        if (count >= 120) and char in end_line:
+            print("\n")
+            count = 0
+        
     print("")#newline after typing text

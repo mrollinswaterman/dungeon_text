@@ -1,5 +1,5 @@
 #Mysterious Berries event class
-import events
+import event
 import global_commands
 import random
 
@@ -38,7 +38,7 @@ end = [
     "You eat a few to ward off hunger.",
 ]
 
-class Mysterious_Berries(events.Event):
+class Mysterious_Berries(event.Event):
 
     def __init__(self, id="Mysterious_Berries"):
         super().__init__(id)
