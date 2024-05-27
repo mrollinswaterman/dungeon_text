@@ -118,7 +118,6 @@ class Event():
                 self._stats[type][stat].append(message_dict[stat])
             else:
                 self._stats[type][stat] = message_dict[stat]
-            
 
     def add_end_message(self, msg) -> None:
         """
