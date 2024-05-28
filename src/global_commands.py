@@ -57,8 +57,8 @@ def save():
     item_dict_list = []
 
     #append all inventory item_to_dicts to list
-    for item in global_variables.PLAYER.inventory:
-        print(item)
+    for entry in global_variables.PLAYER.inventory:
+        item = global_variables.PLAYER.inventory[entry]
         item.save()
         item_dict_list.append(item.tod)
 
@@ -106,6 +106,12 @@ def generate_item_rarity() -> str:
         return "Uncommon"
     
     return "Common"
+
+def d(num):
+    """
+    Rolls a dX where X is some number (ie d6, d20, etc)
+    """
+    return random.randrange(1, num+1)
 
 def probability(chance):
     return random.random() < (chance / 100)

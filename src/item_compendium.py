@@ -3,7 +3,7 @@ import items
 
 PLAYER = None
 
-def generate_hp_potions(rarity="Common", num=1):
+def generate_hp_potions(rarity, num=1):
     hp = items.Health_Potion(rarity)
     hp.set_quantity(num)
     hp.set_target(PLAYER)

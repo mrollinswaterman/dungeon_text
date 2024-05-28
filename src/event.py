@@ -58,7 +58,7 @@ class Event():
         self._loot = {
             "xp": 0,
             "gold": 0,
-            "drops": None
+            "drops": []
         }
 
         self._player = global_variables.PLAYER
@@ -203,7 +203,7 @@ class Event():
             self.set_xp(int(self.stat_dc(code) / 1.5))
         global_commands.type_text(random.choice(self._messages[True][code]))#print a random success message
         print("")#newline b4 end
-        global_commands.type_text(random.choice(self._end_messages))#random end message
+        #global_commands.type_text(random.choice(self._end_messages))#random end message
     
     def failure(self, code) -> None:
         """

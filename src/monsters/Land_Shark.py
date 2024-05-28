@@ -21,8 +21,8 @@ stats = {
     "dc": 10,
     "hit_dice": 12,
     "loot": {
-        "gold": 10,
-        "xp": 5,
+        "gold": 15,
+        "xp": 8,
         "drops": []
     }
 }
@@ -31,7 +31,7 @@ class Land_Shark(mob.Mob):
     def __init__(self, id="Land Shark", level = (3,10), statblock=stats):
         super().__init__(id, level, statblock)
 
-        if global_commands.probability(3):
+        if global_commands.probability(10):
             tooth = items.Item("Land Shark Tooth", "Epic")
             tooth.set_weight(0.5)
             self._loot["drops"] = [tooth]

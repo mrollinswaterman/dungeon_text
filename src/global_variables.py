@@ -59,8 +59,9 @@ def restock_the_shop():
     for entry in BLACKSMITH.storehouse:
         SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
 
-    SHOPKEEP.stock(item_compendium.generate_hp_potions(
-        items.numerical_rarity_to_str(max(PLAYER.threat // 5, 1)), 5))
+    threat_str = items.numerical_rarity_to_str(max(PLAYER.threat // 5, 1))
+    pots = item_compendium.generate_hp_potions(threat_str, 5)
+    SHOPKEEP.stock(pots)
     #scales HP potions to be higher rarity with player level
 
     SHOPKEEP.stock(item_compendium.generate_repair_kits(5))

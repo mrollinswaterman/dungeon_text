@@ -15,8 +15,8 @@ success_safe = {
     "int": ["You scrutinze the berries closely, detecting no abnormalities.", 
             "These berries are identical to a safe species from one ouf your botany textbooks. Good thing you were paying attention."],
 
-    "wis": ["You've seen many a barry in your time, and these look safe. You take a few tentative bites. After nothing happens, you breathe a sigh of relief.",
-            "Your gut is telling you these berries are good. And that you should eat some. You oblige."]
+    "wis": ["You've seen many a berry in your time, and these look safe.",
+            "Your gut is telling you these berries are good. And that you should eat some."]
 }
 
 failure = {
@@ -31,11 +31,11 @@ failure = {
 end = [
     "You shrug and grab a handful.",
     "Never one to waste a meal, you dig in.",
-    "You snatch a few for the road as you continue on.",
+    "You snatch a bunch for the road as you continue forward.",
     "Food is food. You eat the berries.",
     "Your mother didn't raise you to be picky.",
-    "You pop a few in your mouth and continue on.",
-    "You eat a few to ward off hunger.",
+    "You pop a few in your mouth and move on.",
+    "You eat some to ward off hunger.",
 ]
 
 class Mysterious_Berries(event.Event):
@@ -71,32 +71,28 @@ class Mysterious_Berries(event.Event):
         if self._poisonous:
             global_commands.type_text("You pass on the poisonous snacks.")
             return None
-
-        return None
+        self.end()
 
     def end(self):
         super().end()
         print("")#formatting :(
         if not self._poisonous and self.passed:#safe and passed
-            global_commands.type_text("Delicious! You can feel your strength returning.")
-            print("")#formatting
+            global_commands.type_text("Delicious! You can feel your strength returning.\n")#heal msg comes after so \n is needed
             self._player.heal(5)
             return None
         elif self._poisonous and self.passed: #dangerous but passed
-            global_commands.type_text("You pass on the poisonous snacks.")
+            global_commands.type_text("You pass on the poisonous snacks.\n")#XP msg comes after this so \n is needed
             return None
         elif self._poisonous and not self.passed: #dangerous and failed
-            global_commands.type_text("You probably shouldn't have eaten those...")
-            print("")#formatting
+            global_commands.type_text("You probably shouldn't have eaten those...\n")#not last item so \n is needed
             if self._player.hp >= 4*2:
-                self._player.lose_hp(4)
-                global_commands.type_text("The posion berries did 4 damage to you.")
+                self._player.lose_hp(3)
+                global_commands.type_text("The posion berries did 3 damage to you.")
             else:
                 global_commands.type_text("You don't feel so good, but nothing bad happened this time.")
             return None
         else: # safe and failed
-            global_commands.type_text("You got lucky. The berries turned out to be edible.")
-            print("")#formatting
+            global_commands.type_text("You got lucky. The berries turned out to be edible.\n")#not last item so \n is needed
             self._player.heal(2)
             return None
 

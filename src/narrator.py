@@ -45,8 +45,8 @@ EXIT_THE_SHOP = [
 def next_scene_options():
     global_commands.type_text(random.choice(SCENE_CHANGE))
     ominous = f'    ...\n'
-    for i in range(5):
-        time.sleep(.5)
+    for i in range(4):
+        time.sleep(.4)
         print('\t'*i + ominous)
 
 def level_up_options():
@@ -60,12 +60,9 @@ def event_options():
 def continue_run(next):
     global_commands.type_with_lines("Continue? y/n\n")
     command = input(">> ").lower()
-    print("")#newline after cmd prompt
     if command == "y":   
         next_scene_options()
         next()
-        #command = None
-        #return None
     elif command == "n":
         exit_the_dungeon()
     elif command == "exit":
@@ -83,7 +80,6 @@ def exit_the_dungeon():
 def buy_something():
     global_commands.type_with_lines("Enter an item's number to purchase it OR (c) - Cancel Order\n")
     command = input(">> ").lower()
-    print("")#newline after cmd prompt
 
     if command == "exit":
         global_commands.exit()
@@ -97,11 +93,13 @@ def buy_something():
             print("Invalid option, please try again.\n")
             buy_something()
         if stock_num <= global_variables.SHOPKEEP.stock_size+1:
+            print("")#formatting
             if item.is_consumable is False:
                 if global_variables.SHOPKEEP.sell(item, global_variables.PLAYER) is False:
                     buy_something()
                 else:
-                    shopkeep_options()
+                    global_variables.SHOPKEEP.print_inventory()
+                    buy_something()
             else:
                 def ask_quantity():
                     global_commands.type_text(f"Please enter desired quantity:\n")
@@ -113,7 +111,8 @@ def buy_something():
                         if global_variables.SHOPKEEP.sell(item, global_variables.PLAYER, int(command)) is False:
                             buy_something()
                         else:
-                            shopkeep_options()
+                            global_variables.SHOPKEEP.print_inventory()
+                            buy_something()
                     except TypeError:
                         print(f" Invalid quantity '{command}'. Please enter a valid quantity.\n")
                         ask_quantity()
@@ -132,7 +131,6 @@ def shopkeep_options():
     global_commands.type_with_lines("What would you like to do?\n")
     print("\t Buy Something - (b) | Leave - (l) | Sell something - (s) | Inventory - (i)\n")
     command = input(">> ").lower()
-    print("")
     if command == "b":
         global_variables.SHOPKEEP.print_inventory()
         buy_something()
@@ -147,7 +145,7 @@ def shopkeep_options():
         shopkeep_options()
 
 def rest():
-    global_commands.type_text("Plenty of time to rest when you're dead.\n", 2)
+    global_commands.type_with_lines("Plenty of time to rest when you're dead.")
     menu_options()
 
 def check_player_inventory(next):
@@ -157,7 +155,6 @@ def check_player_inventory(next):
     def select_item():
         global_commands.type_with_lines("Enter an item's number to equip it OR (b) - Go Back\n")
         command = input(">> ").lower()
-        print("")#newline after cmd prompt
         if command == "b":
             next()
         elif command == "exit":
@@ -168,11 +165,13 @@ def check_player_inventory(next):
             except ValueError:
                 print("Invalid command, please try again.\n")
                 select_item()
-            item = global_variables.PLAYER.inventory[int(command)-1]
+            index = int(command) - 1
+            item_id = list(global_variables.PLAYER.inventory.keys())[index]
+            item = global_variables.PLAYER.inventory[item_id]
             if global_variables.PLAYER.equip(item) is True:
                 check_player_inventory(next)
             else:
-                print("Can't equip that.")
+                print("\nCan't equip that.")
                 select_item()
     select_item()
 
@@ -180,7 +179,6 @@ def menu_options():
     global_commands.type_with_lines("What would you like to do?\n")
     print("\t Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v) | Inventory - (i) \n")
     command = input(">> ").lower()
-    print("")#newline after cmd prompt
     match command:
             case "e": #enter the dungeon again
                 global_variables.START_CMD = True

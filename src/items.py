@@ -28,14 +28,6 @@ class Item():
     def __init__(self, id:str, rarity=None):
         """
         Init function for the base Item class
-
-        id = the item's rarity + item's name
-        rarity = rarity as a string (ie common, uncommon, etc)
-        numerical_rarity = rarity as an integer value, used in calculations
-        name property = the item's name without rarity tag attached
-        (
-            ie. 'Uncommon Sword'[id] vs 'Sword'[name]
-        )
         """
         self._id = id
         self._name = id
@@ -60,10 +52,16 @@ class Item():
     #properties
     @property
     def id(self) -> str:
-        return f"{self._rarity} {self._id}"
+        """
+        Returns the item's identifcation tag, without any context
+        """
+        return self._id
     @property
     def name(self) -> str:
-        return self._name
+        """
+        Returns the item's full indentifiction, including rarity
+        """
+        return f"{self._rarity} {self._name}"
     @property
     def value(self) -> int:
         return self._value
@@ -120,9 +118,8 @@ class Item():
         return self._tod
     #methods
     def lose_durability(self) -> None:
-        prob = random.randrange(100)
         #weapon only loses durability occasionally, probability decreases with rarity
-        if prob < (60 // self._numerical_rarity):
+        if global_commands.probability(60 // self._numerical_rarity):
             self._durability -= 1
             if self.broken is True:
                 self.item_has_broken()
@@ -171,7 +168,7 @@ class Item():
         self._tod = {
             "type": self._type,
             "id": self._id,
-            "name": self._id,
+            "name": self._name,
             "rarity": self._rarity,
             "durability": self._durability,
         }
@@ -359,9 +356,10 @@ class Armor(Item):
 
 class Consumable(Item):
 
-    def __init__(self, id:str, rarity="Common",quantity:int=0):
+    def __init__(self, id:str, rarity="Common", quantity=1):
         super().__init__(id, rarity)
         self._quantity = quantity
+        self._plural = True if self._quantity > 1 else False
         self._strength = self._numerical_rarity * 2
         self._is_consumable = True
         self._type = "Consumable"
@@ -371,6 +369,14 @@ class Consumable(Item):
         self._value = self._unit_value * self._quantity
 
     #properties
+    @property
+    def name(self) -> str:
+        return f"{self._id}s" if self._plural else self._id
+    @property
+    def pickup_message(self) -> None:
+        if self._plural:
+            return f"You picked up {self._quantity} {self._id}s"
+        return f"You picked up a {self._id}"
     @property
     def quantity(self) -> int:
         return self._quantity
@@ -407,14 +413,7 @@ class Consumable(Item):
         self._target = tar
 
     def update(self) -> None:
-        if self._quantity > 1:
-            self._pickup_message = f"You picked up {self._quantity} {self._name}."
-            self._name = self._id +"s"
-        else:
-            self._pickup_message = f"You picked up a {self._id}."
-            if self._name[-1] == "s":
-                self._name = self._name.rstrip(self._name[-1])
-
+        self._plural = True if self._quantity > 1 else False
         self._value = self._unit_value * self._quantity
         self._weight = self._unit_weight * self._quantity
 
@@ -440,8 +439,8 @@ class Consumable(Item):
     
 class Health_Potion(Consumable):
 
-    def __init__(self, id="Health Potion", rarity="Common", quantity=0):
-        super().__init__(id, rarity, quantity)
+    def __init__(self, rarity):
+        super().__init__("Health Potion", rarity)
         self._unit_weight = 0.5
         self._target = status_effects.PLAYER
         self._type = "Health_Potion"
@@ -461,8 +460,8 @@ class Health_Potion(Consumable):
     
 class Repair_Kit(Consumable):
 
-    def __init__(self, id="Repair Kit", rarity="Uncommon", quantity=0):
-        super().__init__(id, rarity, quantity)
+    def __init__(self):
+        super().__init__("Repair Kit", "Uncommon", 0)
         self._unit_value = 10 * self._numerical_rarity
         self._unit_weight = .5
         self._type = "Repair_Kit"
@@ -480,8 +479,8 @@ class Repair_Kit(Consumable):
 
 class Firebomb(Consumable):
     
-    def __init__(self, id="Firebomb", rarity="Uncommon", quantity=0):
-        super().__init__(id, rarity, quantity)
+    def __init__(self, rarity="Uncommon"):
+        super().__init__("Firebomb", "Uncommon", 0)
         self._unit_value = 20 * self._numerical_rarity
         self._unit_weight = 1 
         self._target = None

@@ -39,14 +39,14 @@ class Player():
             "max_ap": 1 + (self._level // 5)
         }
 
-        self._stats["max_hp"] = 8 + self.bonus("con")
+        self._stats["max_hp"] = 10 + self.bonus("con")
         self._hp = self.max_hp
         self._ap = self.max_ap
         
         #xp/gold/items
         self._xp = 0
         self._gold = 0
-        self._inventory = []
+        self._inventory:dict[str, items.Item] = {}
         self._status_effects:dict[str, status_effects.Status_Effect] = {}
         self._level_up_function = None
 
@@ -103,8 +103,8 @@ class Player():
     def current_weight(self) -> int:
         total_weight = 0
         for entry in self._inventory:
-            if entry is not None:#check to make sure the entry is valid
-                held_item:items.Item = entry
+            if self._inventory[entry] is not None:#check to make sure the entry is valid
+                held_item:items.Item = self._inventory[entry]
                 total_weight += held_item.total_weight
         for item in self._equipped:
             if self._equipped[item] is not None: #check to make sure an item is equipped, add its weight to the total if it is
@@ -118,7 +118,7 @@ class Player():
         return self._inventory
     @property
     def inventory_size(self) -> int:
-        return len(self._inventory) + 1
+        return len(list(self._inventory.keys())) + 1
     @property
     def id(self):
         return self._id
@@ -147,7 +147,7 @@ class Player():
         """
         Checks if the player has enough XP to level up
         """
-        return self.xp > (15 * self._level)
+        return self.xp >= (15 * self._level)
     @property
     def status_effects(self):
         return self._status_effects
@@ -193,7 +193,7 @@ class Player():
         """
         Returns an attack roll (d20 + dex bonus)
         """
-        roll = random.randrange(1,20)
+        roll = global_commands.d(20)#rolls a d20
         if roll == 1:
             return 1
         if roll == 20:
@@ -211,17 +211,17 @@ class Player():
         """
         weapon:items.Weapon = self._equipped["Weapon"]
         weapon.lose_durability()
-        weapon_damage = random.randrange(1, weapon.damage_dice)
+        damage = global_commands.d(weapon.damage_dice)
         for _ in range(weapon.num_damage_dice-1):
-            weapon_damage += random.randrange(1, weapon.damage_dice)
-        return (weapon_damage * self.damage_multiplier) + self.bonus("str")
+            damage += global_commands.d(weapon.damage_dice)
+        return (damage * self.damage_multiplier) + self.bonus("str")
         #add str bonus to damage roll
 
     def roll_a_check(self, stat: str) -> int:
         """
         Returns a check with a given stat (d20 + stat bonus)
         """
-        return random.randrange(1, 20) + self.bonus(stat)
+        return global_commands.d(20) + self.bonus(stat)
     
     def take_damage(self, damage: int, armor_piercing=False) -> int:
         """
@@ -254,7 +254,7 @@ class Player():
         self._xp -= 15 * self._level
         self._level += 1
         prev_max = self.max_hp
-        self._stats["max_hp"] += random.randrange(1, 8) + self.bonus("con")
+        self._stats["max_hp"] += (global_commands.d(10) + self.bonus("con"))
         if self._hp == prev_max:# ie, you were full HP before level up
             self._hp = self.max_hp
         if self._hp < (prev_max * .5): #if you were under 1/2 HP, heal to 1/2 HP
@@ -338,7 +338,6 @@ class Player():
             global_commands.type_text(f"You only healed {self.max_hp - self._hp} HP.")
             return None
 
-
     #INVENTORY STUFF
     def pick_up(self, item: items.Item | items.Consumable, silently:bool = False) -> bool:
         """
@@ -346,15 +345,14 @@ class Player():
         """
         if item is None:
             return False
-        if self.current_weight <= self.carrying_capacity and self.can_carry(item):
+        if self.can_carry(item):
             if self.has_item(item) is True and item.is_consumable is True:
-                index = self.find_consumable_by_id(item)
-                held_item:items.Consumable = self._inventory[index]
+                held_item:items.Consumable = self._inventory[item.id]
                 held_item.increase_quantity(item.quantity)
                 if silently is False:
                     print(held_item.pickup_message)
                 return True
-            self._inventory.append(item)
+            self._inventory[item.id] = item
             item.set_owner(self)
             if silently is False:
                 print(item.pickup_message)
@@ -368,7 +366,7 @@ class Player():
         Drops an item out of the player's inventory
         """
         if item.id in self._inventory:
-            self._inventory.remove(item)
+            del self._inventory[item.id]
             item.set_owner(None)
         else:
             raise ValueError("Can't drop an item you don't have.\n")
@@ -378,10 +376,11 @@ class Player():
         Equips the player with a given weapon
         """
         if item.type in self._equipped:
-            if self._equipped[item.type] is not None and self._equipped[item.type].id != item.id:#if its not none and not the same item, swap it to inventory
-                self._inventory.append(self._equipped[item.type])
-            if item in self._inventory:
-                self._inventory.remove(item)
+            prev:items.Item = self._equipped[item.type]
+            if prev is not None and prev.id != item.id:#if its not none and not the same item, swap it to inventory
+                self._inventory[prev.id] = prev
+            if item.id in self._inventory and item == self._inventory[item.id]:
+                del self._inventory[item.id]
             if silently is False:
                 print(f" {item.name} equipped.")
             if item.type == "Armor":
@@ -423,15 +422,13 @@ class Player():
         if item is None:
             return False
 
-        if item.is_consumable is True:
-            for entry in self._inventory:
-                held_item:items.Consumable = entry
-                if held_item.id == item.id:
-                    return True
-            return False
-        if item in self._inventory:
-            return True
-        return False
+        if item.id in self._inventory:
+            if item.is_consumable:
+                return True    
+            try:
+                return item == self._inventory[item.id]
+            except KeyError:
+                return False
     
     def find_item_by_name(self, name:str) -> items.Item:
         """
@@ -451,7 +448,7 @@ class Player():
         Prints the contents of the player's inventory
         """
         for idx, item in enumerate(self._inventory):
-            print(f" {idx+1}. {item}")
+            print(f" {idx+1}. {self._inventory[item]}")
 
         print(f"Carrying Capacity: {self.current_weight}/{self.carrying_capacity}")
 
@@ -536,7 +533,7 @@ class Player():
         self.load_inventory(inventory_file)
     
     def load_inventory(self, filename) -> None:
-        self._inventory = []
+        self._inventory = {}
         size = 0
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
@@ -547,7 +544,7 @@ class Player():
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
                 if row["type"] in ITEM_TYPES:
-                    item:items.Item = ITEM_TYPES[row["type"]](row["id"])
+                    item:items.Item = ITEM_TYPES[row["type"]](row["rarity"])
                     item.save()
                     with open("temp.csv", "w", newline='') as temp_file:
                         temp_file.truncate(0)

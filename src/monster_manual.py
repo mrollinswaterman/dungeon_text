@@ -33,6 +33,7 @@ def spawn_random_mob():
 
     if PLAYER.level in range(enemy.range[0],enemy.range[1]):
         return enemy
-
-    spawn_random_mob()
+    else:
+        enemy = None
+        spawn_random_mob()
     #might be a more efficient way to do all this, but it's fine for now

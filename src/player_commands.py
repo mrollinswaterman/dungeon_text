@@ -1,5 +1,4 @@
-import random
-import csv
+import random, time, csv
 import sys
 import global_commands
 import global_variables
@@ -8,7 +7,7 @@ import items
 import narrator
 import status_effects
 
-GOD_MODE = True
+GOD_MODE = False
 TEST = None
 
 ENEMY:mob.Mob = None
@@ -30,7 +29,14 @@ def cleanse_an_effect():
     global_commands.type_with_lines("Select an effect to cleanse OR Cancel - (c)\n")
     for idx, effect in enumerate(PLAYER.status_effects):
         effect: status_effects.Status_Effect = effect
-        print(f"{idx+1}. {effect.id}\n")
+        string = f"{idx+1}. {effect.id}"
+        if idx % 2 == 0:
+            time.sleep(0.05)
+            print("\n")
+        
+        print(string + 2*"\t", end='')
+    
+    print("\n")
 
     cmd = input(">> ").lower()
     print("")
@@ -42,8 +48,9 @@ def cleanse_an_effect():
             if PLAYER.can_act is True:
                 turn_options()
                 return None
-            ENEMY_TURN()
-            return None
+            else:
+                ENEMY_TURN()
+                return None
         else:
             raise Exception("attempt failed")
 
@@ -134,13 +141,16 @@ def select_an_item() -> None:
     command = input(">> ")
     print("")
 
+    if command.lower() == "exit":
+        global_commands.exit()
+
     if command.lower() == "b":
         PLAYER_TURN()
         return None
     try:
         command = int(command)
         try:
-            item = PLAYER.inventory[command - 1]
+            item = list(PLAYER.inventory.values())[command - 1]
         except IndexError:
             print(" Please enter a valid item number.")
             select_an_item()
@@ -165,7 +175,7 @@ def use_an_item(item: items.Consumable, target=None) -> None:
         return None
     if PLAYER.has_item(item) is True:#check the player has the item
         if item.is_consumable is True:
-            item = PLAYER.find_item_by_name(item.name)
+            item = PLAYER.inventory[item.id]
             held_item:items.Consumable = item
             if held_item.quantity == 0: #if the items quantity is 0, remove it
                 PLAYER.drop(held_item)
@@ -189,13 +199,14 @@ def stop_flee_attempt() -> None:
     Checks to see if an enemy is able to successfuly interrupt
     a player's attempt to flee
     """
-    global_commands.type_text(f"The {ENEMY.id} attempts to stop you!")
-    if ENEMY.attack_of_oppurtunity(PLAYER) is True:
+    global_commands.type_text(f"The {ENEMY.id} attempts to stop you!\n")
+    if ENEMY.attack_of_oppurtunity() is True:
         global_commands.type_text("It caught up with you! You escape but not unscathed.")
         #player.lose_some_items
-        narrator.exit_the_dungeon()
     else:
         global_commands.type_text("It failed. You've escaped.")
+    
+    narrator.continue_run(NEXT_SCENE)
 
 def flee() -> None:
     """
@@ -212,7 +223,7 @@ def flee() -> None:
         stop_flee_attempt()
     else:
         global_commands.type_text(f"The {ENEMY.id} lets you go.")
-        narrator.exit_the_dungeon()
+        narrator.continue_run(NEXT_SCENE)
 
 def load():
     PLAYER.load("player.csv", "inventory.csv")

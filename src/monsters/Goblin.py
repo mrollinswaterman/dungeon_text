@@ -15,7 +15,7 @@ stats = {
     "max_hp": 0,
     "max_ap": 0,
     "armor": 0,
-    "damage": 4,
+    "damage": 6,
     "dc": 10,
     "hit_dice": 10,
     "loot": {
@@ -49,7 +49,7 @@ class Goblin(mob.Mob):
             self.spend_ap(1)
             global_commands.type_with_lines(f"The {self._id} makes a grab at your gold pouch.\n")
             if self._player.roll_a_check("dex") >= self.roll_attack():
-                global_commands.type_text(" It missed.")
+                global_commands.type_text("It missed.")
             else:
                 prospective = random.randrange(1,20)
                 actual = self._player.lose_gold(prospective)

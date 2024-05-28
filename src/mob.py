@@ -33,22 +33,29 @@ class Mob():
         #identification
         self._id = id
         self._name = self._id
-        self._level = random.randrange(min(level), max(level))
+        self._level = random.randrange(min(level), max(level)+1)
         self._range = level
+
+        self._stats = {}
 
         #if no statblock, use default
         if not statblock:
             print("No statblock given.\n")
-            self._stats = default
-        else:
-            self._stats = statblock
-            
+            statblock = default
+
+        #copy statblock items to self._stats
+        for entry in statblock:
+            self._stats[entry] = statblock[entry]
+
+        #copy loot info to self._stats
+        self._loot = {}
+        for item in self._stats["loot"]:
+            self._loot[item] = self._stats["loot"][item]
 
         #calculate stats
         self.calculate_hp()
         self._stats["max_ap"] = 1 + (self._level // 5)
         self._ap = self.max_ap
-        self._loot = self._stats["loot"]
 
         # percent current HP threshold at which the enemy tries to flee (higher==more cowardly)
         self._flee_threshold = 0.2
@@ -61,6 +68,7 @@ class Mob():
         self._header_printed = False
 
         self.update()
+        self.calculate_loot()
 
     #properties
     @property
@@ -141,25 +149,10 @@ class Mob():
         self._stats["max_hp"] = 0
         temp = self._stats["hit_dice"] + self.bonus("con")
         for _ in range(self._level-1):
-            temp += random.randrange(1, self._stats["hit_dice"]) + self.bonus("con")
+            temp += global_commands.d(self._stats["hit_dice"]) + self.bonus("con")
 
         self._stats["max_hp"] = temp
         self._hp = self.max_hp
-
-    #SETTERS
-    def set_level(self, level:int)-> None:
-        """
-        Sets the mobs levels then re-calculates HP and loot based on level
-        """
-        self._level = level
-        #reset stast based on new level
-        self._stats["max_ap"] = 1 + self._level // 5
-        self._ap = self.max_ap
-
-        self.calculate_hp()
-
-        self._loot["gold"] *= max(self._level // 2, 1)
-        self._loot["xp"] *= max(self._level // 2, 1)
 
     def set_header(self, val:bool) -> None:
         self._header_printed = val
@@ -169,7 +162,7 @@ class Mob():
         """
         Rolls an attack (d20)
         """
-        roll = random.randrange(1,20)
+        roll = global_commands.d(20)
 
         if roll == 1:
             return 1
@@ -179,13 +172,13 @@ class Mob():
         return roll + self.bonus("dex") + (self._level // 5)
 
     def roll_a_check(self, stat:str):
-        return random.randrange(1, 20) + self.bonus(stat)
+        return global_commands.d(20) + self.bonus(stat)
     
     def roll_damage(self) -> int:
         """
         Rolls damage (damage dice)
         """
-        return random.randrange(1, self.damage) * self.damage_multiplier + self.bonus("str")
+        return global_commands.d(self.damage) * self.damage_multiplier + self.bonus("str")
     
     def take_damage(self, damage:int, armor_piercing=False) -> int:
         """
@@ -258,7 +251,18 @@ class Mob():
         effect.cleanse()
         return None
 
-    #Update
+    #Updates
+    def calculate_loot(self):
+        """
+        Adds a random extra amount of XP and Gold per level it is above base
+        to the mob's loot pool
+        """
+        for _ in range(self._range[0], self._level+1):
+            x_gold = global_commands.d(6) 
+            x_xp = global_commands.d(6)
+            self._loot["gold"] += x_gold * self._level // 3
+            self._loot["xp"] += x_xp * max(self._level // 5, 1)
+
     def update(self):
         """
         Updates all relevant stats when a mob's level is changed,

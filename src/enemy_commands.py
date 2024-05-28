@@ -46,19 +46,20 @@ def enemy_flee_attempt():
     next = the function to run if the player stops them successfully
     """
     def enemy_flee_success():
+        print("")#formatting
         global_commands.type_text("It got away.")
         narrator.continue_run(NEXT_SCENE)
     def enemy_flee_failure():
-        global_commands.type_text(f"You stopped the {ENEMY.id}. It is forced to continue fighting.")
+        global_commands.type_text(f"You stopped the {ENEMY.id}. It turns to fight you.")
         PLAYER_TURN()
     global_commands.switch(ENEMY.header, f"The {ENEMY.id} attempts to flee...\n")
     print(" Try to stop them? y/n\n")
     command = input(">").lower()
-    #print("")#newline after cmd prompt
     if command == "y":
         PLAYER.reset_ap()
         player_commands.attack(enemy_flee_failure, enemy_flee_success)
     if command == "n":
+        print("")#newline after cmd prompt
         global_commands.type_text(f"You let the {ENEMY.id} go.")
         narrator.continue_run(NEXT_SCENE)
 
@@ -71,7 +72,6 @@ def run_enemy_next():
     enemy_next = ditto but for enemy
     """
     if ENEMY.can_act is False:
-        #ENEMY.reset_ap()
         PLAYER_TURN()
     else:
         turn_options()
