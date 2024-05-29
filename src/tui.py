@@ -29,7 +29,7 @@ def next_scene():
             global_variables.RUNNING = False
             link_start()
         else: #remainging 15% chance of an event spawning
-            next_event: ev.Event = dm_guide.spawn_random_event()
+            next_event: ev.Event = dm_guide.spawn_event("Smog")#dm_guide.spawn_random_event()
             next_event.set_tries(2)
             next_event.set_passed(False)
             next_event.start()#prints event start text
@@ -91,7 +91,7 @@ def run_event(event: ev.Event):
         elif event.tries is True:# if not passed yet, and still tries left, run it again
             run_event(event)
         else: # if failed, tell the player and move on
-            event.end()
+            event.failure()
             narrator.continue_run(next_scene)
     elif command.lower() == "exit":
         global_commands.exit()

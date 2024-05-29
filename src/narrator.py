@@ -43,7 +43,7 @@ EXIT_THE_SHOP = [
 ]
 
 def next_scene_options():
-    global_commands.type_text(random.choice(SCENE_CHANGE))
+    global_commands.type_text("\n" + " " + random.choice(SCENE_CHANGE))
     ominous = f'    ...\n'
     for i in range(4):
         time.sleep(.4)

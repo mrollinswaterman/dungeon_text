@@ -121,6 +121,90 @@ class Player_On_Fire(On_Fire):
         global_commands.type_text(" You put out the fire.\n")
         return self._target.remove_status_effect(self)
 
+class Poisoned(Status_Effect):
+    def _init__(self, src, target, id="Poisoned"):
+        super().__init__(src, target, id)
+        self._stacks = 0
+        self._message = f"The {self._target.id} is now {id}."
+        self._cleanse_message = f"The {self._target.id} shakes off the poison."
+
+    @property
+    def stacks(self):
+        return self._stacks
+
+    def set_stacks(self, num:int):
+        self._stacks = num
+        self._duration = self._stacks
+
+    def update(self):
+        self._duration -= 1
+
+        damage = self._potency * self._stacks
+
+        self._stacks -= 1
+
+        if self._target.roll_a_check("con") >= damage * self._potency:
+            damage //= 2
+
+        self._target.take_damage(damage, True)
+
+        global_commands.switch(self._target.header, f"The {self._target.id} took {damage} damage from from the poison.\n")
+        self._target.set_header(True)
+
+        if self._duration <= 0:
+            self._stacks = 0
+            self._active = False
+    
+    def attempt_cleanse(self, roll: int = 0):
+        if roll >= self._potency * 2 * self._stacks:
+            self.cleanse()
+        else:
+            global_commands.switch(self._target.header, f"The {self._target.id} failed to cleanse the poison.")
+            self._target.set_header(True)
+
+    def cleanse(self) -> None:
+        self._active = False
+        self._duration = 0
+        self._stacks = 0
+        global_commands.switch(self._target.header, self._cleanse_message)
+        self._target.set_header(True)
+        return None
+    
+class Player_Poisoned(Poisoned):
+    def __init__(self, src, target=PLAYER, id="Poisoned"):
+        super().__init__(src, target, id)
+        self._message = f"You are now {id}."
+        self._cleanse_message = f"You are not longer {id}."
+
+    def update(self):
+        self._duration -= 1
+        damage = self._potency * self._stacks
+        self._stacks -= 1
+
+        if self._target.roll_a_check("con") >= damage * self._potency:
+            damage //= 2
+
+        self._target.take_damage(damage, True)
+
+        global_commands.type_text(f"You lost {damage} HP from from the poison.\n")
+
+        if self._duration <= 0:
+            self._stacks = 0
+            self._active = False
+
+    def attempt_cleanse(self, roll:int = 0):
+        if roll >= self._potency * 2 * self._stacks:
+            self.cleanse()
+        else:
+            global_commands.type_text("You fail to cleanse the poison.")
+    
+    def cleanse(self) -> None:
+        self._active = False
+        self._duration = 0
+        self._stacks = 0
+        global_commands.type_text(self._cleanse_message)
+        return None
+
 class Stat_Buff(Status_Effect):
 
     def __init__(self, src, target, id="Buff"):

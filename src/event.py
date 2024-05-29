@@ -198,26 +198,25 @@ class Event():
         """
         Runs if the player has passed the event
         """
+        self._passed = True
         self._tries = -1#set self.tries to False by setting _tries to -1
         if self._loot["xp"] <= 0:#set xp if it hasnt been
             self.set_xp(int(self.stat_dc(code) / 1.5))
         global_commands.type_text(random.choice(self._messages[True][code]))#print a random success message
         print("")#newline b4 end
-        #global_commands.type_text(random.choice(self._end_messages))#random end message
+        return None
     
-    def failure(self, code) -> None:
+    def try_again(self, code) -> None:
         """
         Runs if the player fails the event
         """
         global_commands.type_text(random.choice(self._messages[False][code]))#print failure line
-        print("")#formatting, unsure why this is needed, but the lines are too close without it
 
     def not_that_stat(self, code:str):
         """
         Runs if the player tries the event with the wrong stat
         """
         global_commands.type_text(random.choice(FAILURE_LINES[code]))#print failure line
-        print("")#formatting, unsure why this is needed, but the lines are too close without it
     
     def run(self, code:str, roll: int):
         """
@@ -231,17 +230,17 @@ class Event():
         self._tries -= 1
         if self.has_stat(code) is True:
             if roll >= self.stat_dc(code):#if roll beats the DC
-                self._passed = True
                 self.success(code)
             else:
-                self.failure(code)
+                self.try_again(code)
         else:
             self.not_that_stat(code)
         return self.tries
 
-    def end(self):
+    def failure(self):
         """
-        Runs if the player has failed the event twice
+        Runs if the event has been failed twice (ie its over)
         """
         self._tries = -1
         global_commands.type_text(random.choice(self._end_messages))
+        return None

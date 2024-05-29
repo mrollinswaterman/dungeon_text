@@ -1,5 +1,5 @@
 import random
-from events import Boulder, RockWall, Berries
+from events import Boulder, RockWall, Berries, Smog
 import event
 
 #STRENGTH_LINES = [f'You come across a gnomish miner. He is struggling to break a rock with a pickaxe that is far too large for his small frame.', f'You come to the edge of a small chasm. It looks jumpable...',
@@ -8,7 +8,8 @@ import event
 #]
 
 event_scenarios = [
-    Boulder.object, RockWall.object, Berries.object
+    Boulder.object, RockWall.object, Berries.object, Smog.object,
+    
 ]
 
 def spawn_event(name:str):

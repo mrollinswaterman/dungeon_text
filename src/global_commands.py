@@ -44,6 +44,7 @@ end_line = [
 def exit():
     global_variables.RUNNING = False
     save()
+    print("")
     sys.exit()
 
 def save():
