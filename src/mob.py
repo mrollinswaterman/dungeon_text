@@ -238,7 +238,9 @@ class Mob():
         Adds a status effect to the mob
         """
         if effect.id in self._status_effects:
-            #if we have the effect already, kick out of the function
+            #if we have the effect already, run the effect's additional_effect function and kick out
+            applied = self._status_effects[effect.id]
+            applied.additional_effect(effect)
             return None
         self._status_effects[effect.id] = effect
         effect.apply()

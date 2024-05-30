@@ -227,7 +227,7 @@ class Event():
         """
         if self.tries is False:
             raise ValueError("No more tries")
-        self._tries -= 1
+        self._tries -= 2#1
         if self.has_stat(code) is True:
             if roll >= self.stat_dc(code):#if roll beats the DC
                 self.success(code)
@@ -242,5 +242,4 @@ class Event():
         Runs if the event has been failed twice (ie its over)
         """
         self._tries = -1
-        global_commands.type_text(random.choice(self._end_messages))
-        return None
+        global_commands.type_text("\n "+random.choice(self._end_messages))

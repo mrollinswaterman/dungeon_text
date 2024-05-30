@@ -5,7 +5,6 @@ import global_commands
 PLAYER = None
 
 class Status_Effect():
-
     def __init__(self, src, target, id):
         #SRC is a player or mob object
         self._id = id
@@ -52,9 +51,6 @@ class Status_Effect():
             self._active = False
 
     def apply(self) -> None:
-        """
-        Types the effect's apply message
-        """
         global_commands.type_text(self._message)
 
     def set_potency(self, num:int) -> None:
@@ -75,6 +71,9 @@ class Status_Effect():
     def set_target(self, tar):
         self._target = tar
 
+    def additional_effect(self, effect:"Status_Effect"):
+        return None
+
     def cleanse(self) -> None:
         """
         Sets the effect's duration to 0, and
@@ -90,43 +89,43 @@ class Status_Effect():
         raise NotImplementedError
 
 class On_Fire(Status_Effect):
-
-    def __init__(self, src, target, id="On Fire"):
+    def __init__(self, src, target=PLAYER, id="On Fire"):
         super().__init__(src, target, id)
-        self._message = f"The {self._target.id} is now {id}."
-        self._cleanse_message = f"The {self._target.id} is not longer {id}.\n"
+        if target is None:
+            self._target = PLAYER
+        self._target_header = "You are"
+        if self._target != PLAYER:
+            self._target_header = f"The {self._target.id} is"
+        self._message = f"{self._target_header} now {id}."
+        self._cleanse_message = f"{self._target_header} not longer {id}.\n"
     
     def update(self):
         self._duration -= 1
-
         taken = self._target.take_damage(self._potency, True)
-
-        global_commands.switch(self._target.header, f"The {self._target.id} took {taken} damage from from the fire.\n")
-        self._target.set_header(True)
+        if self._target != PLAYER:
+            global_commands.switch(self._target.header, f"The {self._target.id} took {taken} damage from from the fire.\n")
+            self._target.set_header(True)
+        else:
+            global_commands.type_text(f"You took {taken} damage from the fire.\n")
 
         if self._duration <= 0:
             self._active = False
-
     
-class Player_On_Fire(On_Fire):
-    """
-    On Fire Status effect, but only applied to the PLAYER
-    """
-    def __init__(self, src, target=PLAYER, id="On Fire"):
-        super().__init__(src, target, id)
-        self._message = f"You are now {id}."
-        self._cleanse_message = f"You are not longer {id}."
-
-    def attempt_cleanse(self) -> bool:
-        global_commands.type_text(" You put out the fire.\n")
-        return self._target.remove_status_effect(self)
+    def additional_effect(self, effect: Status_Effect):
+        global_commands.type_text("More fire has no effect.\n")
 
 class Poisoned(Status_Effect):
-    def _init__(self, src, target, id="Poisoned"):
+    def __init__(self, src, target=PLAYER, id="Poisoned"):
         super().__init__(src, target, id)
+        if target is None:
+            self._target = PLAYER
         self._stacks = 0
-        self._message = f"The {self._target.id} is now {id}."
-        self._cleanse_message = f"The {self._target.id} shakes off the poison."
+        self._target_header = "You are"
+        if self._target != PLAYER:
+            self._target_header = f"The {self._target.id} is"
+
+        self._message = f"{self._target_header} now {id}."
+        self._cleanse_message = f"{self._target_header} no longer {self._id}."
 
     @property
     def stacks(self):
@@ -135,22 +134,24 @@ class Poisoned(Status_Effect):
     def set_stacks(self, num:int):
         self._stacks = num
         self._duration = self._stacks
+    
+    def additional_effect(self, effect):
+        self._potency += effect.duration
+        global_commands.type_text("The poison's effect becomes more severe...\n")
+        return None
 
     def update(self):
         self._duration -= 1
-
         damage = self._potency * self._stacks
-
         self._stacks -= 1
-
         if self._target.roll_a_check("con") >= damage * self._potency:
             damage //= 2
-
         self._target.take_damage(damage, True)
-
-        global_commands.switch(self._target.header, f"The {self._target.id} took {damage} damage from from the poison.\n")
-        self._target.set_header(True)
-
+        if self._target != PLAYER:
+            global_commands.switch(self._target.header, f"The {self._target.id} took {damage} damage from from the poison.\n")
+            self._target.set_header(True)
+        else:
+            global_commands.type_text(f"You took {damage} damge from the poison.\n")
         if self._duration <= 0:
             self._stacks = 0
             self._active = False
@@ -159,70 +160,46 @@ class Poisoned(Status_Effect):
         if roll >= self._potency * 2 * self._stacks:
             self.cleanse()
         else:
-            global_commands.switch(self._target.header, f"The {self._target.id} failed to cleanse the poison.")
+            if self._target != PLAYER:
+                global_commands.switch(self._target.header, f"The {self._target.id} failed to cleanse the poison.\n")
+                self._target.set_header(True)
+            else:
+                global_commands.type_text(f"You failed to cleanse the poison.\n")
+
+    def cleanse(self) -> None:
+        self._active = False
+        self._duration = 0
+        self._stacks = 0
+        if self._target != PLAYER:
+            global_commands.switch(self._target.header, self._cleanse_message)
             self._target.set_header(True)
-
-    def cleanse(self) -> None:
-        self._active = False
-        self._duration = 0
-        self._stacks = 0
-        global_commands.switch(self._target.header, self._cleanse_message)
-        self._target.set_header(True)
-        return None
-    
-class Player_Poisoned(Poisoned):
-    def __init__(self, src, target=PLAYER, id="Poisoned"):
-        super().__init__(src, target, id)
-        self._message = f"You are now {id}."
-        self._cleanse_message = f"You are not longer {id}."
-
-    def update(self):
-        self._duration -= 1
-        damage = self._potency * self._stacks
-        self._stacks -= 1
-
-        if self._target.roll_a_check("con") >= damage * self._potency:
-            damage //= 2
-
-        self._target.take_damage(damage, True)
-
-        global_commands.type_text(f"You lost {damage} HP from from the poison.\n")
-
-        if self._duration <= 0:
-            self._stacks = 0
-            self._active = False
-
-    def attempt_cleanse(self, roll:int = 0):
-        if roll >= self._potency * 2 * self._stacks:
-            self.cleanse()
         else:
-            global_commands.type_text("You fail to cleanse the poison.")
-    
-    def cleanse(self) -> None:
-        self._active = False
-        self._duration = 0
-        self._stacks = 0
-        global_commands.type_text(self._cleanse_message)
+            global_commands.type_text(self._cleanse_message)
         return None
+    
+    def apply(self) -> None:
+        global_commands.type_text(self._message)
 
 class Stat_Buff(Status_Effect):
-
-    def __init__(self, src, target, id="Buff"):
+    def __init__(self, src, target=PLAYER, id="Buff"):
         super().__init__(src, target, id)
+        if target is None:
+            self._target = PLAYER
         self._stat = ""
         self._id = self._stat +" " + id
+        self._target_header = f"Your"
+        if self._target != PLAYER:
+            self._target_header = f"The {self._target.id}'s"
 
     @property
     def stat(self) -> str:
         return self._stat
 
     def set_stat(self, stat:str) -> None:
-        if self._target is None:
-            self._target = PLAYER
         self._stat = stat
-        self._id = stat + self._id
-        self._message = f"The {self._target.id}'s {global_commands.TAG_TO_STAT[self._stat]} increased by {self._potency}."
-        self._cleanse_message = f"The {self._target.id}'s {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
+        self._id = f"{stat} {self._id}"
+        self._message = f"{self._target_header} {global_commands.TAG_TO_STAT[self._stat]} increased by {self._potency}."
+        self._cleanse_message = f"{self._target_header} {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
 
     def apply(self):
         super().apply()
@@ -231,9 +208,13 @@ class Stat_Buff(Status_Effect):
     def cleanse(self) -> None:
         self._target.stats[self._stat] -= self._potency
         super().cleanse()
+    
+    def additional_effect(self, effect: Status_Effect):
+        self.apply()
+        return None
 
 class Stat_Debuff(Stat_Buff):
-    def __init__(self, src, target, id="Debuff"):
+    def __init__(self, src, target=PLAYER, id="Debuff"):
         super().__init__(src, target, id)
 
     def apply(self):
@@ -242,41 +223,29 @@ class Stat_Debuff(Stat_Buff):
 
     def set_stat(self, stat: str) -> None:
         super().set_stat(stat)
-        self._message = f"The {self._src.id}'s {self._stat} is being decreased by {self._potency} by the {self._src.id}'s {self._id}."
+        self._message = f"{self._target_header} {global_commands.TAG_TO_STAT[self._stat]} is being decreased by {self._potency}."
 
-class Player_Stat_Buff(Stat_Buff):
-    """
-    Stat buff class only to be applied to PLAYER
-    """
-    def __init__(self, src, target=PLAYER, id="Buff"):
+class Entangled(Status_Effect):
+
+    def __init__(self, src, target=PLAYER, id="Entangled"):
+        """
+        Init function for Entangled status effect
+
+        target_header and cleanse_header change based on the target of the effect,
+        either the Player or a mob, and head the self._message and cleanse function text ouput.
+        """
         super().__init__(src, target, id)
-
-    def set_stat(self, stat: str) -> None:
-        if self._target is None:
+        if target is None:
             self._target = PLAYER
-        super().set_stat(stat)
-        self._message = f"Your {global_commands.TAG_TO_STAT[self._stat]} is being increased by {self._potency} by the {self._src}'s {self._id}."
-        self._cleanse_message = f"Your {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
-
-class Player_Stat_Debuff(Player_Stat_Buff):
-    """
-    Stat debuff class only to be applied to PLAYER
-    """
-    def __init__(self, src, target=PLAYER, id="Debuff"):
-        super().__init__(src, target, id)
-
-    def set_stat(self, stat: str) -> None:
-        super().set_stat(stat)
-        self._message = f"Your {global_commands.TAG_TO_STAT[self._stat]} is being decreased by {self._potency} by the {self._src.id}'s {self._id}."
-        self._cleanse_message = f"Your {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
-
-class Player_Entangled(Status_Effect):
-
-    def __init__(self, src, target, id="Entangled"):
-        super().__init__(src, target, id)
         self._stat = "ap"
-        self._message = f"You are now {id}."
-        self._cleanse_message = f"You are no longer {id}."
+        self._target_header = "You are"
+        self._cleanse_header = "You try"
+        if self._target != PLAYER:
+            self._target_header = f"The {self._target.id} is"
+            self._cleanse_header = f"The {self._target.id} tries"
+
+        self._message = f"{self._target_header} now {id}."
+        self._cleanse_message = f"{self._target_header} no longer {id}."
         self._cleanse_stat = "str"
 
     def apply(self):
@@ -289,37 +258,43 @@ class Player_Entangled(Status_Effect):
         super().cleanse()
 
     def attempt_cleanse(self, roll: int = 0) -> bool:
-        global_commands.type_with_lines("You try to break free of your entanglement...\n")
+        global_commands.type_with_lines(f"{self._cleanse_header} to break free of the entanglement...\n")
         if roll >= self._src.dc - 2:
-            global_commands.type_text("You succeed!\n")
+            global_commands.type_text("Success!\n")
             return self._target.remove_status_effect(self)
-        global_commands.type_text("You failed.\n")
+        global_commands.type_text("No luck.\n")
         return False
+    
+    def additional_effect(self, effect: Status_Effect):
+        global_commands.type_text("The entanglment's duration grows...\n")
+        self._duration += 1
+        return None
 
 class Vulnerable(Stat_Buff):
     """
     Makes the target vulnerable,
     meaning they take x2 damage for the duration
     """
-    def __init__(self, src, target, id="Vulnerable"):
+    def __init__(self, src, target=PLAYER, id="Vulnerable"):
         super().__init__(src, target, id)
-        self._message = f"The {self._target.id} is now {self._id}."
-        if src == target:
-            self._message = f"The {self._target.id} made itself {self._id}."
-        self._cleanse_message = f"The {self._target.id} is no longer {self._id}."
+        if target is None:
+            self._target = PLAYER
+        self._target_header = "You are"
+        if self._target != PLAYER:
+            self._target_header = f"The {self._target.id} is "
+
+        self._message = f"{self._target_header} now {self._id}."
+
+        if target == src and self._target != PLAYER:
+            self._message = f"The {self._target.id} made itself {self._id}"
+        elif target == src:
+            self._message = f"You made yourself {self._id}"
+
+        self._cleanse_message = f"{self._target_header} no longer {self._id}."
         self._stat = "damage-taken-multiplier"
         self._potency = 1# this is because the apply function adds to the stat,
         #so a potency of 2 would result in a damage-taken of 3, not 2 like we want
 
-    def apply(self) -> None:
-        super().apply()
-
-class Player_Vulnerable(Vulnerable):
-    """
-    Makes the PLAYER vulnerable,
-    meaning they take x2 damage for the duration
-    """
-    def __init__(self, src, target=PLAYER, id="Vulnerable"):
-        super().__init__(src, target, id)
-        self._message = f"You are now {self._id}."
-        self._cleanse_message = f"You are no longer {self._id}."
+    def additional_effect(self, effect: Status_Effect):
+        self._potency += 1#might need re-balancing
+    

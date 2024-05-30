@@ -1,5 +1,6 @@
 #Smog Cloud Event class
 import event
+import status_effects
 
 success = {
     "con": ["You grit your teeth and continue forwards.", 
@@ -42,5 +43,13 @@ class Smog(event.Event):
 
         #out of tries
         self.add_end_message(end)
+
+    def failure(self):
+        super().failure()
+        print("")#formatting
+        poison = status_effects.Poisoned(self)
+        poison.set_stacks(3)
+        poison.set_potency(1)
+        self._player.add_status_effect(poison)
 
 object = Smog

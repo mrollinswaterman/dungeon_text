@@ -467,16 +467,15 @@ class Player():
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS#
     def add_status_effect(self, effect:"status_effects.Status_Effect", silent=False) -> None:
         """
-        Adds a status effect to the player's status effect list
-        and changes the corresponding stat
+        Adds a status effect to the player's status effect list and applies it
         """
-        if effect.id not in self._status_effects:
-            self._status_effects[effect.id] = effect
-            if silent is True:
-                effect.set_message("")
-            effect.apply()
+        
+        if effect.id in self._status_effects:#if effect already in status_effects
+            applied = self._status_effects[effect.id]
+            applied.additional_effect(effect)#...apply the effect's additional_effect function
         else:
             self._status_effects[effect.id] = effect
+            effect.apply()
         return None
 
     def remove_status_effect(self, effect:"status_effects.Status_Effect") -> bool:

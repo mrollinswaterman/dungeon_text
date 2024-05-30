@@ -87,7 +87,10 @@ def run_event(event: ev.Event):
             event.set_tries(2)
             event.set_passed(False)
             PLAYER.recieve_reward(event.loot)
-            narrator.continue_run(next_scene)
+            if not PLAYER.can_level_up:
+                narrator.continue_run(next_scene)
+            else:
+                level_up_player()
         elif event.tries is True:# if not passed yet, and still tries left, run it again
             run_event(event)
         else: # if failed, tell the player and move on
