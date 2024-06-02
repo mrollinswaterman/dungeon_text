@@ -24,7 +24,7 @@ end = ["You are forced to double back and find another way through.",
        "Better luck next time champ."]
 
 class Rock_Wall(event.Event):
-    def __init__(self, id="Rock_Wall"):
+    def __init__(self, id="Rock Wall"):
         super().__init__(id)
 
         self.add_stat("str", 20)

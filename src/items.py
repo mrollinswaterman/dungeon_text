@@ -52,9 +52,6 @@ class Item():
     #properties
     @property
     def id(self) -> str:
-        """
-        Returns the item's identifcation tag, without any context
-        """
         return self._id
     @property
     def name(self) -> str:
@@ -73,7 +70,10 @@ class Item():
         return self._owner
     @property
     def broken(self) -> bool:
-        return self._durability <= 0
+        return self._durability <= 0 and not self.destroyed
+    @property
+    def destroyed(self) -> bool:
+        return self._durability <= -(self._max_durability // 2)
     @property
     def durability(self) -> tuple[int, int]:
         return (self._durability, self._max_durability)
@@ -93,9 +93,6 @@ class Item():
     def weight(self) -> int:
         return self._weight
     @property
-    def quantity(self) -> int:
-        return self._quantity
-    @property
     def total_weight(self) -> int:
         return self._weight
     @property
@@ -105,36 +102,42 @@ class Item():
     def description(self) -> str:
         return self._description
     @property
-    def broken(self) -> bool:
-       return self._durability <= 0
-    @property
     def type(self) -> str:
         return self._type
-    @property
-    def pickup_message(self) -> str:
-        return self._pickup_message
     @property
     def tod(self) -> dict:
         return self._tod
     #methods
     def lose_durability(self) -> None:
-        #weapon only loses durability occasionally, probability decreases with rarity
-        if global_commands.probability(60 // self._numerical_rarity):
+        """
+        Checks to see if the item loses durability on this use
+        """
+        if global_commands.probability((66 // self._numerical_rarity)):
             self._durability -= 1
             if self.broken is True:
                 self.item_has_broken()
 
     def remove_durability(self, num:int) -> None:
+        """
+        Removes (num) durability from the item
+        """
         self._durability -= num
         if self.broken is True:
             self._durability = 0
-            self.item_has_broken()
+            self.break_item()
 
     def repair(self) -> None:
         """
         Repairs weapon, returning its current durability to max value
         """
-        self._durability = self._max_durability
+        if not self.destroyed:
+            self._durability = self._max_durability
+            stopword = "Broken"
+            query = self._id.split()
+
+            resultwords = [word for word in query if word != stopword]
+            print(resultwords)
+            self._id = ''.join(resultwords)
 
     def set_weight(self, num:int) -> None:
         self._weight = num
@@ -145,8 +148,14 @@ class Item():
     def set_pickup_message(self, msg:str) -> None:
         self._pickup_message = msg
 
-    def item_has_broken(self) -> None:
-        print(f"Your {self._id} has broken!")
+    def break_item(self) -> None:
+        self._id = "Broken " + self._id
+        global_commands.type_text(f"Your {self._id} has broken!")
+
+    def destroy(self) -> None:
+        self._id = self._id + " Scrap"
+        self._weight = 1
+        self._max_durability = 0
     
     def set_description(self, words:str) -> None:
         self._description = words
@@ -253,8 +262,14 @@ class Weapon(Item):
         self._damage_dice = type
         self._num_damage_dice = num
 
-    def set_crit_multiplier(self, crit)->None:
-        self._crit = crit
+    def set_crit_multiplier(self, num:int)->None:
+        self._crit = num
+
+    def roll_damage(self) -> int:
+        dmg = 0
+        for die in range(self._num_damage_dice):
+            dmg += global_commands.d(self._damage_dice)
+        return dmg
 
     def update(self) -> None:
         self._value = 15 * self._numerical_rarity
@@ -274,13 +289,13 @@ class Weapon(Item):
             for row in reader:
                 self._damage_dice = int(row["damage_dice"])
                 self._num_damage_dice = int(row["num_damage_dice"])
+
                 self._crit = int(row["crit"])
             file.close()
         self.update()
     
     def __str__(self) -> str:
         return (f"""{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n""")
-
 
 class Armor(Item):
 
@@ -296,9 +311,6 @@ class Armor(Item):
     #properties
     @property
     def armor_value(self) -> int:
-        """
-        Return the value of the armor
-        """
         return self._armor_value
     @property
     def stats(self) -> str:
@@ -448,15 +460,16 @@ class Health_Potion(Consumable):
     def use(self, target=None) -> bool:
         """
         Heals the target for a given amount
+        Returns True if the target is not already full HP.
         """
-        if self._target.hp < self._target.max_hp:
-            self.decrease_quantity(1)
-            global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
-            self._target.heal(self._strength*2)
-            self._owner.spend_ap(1)
-            return True
-        global_commands.type_with_lines("You are already full HP.")
-        return False
+        if not self._target.needs_healing:
+            global_commands.type_with_lines("You are already full HP.")
+            return False
+    
+        self.decrease_quantity(1)
+        global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.")
+        self._target.heal(self._strength*2)
+        return True
     
 class Repair_Kit(Consumable):
 
@@ -468,18 +481,19 @@ class Repair_Kit(Consumable):
 
     def use(self, target: Item) -> bool:
         """
-        Repairs the item to full durability
+        Repairs the item to full durability,
+        Returns True if the item is not already full durability
         """
         if target.durability[0] < target._durability[1]:#ie item is damaged
             self.decrease_quantity(1)
-            global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.\n")
+            global_commands.type_text(f"{self.id} used. {self._quantity} remaining.")
             target.repair()
             return True
         return False
 
 class Firebomb(Consumable):
     
-    def __init__(self, rarity="Uncommon"):
+    def __init__(self, id="Firebomb"):
         super().__init__("Firebomb", "Uncommon", 0)
         self._unit_value = 20 * self._numerical_rarity
         self._unit_weight = 1 
@@ -487,48 +501,53 @@ class Firebomb(Consumable):
         self._damage = self._strength
         self._type = "Firebomb"
 
-    def use(self, target=None):
+    @property
+    def damage_header(self) -> str:
+        return self._id
+    @property
+    def damage_type(self) -> str:
+        return "Physical"
+
+    def use(self, target=None) -> bool:
+        """
+        Throws the firebomb at a given target, and checks to
+        see if that target is set on fire
+        Always returns True
+        """
         self._target = target
+
         throw = self._owner.roll_a_check("dex")
         dodge = target.roll_a_check("dex")
+       
+        self.decrease_quantity(1)
 
-        self._owner.spend_ap()
-        self._quantity -= 1
-
-        global_commands.type_with_lines(f"You throw a {self._id} at the {self._target.id}.\n")
+        global_commands.type_text(f"You throw a {self._id} at the {self._target.id}.")
 
         if dodge >= throw + 10:
             global_commands.type_text(f"The {self._target.id} dodged your {self._id} entirely!")
             return True
         
         if dodge >= throw:
-            global_commands.type_text(f"The {self._target.id} partially dodged your {self._id}.\n")
-            taken = self._target.take_damage(int(self._damage / 2))
-            if global_commands.probability(50 - dodge): #--> if statement is a formattting thing the message doesn't change 
-                global_commands.type_text(f"The {self._id} did {taken} damage to the {self._target.id}.\n")
+            global_commands.type_text(f"The {self._target.id} partially dodged your {self._id}.")
+            taken = self._target.take_damage(int(self._damage // 2), self)
+            if global_commands.probability(50 - dodge):
                 self.set_on_fire()
-            else:
-                global_commands.type_text(f"The {self._id} did {taken} damage to the {self._target.id}.")
             return True
         
         if throw > dodge:
-            global_commands.type_text(f"You hit the {self._target.id}.\n")
-            taken = self._target.take_damage(int(self._damage))
+            global_commands.type_text(f"You hit the {self._target.id}.")
+            taken = self._target.take_damage(int(self._damage), self)
             if global_commands.probability(75):#--> if statement is a formattting thing the message doesn't change 
-                global_commands.type_text(f"Your {self._id} did {taken} damage to the {self._target.id}.\n")
                 self.set_on_fire()
-            else:
-                global_commands.type_text(f"Your {self._id} did {taken} damage to the {self._target.id}.")
-            return True
+
+        return True
 
     def set_on_fire(self) -> None:
-        if self.target == None:
-            firebomb = status_effects.Player_On_Fire(self._owner)
-        else:
-            firebomb = status_effects.On_Fire(self._owner, self._target)
-        firebomb.set_duration(3)
-        firebomb.set_potency(self._numerical_rarity)
-        self._target.add_status_effect(firebomb)
+        fire = status_effects.On_Fire(self._owner, self._target)
+        fire.set_duration(2)
+        fire.set_potency(self._numerical_rarity)
+        self._target.add_status_effect(fire)
+        return None
        
     def update(self) -> None:
         super().update()

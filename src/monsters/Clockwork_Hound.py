@@ -37,28 +37,29 @@ class Clockwork_Hound(mob.Mob):
             heart = items.Item("Clockwork Heart", "Epic")
             heart.set_weight(2)
             self._loot["drops"].append(heart)
-    
-    def trigger(self) -> None:
+            
+    def trigger(self) -> bool:
         return self._hp < self.max_hp // 2
 
-    def special(self) -> bool:
-        
+    def special(self) -> None:
+        self.spend_ap()
+
         if self._player is None:
-            raise ValueError("No Target.\n")
+            raise ValueError("No Target.")
         
-        weapon = self._player.equipped["Weapon"]
-        armor = self._player.equipped["Armor"]
+        weapon:items.Weapon = self._player.equipped["Weapon"]
+        armor:items.Armor = self._player.equipped["Armor"]
 
         meal:items.Item = weapon
         if weapon.durability < armor.durability:
             meal = armor
         
+        global_commands.type_text(f"The {self.id} lunges for your {meal.id}.")
         if self.roll_attack() > self._player.evasion:
-            #add print statements
+            global_commands.type_text(f"It gulps down a chunk, then darts back looking satisfied.")
             meal.remove_durability(self.bonus("str"))
             self.heal(self.bonus("str"))
         else:
-            #add print statements
-            pass
+            global_commands.type_text("It missed.")
 
 object = Clockwork_Hound

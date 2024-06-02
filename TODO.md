@@ -23,10 +23,11 @@ This file contains a list of tasks and ideas
 actually printing, maybe the print function just tells you what lines should be printed, ie durability
 for weapons/armor, quantity for consumables, etc, then the print inventory function prints each line
 as necessary for formatting)
+- [ ] Make a switch statement so rolls that should be paired with "an" are paired with "an" instead of "a". (ie "You rolled 'an' 18." instead of "'a' 18.")
 
 ## Mechanics
 
-- [ ] Some kind of reward for stat check events
+- [X] Some kind of reward for stat check events
 - [X] Shopkeep/exiting the dungeon in general
 - [ ] Damage types??
 - [ ] Max level?
@@ -36,13 +37,14 @@ as necessary for formatting)
 - [X] Weight class for armors → heavier == more armor, but less evasion + dex checks
 - [X] Add message when buffed / debuffed + message when status effects end
 - [ ] Mob drops that can be sold at the shop
-- [X] Fail to flee scenario → %chance the enemy tries to stop you, if you get caught, you have to keep fighting, else lose some gold + small %chance you lose an item (value cap on   how much gold you can lose total including item values)
+- [X] Fail to flee scenario → %chance the enemy tries to stop you, if you get caught, you have to keep fighting, else lose some gold + small %chance you lose an item (value cap on how much gold you can lose total including item values)
 - [X] Add flee action to mobs → works the same as the players?
 - [ ] Failing events gives some drawback (ie take a little bit of damage, lose some gold, etc), BUT can withdraw at any time
 - [ ] Add a view equipped items menu to menu_options()
 - [ ] Add a "talk" mechanic with the Shopkeep to give player hints about how to unlock legendary weapons
 (ie, "The Shopkeep says the Blacksmith might be able to craft something special with enough Land Shark teeth)
 - [ ] Add a extended crit range to some weapons, ie 18-20, 16-20, etc
+- [ ] Add a menu if the player hits "n" initally that lets them enter the overworld, save, or quit the game. 
 
 ## Items
 
@@ -75,9 +77,20 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Talking wall
 - [ ] Mysterious cypher
 - [ ] Sphinx??
-- [ ] Gas cloud → constitution check finally!
+- [X] Gas cloud → constitution check finally!
 - [ ] Elaborate trap room → int/dex
 
 ## Balance
 
 - [X] HP potions should restore double their power in health (ie 4 instead of 2)
+
+## Combat Tricks
+
+- [ ] Can only use 1 combat trick per round???
+- [ ] Power Attack(1AP): no dex bonus to attack roll, but roll damage twice (take highest) and add x1.5 str to attack
+- [ ] Feint(1AP): If you beat the enemy in a Cha check, add +2 or +Cha whichever is higher to base-evasion for 3 rounds. if you lose add 1/2 that (either 1 or 1/2 cha, whichever is higher)
+- [ ] Riposte(2AP): Gain +2 to base-evasion, if they miss by your dex or more, deal 1/2 of the attack's potential damage back to them instead
+- [ ] Total Defense(All AP): add 5+(level//5) to base-evasion for enemy's next turn, but on your next turn, no dex bonus to attacks (potenitally more penalties like roll twice and take lowest on attacks)
+- [ ] All-out(All AP): no dex bonus to evasion (and enemies get to roll twice take highest vs you??) for next turn, but attack rolls now add str+dex or dex+dex, whichever is highest
+- [ ] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
+- [ ] Flurry(All AP): Make (level//4) extra attacks at a -1 to-hit per attack (ie first attack is -1, second attack is -2. etc)

@@ -48,17 +48,18 @@ def next_scene_options():
     for i in range(4):
         time.sleep(.4)
         print('\t'*i + ominous)
+    print("\n")
 
 def level_up_options():
-    global_commands.type_with_lines(' You have gained enough XP to level up! Which stat would you like to level up?\n')
+    global_commands.type_with_lines(' You have gained enough XP to level up! Which stat would you like to level up?')
     print("\t Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n")
 
 def event_options():
-    global_commands.type_with_lines("Which stat would you like to roll?\n")
+    global_commands.type_text("Which stat would you like to roll?")
     print("\t Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n")
 
 def continue_run(next):
-    global_commands.type_with_lines("Continue? y/n\n")
+    global_commands.type_with_lines("Continue? y/n")
     command = input(">> ").lower()
     if command == "y":   
         next_scene_options()
@@ -68,7 +69,7 @@ def continue_run(next):
     elif command == "exit":
         global_commands.exit()
     else:
-        global_commands.type_text("Invalid command. Please try again.\n")
+        global_commands.type_text("Invalid command. Please try again.")
         continue_run(next)
 
 def exit_the_dungeon():
@@ -78,7 +79,7 @@ def exit_the_dungeon():
     menu_options()
 
 def buy_something():
-    global_commands.type_with_lines("Enter an item's number to purchase it OR (c) - Cancel Order\n")
+    global_commands.type_with_lines("Enter an item's number to purchase it OR (c) - Cancel Order")
     command = input(">> ").lower()
 
     if command == "exit":
@@ -102,7 +103,7 @@ def buy_something():
                     buy_something()
             else:
                 def ask_quantity():
-                    global_commands.type_text(f"Please enter desired quantity:\n")
+                    global_commands.type_text(f"Please enter desired quantity:")
                     command = input(">> ").lower()
                     print("")#newline after... you get the idea
                     if command == "exit":
@@ -114,12 +115,12 @@ def buy_something():
                             global_variables.SHOPKEEP.print_inventory()
                             buy_something()
                     except TypeError:
-                        print(f" Invalid quantity '{command}'. Please enter a valid quantity.\n")
+                        print(f" Invalid quantity '{command}'. Please enter a valid quantity.")
                         ask_quantity()
 
                 ask_quantity()
         else:
-            print(f" Invalid item number '{int(command)}'. Please try again.\n")
+            print(f" Invalid item number '{int(command)}'. Please try again.")
             buy_something()
 
 def leave_the_shop():
@@ -153,7 +154,7 @@ def check_player_inventory(next):
     print(f"Gold: {global_variables.PLAYER.gold}\n")
     global_variables.PLAYER.print_inventory()
     def select_item():
-        global_commands.type_with_lines("Enter an item's number to equip it OR (b) - Go Back\n")
+        global_commands.type_with_lines("Enter an item's number to equip it OR (b) - Go Back")
         command = input(">> ").lower()
         if command == "b":
             next()
@@ -176,7 +177,7 @@ def check_player_inventory(next):
     select_item()
 
 def menu_options():
-    global_commands.type_with_lines("What would you like to do?\n")
+    global_commands.type_with_lines("What would you like to do?")
     print("\t Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v) | Inventory - (i) \n")
     command = input(">> ").lower()
     match command:

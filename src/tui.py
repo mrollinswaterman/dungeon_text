@@ -13,7 +13,6 @@ TEST = False
 
 item_compendium.PLAYER = PLAYER
 status_effects.PLAYER = PLAYER
-enemy_commands.PLAYER = PLAYER
 player_commands.TEST = TEST
 
 ENEMY:mob.Mob = None
@@ -29,48 +28,30 @@ def next_scene():
             global_variables.RUNNING = False
             link_start()
         else: #remainging 15% chance of an event spawning
-            next_event: ev.Event = dm_guide.spawn_event("Smog")#dm_guide.spawn_random_event()
+            next_event: ev.Event = dm_guide.spawn_event("Glyphs")#dm_guide.spawn_random_event()
             next_event.set_tries(2)
             next_event.set_passed(False)
+            PLAYER.update()#update player before event text goes off
             next_event.start()#prints event start text
+            global_commands.type_with_lines("")
             run_event(next_event)
 
 def begin_encounter():
     """
-    Begins an encounter
+    Sets the enemy for the scene if it's None,
+    and prints the encounter header
     """
     if ENEMY is None:
         next_scene()
         return None
+
     global_commands.type_text(f"You encounter a Level {ENEMY.level} {ENEMY.id.upper()}!")
-
-def player_turn():
-    """
-    Begins the Player turn
-    """
-    ENEMY.set_header(False)#reset enemy's formatting header
-    PLAYER.update()
-    player_commands.turn_options()
-
-def enemy_turn():
-    """
-    Begins the enemy turn
-    """
-    ENEMY.update()
-    enemy_commands.turn_options()
-
-def player_death():
-    #smth else
-    global_commands.type_with_lines("You have died.", 2)
-    global_variables.RUNNING = False
-    player_commands.reset()
-    sys.exit()
+    global_commands.type_with_lines("")
 
 def end_scene():
     global ENEMY
-    global_commands.type_text(f"You killed the {ENEMY.id}!\n")
+    global_commands.type_text(f"You killed the {ENEMY.id}!")
     PLAYER.recieve_reward(ENEMY.loot)
-    PLAYER.update()
     ENEMY = None
     if not PLAYER.can_level_up:
         narrator.continue_run(next_scene)
@@ -92,6 +73,7 @@ def run_event(event: ev.Event):
             else:
                 level_up_player()
         elif event.tries is True:# if not passed yet, and still tries left, run it again
+            global_commands.type_with_lines("")
             run_event(event)
         else: # if failed, tell the player and move on
             event.failure()
@@ -116,91 +98,48 @@ def level_up_player():
 
 def link_start() -> None:
 
-    if ENEMY is None:
-        next_scene()
-        return None
+    begin_encounter()
 
     global_variables.RUNNING = True
     enemy_commands.ENEMY = ENEMY
     player_commands.ENEMY = ENEMY
 
-    #starting print statements
-    begin_encounter()
-    player_turn()
-
-    while global_variables.RUNNING is True:
-
-        command = input(">> ").lower()
-        print("")
-
-        #command interpretation
-        if command == "exit":
-            global_variables.RUNNING = False
-            global_commands.exit()
-        if command == "reset":
-            player_commands.reset()
-            sys.exit()
-        try:
-            command = int(command)
-            try:
-                item = list(PLAYER.inventory.values())[command - 1]
-            except IndexError:
-                item = None
-            player_commands.use_an_item(item, ENEMY)
-        except ValueError:
-            pass
-        match command:
-            case "a": #attack
-                player_commands.attack()
-            case "hp": #check hp
-                player_commands.show_hp()
-            case "i": #show inventory
-                player_commands.show_inventory()
-            case "test": #test suite
-                player_death()
-            case "p": #pass the turn
-                enemy_turn()
-            case "c": #cleans an effect
-                player_commands.cleanse_an_effect()
-            case "f": #attempt to flee
-                global_variables.RUNNING = False
-                player_commands.flee()
-                enemy = None
+    player_commands.start_turn()
 
 def begin():
     print("")
     global ENEMY
-    global_commands.type_text("Would you like to enter the dungeon? y/n\n")
+    global_commands.type_text("Would you like to enter the dungeon? y/n")
     ENEMY = monster_manual.spawn_random_mob() if TEST is False else monster_manual.spawn_mob("Land Shark")
 
     if ENEMY is None:
         ENEMY = monster_manual.mobs[0]()
 
     command = input(">> ").lower()
-    if command == "y":
-        print("")#formatting
-        global_variables.RUNNING = True
-        link_start()
-    elif command == "t":
-        global_variables.restock_the_shop()
-        global_variables.SHOPKEEP.print_inventory()
-    elif command == "n":
-        narrator.exit_the_dungeon()
-
-player_commands.load()
+    match command:
+        case "exit":
+            global_commands.exit()
+        case "y":
+            print("")#formatting
+            player_commands.load()
+            global_variables.RUNNING = True
+            link_start()
+        case "test":
+            global_variables.restock_the_shop()
+            global_variables.SHOPKEEP.print_inventory()
+        case "n":
+            narrator.exit_the_dungeon()
+        case _:
+            print("")#formatting
+            player_commands.load()
+            global_variables.RUNNING = True
+            link_start()
 
 #Set constants for command files
 enemy_commands.NEXT_SCENE = next_scene
 player_commands.NEXT_SCENE = next_scene
 
-enemy_commands.PLAYER_TURN = player_turn
-player_commands.PLAYER_TURN = player_turn
-
-enemy_commands.ENEMY_TURN = enemy_turn
-player_commands.ENEMY_TURN = enemy_turn
-
-enemy_commands.PLAYER_DEATH = player_death
-player_commands.PLAYER_DEATH = player_death
+player_commands.ENEMY_TURN = enemy_commands.start_turn
 
 enemy_commands.END_SCENE = end_scene
 player_commands.END_SCENE = end_scene

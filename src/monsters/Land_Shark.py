@@ -38,6 +38,10 @@ class Land_Shark(mob.Mob):
 
         self._burrowed = False
 
+    @property
+    def applied(self):
+        return self._my_effect_id in self._status_effects
+
     def trigger(self):
         """
         Conditions that trigger the mob's special
@@ -47,13 +51,14 @@ class Land_Shark(mob.Mob):
         10, and that the Hobgoblin has not recently applied a
         status effect 
         """
-        if self._burrowed is True and len(self._status_effects) == 0:
+        if self._burrowed is True and not self.applied and global_commands.probability(33):
             return True
         
-        if global_commands.probability(abs(self._hp - self.max_hp) * 10):#higher HP == lower chance of burrowing
+        if global_commands.probability(100 - ((self._hp * 100) / self.max_hp)):
+            # %HP determines directly determines burrow chance
             return True
         
-        return len(self._status_effects) > 0 and self._burrowed is False#if I have status effects and not burrowed, burrow
+        return len(self._status_effects) >= 2 and self._burrowed is False#if I have status effects and not burrowed, burrow
 
     def special(self) -> bool:
         """
@@ -63,28 +68,21 @@ class Land_Shark(mob.Mob):
         doubles all damage done and taken after use, reverts evasion
         changes made by burrow 
         """
-        if self.trigger() is True:
-            if self._burrowed is False:#if not burrowed, burrow
-                self.spend_ap(0) #indicates a full round action
-                global_commands.switch(self.header, f"The {self._id} burrows underground, making it harder to hit.")
-                self._stats["base_evasion"] += 3
-                self._burrowed = True
-                return True
-            else:
-                self.spend_ap()
-                #the text variable is so the formatting of the message can be dynamically altered
-                #depending on what text will come next
-                text = f"The {self._id} erupts from the ground."
-                if "Vulnerable" not in self._status_effects:
-                    text = text + "\n"
-                global_commands.switch(self.header, text)
-                self._stats["base_evasion"] -= 3
-                #double all damage taken for 3 turns
-                vul = status_effects.Vulnerable(self, self)
-                vul.set_duration(3)
-                self.add_status_effect(vul)
-                self._burrowed = False
-                return True
-        return False
+        if not self._burrowed:
+            self.spend_ap(0) #indicates a full round action
+            global_commands.type_text(f"The {self._id} burrows underground, making itself harder to hit.")
+            self._stats["base_evasion"] += 3
+            self._burrowed = True
+            return True
+        else:
+            self.spend_ap()
+            global_commands.type_text(f"The {self._id} erupts from the ground.")
+            self._stats["base_evasion"] -= 3
+            vul = status_effects.Vulnerable(self, self)#double all damage taken for 3 turns
+            self._my_effect_id = vul.id
+            vul.set_duration(3)
+            self.add_status_effect(vul)
+            self._burrowed = False
+            return True
 
 object = Land_Shark

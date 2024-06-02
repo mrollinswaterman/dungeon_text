@@ -3,26 +3,28 @@ import event
 import status_effects
 
 success = {
-    "con": ["You grit your teeth and continue forwards.", 
-            "You pinch your nose and march in.",
-            "You take a deep breath then dive into the cloud."],
+    "con": ["You grit your teeth and continue forwards, making it out without a scratch.", 
+            "A little noxious gas is nothing to you. You pinch your nose and march across.",
+            "You take a deep breath and dive through the cloud.",
+            "As you make your way through, you begin to feel nauseous. You shake it off and press on."],
 
     "int": ["With scraps from your gear, you fashion a make-shift face mask and brave the smog.",
-            "You study the smog and recoginze it as harmless. Rank, but harmless. You press on without fear."]
+            "You study the smog and recoginze it as harmless. Rank, but harmless. You continue without fear."]
 }
 
 failure = {
-    "con": ["You try holding your breath, but can't make it far enough. You scramble back before you pass out, ready to try again.", 
-            "You aren't sure you can just tough this out."],
+    "con": ["You don't reckon you can hold your breath long enough to get out the other side.", 
+            "You might not be tough enough for this yet.",
+            "Approaching the cloud, you shrink away in disgust. You've never been a fan of repugnant stenches."],
 
-    "int": ["You can't quite think of a way to navigate this obstacle.",
+    "int": ["You can't yet think of a way to navigate this obstacle.",
             "The smog isn't recogizable to you.",
             "You scratch your head and stare at the cloud, trying to figure out if it's dangerous or not. Nothing comes to you."]
 }
 
-end = ["You push through the cloud, but not unscathed.",
-       "You come out the other side coughing and heaving.",
-       "You've made it, but you feel sickly and nauseous."]
+end = ["No way to go but straight. You make it out the other side, but not unscathed.",
+       "You push through the cloud head on, coughing and heaving all the way. You don't feel so good...",
+       "You decide to tackle this obstacle head on. Not the best idea. You're through, but the nausea hasn't passed yet."]
 
 class Smog(event.Event):
     def __init__(self, id="Smog"):
@@ -46,7 +48,6 @@ class Smog(event.Event):
 
     def failure(self):
         super().failure()
-        print("")#formatting
         poison = status_effects.Poisoned(self)
         poison.set_stacks(3)
         poison.set_potency(1)

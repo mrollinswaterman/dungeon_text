@@ -30,32 +30,39 @@ class Goblin(mob.Mob):
         super().__init__(id, level, statblock)
 
         self._flee_threshold = 0.25
+        self._stolen = False
+
+    @property
+    def retreat(self):
+        return self._loot["gold"] >= (1.5 * self._player.gold) and self._stolen
     
     def trigger(self):
         """
-        Conditions that trigger the mob's special
-        move. 
-
-        For the Goblin, if the player has more gold than
-        it does.
+        Returns True if the player has more gold than the goblin, 
+        or if the goblin has x1.5 the player's gold
         """
-        return self._player.gold >= self._loot["gold"]
+        return self._loot["gold"] < self._player.gold or self.retreat
 
-    def special(self) -> bool:
+    def special(self) -> None:
         """
         Rob: Steals a random amount of gold from the player if they fail a dex check
         """
-        if self.trigger():
+        if not self.retreat:
             self.spend_ap(1)
-            global_commands.type_with_lines(f"The {self._id} makes a grab at your gold pouch.\n")
-            if self._player.roll_a_check("dex") >= self.roll_attack():
+            global_commands.type_text(f"The {self._id} makes a grab at your gold pouch.")
+            save = self._player.roll_a_check("dex")
+            attack = self.roll_attack()
+            if save >= attack:
                 global_commands.type_text("It missed.")
             else:
-                prospective = random.randrange(1,20)
+                prospective = global_commands.d(10) + (attack - save)#adjust gold stolen based on how bad the player got beat
                 actual = self._player.lose_gold(prospective)
                 global_commands.type_text(f"The {self._id} stole {actual} gold from you!")
                 self._loot["gold"] += actual
-            return True
-        return False
+                self._stolen = actual > 0
+            return None
+        else:
+            self._flee_threshold = 1.01
+        return None
 
 object = Goblin

@@ -38,16 +38,16 @@ end = [
     "You eat some to ward off hunger.",
 ]
 
-class Mysterious_Berries(event.Event):
+class Berries(event.Event):
 
-    def __init__(self, id="Mysterious_Berries"):
+    def __init__(self, id="Berries"):
         super().__init__(id)
 
         #determines if the berries are poisonous
         self._poisonous = global_commands.probability(50)
         #checks whether the player eats the berries or not
 
-        self.add_stat("int", 1)
+        self.add_stat("int", 15)
 
         self.add_stat("wis", 20)
 
@@ -66,19 +66,18 @@ class Mysterious_Berries(event.Event):
     def success(self, code:str) -> None:
         self._passed = True
         if self._loot["xp"] <= 0:
-            #self.set_xp(int(self.stat_dc(code) / 1.5))
-            self.set_xp(10)
-        global_commands.type_text(random.choice(self._messages[True][code]) + "\n")#print a random success message
+            self.set_xp(int(self.stat_dc(code) / 1.5))
+        global_commands.type_text(random.choice(self._messages[True][code]))#print a random success message
         if self._poisonous:
-            global_commands.type_text("You pass on the poisonous snacks.\n")#XP msg comes after this so \n is needed
+            global_commands.type_text("You pass on the poisonous snacks.")
             return None
         else:
             if self._player.hp < self._player.max_hp:
-                global_commands.type_text("Delicious! You can feel your strength returning.\n")#heal msg comes after so \n is needed
+                global_commands.type_text("Delicious! You can feel your strength returning.")
                 self._player.heal(4)
                 print("")#formatting
             else:
-                global_commands.type_text("Delicious!\n")
+                global_commands.type_text("Delicious!")
             return None
 
     def failure(self):
@@ -86,7 +85,7 @@ class Mysterious_Berries(event.Event):
         super().failure()
         print("")#formatting
         if self._poisonous:
-            global_commands.type_text("You probably shouldn't have eaten those...\n")#not last item so \n is needed
+            global_commands.type_text("You probably shouldn't have eaten those...")
             if self._player.hp >= 4*2:
                 self._player.lose_hp(3)
                 global_commands.type_text("The posion berries did 3 damage to you.")
@@ -95,11 +94,11 @@ class Mysterious_Berries(event.Event):
             return None
         else:
             if self._player.hp < self._player.max_hp:
-                global_commands.type_text("You got lucky. The berries turned out to be edible.\n")#not last item so \n is needed
+                global_commands.type_text("You got lucky. The berries turned out to be edible.")
                 self._player.heal(2)
             else:
-                global_commands.type_text("You got lucky. The berries turned out to be edible.")#last item so no \n
+                global_commands.type_text("You got lucky. The berries turned out to be edible.")
                 self._player.heal(2)
             return None
 
-object = Mysterious_Berries
+object = Berries

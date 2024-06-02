@@ -30,42 +30,34 @@ class Hobgoblin(mob.Mob):
     def __init__(self, id="Hobgoblin", level=(1,5), statblock=stats):
         super().__init__(id, level, statblock)
 
-        self._stats["dc"] = 12 + self.bonus("cha")
+        self._stats["dc"] = 24 + self.bonus("cha")#12 + cha
 
     def trigger(self):
         """
-        Conditions that trigger the mob's special
-        move. 
-
-        For Hobgoblin's it's if the player's evasion is over
-        10, and that the Hobgoblin has not recently applied a
-        status effect 
+        For Hobgoblins it's if the player's evasion is >= 10, 
+        and the player is not currently suffering from a Hobgoblin's taunt
         """
-        return self._player.evasion > 10 and len(self._applied_status_effects) == 0
+        return self._player.evasion >= 10 and not self.applied
 
 
-    def special(self) -> bool:
+    def special(self) -> None:
         """
         Taunt: Reduces the player's evasion by 2 points for 2 turns if they fail a charisma check
         """
-        if self.trigger():
-            self.spend_ap()
-            global_commands.type_with_lines(f"The {self.id} hurls enraging insults at you.\n")
+        self.spend_ap()
+        global_commands.type_text(f"The {self.id} hurls enraging insults at you.")
 
-            if self._player.roll_a_check("cha") >= self.dc:
-                global_commands.type_text(f"Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
+        if self._player.roll_a_check("cha") >= self.dc:
+            global_commands.type_text(f"Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
 
-            else:
-                if len(self._applied_status_effects) > 0:
-                    return False
-                global_commands.type_text(f"The {self.id}'s insults distract you, making you an easier target.\n")
-                taunt = status_effects.Player_Stat_Debuff(self)
-                taunt.set_stat("base-evasion")
-                taunt.set_duration(3)
-                taunt.set_potency(2)
-                self._player.add_status_effect(taunt)
-                self._applied_status_effects.add(taunt)
-            return True
-        return False 
+        else:
+            global_commands.type_text(f"The {self.id}'s insults distract you, making you an easier target.")
+            taunt = status_effects.Stat_Debuff(self, self._player)
+            self._my_effect_id = taunt.id
+            taunt.set_duration(3)
+            taunt.set_potency(2)
+            taunt.set_stat("base_evasion")
+            self._player.add_status_effect(taunt)
+        return None
 
 object = Hobgoblin

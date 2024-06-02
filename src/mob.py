@@ -62,10 +62,9 @@ class Mob():
         self._player:player.Player = global_variables.PLAYER
 
         self._status_effects: dict[str, status_effects.Status_Effect] = {}
-        self._applied_status_effects = set()
 
-        #tracks if the header for the turn has been printed yet
-        self._header_printed = False
+        self._retreating = False
+        self._my_effect_id = ""
 
         self.update()
         self.calculate_loot()
@@ -74,6 +73,12 @@ class Mob():
     @property
     def id(self) -> str:
         return self._id
+    @property
+    def damage_header(self) -> str:
+        return self._id
+    @property
+    def damage_type(self) -> str:
+        return "Physical"
     @property
     def dead(self) -> bool:
         return self.hp <= 0
@@ -118,10 +123,10 @@ class Mob():
         return self._ap
     @property
     def can_act(self) -> int:
-        return self._ap > 0
+        return self._ap > 0 and not self.dead
     @property
     def fleeing(self) -> bool:
-        return self._hp <= self.max_hp * self._flee_threshold and self.roll_a_check("cha") > 10
+        return self.flee_check() or self._retreating
     @property
     def range(self) -> int:
         return self._range
@@ -129,10 +134,8 @@ class Mob():
     def stats(self) -> dict:
         return self._stats
     @property
-    def header(self) -> bool:
-        return self._header_printed
-    
-    #methods
+    def applied(self) -> bool:
+        return self._my_effect_id in self._player.status_effects
 
     #MISC.
     def bonus(self, stat:str) -> int:
@@ -154,8 +157,14 @@ class Mob():
         self._stats["max_hp"] = temp
         self._hp = self.max_hp
 
-    def set_header(self, val:bool) -> None:
-        self._header_printed = val
+    def flee_check(self):
+        """
+        Checks the enemy should be fleeing
+        """
+        if self._hp <= self.max_hp * self._flee_threshold and self.roll_a_check("cha") > 10:
+            self._retreating = True
+            return self._retreating
+        return False
 
     #ROLLS
     def roll_attack(self) -> int:
@@ -172,6 +181,9 @@ class Mob():
         return roll + self.bonus("dex") + (self._level // 5)
 
     def roll_a_check(self, stat:str):
+        """
+        Rolls a check with a given stat
+        """
         return global_commands.d(20) + self.bonus(stat)
     
     def roll_damage(self) -> int:
@@ -180,20 +192,41 @@ class Mob():
         """
         return global_commands.d(self.damage) * self.damage_multiplier + self.bonus("str")
     
-    def take_damage(self, damage:int, armor_piercing=False) -> int:
+    def take_damage(self, taken:int, src, armor_piercing=False) -> int:
         """
         Takes a given amount of damage, reduced by armor
         """
-        damage *= self.damage_taken_multiplier
+        taken *= self.damage_taken_multiplier
         if armor_piercing:
-            self._hp -= damage
-            return damage
+            self._hp -= taken
+            if src == self._player:
+                global_commands.type_text(f"You did {taken} damage to the {self._id}.")
+            else:
+                global_commands.type_text(f"The {self._id} took {taken} damage from the {src.damage_header}.")
+            return taken
 
-        if (damage - self.armor) < 0:
-            return 0
+        if src.damage_type == "Physical":
+            if (taken - self.armor) <= 0:
+                if src == self._player:
+                    global_commands.type_text(f"You did no damage to the {self._id}.")
+                else:
+                    global_commands.type_text(f"The {self._id} took no damage from the {src.damage_header}.")
+                return 0
+            else:
+                self._hp -= taken - self.armor
+                if src == self._player:
+                    global_commands.type_text(f"You did {taken - self.armor} damage to the {self._id}.")
+                else:
+                    global_commands.type_text(f"The {self._id} took {taken - self.armor} damage from the {src.damage_header}.")
+                return taken - self.armor
         else:
-            self._hp -= damage - self.armor
-            return damage - self.armor
+            self._hp -= taken
+            if src == self._player:
+                global_commands.type_text(f"You did {taken} damage to the {self._id}.")
+            else:
+                global_commands.type_text(f"The {self._id} took {taken} damage from the {src.damage_header}.")
+            return taken
+
         
     def fumble_table(self) -> Union[str, bool]:
         """
@@ -212,11 +245,13 @@ class Mob():
     #Resources
     def heal(self, num:int) -> None:
         #heals for the given amount up to max hp value
-        self._hp += self._hp + num if (self._hp + num <= self.max_hp) else self.max_hp
+        prev = self._hp
+        self._hp = self._hp + num if (self._hp + num <= self.max_hp) else self.max_hp
+        global_commands.type_text(f"The {self._id} healed {self._hp - prev} HP.")
 
     def spend_ap(self, num:int=1) -> None:
         """
-        Spend an amount of AP
+        Spends an amount of AP
         """
         if num == 0:#spend_ap(0) indicates a full round action, uses all AP
             self._ap = 0
@@ -285,7 +320,13 @@ class Mob():
         inactive = []
 
     def special(self):
+        """
+        Mob's special move
+        """
         raise NotImplementedError
     
     def trigger(self):
+        """
+        Trigger that determines if the mob should do their special move
+        """
         return False

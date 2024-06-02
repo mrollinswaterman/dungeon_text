@@ -124,7 +124,7 @@ class Shopkeep():
             if quantity <= my_version.quantity:
                pass
             else:
-                global_commands.type_text(f"The Shopkeep does not have {quantity} {item.id}s. He'll sell you all that he has.\n")
+                global_commands.type_text(f"The Shopkeep does not have {quantity} {item.id}s. He'll sell you all that he has.")
                 quantity = my_version.quantity
             if buyer.can_carry(buyer_version) is True:
                 if buyer.spend_gold(buyer_version.total_value) is True:
@@ -152,7 +152,7 @@ class Shopkeep():
                 self.stock(item)
                 return True
         else:
-            global_commands.type_text("The Shopkeep throws you a questioning glance as you try to sell him thin air.\n")
+            global_commands.type_text("The Shopkeep throws you a questioning glance as you try to sell him thin air.")
             return False
         
     #INVENTORY/STOCK
@@ -164,7 +164,7 @@ class Shopkeep():
     def print_inventory(self):
         if len(self._inventory) == 0:
             print("Shop's empty!")
-        global_commands.type_with_lines("For Sale:\n")
+        global_commands.type_with_lines("For Sale:")
         for i in range(self.stock_size):
             item:items.Item = self._inventory[i]
             if i % 2 == 0 and i != 0:
@@ -179,7 +179,8 @@ class Shopkeep():
             
         print("\n")#newline after last
 
-        global_commands.print_with_lines(f"Your Gold: {global_variables.PLAYER.gold} \tCarrying Capacity: {global_variables.PLAYER.current_weight}/{global_variables.PLAYER.carrying_capacity}")
+        global_commands.type_with_lines("")
+        global_commands.type_text(f"Your Gold: {global_variables.PLAYER.gold} \tCarrying Capacity: {global_variables.PLAYER.current_weight}/{global_variables.PLAYER.carrying_capacity}")
 
     def restock(self, warehouse:list, amount:int) -> None:
         ready_to_stock = set()
@@ -225,4 +226,4 @@ class Shopkeep():
             f"As you take the {item.name}, you wonder if it will be enough."
         ]
 
-        return random.choice(message_list) + "\n"
+        return random.choice(message_list)

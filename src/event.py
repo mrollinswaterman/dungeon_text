@@ -12,7 +12,7 @@ FAILURE_LINES = {
     "dex": [
         "You do a sick spin move. Nothing happens.",
         "You can't think of a way to come at this problem using your dexterity.",
-        "This will require substancially more than the ability to twist yourself into a pretzel.",
+        "This will require something substantially different from the ability to twist yourself into a pretzel.",
         "No way to wriggle your way out of this."
     ],
 
@@ -55,6 +55,7 @@ class Event():
         self._messages = {True: {}, False: {}}
         self._passed = False
         self._end_messages:list[str] = []
+        self._damage_header = ""
         self._loot = {
             "xp": 0,
             "gold": 0,
@@ -85,7 +86,13 @@ class Event():
     @property
     def loot(self):
         return self._loot
-
+    @property
+    def damage_header(self) -> str:
+        return self._damage_header
+    @property
+    def damage_type(self):
+        return None
+    
     #methods
 
     #ADD
@@ -131,18 +138,12 @@ class Event():
 
     #SETTERS
     def set_id(self, id:str):
-        """
-        Sets event id
-        """
         self._id = id
     
     def set_tries(self, tries:int) -> None:
-        """
-        Sets the number of tries the event has to a given integer
-        """
         self._tries = tries
 
-    def set_loot(self, loot) -> None:
+    def set_loot(self, loot:dict) -> None:
         """
         Adds loot to the event
         """
@@ -154,9 +155,6 @@ class Event():
 
     def set_xp(self, num:int) -> None:
         self._loot["xp"] = num
-
-    def set_drop(self, item) -> None:
-        self._loot["drops"] = [item]
 
     def add_drop(self, item) -> None:
         if self._loot["drops"] is None:
@@ -192,7 +190,7 @@ class Event():
         """
         Prints the start text and associated formatting of the event
         """
-        global_commands.type_with_lines(self.text)
+        global_commands.type_text(self._text)
 
     def success(self, code:str) -> None:
         """
@@ -203,7 +201,6 @@ class Event():
         if self._loot["xp"] <= 0:#set xp if it hasnt been
             self.set_xp(int(self.stat_dc(code) / 1.5))
         global_commands.type_text(random.choice(self._messages[True][code]))#print a random success message
-        print("")#newline b4 end
         return None
     
     def try_again(self, code) -> None:
@@ -220,14 +217,12 @@ class Event():
     
     def run(self, code:str, roll: int):
         """
-        Runs the event for a given stat and roll
-
-        Returns an f-string determined by the stat rolled and whether or not
-        the check succeded
+        Runs the event for a given stat code and roll
+        Returns the number of tries left on the event
         """
         if self.tries is False:
             raise ValueError("No more tries")
-        self._tries -= 2#1
+        self._tries -= 1#1
         if self.has_stat(code) is True:
             if roll >= self.stat_dc(code):#if roll beats the DC
                 self.success(code)
@@ -242,4 +237,4 @@ class Event():
         Runs if the event has been failed twice (ie its over)
         """
         self._tries = -1
-        global_commands.type_text("\n "+random.choice(self._end_messages))
+        global_commands.type_text(random.choice(self._end_messages))
