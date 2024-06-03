@@ -121,11 +121,11 @@ class Shopkeep():
         if item in self._inventory and item.quantity > 0:
             buyer_version = deepcopy(item)
             my_version:items.Consumable = self.find_item(item.id)
-            if quantity <= my_version.quantity:
-               pass
-            else:
+            if quantity > my_version.quantity:
                 global_commands.type_text(f"The Shopkeep does not have {quantity} {item.id}s. He'll sell you all that he has.")
                 quantity = my_version.quantity
+                
+            buyer_version.set_quantity(quantity)
             if buyer.can_carry(buyer_version) is True:
                 if buyer.spend_gold(buyer_version.total_value) is True:
                     self._gold += buyer_version.total_value
@@ -171,15 +171,13 @@ class Shopkeep():
                 time.sleep(.05)
                 print("\n\n")
 
-            string = f"{i+1}. {item.name} ({item.stats}): {item.value}g, {item.weight} lbs"
-            while (len(string) < 55):
-                string = string + " "
+            string = f" {i+1}. {item.name} ({item.stats}): {item.value}g, {item.weight} lbs"
+            string = global_commands.match(string, 55)
             
             print(string + 2*"\t", end='')
             
-        print("\n")#newline after last
+        print("\n\n")#double newline after last item
 
-        global_commands.type_with_lines("")
         global_commands.type_text(f"Your Gold: {global_variables.PLAYER.gold} \tCarrying Capacity: {global_variables.PLAYER.current_weight}/{global_variables.PLAYER.carrying_capacity}")
 
     def restock(self, warehouse:list, amount:int) -> None:

@@ -1,4 +1,4 @@
-import random
+import random, time
 import os
 import csv
 import items
@@ -51,9 +51,11 @@ class Player():
         self._level_up_function = None
 
         #equipment
+        w:items.Item = None
+        a:items.Item = None
         self._equipped = {
-            "Weapon": None, 
-            "Armor": None
+            "Weapon": w, 
+            "Armor": a
         }
 
     #properties
@@ -307,7 +309,7 @@ class Player():
         if gold > self.gold:   
             return False
         self._gold -= gold
-        global_commands.type_text(f" {gold} gold spent. {self._gold} gold remaining.")
+        global_commands.type_text(f"{gold} gold spent. {self._gold} gold remaining.")
         return True
 
     def lose_gold(self, amount:int) -> None:
@@ -368,16 +370,16 @@ class Player():
                 held_item:items.Consumable = self._inventory[item.id]
                 held_item.increase_quantity(item.quantity)
                 if silently is False:
-                    print(held_item.pickup_message)
+                    (item.pickup_message + "\n")
                 return True
             self._inventory[item.id] = item
             item.set_owner(self)
             if silently is False:
-                print(item.pickup_message)
+                print(item.pickup_message+ "\n")
             return True
         else:
             if silently is False:
-                global_commands.type_text("Not enough inventory space\n")
+                global_commands.type_text("Not enough inventory space.")
         
     def drop(self, item: items.Item) -> None:
         """
@@ -387,7 +389,7 @@ class Player():
             del self._inventory[item.id]
             item.set_owner(None)
         else:
-            raise ValueError("Can't drop an item you don't have.\n")
+            raise ValueError("Can't drop an item you don't have.")
 
     def equip(self, item: "items.Item", silently=False) -> bool:
         """
@@ -400,7 +402,7 @@ class Player():
             if item.id in self._inventory and item == self._inventory[item.id]:
                 del self._inventory[item.id]
             if silently is False:
-                print(f" {item.name} equipped.")
+                global_commands.type_text(f"{item.name} equipped.")
             if item.type == "Armor":
                 self.equip_armor(item)
                 return True
@@ -449,27 +451,83 @@ class Player():
             except KeyError:
                 return False
     
-    def find_item_by_name(self, name:str) -> items.Item:
+    def get_item_by_id(self, id:str) -> items.Item:
         """
-        Finds an item in the player's inventory by it's name
-
+        Get an item in the player's inventory by it's id
         Returns the item, None if not found
         """
-        for entry in self._inventory:
-            held_item: items.Item = entry
-            if held_item.name == name:
-                return entry
-            
-        return None
+        try:
+            return self._inventory[id]
+        except IndexError:
+            return None
+    
+    def get_item_by_index(self, idx:int) -> items.Item:
+        """"""
+        try:
+            return list(self._inventory.values())[idx]
+        except IndexError:
+            return None
 
     def print_inventory(self) -> None:
-        """
-        Prints the contents of the player's inventory
-        """
-        for idx, item in enumerate(self._inventory):
-            print(f" {idx+1}. {self._inventory[item]}")
+        global_commands.type_with_lines("")
+        print(f"{25 * " "} Inventory: {25 * " "} {1 * "\t"} \t\t Equipped:\n")
+        line_len = 25
+        idx = 0
+        last = False
+        while(idx < len(self._inventory)):
 
-        print(f"Carrying Capacity: {self.current_weight}/{self.carrying_capacity}\n")
+            if idx % 2 == 0 and idx != 0:
+                time.sleep(0.05)
+                print("\n")
+            
+            first = list(self._inventory.values())[idx].format()
+            try:
+                second = list(self._inventory.values())[idx + 1].format()
+            except IndexError:
+                last = True
+                second = first
+            weapon = self._equipped["Weapon"].format()
+            armor = self._equipped["Armor"].format()
+
+            header1 = f"{idx+1}. {first[0]}"
+            header2 = f"{idx+2}. {second[0]}" if not last else " "
+            w_header = " "
+            a_header = " "
+            if idx == 0:
+                w_header = f"1. {weapon[0]}"
+                
+            if idx == 2:
+                a_header = f"2. {armor[0]}"
+            
+            header1 = global_commands.match(header1, line_len)
+            header2 = global_commands.match(header2, line_len)
+            w_header = global_commands.match(w_header, line_len)
+            a_header = global_commands.match(a_header, line_len)
+
+            equipped_header = w_header if idx == 0 else a_header
+            print(f" {header1} {1 * "\t"} {header2} \t\t {equipped_header}")#print ids + weapon
+            long = max(len(first), len(second))
+            for i in range(1, long):
+                str1 = first[i] if i < len(first) else " "
+                str2 = second[i] if i < len(second) and not last else " "
+                w = weapon[i] if idx == 0 else " "
+                a = armor[i] if idx == 2 else " "
+
+                str1 = global_commands.match(str1, line_len)
+                str2 = global_commands.match(str2, line_len)
+                w = global_commands.match(w, line_len)
+                a = global_commands.match(a, line_len)
+
+                equipped = w if idx == 0 else a
+                print(f" {str1} {1 * "\t"} {str2} \t\t {equipped}")
+
+            idx += 2 if len(self._inventory) - idx >= 2 else 1
+
+        print("\n")
+        print(f"Gold: {self.gold}g", end='')
+        time.sleep(0.05)
+        print(f"\tCarrying Capacity: {self.current_weight}/{self.carrying_capacity} lbs\n")
+        global_commands.type_with_lines("")
 
     def recieve_reward(self, reward:dict) -> None:
         for entry in reward:

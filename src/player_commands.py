@@ -165,10 +165,6 @@ def attack() -> None:
     return None
 
 def show_inventory() -> None:
-    """
-    Prints the player's inventory
-    """
-    global_commands.type_with_lines("")
     PLAYER.print_inventory()
     select_an_item()
 
@@ -177,7 +173,6 @@ def select_an_item() -> None:
     Lets the player select an inventory item to use
     """
     global_commands.type_text("Enter an Item's number to use it | Go Back - (b)")
-    
     while True:
         cmd = input(">> ").lower()
         print("")
@@ -190,7 +185,7 @@ def select_an_item() -> None:
                 try:
                     cmd = int(cmd)
                     try:
-                        item = list(PLAYER.inventory.values())[cmd - 1]
+                        item = PLAYER.get_item_by_index(cmd-1)
                         return use_an_item(item, ENEMY)
                     except IndexError:
                         global_commands.type_text("Please enter a valid item number.")

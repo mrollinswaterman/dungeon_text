@@ -204,6 +204,15 @@ class Item():
             file.close()
         self.update()
 
+    def format(self) -> list[str]:
+        forms = [
+            f"{self.id} ({self._rarity})",
+            f"Value: {self._value}g",
+            f"Durability: {self._durability}/{self._max_durability}",
+            f"Weight: {self.total_weight} lbs"
+        ]
+        return forms
+
     def __str__(self) -> str:
         return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
@@ -294,8 +303,18 @@ class Weapon(Item):
             file.close()
         self.update()
     
+    def format(self) -> list[str]:
+        forms = [
+            f"{self.id} ({self._rarity})",
+            f"Damage Dice: {self._num_damage_dice}d{self._damage_dice}",
+            f"Durability: {self._durability}/{self._max_durability}",
+            f"Value: {self._value}g",
+            f"Weight: {self.weight} lbs",
+        ]
+        return forms
+    
     def __str__(self) -> str:
-        return (f"""{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n""")
+        return (f"{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n")
 
 class Armor(Item):
 
@@ -363,8 +382,19 @@ class Armor(Item):
             file.close()
         self.update()
 
+    def format(self):
+        forms = [
+            f"{self.id} ({self._rarity})",
+            f"Class: {self.weight_class}",
+            f"Armor: {self._armor_value}P",
+            f"Durability: {self._durability}/{self._max_durability}",
+            f"Value: {self._value}g",
+            f"Weight: {self._weight} lbs"
+        ]
+        return forms
+
     def __str__(self) -> str:
-        return f"{self.id}\n Weight: {self.weight_class}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Armor Value: {self._armor_value}\n"
+        return f"{self.id}\n Class: {self.weight_class}\n Armor Value: {self._armor_value}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 class Consumable(Item):
 
@@ -445,9 +475,18 @@ class Consumable(Item):
                 self._unit_value = float(row["unit_value"])
             file.close()
         self.update()
+    
+    def format(self) -> list[str]:
+        forms = [
+            f"{self.name} ({self._rarity})",
+            f"Quantity: {self._quantity}",
+            f"Value: {self._unit_value}g/each",
+            f"Total Weight: {self.total_weight} lbs"
+        ]
+        return forms
 
     def __str__(self) -> str:
-        return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n Quantity: {self._quantity}\n"
+        return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n"
     
 class Health_Potion(Consumable):
 

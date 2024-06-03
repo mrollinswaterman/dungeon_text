@@ -3,6 +3,7 @@
 This file contains a list of tasks and ideas
 
 ## External
+
 - [X] Player save file
 
 ## Internal Logic
@@ -19,7 +20,7 @@ This file contains a list of tasks and ideas
 - [X] Give status effect their own file like item compendium where each individual effect is made its own subclass of status effect
 - [ ] Add a companion, Gears the friendly Clockwork Hound. If you have a Clockwork Heart and some scrap, you have a chance to encounter him, can repair him with an int check, he joins you. Increases loot chances???
 - [ ] Add a drop chance dictionary to item_compendium instead of drop chance being hard coded into classes
-- [ ] Overhaul how player inventory is displayed, and how items are printed to the console (instead of 
+- [X] Overhaul how player inventory is displayed, and how items are printed to the console (instead of 
 actually printing, maybe the print function just tells you what lines should be printed, ie durability
 for weapons/armor, quantity for consumables, etc, then the print inventory function prints each line
 as necessary for formatting)
@@ -40,7 +41,7 @@ as necessary for formatting)
 - [X] Fail to flee scenario → %chance the enemy tries to stop you, if you get caught, you have to keep fighting, else lose some gold + small %chance you lose an item (value cap on how much gold you can lose total including item values)
 - [X] Add flee action to mobs → works the same as the players?
 - [ ] Failing events gives some drawback (ie take a little bit of damage, lose some gold, etc), BUT can withdraw at any time
-- [ ] Add a view equipped items menu to menu_options()
+- [X] Add a view equipped items menu to menu_options()
 - [ ] Add a "talk" mechanic with the Shopkeep to give player hints about how to unlock legendary weapons
 (ie, "The Shopkeep says the Blacksmith might be able to craft something special with enough Land Shark teeth)
 - [ ] Add a extended crit range to some weapons, ie 18-20, 16-20, etc
@@ -52,7 +53,7 @@ as necessary for formatting)
 - [ ] Clockwork Maul --> A great hammer crafted from clockwork scrap. Always loses durability on-hit.
 Special move, uses half max durability for a double damage on the attack (can miss, takes 1/4 durability instead of 1/2). passively regens some durability per turn 
 - [ ] Sharkbone Greatsword --> greatsword made from Land Shark teeth and bone. Serrated edge, causes bleed, DoT on hit. some form of blood related buff, either a +1 to damage per kill until you leave the dungeon (capped at your level) or does bonus damage to enemies below HP thresholds (ie +2 to below 50%, +3 to below 30%, etc)
-- [ ] Helm of the Radiant Lord --> legendary medium armor item, any attacks against you have a chance to smite the attacker in retaliation dealing 1d6+int damage to them (maybe this chance builds up each time you are hit and it doesn't proc??)
+- [ ] Helm of the Radiant Lord --> legendary medium armor item, any attacks against you have a chance to smite the attacker in retaliation dealing 1d6+cha damage to them (maybe this chance builds up each time you are hit and it doesn't proc??)
 - [ ] Volcanic Breastplate --> legendary heavy breastplate forged in an erupting volcano, every enemy in combat with you takes 2+con damage on each of your(their??) turns, with a chance to be set on fire.
 - [ ] Spectre's Cowl --> legendary light armor, every non-magical attack against you has a chance to miss, any attack that would kill you misses automatically, but this item loses 1/2(or 1/3) durability, any attack that would break this item misses, but the item still breaks
 - [ ] Ghostcrawler's Cape --> legendary light armor, once per encounter can try and force an enemy to flee, if successful gain 1/2 gold and XP from encounter. enemies can't stop your flee attempts, unless this item is below 1/3 durability or you are below 10% HP. 
@@ -75,10 +76,10 @@ Special move, uses half max durability for a double damage on the attack (can mi
 
 - [ ] Gnomish miner
 - [ ] Talking wall
-- [ ] Mysterious cypher
+- [X] Mysterious cypher
 - [ ] Sphinx??
 - [X] Gas cloud → constitution check finally!
-- [ ] Elaborate trap room → int/dex
+- [X] Elaborate trap room → int/dex
 
 ## Balance
 

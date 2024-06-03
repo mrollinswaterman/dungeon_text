@@ -106,8 +106,8 @@ def link_start() -> None:
 
     player_commands.start_turn()
 
+print("")#formatting
 def begin():
-    print("")
     global ENEMY
     global_commands.type_text("Would you like to enter the dungeon? y/n")
     ENEMY = monster_manual.spawn_random_mob() if TEST is False else monster_manual.spawn_mob("Land Shark")
@@ -116,21 +116,23 @@ def begin():
         ENEMY = monster_manual.mobs[0]()
 
     command = input(">> ").lower()
+    print("")
     match command:
         case "exit":
+            player_commands.load()
             global_commands.exit()
         case "y":
-            print("")#formatting
             player_commands.load()
+            PLAYER.gain_gold(300)
             global_variables.RUNNING = True
             link_start()
         case "test":
-            global_variables.restock_the_shop()
-            global_variables.SHOPKEEP.print_inventory()
+            player_commands.load()
+            PLAYER.print_inventory()
         case "n":
+            player_commands.load()
             narrator.exit_the_dungeon()
-        case _:
-            print("")#formatting
+        case _:#run the game by default
             player_commands.load()
             global_variables.RUNNING = True
             link_start()

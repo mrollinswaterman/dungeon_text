@@ -50,6 +50,7 @@ def exit():
 def save():
     player_dict = global_variables.PLAYER.save_to_dict()
     with open('player.csv', "w", newline='') as file:
+        file.truncate(0)
         w = csv.DictWriter(file, player_dict.keys())
         w.writeheader()
         w.writerow(player_dict)
@@ -81,17 +82,15 @@ def save():
 def bonus(num:int) -> int:
     return BONUS[num]
 
-def switch(header, text):
+def match(text:str, size:int) -> str:
     """
-    Prints the given text with lines if header is false
-    and without lines if header is true
+    Adds " " to the end of a given string until it is
+    the desired length.
+    Used for formatting mostly
     """
-    if header is True:
-        type_text(text)
-    elif header is False:
-        type_with_lines(text)
-    else:
-        raise ValueError("header val not a boolean")
+    while(len(text) < size):
+        text = text + " "
+    return text
 
 def generate_item_rarity() -> str:
     """
