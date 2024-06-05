@@ -1,7 +1,7 @@
 #Land Shark mob file
 import mob, global_commands
-import status_effects
-import items
+from conditions import Vulnerable
+import items, status_effect
 
 stats = {
     "str": 15,
@@ -77,7 +77,7 @@ class Land_Shark(mob.Mob):
             self.spend_ap()
             global_commands.type_text(f"The {self._id} erupts from the ground.")
             self._stats["base_evasion"] -= 3
-            vul = status_effects.Vulnerable(self, self)#double all damage taken for 3 turns
+            vul:status_effect.Status_Effect = Vulnerable(self, self)#double all damage taken for 3 turns
             self._my_effect_id = vul.id
             vul.set_duration(3)
             self.add_status_effect(vul)

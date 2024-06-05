@@ -1,7 +1,9 @@
 import random, time, os, csv
 import global_commands
-from items import Item, Consumable, Weapon, Armor, Firebomb, Health_Potion
-from status_effects import Status_Effect, Stat_Debuff
+from items import Item, Consumable, Weapon, Armor
+import item_compendium
+from status_effect import Status_Effect
+from conditions import Stat_Buff_Debuff as sbd
 
 HP_POT = None
 FIREBOMB = None
@@ -11,14 +13,14 @@ ITEM_TYPES = {
     "Armor": Armor,
     "Item": Item,
     "Consumable": Consumable,
-    "Health_Potion": Health_Potion,
-    "Firebomb": Firebomb
+    "Health_Potion": item_compendium.Health_Potion,
+    "Firebomb": item_compendium.Firebomb
 }
 
 class Player():
 
     def __init__(self, id:str="Player", name:str="New Player"):
-        import status_effects
+        import status_effect
 
         self._id = id
         self._name = name
@@ -46,7 +48,7 @@ class Player():
         self._xp = 0
         self._gold = 0
         self._inventory:dict[str, Item] = {}
-        self._status_effects:dict[str: status_effects.Status_Effect] = {}
+        self._status_effects:dict[str: status_effect.Status_Effect] = {}
 
         #equipment
         w:Item = None
@@ -176,11 +178,72 @@ class Player():
     def set_level(self, num:int) -> None:
         self._level = num
 
-    #ROLLS
-    def roll_attack(self) -> int:
+    #COMBAT TRICKS
+    def crit(self, on=True) -> bool:
+        global_commands.type_text("A critical hit!")
+        if self.weapon.broken:
+            self._stats["damage_multiplier"] += 1 if on else -1
+        else:
+            self._stats["damage_multiplier"] += (self.weapon.crit-1) if on else -(self.weapon.crit-1)
+        return on
+
+
+    def attack(self) -> None:
         """
         Returns an attack roll (d20 + dex bonus)
         """
+        import player_commands, controller
+        enemy = controller.SCENE.enemy
+
+        roll = 1000 if player_commands.GOD_MODE else self.roll_to_hit()
+        self.spend_ap()
+
+        roll_text = f"natural 20!" if roll == 0 else f"{roll}."
+        crit = self.crit(True) if roll == 0 else None#turns crit on
+        
+        global_commands.type_text(f"You attack the {enemy.id}, rolling a {roll_text}")
+
+        if roll == 1:
+            global_commands.type_text("Crtical Fail!")
+
+        if roll >= controller.SCENE.enemy.evasion or roll == 0:
+            global_commands.type_text(f"You hit the {enemy.id}")
+            if player_commands.GOD_MODE:
+                taken = enemy.take_damage(1000, self, True)
+            else:
+                taken = enemy.take_damage(self.roll_damage(), self)
+            crit = self.crit(False) if roll == 0 else None#turns crit off
+            return None
+        else:
+            global_commands.type_text("You missed.")
+        return None
+
+    def power_attack(self) -> int:
+        import controller
+        enemy = controller.SCENE.enemy
+
+        global_commands.type_text(f"You wind up a Power Attack...")
+        roll = self.roll_to_hit()
+        self.spend_ap()
+
+        self._stats["damage_multiplier"] += self.weapon.crit if roll == 0 else 0
+
+        if roll != 0:
+            roll -= self.bonus("dex")
+
+        hit_text = f"A critical hit!" if roll == 0 else f"You hit the {enemy.id}."
+        if roll >= enemy.evasion or roll == 0:
+            global_commands.type_text(hit_text)
+            dmg = max(self.roll_damage(), self.roll_damage())
+            dmg += (self.bonus("str") // 2) * self.damage_multiplier
+            taken = enemy.take_damage(dmg, self)
+            self._stats["damage_multiplier"] -= 1 if roll == 0 else 0
+            return None
+        else:
+            global_commands.type_text("No luck.")
+
+    #ROLLS
+    def roll_to_hit(self) -> int:
         weapon:Weapon = self._equipped["Weapon"]
         if weapon.broken is True:
             raise ValueError("Weapon is broken")
@@ -191,7 +254,7 @@ class Player():
             case 20:
                 return 0
             case _:
-                return roll + self.bonus("dex")
+                return roll + self.bonus("dex") + weapon.attack_bonus
             
     def roll_damage(self) -> int:
         """
@@ -254,7 +317,7 @@ class Player():
                     self._hp -= (taken - self.armor.armor_value)
                     strings = [
                         f"You took {taken - self.armor.armor_value} damage from the {src.damage_header}.",
-                        f"The {src.damage_header} dealt {taken - self.armor.armor_value} to you."]
+                        f"The {src.damage_header} dealt {taken - self.armor.armor_value} damage to you."]
                     global_commands.type_text(random.choice(strings))
                     if self.dead:
                         player_commands.end_game()
@@ -265,7 +328,7 @@ class Player():
 
         self._hp -= taken
         strings = [
-            f"You took {taken} from the {src.damage_header}.",
+            f"You took {taken} damage from the {src.damage_header}.",
             f"The {src.damage_header} dealt {taken} damage to you."]
         global_commands.type_text(random.choice(strings))
         if self.dead:
@@ -274,7 +337,12 @@ class Player():
         return taken
 
     def lose_hp(self, num:int) -> None:
+        import player_commands
+
         self._hp -= num
+        if self.dead:
+            player_commands.end_game()
+        return None
 
     #RESOURCES
     def level_up(self, stat: str) -> None:
@@ -427,7 +495,7 @@ class Player():
 
         if self.bonus("str") + 1 < armor.numerical_weight_class:
             print("too-heavy")
-            armor_debuff = Stat_Debuff(armor, self)#armor is src, self is target
+            armor_debuff:Status_Effect = sbd.Stat_Debuff(armor, self)#armor is src, self is target
             armor_debuff.set_stat("dex")
             armor_debuff.set_id("Maximum Dexterity Bonus")#placeholder id --> just a flag to find and remove it when equipped armor changes
             armor_debuff.set_potency((armor.numerical_weight_class - 2))
@@ -519,8 +587,8 @@ class Player():
             for i in range(1, long):
                 str1 = first[i] if i < len(first) else " "
                 str2 = second[i] if i < len(second) and not last else " "
-                w = weapon[i] if idx == 0 else " "
-                a = armor[i] if idx == 2 else " "
+                w = weapon[i] if idx == 0 and i < len(weapon) else " "
+                a = armor[i] if idx == 2 and i < len(armor) else " "
 
                 str1 = global_commands.match(str1, line_len)
                 str2 = global_commands.match(str2, line_len)
@@ -596,6 +664,8 @@ class Player():
         
         for effect in inactive:
             self.remove_status_effect(effect)
+
+    ##MISC.
 
     def save_to_dict(self) -> dict:
         self.cleanse_all()#for now, cleanse all status effects before saving

@@ -225,7 +225,6 @@ class Weapon(Item):
         self._damage_dice = 0
         self._num_damage_dice = 0
         self._crit = 0
-        self._type = "Weapon"
 
     #properties
     @property
@@ -242,7 +241,10 @@ class Weapon(Item):
         return self._crit
     @property
     def type(self) -> str:
-        return self._type
+        return "Weapon"
+    @property
+    def attack_bonus(self) -> int:
+        return self._numerical_rarity
     
     def set_stats(self, statblock: str):
         """
@@ -480,111 +482,4 @@ class Consumable(Item):
 
     def __str__(self) -> str:
         return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n"
-    
-class Health_Potion(Consumable):
 
-    def __init__(self, rarity):
-        super().__init__("Health Potion", rarity)
-        import global_variables
-        self._unit_weight = 0.5
-        self._target = global_variables.PLAYER
-        self._type = "Health_Potion"
-
-    def use(self, target=None) -> bool:
-        """
-        Heals the target for a given amount
-        Returns True if the target is not already full HP.
-        """
-        if not self._target.needs_healing:
-            global_commands.type_with_lines("You are already full HP.")
-            return False
-    
-        self.decrease_quantity(1)
-        global_commands.type_with_lines(f"{self.id} used. {self._quantity} remaining.")
-        self._target.heal(self._strength*2)
-        return True
-    
-class Repair_Kit(Consumable):
-
-    def __init__(self):
-        super().__init__("Repair Kit", "Uncommon", 0)
-        self._unit_value = 10 * self._numerical_rarity
-        self._unit_weight = .5
-        self._type = "Repair_Kit"
-
-    def use(self, target:Item) -> bool:
-        """
-        Repairs the item to full durability,
-        Returns True if the item is not already full durability
-        """
-        if target.durability[0] < target._durability[1]:#ie item is damaged
-            self.decrease_quantity(1)
-            global_commands.type_text(f"{self.id} used. {self._quantity} remaining.")
-            target.repair()
-            return True
-        return False
-
-class Firebomb(Consumable):
-    
-    def __init__(self, id="Firebomb"):
-        import mob
-        super().__init__("Firebomb", "Uncommon", 0)
-        self._unit_value = 20 * self._numerical_rarity
-        self._unit_weight = 1 
-        self._target:mob.Mob = None
-        self._damage = self._strength
-        self._type = "Firebomb"
-
-    @property
-    def damage_header(self) -> str:
-        return self._id
-    @property
-    def damage_type(self) -> str:
-        return "Physical"
-
-    def use(self, target=None) -> bool:
-        """
-        Throws the firebomb at a given target, and checks to
-        see if that target is set on fire
-        Always returns True
-        """
-        self._target = target
-
-        throw = self._owner.roll_a_check("dex")
-        dodge = target.roll_a_check("dex")
-       
-        self.decrease_quantity(1)
-
-        global_commands.type_text(f"You throw a {self._id} at the {self._target.id}.")
-
-        if dodge >= throw + 10:
-            global_commands.type_text(f"The {self._target.id} dodged your {self._id} entirely!")
-            return True
-        
-        if dodge >= throw:
-            global_commands.type_text(f"The {self._target.id} partially dodged your {self._id}.")
-            taken = self._target.take_damage(int(self._damage // 2), self)
-            if global_commands.probability(50 - dodge):
-                self.set_on_fire()
-            return True
-        
-        if throw > dodge:
-            global_commands.type_text(f"You hit the {self._target.id}.")
-            taken = self._target.take_damage(int(self._damage), self)
-            if global_commands.probability(75):#--> if statement is a formattting thing the message doesn't change 
-                self.set_on_fire()
-
-        return True
-
-    def set_on_fire(self) -> None:
-        fire = global_commands.status_effects.On_Fire(self._owner, self._target)
-        fire.set_duration(2)
-        fire.set_potency(self._numerical_rarity)
-        self._target.add_status_effect(fire)
-        return None
-       
-    def update(self) -> None:
-        super().update()
-        self._damage = self._strength
-        self._unit_value = 20 * self._numerical_rarity
-        self._unit_weight = 1

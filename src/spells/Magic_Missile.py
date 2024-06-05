@@ -1,6 +1,6 @@
 import global_commands, magic
 
-class Magic_Missile(magic.Spell):
+class Magic_Missile(magic.Evocation):
 
     def __init__(self, caster, id="Magic Missile"):
         super().__init__(caster, id)

@@ -1,26 +1,7 @@
 #item compendium
-from items import Health_Potion, Firebomb, Repair_Kit
-
-def generate_hp_potions(rarity, num=1):
-    import global_variables
-    hp = Health_Potion(rarity)
-    hp.set_quantity(num)
-    hp.set_target(global_variables.PLAYER)
-    return hp
-
-def generate_repair_kits(num):
-    repair = Repair_Kit()
-    repair.set_quantity(num)
-    return repair
-
-def generate_firebombs(num):
-    fb = Firebomb()
-    fb.set_quantity(num)
-    return fb
 
 #tag, id, (num dice, dice type, crit)
 WEAPONS_DICTIONARY = [
-
     (("WP"), "Battleaxe", "1d8,x2"),
     (("WP"), "Light Flail", "1d8,x2"),
     (("WP"), "Scimitar", "1d6,x4"),
@@ -33,6 +14,7 @@ WEAPONS_DICTIONARY = [
     (("WP"), "Halberd", "1d10,x3")
 ]
 
+#tag, id, weight class, armor bonus (none is default --> determined by rarity and class)
 ARMOR_DICTIONARY = [
     (("AR"), "Studded Leather", ("Light", None)),
     (("AR"), "Haramaki", ("None", 1)),

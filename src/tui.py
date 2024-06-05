@@ -13,7 +13,10 @@ def begin():
 
     global_commands.type_text("Would you like to enter the dungeon? y/n")
 
-    controller.SCENE.enemy = monster_manual.spawn_random_mob() if controller.TEST is False else monster_manual.spawn_mob("Evil Eye")
+    if not controller.TEST:
+        controller.SCENE.enemy = monster_manual.spawn_random_mob()  
+    else:
+        controller.SCENE.enemy = monster_manual.spawn_mob("Evil Eye")
 
     command = input(">> ").lower()
     print("")

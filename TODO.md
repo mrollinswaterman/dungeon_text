@@ -46,7 +46,8 @@ as necessary for formatting)
 - [ ] Add a "talk" mechanic with the Shopkeep to give player hints about how to unlock legendary weapons
 (ie, "The Shopkeep says the Blacksmith might be able to craft something special with enough Land Shark teeth)
 - [ ] Add a extended crit range to some weapons, ie 18-20, 16-20, etc
-- [ ] Add a menu if the player hits "n" initally that lets them enter the overworld, save, or quit the game. 
+- [ ] Add a menu if the player hits "n" initally that lets them enter the overworld, save, or quit the game.
+- [ ] Add a 1/round "Reaction" ability to all objects, can act on the opponents turn to do something (i.e add +5 to Evasion at the cost of -5 on all attack checks on your next turn, interurrpt a spell cast, chase a fleeing enemy, etc) 
 
 ## Items
 
@@ -97,3 +98,9 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] All-out(All AP): no dex bonus to evasion (and enemies get to roll twice take highest vs you??) for next turn, but attack rolls now add str+dex or dex+dex, whichever is highest
 - [ ] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
 - [ ] Flurry(All AP): Make (level//4) extra attacks at a -1 to-hit per attack (ie first attack is -1, second attack is -2. etc)
+
+## Bugs
+
+- [ ] check_inventory should print equipped items even if inventory is empty
+- [ ] buying a consumable at the store does not reprint the shopkeep's inventory
+- [ ] Extra line printed after re-entering dungeon

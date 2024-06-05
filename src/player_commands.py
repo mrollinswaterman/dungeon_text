@@ -93,10 +93,10 @@ def cleanse_an_effect():
     Attempts to cleanse a chosen status effect
     """
     import global_variables
-    import status_effects
+    import status_effect
     global_commands.type_text("Select an effect to cleanse OR Cancel - (c)")
     for idx, entry in enumerate(global_variables.PLAYER.status_effects):
-        effect: status_effects.Status_Effect = global_variables.PLAYER.status_effects[entry]
+        effect: status_effect.Status_Effect = global_variables.PLAYER.status_effects[entry]
         string = f"{idx+1}. {effect.id}"
         if idx % 2 == 0 and idx != 0:
             time.sleep(0.05)
@@ -119,7 +119,7 @@ def cleanse_an_effect():
                 try:
                     num = int(cmd)
                     try: 
-                        effect:status_effects.Status_Effect = list(global_variables.PLAYER.status_effects.values())[num-1]
+                        effect:status_effect.Status_Effect = list(global_variables.PLAYER.status_effects.values())[num-1]
                         global_variables.PLAYER.spend_ap()
                         effect.attempt_cleanse(global_variables.PLAYER.roll_a_check(effect.cleanse_stat))
                         return None
@@ -136,35 +136,8 @@ def attack() -> None:
     Runs the player attack action
     """
     import global_variables
-    import tui
-    import controller
-
-    if GOD_MODE is True:
-        attack = 1000000
-    else:
-        attack = global_variables.PLAYER.roll_attack() #if tui.TEST is False else 1
-        global_variables.PLAYER.spend_ap()
-
-    if attack == 0:#CRITICAL HIT DETECTION
-        global_commands.type_text(f"You attack the {controller.SCENE.enemy.id}, rolling a natural 20!")
-    else:
-        global_commands.type_text(f"You attack the {controller.SCENE.enemy.id}, rolling a {attack}.")
-
-    if attack == 0:#CRITICAL HIT DETECTION
-        global_commands.type_text("Critical Hit!")
-        global_variables.PLAYER.stats["damage_multiplier"] += (global_variables.PLAYER.weapon.crit - 1)#math thing
-        taken = controller.SCENE.enemy.take_damage(global_variables.PLAYER.roll_damage(), global_variables.PLAYER)
-        global_variables.PLAYER.stats["damage_multiplier"] -= (global_variables.PLAYER.weapon.crit - 1)#math thing
-        return None
-    elif attack == 1:
-        global_commands.type_text("Crtical Fail!")
-    elif attack >= controller.SCENE.enemy.evasion:
-        if GOD_MODE is True:
-            taken = controller.SCENE.enemy.take_damage(1000, global_variables.PLAYER, True)
-        else:
-            taken = controller.SCENE.enemy.take_damage(global_variables.PLAYER.roll_damage(), global_variables.PLAYER)
-        return None
-    global_commands.type_text("You missed.")
+    
+    global_variables.PLAYER.attack()
     return None
 
 def show_inventory() -> None:

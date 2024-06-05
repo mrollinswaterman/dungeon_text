@@ -1,6 +1,6 @@
 #Hobgoblin mob file
 import mob, global_commands
-import status_effects
+from conditions import Stat_Buff_Debuff
 
 stats = {
     "str": 12,
@@ -51,7 +51,7 @@ class Hobgoblin(mob.Mob):
 
         else:
             global_commands.type_text(f"The {self.id}'s insults distract you, making you an easier target.")
-            taunt = status_effects.Stat_Debuff(self, self._player)
+            taunt = Stat_Buff_Debuff.Stat_Debuff(self, self._player)
             self._my_effect_id = taunt.id
             taunt.set_duration(3)
             taunt.set_potency(2)

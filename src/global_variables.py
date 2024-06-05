@@ -1,8 +1,8 @@
 #globals variables
 from player import Player
 from items import Weapon, Armor, numerical_rarity_to_str
-from item_compendium import generate_hp_potions, generate_firebombs, generate_repair_kits
-from item_compendium import WEAPONS_DICTIONARY, ARMOR_DICTIONARY
+import item_compendium
+from equipment_stats import WEAPONS_DICTIONARY, ARMOR_DICTIONARY
 from shopkeep import Blacksmith, Shopkeep
 
 PLAYER:Player = Player()
@@ -40,8 +40,8 @@ leather_armor.set_armor_value(2)
 PLAYER.equip(leather_armor, True)
 PLAYER.equip(long_sword, True)
 
-PLAYER.pick_up(generate_hp_potions("Common", 5), True)
-PLAYER.pick_up(generate_firebombs(5), True)
+PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
+PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
 SHOPKEEP = Shopkeep()
 BLACKSMITH = Blacksmith()
@@ -61,9 +61,9 @@ def restock_the_shop():
         SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
 
     threat_str = numerical_rarity_to_str(max(PLAYER.threat // 5, 1))
-    pots = generate_hp_potions(threat_str, 5)
+    pots = item_compendium.Health_Potion.craft(threat_str, 5)
     SHOPKEEP.stock(pots)
     #scales HP potions to be higher rarity with player level
 
-    SHOPKEEP.stock(generate_repair_kits(5))
+    SHOPKEEP.stock(item_compendium.Repair_Kit.craft(5))
 

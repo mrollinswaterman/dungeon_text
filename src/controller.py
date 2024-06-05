@@ -9,8 +9,12 @@ TEST = True
 class Scene():
 
     def __init__(self):
+        self.player = global_variables.PLAYER
         self.enemy:monster_manual.mob.Mob = None
         self.event:ev.Event = None
+
+        self.queue = [self.player, self.enemy]
+                  
 
 SCENE = Scene()
 

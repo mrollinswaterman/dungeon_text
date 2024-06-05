@@ -1,6 +1,6 @@
 import random
 import global_commands
-import status_effects
+import status_effect
 
 default = {
     "hit_dice": 8,
@@ -31,7 +31,7 @@ class Mob():
         #identification
         import global_variables
         import player
-        import status_effects
+        import status_effect
 
         self._id = id
         self._name = self._id
@@ -64,7 +64,7 @@ class Mob():
         self._flee_threshold = 0.2
         self._player:player.Player = global_variables.PLAYER
 
-        self._status_effects: dict[str: status_effects.Status_Effect] = {}
+        self._status_effects: dict[str: status_effect.Status_Effect] = {}
 
         self._retreating = False
         self._my_effect_id = ""
@@ -179,7 +179,30 @@ class Mob():
         return False
 
     #ROLLS
-    def roll_attack(self) -> int:
+    def crit(self, on=True) -> bool:
+        global_commands.type_text(f"A critical hit! Uh oh.")
+        self._stats["damage_multiplier"] += 1 if on else -1
+
+    def attack(self) -> None:
+        import global_variables
+        player = global_variables.PLAYER
+
+        roll = self.roll_to_hit()
+        self.spend_ap()
+        roll_text = f"natural 20!" if roll == 0 else f"{roll}."
+        global_commands.type_text(f"The {self.id} attacks you, rolling a {roll_text}")
+        crit = self.crit(True) if roll == 0 else None
+
+        if roll >= player.evasion or roll == 0:
+            global_commands.type_text("A hit.")
+            taken = player.take_damage(self.roll_damage(), self)
+        else:
+            global_commands.type_text("It missed")
+        return None
+
+
+    
+    def roll_to_hit(self) -> int:
         """
         Rolls an attack (d20)
         """
@@ -209,10 +232,10 @@ class Mob():
         """
         Takes a given amount of damage, reduced by armor
         """
-        import status_effects
+        import status_effect
         import items
 
-        src:status_effects.Status_Effect | items.Item = src
+        src:status_effect.Status_Effect | items.Item = src
 
         taken *= self.damage_taken_multiplier
         if armor_piercing:
@@ -303,7 +326,7 @@ class Mob():
         return True
     
     #STATUS EFFECTS
-    def add_status_effect(self, effect:status_effects.Status_Effect) -> None:
+    def add_status_effect(self, effect:status_effect.Status_Effect) -> None:
         """
         Adds a status effect to the mob
         """
@@ -315,7 +338,7 @@ class Mob():
         self._status_effects[effect.id] = effect
         effect.apply()
 
-    def remove_status_effect(self, effect:status_effects.Status_Effect) -> None:
+    def remove_status_effect(self, effect:status_effect.Status_Effect) -> None:
         """
         Removes a status effect from the mob
         """
@@ -346,7 +369,7 @@ class Mob():
         #update all status effects
         inactive = []
         for entry in self._status_effects:
-            effect:status_effects.Status_Effect = self._status_effects[entry]
+            effect:status_effect.Status_Effect = self._status_effects[entry]
             effect.update()
             if effect.active is False:
                 inactive.append(effect)
