@@ -1,6 +1,5 @@
 #Hobgoblin mob file
-import random
-import mob, player, global_commands
+import mob, global_commands
 import status_effects
 
 stats = {
@@ -16,7 +15,7 @@ stats = {
     "max_hp": 0,
     "max_ap": 0,
     "armor": 1,
-    "damage": 8,
+    "damage": "1d8",
     "dc": 10,
     "hit_dice": 10,
     "loot": {

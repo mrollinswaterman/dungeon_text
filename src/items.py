@@ -1,7 +1,5 @@
-import random
 import csv
 import global_commands
-import status_effects
 
 RARITY = {
     "Common": 1,
@@ -29,6 +27,7 @@ class Item():
         """
         Init function for the base Item class
         """
+        import player
         self._id = id
         self._name = id
         if rarity is None:
@@ -46,7 +45,7 @@ class Item():
         self._broken = False
         self._type = "Item"
 
-        self._owner = None
+        self._owner:"player.Player" = None
 
         self._tod = {}
     #properties
@@ -115,7 +114,7 @@ class Item():
         if global_commands.probability((66 // self._numerical_rarity)):
             self._durability -= 1
             if self.broken is True:
-                self.item_has_broken()
+                self.break_item()
 
     def remove_durability(self, num:int) -> None:
         """
@@ -231,9 +230,6 @@ class Weapon(Item):
     #properties
     @property
     def damage_dice(self) -> int:
-        """
-        Returns damage dice
-        """
         return self._damage_dice
     @property
     def num_damage_dice(self) -> int:
@@ -275,10 +271,7 @@ class Weapon(Item):
         self._crit = num
 
     def roll_damage(self) -> int:
-        dmg = 0
-        for die in range(self._num_damage_dice):
-            dmg += global_commands.d(self._damage_dice)
-        return dmg
+        return global_commands.XdY([self._num_damage_dice, self._damage_dice])
 
     def update(self) -> None:
         self._value = 15 * self._numerical_rarity
@@ -492,8 +485,9 @@ class Health_Potion(Consumable):
 
     def __init__(self, rarity):
         super().__init__("Health Potion", rarity)
+        import global_variables
         self._unit_weight = 0.5
-        self._target = status_effects.PLAYER
+        self._target = global_variables.PLAYER
         self._type = "Health_Potion"
 
     def use(self, target=None) -> bool:
@@ -518,7 +512,7 @@ class Repair_Kit(Consumable):
         self._unit_weight = .5
         self._type = "Repair_Kit"
 
-    def use(self, target: Item) -> bool:
+    def use(self, target:Item) -> bool:
         """
         Repairs the item to full durability,
         Returns True if the item is not already full durability
@@ -533,10 +527,11 @@ class Repair_Kit(Consumable):
 class Firebomb(Consumable):
     
     def __init__(self, id="Firebomb"):
+        import mob
         super().__init__("Firebomb", "Uncommon", 0)
         self._unit_value = 20 * self._numerical_rarity
         self._unit_weight = 1 
-        self._target = None
+        self._target:mob.Mob = None
         self._damage = self._strength
         self._type = "Firebomb"
 
@@ -582,7 +577,7 @@ class Firebomb(Consumable):
         return True
 
     def set_on_fire(self) -> None:
-        fire = status_effects.On_Fire(self._owner, self._target)
+        fire = global_commands.status_effects.On_Fire(self._owner, self._target)
         fire.set_duration(2)
         fire.set_potency(self._numerical_rarity)
         self._target.add_status_effect(fire)

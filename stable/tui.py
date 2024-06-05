@@ -1,10 +1,10 @@
 import sys, random
-import mob, monster_manual
-import narrator, player_commands, enemy_commands
-import item_compendium
+import objects.mob as mob, helpers.monster_manual as monster_manual
+import narrator, commands.player_commands as player_commands, commands.enemy_commands as enemy_commands
+import helpers.item_compendium as item_compendium
 import dms_guide, events
-import global_commands, global_variables
-import status_effects
+import commands.global_commands as global_commands, global_variables
+import objects.status_effects as status_effects
 
 PLAYER = global_variables.PLAYER
 

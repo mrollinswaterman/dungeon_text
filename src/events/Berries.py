@@ -1,7 +1,7 @@
 #Mysterious Berries event class
-import event
-import global_commands
 import random
+import event, global_commands
+
 
 success_poison = {
     "int": ["You identify the berries as a poisonous species. Best to steer clear.",

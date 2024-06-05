@@ -1,6 +1,6 @@
 #status effects file
 import random
-import global_commands
+import commands.global_commands as global_commands
 
 PLAYER = None
 

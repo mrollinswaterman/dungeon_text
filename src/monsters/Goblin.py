@@ -1,5 +1,4 @@
 #Goblin mob file
-import random
 import mob, global_commands
 
 stats = {
@@ -15,7 +14,7 @@ stats = {
     "max_hp": 0,
     "max_ap": 0,
     "armor": 0,
-    "damage": 6,
+    "damage": "1d6",
     "dc": 10,
     "hit_dice": 10,
     "loot": {
@@ -48,7 +47,7 @@ class Goblin(mob.Mob):
         Rob: Steals a random amount of gold from the player if they fail a dex check
         """
         if not self.retreat:
-            self.spend_ap(1)
+            self.spend_ap()
             global_commands.type_text(f"The {self._id} makes a grab at your gold pouch.")
             save = self._player.roll_a_check("dex")
             attack = self.roll_attack()

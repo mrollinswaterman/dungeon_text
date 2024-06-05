@@ -1,26 +1,25 @@
-import random, time
-import os
-import csv
-import items
+import random, time, os, csv
 import global_commands
-from event import Event
-import status_effects
+from items import Item, Consumable, Weapon, Armor, Firebomb, Health_Potion
+from status_effects import Status_Effect, Stat_Debuff
 
 HP_POT = None
 FIREBOMB = None
 
 ITEM_TYPES = {
-    "Weapon": items.Weapon,
-    "Armor": items.Armor,
-    "Item": items.Item,
-    "Consumable": items.Consumable,
-    "Health_Potion": items.Health_Potion,
-    "Firebomb": items.Firebomb
+    "Weapon": Weapon,
+    "Armor": Armor,
+    "Item": Item,
+    "Consumable": Consumable,
+    "Health_Potion": Health_Potion,
+    "Firebomb": Firebomb
 }
 
 class Player():
 
-    def __init__(self, id: str="Player", name:str = "New Player"):
+    def __init__(self, id:str="Player", name:str="New Player"):
+        import status_effects
+
         self._id = id
         self._name = name
         self._level = 1
@@ -46,13 +45,12 @@ class Player():
         #xp/gold/items
         self._xp = 0
         self._gold = 0
-        self._inventory:dict[str, items.Item] = {}
-        self._status_effects:dict[str, status_effects.Status_Effect] = {}
-        self._level_up_function = None
+        self._inventory:dict[str, Item] = {}
+        self._status_effects:dict[str: status_effects.Status_Effect] = {}
 
         #equipment
-        w:items.Item = None
-        a:items.Item = None
+        w:Item = None
+        a:Item = None
         self._equipped = {
             "Weapon": w, 
             "Armor": a
@@ -69,6 +67,9 @@ class Player():
     def level(self) -> int:
         return self._level
     @property
+    def caster_level(self) -> int:
+        return 1 + (self.level // 5)
+    @property
     def hp(self) -> int:
         return self._hp
     @property
@@ -81,10 +82,10 @@ class Player():
     def xp(self):
         return self._xp
     @property
-    def armor(self) -> items.Armor:
+    def armor(self) -> Armor:
         return self._equipped["Armor"]
     @property
-    def weapon(self) -> items.Weapon:
+    def weapon(self) -> Weapon:
         return self._equipped["Weapon"]
     @property
     def evasion(self):
@@ -103,7 +104,7 @@ class Player():
         total_weight = 0
         for entry in self._inventory:
             if self._inventory[entry] is not None:#check to make sure the entry is valid
-                held_item:items.Item = self._inventory[entry]
+                held_item:Item = self._inventory[entry]
                 total_weight += held_item.total_weight
         for item in self._equipped:
             if self._equipped[item] is not None: #check to make sure an item is equipped, add its weight to the total if it is
@@ -172,9 +173,6 @@ class Player():
         self._inventory = []
         #other stuff to be added
 
-    def set_level_up_function(self, func) -> None:
-        self._level_up_function = func
-
     def set_level(self, num:int) -> None:
         self._level = num
 
@@ -183,7 +181,7 @@ class Player():
         """
         Returns an attack roll (d20 + dex bonus)
         """
-        weapon:items.Weapon = self._equipped["Weapon"]
+        weapon:Weapon = self._equipped["Weapon"]
         if weapon.broken is True:
             raise ValueError("Weapon is broken")
         roll = global_commands.d(20)#rolls a d20
@@ -199,7 +197,7 @@ class Player():
         """
         Returns a damage roll (weapon dice + str bonus)
         """
-        weapon:items.Weapon = self._equipped["Weapon"]
+        weapon:Weapon = self._equipped["Weapon"]
         if weapon.broken:
             global_commands.type_text(f"You can't use a broken {weapon.id}, so your hands will have to do.")
             return (global_commands.d(4) + self.bonus("str")) * self.damage_multiplier
@@ -224,15 +222,23 @@ class Player():
         """
         Reduces the players hp by a damage amount, reduced by armor
         """
+        import magic
+        import mob
+        import player_commands
+
+        src:magic.Spell | mob.Mob | Status_Effect | Item = src
         if armor_piercing is True:
             self._hp -= int(taken)
             strings = [
-            f"You took {taken} from the {src.damage_header}.",
+            f"You took {taken} damage from the {src.damage_header}.",
             f"The {src.damage_header} dealt {taken} damage to you."]
             global_commands.type_text(random.choice(strings))
+            if self.dead:
+                player_commands.end_game()
+                return None
             return taken
 
-        armor:items.Armor = self._equipped["Armor"]
+        armor:Armor = self._equipped["Armor"]
         taken *= self.damage_taken_multiplier
 
         if src.damage_type == "Physical" or src.damage_type is None:
@@ -250,6 +256,9 @@ class Player():
                         f"You took {taken - self.armor.armor_value} damage from the {src.damage_header}.",
                         f"The {src.damage_header} dealt {taken - self.armor.armor_value} to you."]
                     global_commands.type_text(random.choice(strings))
+                    if self.dead:
+                        player_commands.end_game()
+                        return None
                     return taken - self.armor.armor_value
             else:
                 global_commands.type_text(f"Broken {armor.id} does you no good...")
@@ -259,6 +268,9 @@ class Player():
             f"You took {taken} from the {src.damage_header}.",
             f"The {src.damage_header} dealt {taken} damage to you."]
         global_commands.type_text(random.choice(strings))
+        if self.dead:
+            player_commands.end_game()
+            return None
         return taken
 
     def lose_hp(self, num:int) -> None:
@@ -287,9 +299,6 @@ class Player():
             return None
         global_commands.type_text(f"{xp} XP earned.")
         self._xp += xp
-
-        if self.can_level_up is True:
-            self._level_up_function()
     
     def gain_gold(self, gold:int, silently:bool=False) -> None:
         """
@@ -359,7 +368,7 @@ class Player():
             return None
 
     #INVENTORY STUFF
-    def pick_up(self, item: items.Item | items.Consumable, silently:bool = False) -> bool:
+    def pick_up(self, item: Item | Consumable, silently:bool = False) -> bool:
         """
         Picks up an item if the player has inventory space for it
         """
@@ -367,7 +376,7 @@ class Player():
             return False
         if self.can_carry(item):
             if self.has_item(item) is True and item.is_consumable is True:
-                held_item:items.Consumable = self._inventory[item.id]
+                held_item:Consumable = self._inventory[item.id]
                 held_item.increase_quantity(item.quantity)
                 if silently is False:
                     (item.pickup_message + "\n")
@@ -381,7 +390,7 @@ class Player():
             if silently is False:
                 global_commands.type_text("Not enough inventory space.")
         
-    def drop(self, item: items.Item) -> None:
+    def drop(self, item: Item) -> None:
         """
         Drops an item out of the player's inventory
         """
@@ -391,12 +400,12 @@ class Player():
         else:
             raise ValueError("Can't drop an item you don't have.")
 
-    def equip(self, item: "items.Item", silently=False) -> bool:
+    def equip(self, item: Item, silently=False) -> bool:
         """
         Equips the player with a given weapon
         """
         if item.type in self._equipped:
-            prev:items.Item = self._equipped[item.type]
+            prev:Item = self._equipped[item.type]
             if prev is not None and prev.id != item.id:#if its not none and not the same item, swap it to inventory
                 self._inventory[prev.id] = prev
             if item.id in self._inventory and item == self._inventory[item.id]:
@@ -410,7 +419,7 @@ class Player():
             return True
         return False
 
-    def equip_armor(self, armor: "items.Armor") -> None:
+    def equip_armor(self, armor: Armor) -> None:
         """
         Same as above but for armor
         """
@@ -418,14 +427,14 @@ class Player():
 
         if self.bonus("str") + 1 < armor.numerical_weight_class:
             print("too-heavy")
-            armor_debuff = status_effects.Stat_Debuff(armor, self)#armor is src, self is target
+            armor_debuff = Stat_Debuff(armor, self)#armor is src, self is target
             armor_debuff.set_stat("dex")
             armor_debuff.set_id("Maximum Dexterity Bonus")#placeholder id --> just a flag to find and remove it when equipped armor changes
             armor_debuff.set_potency((armor.numerical_weight_class - 2))
             armor_debuff.set_duration(1000000000000)
             self.add_status_effect(armor_debuff, True)
 
-    def can_carry(self, item:items.Item) -> bool:
+    def can_carry(self, item:Item) -> bool:
         """
         Checks if the player can carry item 
 
@@ -433,7 +442,7 @@ class Player():
         """
         return self.current_weight + item.total_weight <= self.carrying_capacity
 
-    def has_item(self, item: items.Item) -> bool:
+    def has_item(self, item: Item) -> bool:
         """
         Checks if a player has an item in their inventory
 
@@ -451,7 +460,7 @@ class Player():
             except KeyError:
                 return False
     
-    def get_item_by_id(self, id:str) -> items.Item:
+    def get_item_by_id(self, id:str) -> Item:
         """
         Get an item in the player's inventory by it's id
         Returns the item, None if not found
@@ -461,7 +470,7 @@ class Player():
         except IndexError:
             return None
     
-    def get_item_by_index(self, idx:int) -> items.Item:
+    def get_item_by_index(self, idx:int) -> Item:
         """"""
         try:
             return list(self._inventory.values())[idx]
@@ -546,11 +555,10 @@ class Player():
     def modify_stat(self, stat, num):
         self._stats[stat] += num
 
-    def add_status_effect(self, effect:"status_effects.Status_Effect", silent=False) -> None:
+    def add_status_effect(self, effect: Status_Effect, silent=False) -> None:
         """
         Adds a status effect to the player's status effect list and applies it
         """
-        
         if effect.id in self._status_effects:#if effect already in status_effects
             applied = self._status_effects[effect.id]
             applied.additional_effect(effect)#...apply the effect's additional_effect function
@@ -559,7 +567,7 @@ class Player():
             effect.apply()
         return None
 
-    def remove_status_effect(self, effect:"status_effects.Status_Effect") -> bool:
+    def remove_status_effect(self, effect:"Status_Effect") -> bool:
         if effect.id in self._status_effects:
             del self._status_effects[effect.id]
             effect.cleanse()
@@ -571,7 +579,7 @@ class Player():
         removed = []
         self.reset_ap()
         for entry in self._status_effects:
-            effect:status_effects.Status_Effect = self._status_effects[entry]
+            effect:Status_Effect = self._status_effects[entry]
             effect.update()
             if effect.active is False:
                 #removes effect
@@ -633,7 +641,7 @@ class Player():
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
                 if row["type"] in ITEM_TYPES:
-                    item:items.Item = ITEM_TYPES[row["type"]](row["rarity"])
+                    item:Item = ITEM_TYPES[row["type"]](row["rarity"])
                     item.save()
                     with open("temp.csv", "w", newline='') as temp_file:
                         temp_file.truncate(0)
@@ -652,11 +660,13 @@ class Player():
         if os.path.exists("temp.csv"):
             os.remove("temp.csv")
         else:
-           pass
+            pass
 
+"""
 # arush wrote this while drunk, he won't let me delete it
-class bitch(Event):
+class bitch(event.Event):
     def __init__(self, num_bitches: int):
         var: str = "bitch"
         self.bitches = num_bitches
         return f"miles has {self.bitches} {var}s"
+"""

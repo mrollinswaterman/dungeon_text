@@ -1,7 +1,4 @@
-import time
-import sys
-import csv
-import random
+import time, sys, csv, random
 import global_variables
 
 TAG_TO_STAT = {
@@ -112,6 +109,35 @@ def d(num):
     Rolls a dX where X is some number (ie d6, d20, etc)
     """
     return random.randrange(1, num+1)
+
+def XdY(damage:str | list | int):
+    """
+    Rolls X dYs and returns the total (ie 2d4, 3d6, etc)
+    """
+    ty:str | list | int = type(damage)
+    final = 0
+    num = None
+    dice = None
+
+    if ty == str:
+        num = int(damage.split("d")[0])
+        dice = int(damage.split("d")[1])
+
+    elif ty == list or ty == tuple:
+        num = damage[0]
+        dice = damage[1]
+    
+    elif ty == int:
+        num = 1
+        dice = damage
+    
+    else:
+        raise ValueError(f"Invalid type '{ty}' for XdY.")
+
+    for _ in range(num):
+            final += d(dice)
+    return final
+    
 
 def probability(chance):
     return random.random() < (chance / 100)

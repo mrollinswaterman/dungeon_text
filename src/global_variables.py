@@ -1,8 +1,11 @@
 #globals variables
-import player
-import items
-import item_compendium
-import shopkeep
+from player import Player
+from items import Weapon, Armor, numerical_rarity_to_str
+from item_compendium import generate_hp_potions, generate_firebombs, generate_repair_kits
+from item_compendium import WEAPONS_DICTIONARY, ARMOR_DICTIONARY
+from shopkeep import Blacksmith, Shopkeep
+
+PLAYER:Player = Player()
 
 BONUS = {
     5: -4,
@@ -22,30 +25,29 @@ BONUS = {
     19: 4,
     20: 5
 }
+
 #create constants
 START_CMD = True
 RUNNING = False
 
-PLAYER = player.Player()
-
-long_sword = items.Weapon("Long Sword", "Common")
+long_sword = Weapon("Long Sword", "Common")
 long_sword.set_damage_dice((1,8))
 long_sword.set_crit_multiplier(2)
 
-leather_armor = items.Armor("Leather Armor", "Light", "Common")
+leather_armor = Armor("Leather Armor", "Light", "Common")
 leather_armor.set_armor_value(2)
 
 PLAYER.equip(leather_armor, True)
 PLAYER.equip(long_sword, True)
 
-PLAYER.pick_up(item_compendium.generate_hp_potions("Common", 5), True)
-PLAYER.pick_up(item_compendium.generate_firebombs(5), True)
+PLAYER.pick_up(generate_hp_potions("Common", 5), True)
+PLAYER.pick_up(generate_firebombs(5), True)
 
-SHOPKEEP = shopkeep.Shopkeep()
-BLACKSMITH = shopkeep.Blacksmith()
+SHOPKEEP = Shopkeep()
+BLACKSMITH = Blacksmith()
 
-BLACKSMITH.add_to_forge_list(item_compendium.WEAPONS_DICTIONARY)#add weapons to forge list
-BLACKSMITH.add_to_forge_list(item_compendium.ARMOR_DICTIONARY)#add armors to forge list
+BLACKSMITH.add_to_forge_list(WEAPONS_DICTIONARY)#add weapons to forge list
+BLACKSMITH.add_to_forge_list(ARMOR_DICTIONARY)#add armors to forge list
 
 def restock_the_shop():
     """
@@ -53,15 +55,15 @@ def restock_the_shop():
     """
     #make sure the shop is up-to-date on player level
     SHOPKEEP.empty_inventory()
-    SHOPKEEP.set_player_level(PLAYER.level)
 
     BLACKSMITH.forge()
     for entry in BLACKSMITH.storehouse:
         SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
 
-    threat_str = items.numerical_rarity_to_str(max(PLAYER.threat // 5, 1))
-    pots = item_compendium.generate_hp_potions(threat_str, 5)
+    threat_str = numerical_rarity_to_str(max(PLAYER.threat // 5, 1))
+    pots = generate_hp_potions(threat_str, 5)
     SHOPKEEP.stock(pots)
     #scales HP potions to be higher rarity with player level
 
-    SHOPKEEP.stock(item_compendium.generate_repair_kits(5))
+    SHOPKEEP.stock(generate_repair_kits(5))
+

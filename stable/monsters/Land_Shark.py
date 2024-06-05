@@ -1,8 +1,8 @@
 #Land Shark mob file
 import random
-import mob, player, global_commands
-import status_effects
-import items
+import commands.objects.mob as mob, commands.objects.player as player, commands.global_commands as global_commands
+import objects.status_effects as status_effects
+import objects.items as items
 
 class Land_Shark(mob.Mob):
     def __init__(self, id="Land Shark", level = (3,10)):

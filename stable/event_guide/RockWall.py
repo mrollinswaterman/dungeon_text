@@ -1,5 +1,5 @@
 #Rock Wall Event class
-import event
+import objects.event as event
 
 object = event.Event("RockWall")
 

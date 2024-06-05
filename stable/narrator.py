@@ -1,7 +1,7 @@
 import time
 import sys
 import random
-import global_commands
+import commands.global_commands as global_commands
 import global_variables
 
 SCENE_CHANGE = [

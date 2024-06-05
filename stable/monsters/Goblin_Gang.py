@@ -1,6 +1,6 @@
 #Goblin Gang mob file
 import random
-import mob, player, global_commands
+import commands.objects.mob as mob, commands.objects.player as player, commands.global_commands as global_commands
 
 class Goblin_Gang(mob.Mob):
     def __init__(self, id="Goblin Gang", level = (2,6)):

@@ -1,8 +1,8 @@
 #Glyphs event class
-import event
-import global_commands
-from events import Trap_Room
 import random
+import global_commands
+import event
+from events import Trap_Room
 
 success = {
     "int": ["You recognize the signs as Elvish. They warn of a trap room a litte further ahead. You boldly go the other direction.",

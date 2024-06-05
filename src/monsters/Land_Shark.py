@@ -1,6 +1,5 @@
 #Land Shark mob file
-import random
-import mob, player, global_commands
+import mob, global_commands
 import status_effects
 import items
 
@@ -17,7 +16,7 @@ stats = {
     "max_hp": 0,
     "max_ap": 0,
     "armor": 3,
-    "damage": 10,
+    "damage": "1d12",
     "dc": 10,
     "hit_dice": 12,
     "loot": {

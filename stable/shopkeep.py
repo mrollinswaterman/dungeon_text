@@ -1,10 +1,10 @@
 #Shopkeep class
 import math, random, time
 from copy import deepcopy
-import items
-import item_compendium
-import player
-import global_commands
+import objects.items as items
+import helpers.item_compendium as item_compendium
+import commands.objects.player as player
+import commands.global_commands as global_commands
 
 def format_shop(string1="", string1_1=""):
     print("")#newline after each paired entry

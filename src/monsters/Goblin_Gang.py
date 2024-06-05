@@ -1,6 +1,5 @@
 #Goblin Gang mob file
-import random
-import mob, player, global_commands
+import mob
 
 stats = {
     "str": 14,
@@ -15,7 +14,7 @@ stats = {
     "max_hp": 0,
     "max_ap": 0,
     "armor": 0,
-    "damage": 8,
+    "damage": "3d4",
     "dc": 10,
     "hit_dice": 10,
     "loot": {

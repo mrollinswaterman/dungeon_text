@@ -14,7 +14,7 @@ stats = {
     "max_hp": 0,
     "max_ap": 0,
     "armor": 3,
-    "damage": 8,
+    "damage": "2d8",
     "dc": 10,
     "hit_dice": 10,
     "loot": {

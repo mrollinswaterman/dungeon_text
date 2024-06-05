@@ -1,8 +1,8 @@
 import random
 from typing import Union
-import global_variables, global_commands
-import player
-import status_effects
+import global_variables, commands.global_commands as global_commands
+import commands.objects.player as player
+import objects.status_effects as status_effects
 
 class Mob():
 

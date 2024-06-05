@@ -1,21 +1,20 @@
 #item compendium
-import items
-
-PLAYER = None
+from items import Health_Potion, Firebomb, Repair_Kit
 
 def generate_hp_potions(rarity, num=1):
-    hp = items.Health_Potion(rarity)
+    import global_variables
+    hp = Health_Potion(rarity)
     hp.set_quantity(num)
-    hp.set_target(PLAYER)
+    hp.set_target(global_variables.PLAYER)
     return hp
 
 def generate_repair_kits(num):
-    repair = items.Repair_Kit()
+    repair = Repair_Kit()
     repair.set_quantity(num)
     return repair
 
 def generate_firebombs(num):
-    fb = items.Firebomb()
+    fb = Firebomb()
     fb.set_quantity(num)
     return fb
 

@@ -1,15 +1,13 @@
 #status effects file
-import random
 import global_commands
-
-PLAYER = None
 
 class Status_Effect():
     def __init__(self, src, target, id):
-        #SRC is a player or mob object
+        import player, mob
+        #SRC is a global_variables.PLAYER or mob object
         self._id = id
         self._src = src
-        self._target = target
+        self._target:player.Player | mob.Mob = target
         self._potency = 1
         self._duration = 0
         self._message:str = ""
@@ -42,6 +40,12 @@ class Status_Effect():
     @property
     def cleanse_stat(self):
         return self._cleanse_stat
+    @property
+    def damage_header(self):
+        return self._id
+    @property
+    def damage_type(self):
+        return None
     
     #methods
     def update_message(self):
@@ -95,17 +99,17 @@ class Status_Effect():
     def attempt_cleanse(self, roll:int = 0):
         raise NotImplementedError
 
-class On_Fire(Status_Effect):
-    def __init__(self, src, target=PLAYER, id="On Fire"):
+class On_Fire(Status_Effect): 
+    def __init__(self, src, target=None, id="On Fire"):
         super().__init__(src, target, id)
-        if target is None:
-            self._target = PLAYER
+        import global_variables
+        self._target = global_variables.PLAYER if target is None else self._target
         self._target_header = "You are"
-        if self._target != PLAYER:
+        if self._target != global_variables.PLAYER:
             self._target_header = f"The {self._target.id} is"
         self._message = f"{self._target_header} now {id}."
         self._cleanse_message = f"{self._target_header} not longer {id}."
-    
+
     @property
     def damage_header(self) -> str:
         return "Fire"
@@ -125,13 +129,13 @@ class On_Fire(Status_Effect):
         global_commands.type_text("More fire has no effect.")
 
 class Poisoned(Status_Effect):
-    def __init__(self, src, target=PLAYER, id="Poisoned"):
+    def __init__(self, src, target=None, id="Poisoned"):
         super().__init__(src, target, id)
-        if target is None:
-            self._target = PLAYER
+        import global_variables
+        self._target = global_variables.PLAYER if target is None else self._target
         self._stacks = 0
         self._target_header = "You are"
-        if self._target != PLAYER:
+        if self._target != global_variables.PLAYER:
             self._target_header = f"The {self._target.id} is"
 
         self._message = f"{self._target_header} now {id}."
@@ -170,10 +174,11 @@ class Poisoned(Status_Effect):
                 self._active = False
     
     def attempt_cleanse(self, roll: int = 0):
+        import global_variables
         if roll >= self._potency * 2 * self._stacks:
             self.cleanse()
         else:
-            if self._target != PLAYER:
+            if self._target != global_variables.PLAYER:
                 global_commands.type_text(f"The {self._target.id} failed to cleanse the Poison.")
 
             else:
@@ -190,16 +195,15 @@ class Poisoned(Status_Effect):
         super().apply()
 
 class Stat_Buff(Status_Effect):
-    def __init__(self, src, target=PLAYER, id="Buff"):
+    def __init__(self, src, target=None, id="Buff"):
         super().__init__(src, target, id)
-        if target is None:
-            self._target = PLAYER
+        import global_variables
+        self._target = global_variables.PLAYER if target is None else self._target
         self._stat = ""
         self._id = self._stat +" " + id
         self._target_header = f"Your"
-        if self._target != PLAYER:
+        if self._target != global_variables.PLAYER:
             self._target_header = f"The {self._target.id}'s"
-        
         self._count = 1
 
     @property
@@ -231,7 +235,7 @@ class Stat_Buff(Status_Effect):
         return None
 
 class Stat_Debuff(Stat_Buff):
-    def __init__(self, src, target=PLAYER, id="Debuff"):
+    def __init__(self, src, target=None, id="Debuff"):
         super().__init__(src, target, id)
 
     def update_message(self):
@@ -247,20 +251,20 @@ class Stat_Debuff(Stat_Buff):
 
 class Entangled(Status_Effect):
 
-    def __init__(self, src, target=PLAYER, id="Entangled"):
+    def __init__(self, src, target=None, id="Entangled"):
         """
         Init function for Entangled status effect
 
         target_header and cleanse_header change based on the target of the effect,
-        either the Player or a mob, and head the self._message and cleanse function text ouput.
+        either the global_variables.PLAYER or a mob, and head the self._message and cleanse function text ouput.
         """
         super().__init__(src, target, id)
-        if target is None:
-            self._target = PLAYER
+        import global_variables
+        self._target = global_variables.PLAYER if target is None else self._target
         self._stat = "ap"
         self._target_header = "You are"
         self._cleanse_header = "You try"
-        if self._target != PLAYER:
+        if self._target != global_variables.PLAYER:
             self._target_header = f"The {self._target.id} is"
             self._cleanse_header = f"The {self._target.id} tries"
 
@@ -299,17 +303,17 @@ class Vulnerable(Stat_Buff):
     Makes the target vulnerable,
     meaning they take x2 damage for the duration
     """
-    def __init__(self, src, target=PLAYER, id="Vulnerable"):
+    def __init__(self, src, target=None, id="Vulnerable"):
         super().__init__(src, target, id)
-        if target is None:
-            self._target = PLAYER
+        import global_variables
+        self._target = global_variables.PLAYER if target is None else self._target
         self._target_header = "You are"
-        if self._target != PLAYER:
+        if self._target != global_variables.PLAYER:
             self._target_header = f"The {self._target.id} is "
 
         self._message = f"{self._target_header} now {self._id}."
 
-        if target == src and self._target != PLAYER:
+        if target == src and self._target != global_variables.PLAYER:
             self._message = f"The {self._target.id} made itself {self._id}"
         elif target == src:
             self._message = f"You made yourself {self._id}"
@@ -324,4 +328,3 @@ class Vulnerable(Stat_Buff):
 
     def additional_effect(self, effect: Status_Effect):
         self._potency += 1#might need re-balancing
-    

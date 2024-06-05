@@ -1,5 +1,4 @@
 #Bandit mob file
-import random
 import mob
 
 stats = {
@@ -15,7 +14,7 @@ stats = {
     "max_hp": 0,
     "max_ap": 0,
     "armor": 1,
-    "damage": 6,
+    "damage": "2d4",
     "dc": 10,
     "hit_dice": 10,
     "loot": {

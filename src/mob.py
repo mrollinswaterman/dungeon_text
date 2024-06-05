@@ -1,7 +1,5 @@
 import random
-from typing import Union
-import global_variables, global_commands
-import player
+import global_commands
 import status_effects
 
 default = {
@@ -18,7 +16,7 @@ default = {
     "max_hp": 0,
     "max_ap": 1,
     "armor": 0,
-    "damage": 5,
+    "damage": "1d6",
     "dc": 10,
     "loot": {
         "gold": 0,
@@ -31,12 +29,17 @@ class Mob():
 
     def __init__(self, id:str="Anonymous_Mob", level:tuple= (1, 20), statblock=None):
         #identification
+        import global_variables
+        import player
+        import status_effects
+
         self._id = id
         self._name = self._id
         self._level = random.randrange(min(level), max(level)+1)
         self._range = level
 
         self._stats = {}
+        self._stats["max_mp"] = 0
 
         #if no statblock, use default
         if not statblock:
@@ -61,7 +64,7 @@ class Mob():
         self._flee_threshold = 0.2
         self._player:player.Player = global_variables.PLAYER
 
-        self._status_effects: dict[str, status_effects.Status_Effect] = {}
+        self._status_effects: dict[str: status_effects.Status_Effect] = {}
 
         self._retreating = False
         self._my_effect_id = ""
@@ -86,6 +89,9 @@ class Mob():
     def level(self) -> int:
         return self._level
     @property
+    def caster_level(self) -> int:
+        return max(1, self.level // 5)
+    @property
     def damage(self) -> int:
         return self._stats["damage"]
     @property
@@ -95,19 +101,22 @@ class Mob():
     def armor(self) -> int:
         return self._stats["armor"]
     @property
+    def max_mp(self) -> str:
+        return self._stats["max_mp"]
+    @property
     def hp(self) -> int:
         return self._hp
     @property
-    def loot(self):
+    def loot(self) -> dict:
         return self._loot
     @property
     def name(self) -> str:
         return self._name
     @property
-    def damage_multiplier(self):
+    def damage_multiplier(self) -> int:
         return self._stats["damage_multiplier"]
     @property
-    def damage_taken_multiplier(self):
+    def damage_taken_multiplier(self) -> int:
         return self._stats["damage_taken_multiplier"]
     @property
     def dc(self) -> int:
@@ -122,8 +131,11 @@ class Mob():
     def ap(self) -> int:
         return self._ap
     @property
-    def can_act(self) -> int:
+    def can_act(self) -> bool:
         return self._ap > 0 and not self.dead
+    @property
+    def can_cast(self) -> bool:
+        return self._mp > 0
     @property
     def fleeing(self) -> bool:
         return self.flee_check() or self._retreating
@@ -190,12 +202,18 @@ class Mob():
         """
         Rolls damage (damage dice)
         """
-        return global_commands.d(self.damage) * self.damage_multiplier + self.bonus("str")
+        dmg = global_commands.XdY(self.damage)
+        return (dmg + self.bonus("str")) * self.damage_multiplier
     
     def take_damage(self, taken:int, src, armor_piercing=False) -> int:
         """
         Takes a given amount of damage, reduced by armor
         """
+        import status_effects
+        import items
+
+        src:status_effects.Status_Effect | items.Item = src
+
         taken *= self.damage_taken_multiplier
         if armor_piercing:
             self._hp -= taken
@@ -228,7 +246,7 @@ class Mob():
             return taken
 
         
-    def fumble_table(self) -> Union[str, bool]:
+    def fumble_table(self) -> bool:
         """
         Determines if a mob sufferes a negative effect upon rolling a nat 1.
         """
@@ -266,6 +284,23 @@ class Mob():
         Resets mob's AP to max value
         """
         self._ap = self.max_ap
+
+    def spend_mp(self, num:int=1) -> bool:
+        if num == 0:
+            self._mp = 0
+            return False
+        
+        if self._mp >= num:
+            self._mp -= num
+            return True
+        return False
+    
+    def regain_mp(self, num:int=None):
+        if num is None:
+            self._mp = self.max_mp
+            return True
+        self._mp += num
+        return True
     
     #STATUS EFFECTS
     def add_status_effect(self, effect:status_effects.Status_Effect) -> None:
@@ -307,11 +342,11 @@ class Mob():
         expires. 
         """
         self.reset_ap()
-       
+    
         #update all status effects
         inactive = []
         for entry in self._status_effects:
-            effect: status_effects.Status_Effect = self._status_effects[entry]
+            effect:status_effects.Status_Effect = self._status_effects[entry]
             effect.update()
             if effect.active is False:
                 inactive.append(effect)

@@ -1,6 +1,6 @@
 #Bandit mob file
 import random
-import mob
+import commands.objects.mob as mob
 
 class Bandit(mob.Mob):
     def __init__(self, id="Bandit", level = (1,7)):

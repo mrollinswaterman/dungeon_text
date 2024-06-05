@@ -1,7 +1,7 @@
 import random
 import csv
-import global_commands
-import status_effects
+import commands.global_commands as global_commands
+import objects.status_effects as status_effects
 
 RARITY = {
     "Common": 1,

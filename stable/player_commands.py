@@ -1,12 +1,12 @@
 import random
 import csv
 import sys
-import global_commands
+import commands.global_commands as global_commands
 import global_variables
-import mob
-import items
+import commands.objects.mob as mob
+import objects.items as items
 import narrator
-import status_effects
+import objects.status_effects as status_effects
 
 GOD_MODE = False
 TEST = None

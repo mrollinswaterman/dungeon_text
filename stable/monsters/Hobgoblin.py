@@ -1,7 +1,7 @@
 #Hobgoblin mob file
 import random
-import mob, player, global_commands
-import status_effects
+import commands.objects.mob as mob, commands.objects.player as player, commands.global_commands as global_commands
+import objects.status_effects as status_effects
 
 class Hobgoblin(mob.Mob):
     def __init__(self, id="Hobgoblin", level = (1,5)):

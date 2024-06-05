@@ -1,8 +1,8 @@
 #globals variables
-import player
-import items
-import item_compendium
-import shopkeep
+import commands.objects.player as player
+import objects.items as items
+import helpers.item_compendium as item_compendium
+import commands.objects.shopkeep as shopkeep
 
 BONUS = {
     5: -4,

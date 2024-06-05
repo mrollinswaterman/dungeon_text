@@ -1,7 +1,7 @@
 
 from typing import Optional
 import random
-import global_commands
+import commands.global_commands as global_commands
 import global_variables
 
 FAILURE_LINES = {

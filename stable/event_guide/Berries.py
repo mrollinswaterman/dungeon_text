@@ -1,6 +1,6 @@
 #Mysterious Berries event class
-import event
-import global_commands
+import objects.event as event
+import commands.global_commands as global_commands
 import random
 
 success_poison = {

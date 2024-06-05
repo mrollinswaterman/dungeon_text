@@ -1,10 +1,10 @@
 import random
 import os
 import csv
-import items
-import global_commands
+import objects.items as items
+import commands.global_commands as global_commands
 from events import Event
-import status_effects
+import objects.status_effects as status_effects
 
 BONUS = {
     5: -4,

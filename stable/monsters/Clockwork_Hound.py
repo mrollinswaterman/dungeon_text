@@ -1,5 +1,5 @@
 #Clockwork Hound mob file
-import mob, global_commands, items
+import commands.objects.mob as mob, commands.global_commands as global_commands, objects.items as items
 
 class Clockwork_Hound(mob.Mob):
     def __init__(self, id="Clockwork Hound", level = (6,13)):

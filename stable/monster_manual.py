@@ -1,5 +1,5 @@
 import random
-import mob
+import commands.objects.mob as mob
 import global_variables
 from monsters import Goblin, Hobgoblin, Bandit, Goblin_Gang
 from monsters import Land_Shark, Clockwork_Hound

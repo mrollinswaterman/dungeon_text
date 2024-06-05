@@ -1,6 +1,6 @@
 #test code for item spawn probabilities
 import global_variables
-import shopkeep
+import commands.objects.shopkeep as shopkeep
 
 iteration_size = 1000
 

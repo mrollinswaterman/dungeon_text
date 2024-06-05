@@ -1,9 +1,5 @@
-import time
-import sys
-import random
-import global_commands
-import global_variables
-import player_commands
+import time, random
+import global_commands, global_variables
 
 SCENE_CHANGE = [
     "You press towards your goal...\n",
@@ -60,19 +56,21 @@ def event_options():
     global_commands.type_text("Which stat would you like to roll?")
     print("\t Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n")
 
-def continue_run(next):
+def continue_run():
+    import controller
+
     global_commands.type_with_lines("Continue? y/n")
     command = input(">> ").lower()
     if command == "y":   
         next_scene_options()
-        next()
+        controller.next_scene()
     elif command == "n":
         exit_the_dungeon()
     elif command == "exit":
         global_commands.exit()
     else:
         global_commands.type_text("Invalid command. Please try again.")
-        continue_run(next)
+        continue_run()
 
 def exit_the_dungeon():
     global_variables.RUNNING = False

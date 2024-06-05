@@ -1,9 +1,9 @@
 #enemy commands file
-import global_commands
+import commands.global_commands as global_commands
 import global_variables
 import narrator
-import player_commands
-import mob
+import commands.player_commands as player_commands
+import commands.objects.mob as mob
 
 ENEMY:mob.Mob = None
 ENEMY_TURN = None

@@ -1,20 +1,12 @@
 import random
-import mob
 import global_variables
-from monsters import Goblin, Hobgoblin, Bandit, Goblin_Gang
-from monsters import Land_Shark, Clockwork_Hound
+import mob
+import monsters
 
 LEVELCAP = 7
 
-PLAYER = global_variables.PLAYER
-
-mobs = [
-    Goblin.object, Hobgoblin.object, Bandit.object,
-    Goblin_Gang.object, Land_Shark.object, Clockwork_Hound.object,
-]
-
 def spawn_mob(name:str):
-    for entry in mobs:
+    for entry in monsters.mobs:
         mob_object: mob.Mob = entry()
         if mob_object.id == name:
             return mob_object
@@ -26,14 +18,13 @@ def spawn_random_mob():
 
     If the given level is not within the mob's level range, it picks a different random mob
     """
-    if PLAYER.level >= LEVELCAP:
+    if global_variables.PLAYER.level >= LEVELCAP:
         raise ValueError("Player level too high!")
 
-    enemy:mob.Mob = random.choice(mobs)()
+    enemy:mob.Mob = random.choice(monsters.mobs)()
 
-    if PLAYER.level in range(enemy.range[0],enemy.range[1]):
+    if global_variables.PLAYER.level in range(enemy.range[0],enemy.range[1]):
         return enemy
     else:
-        enemy = None
-        spawn_random_mob()
+        return spawn_random_mob()
     #might be a more efficient way to do all this, but it's fine for now

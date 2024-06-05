@@ -1,6 +1,6 @@
 #Goblin mob file
 import random
-import mob, global_commands
+import commands.objects.mob as mob, commands.global_commands as global_commands
 
 class Goblin(mob.Mob):
     def __init__(self, id="Goblin", level=(1,3)):
