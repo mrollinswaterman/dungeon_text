@@ -1,5 +1,5 @@
 import random
-import global_variables
+import global_variables, global_commands
 
 FAILURE_LINES = {
     "str": [
