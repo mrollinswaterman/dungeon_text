@@ -3,11 +3,13 @@ import global_commands
 
 class Status_Effect():
     def __init__(self, src, target, id):
-        import player, mob
+        import global_variables, player, mob
         #SRC is a global_variables.PLAYER or mob object
         self._id = id
         self._src = src
         self._target:player.Player | mob.Mob = target
+        if self._target == global_variables.PLAYER:
+            self.player = True
         self._potency = 1
         self._duration = 0
         self._message:str = ""

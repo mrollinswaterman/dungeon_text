@@ -1,4 +1,5 @@
 #Goblin mob file
+import random
 import mob, global_commands
 
 stats = {
@@ -40,6 +41,8 @@ class Goblin(mob.Mob):
         Returns True if the player has more gold than the goblin, 
         or if the goblin has x1.5 the player's gold
         """
+        if not super().trigger():
+            return False
         return self._loot["gold"] < self._player.gold or self.retreat
 
     def special(self) -> None:
@@ -50,7 +53,7 @@ class Goblin(mob.Mob):
             self.spend_ap()
             global_commands.type_text(f"The {self._id} makes a grab at your gold pouch.")
             save = self._player.roll_a_check("dex")
-            attack = self.roll_attack()
+            attack = self.roll_to_hit()
             if save >= attack:
                 global_commands.type_text("It missed.")
             else:
@@ -63,5 +66,35 @@ class Goblin(mob.Mob):
         else:
             self._flee_threshold = 1.01
         return None
+    
+    def roll_narration(self):
+        generic = super().roll_narration()        
+        me = [
+            f"The {self.id} jabs its dagger towards you.",
+            f"The {self.id} jumps at you.",
+            f"The {self.id} slashes at your legs.",
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
+
+    def hit_narration(self):
+        generic = super().hit_narration()
+        me = [
+            f"The {self.id}'s dagger finds a chink in your armor.",
+            f"The {self.id}'s small frame slips past your guard."
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
+
+    def miss_narration(self):
+        generic = super().miss_narration()
+        me = [
+            f"You easily dodge the {self.id}'s wild swing.",
+            f"It's dagger bounces off your own weapon.",
+            f"The {self.id} stabs the spot you were just stading in.",
+            f"The {self.id}'s small stature means you can easily parry it's frontal assault."
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
 
 object = Goblin

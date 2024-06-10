@@ -45,6 +45,7 @@ def exit():
     sys.exit()
 
 def save():
+    import items
     player_dict = global_variables.PLAYER.save_to_dict()
     with open('player.csv', "w", newline='') as file:
         file.truncate(0)
@@ -57,7 +58,7 @@ def save():
 
     #append all inventory item_to_dicts to list
     for entry in global_variables.PLAYER.inventory:
-        item = global_variables.PLAYER.inventory[entry]
+        item:items.Item = global_variables.PLAYER.inventory[entry]
         item.save()
         item_dict_list.append(item.tod)
 
@@ -79,15 +80,27 @@ def save():
 def bonus(num:int) -> int:
     return BONUS[num]
 
-def match(text:str, size:int) -> str:
+def get_cmd():
+    cmd = input(">> ").lower()
+    print("")
+    return cmd
+
+def match(text:str | list | tuple, size:int) -> str | tuple:
     """
     Adds " " to the end of a given string until it is
     the desired length.
     Used for formatting mostly
     """
-    while(len(text) < size):
-        text = text + " "
-    return text
+    if type(text) == str:
+        while(len(text) < size):
+            text = text + " "
+        return text
+    else:
+        final = []
+        for item in text:
+            final.append(match(item, size))
+        
+        return tuple(final)
 
 def generate_item_rarity() -> str:
     """

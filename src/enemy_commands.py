@@ -3,7 +3,7 @@ import global_commands
 import player_commands
 import controller
 
-def start_turn():
+def turn():
     import global_variables
     import controller
 
@@ -18,7 +18,6 @@ def start_turn():
             done = turn_options()
             
             if done is None:#wait for turn_options to finish running before checking states
-                print("done\n")
                 if global_variables.PLAYER.dead:
                     player_commands.end_game()
                     return None
@@ -32,7 +31,7 @@ def start_turn():
 
         if global_variables.RUNNING:
             global_commands.type_with_lines("")
-            player_commands.start_turn()
+            player_commands.turn()
     
     else:
         raise ValueError("Enemy is None.")
@@ -74,7 +73,7 @@ def enemy_flee_attempt():
                 if global_variables.PLAYER.roll_attack() >= controller.SCENE.enemy.evasion:
                     global_commands.type_text(f"You cut off the {controller.SCENE.enemy.id}'s escape. It turns to fight...")
                     global_commands.type_with_lines("")
-                    player_commands.start_turn()
+                    player_commands.turn()
                 else:
                     global_commands.type_text(f"You try catching the {controller.SCENE.enemy.id} to no avail. It got away.")
                     narrator.continue_run()
@@ -91,35 +90,8 @@ def enemy_attack():
     """
     Runs the enemy attack
     """
-    import global_variables
     import controller
 
-    controller.SCENE.enemy.spend_ap()
-    attack = controller.SCENE.enemy.roll_attack()
-
-    if attack == 0:
-        global_commands.type_text(f"The {controller.SCENE.enemy.id} attacks you, rolling a natural 20.")
-    else:
-        global_commands.type_text(f"The {controller.SCENE.enemy.id} attacks you, rolling a {attack}.")
-
-    match attack:
-        case 0:
-            global_commands.type_text(f"A critical hit! Uh oh.")
-            taken = global_variables.PLAYER.take_damage(controller.SCENE.enemy.roll_damage() * 2, controller.SCENE.enemy)
-            return None
-        case 1:
-            global_commands.type_text(f"It critically failed!")
-            if controller.SCENE.enemy.fumble_table():
-                taken = controller.SCENE.enemy.take_damage(controller.SCENE.enemy.roll_damage(), controller.SCENE.enemy)
-            else:
-                global_commands.type_text(f"It missed.")
-            return None
-        case _:
-            pass
-
-    if attack >= global_variables.PLAYER.evasion: 
-        taken = global_variables.PLAYER.take_damage(controller.SCENE.enemy.roll_damage(), controller.SCENE.enemy)
-        return None
-
-    global_commands.type_text(f"The {controller.SCENE.enemy.id} missed.")
+    controller.SCENE.enemy.attack()
     return None
+

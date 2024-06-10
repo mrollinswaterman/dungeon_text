@@ -2,7 +2,7 @@ import global_commands, magic
 
 class Magic_Missile(magic.Evocation):
 
-    def __init__(self, caster, id="Magic Missile"):
+    def __init__(self, caster, id="Magic Missile", code="mm"):
         super().__init__(caster, id)
         self._damage = "1d4"
         self._auto_hit = True

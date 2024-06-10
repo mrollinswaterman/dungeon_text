@@ -4,14 +4,14 @@ from conditions import On_Fire
 
 class Firebomb(items.Consumable):
     
-    def __init__(self, id="Firebomb"):
+    def __init__(self, id="Firebomb", rarity="Uncommon", quantity=0):
         import mob
-        super().__init__("Firebomb", "Uncommon", 0)
+        super().__init__(id, rarity, quantity)
         self._unit_value = 20 * self._numerical_rarity
         self._unit_weight = 1 
         self._target:mob.Mob = None
         self._damage = self._strength
-        self._type = "Firebomb"
+        #self._type = "Firebomb"
 
     @property
     def damage_header(self) -> str:
@@ -69,7 +69,9 @@ class Firebomb(items.Consumable):
         self._unit_value = 20 * self._numerical_rarity
         self._unit_weight = 1
 
-def craft(num):
+def craft(num=1):
     fb = Firebomb()
     fb.set_quantity(num)
     return fb
+
+object = Firebomb

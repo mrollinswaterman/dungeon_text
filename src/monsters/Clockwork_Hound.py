@@ -1,4 +1,5 @@
 #Clockwork Hound mob file
+import random
 import mob, global_commands, items
 
 stats = {
@@ -39,6 +40,8 @@ class Clockwork_Hound(mob.Mob):
             self._loot["drops"].append(heart)
             
     def trigger(self) -> bool:
+        if not super().trigger():
+            return False
         return self._hp < self.max_hp // 2
 
     def special(self) -> None:
@@ -55,11 +58,47 @@ class Clockwork_Hound(mob.Mob):
             meal = armor
         
         global_commands.type_text(f"The {self.id} lunges for your {meal.id}.")
-        if self.roll_attack() > self._player.evasion:
-            global_commands.type_text(f"It gulps down a chunk, then darts back looking satisfied.")
+        if self.roll_to_hit() > self._player.evasion:
+            global_commands.type_text(f"It tears off a chunk before darting back to gulp it down.")
             meal.remove_durability(self.bonus("str"))
             self.heal(self.bonus("str"))
         else:
             global_commands.type_text("It missed.")
+    
+    def roll_narration(self):
+        generic = super().roll_narration()        
+        me = [
+            f"The {self.id} snarls and dashes towards you.",
+            f"The {self.id}'s gears screech and grind as it prepares to tear into you.",
+            f"The {self.id}'s clicks and whirs intensify as it readies its attack...",
+            f"The {self.id}'s mechanical muscles tense before it leaps towards you.",
+            f"The mechanical beast growls and crouches low, ready to pounce.",
+            f"The {self.id} gnashes it's teeth and snaps at your midsection.",
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
+
+    def hit_narration(self):
+        generic = super().hit_narration()
+        me = [
+            f"The {self.id}'s fluid movements are far from mechanical. It catches you.",
+            f"It's metal teeth tear through your defenses.",
+            f"The {self.id}'s metal claws find your body.",
+            f"You feel cold steel on your skin, then a burst of pain."
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
+
+    def miss_narration(self):
+        generic = super().miss_narration()
+        me = [
+            f"Just as the {self.id} would have struck you, it's internal machines sputter causing it to fall short.",
+            f"The {self.id}'s jerky, robotic motions are easy enough to dodge this time."
+            f"The {self.id}'s targeting systems failed. It misses you completely.",
+            f"It's jaws clamp down on the empty space where you once stood.",
+            f"Failing to hit you, it skitters to a stop before whipping back around to face you, metal fangs bared."
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
 
 object = Clockwork_Hound

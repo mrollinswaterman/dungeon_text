@@ -3,11 +3,11 @@ import items, global_commands
 
 class Repair_Kit(items.Consumable):
 
-    def __init__(self):
-        super().__init__("Repair Kit", "Uncommon", 0)
+    def __init__(self, id="Repair_Kit", rarity="Uncommon", quantity=0):
+        super().__init__(id, rarity, quantity)
         self._unit_value = 10 * self._numerical_rarity
         self._unit_weight = .5
-        self._type = "Repair_Kit"
+        self._name = "Repair Kit"
 
     def use(self, target:items.Item) -> bool:
         """
@@ -21,7 +21,9 @@ class Repair_Kit(items.Consumable):
             return True
         return False
     
-def craft(num):
+def craft(num=1):
     repair = Repair_Kit()
     repair.set_quantity(num)
     return repair
+
+object = Repair_Kit

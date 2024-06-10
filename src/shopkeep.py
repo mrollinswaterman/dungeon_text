@@ -17,7 +17,7 @@ class Blacksmith():
     then stores them in a set for later use
     """
 
-    def __init__(self, forge_list:list=[]):
+    def __init__(self, forge_list:list=None):
         self._forge_list = forge_list
         self._storehouse = {
             "WP": [],
@@ -48,6 +48,8 @@ class Blacksmith():
             self._storehouse[tag].append(item)
 
     def add_to_forge_list(self, items):
+        if self._forge_list is None: self._forge_list = []
+
         if type(items) == list:
             self._forge_list = self._forge_list + items
         else:

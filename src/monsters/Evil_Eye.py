@@ -1,6 +1,7 @@
 #Evil Eye mob file
+import random
 import mob, global_commands
-from spells import Magic_Missile
+from spells import Magic_Missile as mm
 
 stats = {
     "str": 9,
@@ -62,7 +63,7 @@ class Evil_Eye(mob.Mob):
 
     def spell(self):
         self.spend_ap()
-        spell:Magic_Missile.magic.Spell = Magic_Missile.Magic_Missile(self)
+        spell:mm.magic.Spell = mm.Magic_Missile(self)
         spell.cast(self._player)
         del spell
         return None
@@ -75,20 +76,27 @@ class Evil_Eye(mob.Mob):
 
         global_commands.type_text(f"The {self._id} begins charging its Death Ray...")
 
-        roll = self.roll_attack()
+        roll = self.roll_to_hit()
 
-        self._stats["damage_multiplier"] += 1 if roll == 0 else 0
-        hit_text = "A critical hit. Uh oh..." if roll == 0 else "The magic beam hit you."
-
-        if roll > self._player.evasion or roll == 0:
-            global_commands.type_text(hit_text)
-            dmg = global_commands.XdY(self.death_ray_damage)
-            dmg = (dmg + self.bonus("int")) * self.damage_multiplier
-            taken = self._player.take_damage(dmg, self)
-            self._stats["damage_multiplier"] -= 1 if roll == 0 else 0
-        else:
-            global_commands.type_text("It missed.")
-            return None
+        match roll:
+            case 0:
+                global_commands.type_text("A critical hit. Uh oh...")
+                self._stats["damage_multiplier"] += 1
+                dmg = global_commands.XdY(self.death_ray_damage)
+                dmg = (dmg + (self.bonus("int") // 2)) * self.damage_multiplier
+                taken = self._player.take_damage(dmg, self)
+                self._stats["damage_multiplier"] -= 1
+            case 1:
+                return self.crit_fail()
+            case _:
+                if roll > self._player.evasion:
+                    global_commands.type_text("The magic beam hit you.")
+                    dmg = global_commands.XdY(self.death_ray_damage)
+                    dmg = (dmg + (self.bonus("int") // 2)) * self.damage_multiplier
+                    taken = self._player.take_damage(dmg, self)
+                else:
+                    global_commands.type_text("It missed.")
+                    return None
         
         if self.execute_trigger:
             missing_hp = self._player.max_hp - self._player.hp
@@ -96,11 +104,11 @@ class Evil_Eye(mob.Mob):
             #execute chance is a magic number but it increases with missing HP
             execute_chance = percent_missing * (0.1 + (percent_missing / 10))
             if global_commands.probability(execute_chance):
-                global_commands.type_text("The Evil Eye attempts to execute you...")
+                global_commands.type_text(f"The {self.id} attempts to execute you...")
                 if self._player.roll_a_check("con") >= self.dc:
                     global_commands.type_text("It failed.")
                 else:
-                    global_commands.type_text("You were executed by the Evil Eye's dark magic!")
+                    global_commands.type_text(f"You were executed by the {self.id}'s Death Ray!")
                     player_commands.end_game()
         return None
 
@@ -108,12 +116,40 @@ class Evil_Eye(mob.Mob):
         """
         Picks which magic attack the Evil Eye uses
         """
+        if not super().trigger():
+            return False
         if self._player.hp < self._player.max_hp // 2 and self._mp > 3:
-            self.death_ray()
+            if self.can_full_round:
+                self.death_ray()
+            else: return False
         elif self._mp > 0:
             self.spell()
         else:#if no MP, must attack
             return False
-        return True
 
+        return True
+    
+    def roll_narration(self):
+        generic = super().roll_narration()        
+        me = [
+            f"",
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
+
+    def hit_narration(self):
+        generic = super().hit_narration()
+        me = [
+            f"",
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
+
+    def miss_narration(self):
+        generic = super().miss_narration()
+        me = [
+            f"",
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
 object = Evil_Eye

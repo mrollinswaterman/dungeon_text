@@ -21,6 +21,16 @@ WEIGHT_CLASS = {
 def numerical_rarity_to_str(rare:int):
     return list(RARITY.keys())[rare-1]
 
+def generate_item(id, rarity, type):
+    import item_compendium
+
+    print(item_compendium.master)
+
+    if id in item_compendium.master:
+        return item_compendium.master[id](id, rarity)
+
+    return TYPES[type](id, rarity)
+
 class Item():
 
     def __init__(self, id:str, rarity=None):
@@ -28,26 +38,26 @@ class Item():
         Init function for the base Item class
         """
         import player
+        self._type = "Item"
         self._id = id
         self._name = id
-        if rarity is None:
-            self._rarity = global_commands.generate_item_rarity()
-        else:
-            self._rarity = rarity
+        #RARITY STUFF
+        self._rarity = global_commands.generate_item_rarity() if rarity is None else rarity
         self._numerical_rarity = RARITY[self._rarity]
         self._value = 10 * self._numerical_rarity
         self._max_durability = 10 * self._numerical_rarity
+        #MISC
         self._durability = self._max_durability
         self._is_consumable = False
         self._weight = 0
         self._pickup_message = f"You picked up a {self._id}."
         self._description = ""
         self._broken = False
-        self._type = "Item"
 
         self._owner:"player.Player" = None
 
         self._tod = {}
+
     #properties
     @property
     def id(self) -> str:
@@ -172,7 +182,7 @@ class Item():
         self._value = 10 * self._numerical_rarity
         self._max_durability = 10 * self._numerical_rarity
 
-    def save(self) -> dict:
+    def save(self) -> None:
         self._tod = {
             "type": self._type,
             "id": self._id,
@@ -213,7 +223,7 @@ class Item():
         return forms
 
     def __str__(self) -> str:
-        return f"{self.id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
+        return f"{self._id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 class Weapon(Item):
 
@@ -225,6 +235,7 @@ class Weapon(Item):
         self._damage_dice = 0
         self._num_damage_dice = 0
         self._crit = 0
+        self._type = "Weapon"
 
     #properties
     @property
@@ -301,7 +312,7 @@ class Weapon(Item):
     def format(self) -> list[str]:
         forms = [
             f"{self.id} ({self._rarity})",
-            f"Damage Dice: {self._num_damage_dice}d{self._damage_dice}",
+            f"Damage: {self._num_damage_dice}d{self._damage_dice}, x{self._crit}",
             f"Durability: {self._durability}/{self._max_durability}",
             f"Value: {self._value}g",
             f"Weight: {self.weight} lbs",
@@ -313,13 +324,14 @@ class Weapon(Item):
 
 class Armor(Item):
 
-    def __init__(self, id, weight_class:int="Light", rarity=None):
+    def __init__(self, id:str, rarity=None, weight_class:int="Light"):
         super().__init__(id, rarity)
         self._weight_class = weight_class
         self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
         self._armor_value = int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2))
         self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
         self._broken = False
+        self._weight = (self._numerical_weight_class * 5) + self._armor_value
         self._type = "Armor"
 
     #properties
@@ -454,7 +466,7 @@ class Consumable(Item):
         self._value = self._unit_value * self._quantity
         self._weight = self._unit_weight * self._quantity
 
-    def save(self) -> dict:
+    def save(self) -> None:
         super().save()
         self._tod["quantity"] = self._quantity
         self._tod["unit_weight"] = self._unit_weight
@@ -483,3 +495,9 @@ class Consumable(Item):
     def __str__(self) -> str:
         return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n"
 
+TYPES = {
+    "Item": Item,
+    "Weapon": Weapon,
+    "Armor": Armor,
+    "Consumable": Consumable
+}

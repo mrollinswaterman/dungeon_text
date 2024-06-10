@@ -45,6 +45,8 @@ class Mob():
         if not statblock:
             print("No statblock given.\n")
             statblock = default
+        
+        self._temp_hp = None
 
         #copy statblock items to self._stats
         for entry in statblock:
@@ -137,6 +139,12 @@ class Mob():
     def can_cast(self) -> bool:
         return self._mp > 0
     @property
+    def can_full_round(self) -> bool:
+        return self._ap == self.max_ap
+    @property
+    def flee_threshold(self) -> float:
+        return self._flee_threshold
+    @property
     def fleeing(self) -> bool:
         return self.flee_check() or self._retreating
     @property
@@ -173,35 +181,101 @@ class Mob():
         """
         Checks the enemy should be fleeing
         """
-        if self._hp <= self.max_hp * self._flee_threshold and self.roll_a_check("cha") > 10:
+        if self._hp <= self.max_hp * self._flee_threshold and self.roll_a_check("cha") < 13:
             self._retreating = True
             return self._retreating
         return False
 
-    #ROLLS
-    def crit(self, on=True) -> bool:
-        global_commands.type_text(f"A critical hit! Uh oh.")
-        self._stats["damage_multiplier"] += 1 if on else -1
-
+    #ACTIONS
     def attack(self) -> None:
         import global_variables
         player = global_variables.PLAYER
 
         roll = self.roll_to_hit()
         self.spend_ap()
-        roll_text = f"natural 20!" if roll == 0 else f"{roll}."
-        global_commands.type_text(f"The {self.id} attacks you, rolling a {roll_text}")
-        crit = self.crit(True) if roll == 0 else None
-
-        if roll >= player.evasion or roll == 0:
-            global_commands.type_text("A hit.")
+        self.roll_narration()
+        match roll:
+            case 0:
+                return self.crit()
+            case 1:
+                return self.crit_fail()
+            case _:
+                pass
+        if roll >= player.evasion:
+            self.hit_narration()
             taken = player.take_damage(self.roll_damage(), self)
-        else:
-            global_commands.type_text("It missed")
+            return None
+
+        self.miss_narration()
         return None
 
+    def crit(self) -> bool:
+        import global_variables
+        player = global_variables.PLAYER
 
+        global_commands.type_text(f"A critical hit! Uh oh.")
+        self._stats["damage_multiplier"] += 1
+        taken = player.take_damage(self.roll_damage(), self)
+        self._stats["damage_multiplier"] -= 1
+        return None
     
+    def crit_fail(self) -> None:
+        global_commands.type_text("It critically failed!")
+        if self.fumble_table():
+            taken = self.take_damage(self.roll_damage(), self)
+        else:
+            global_commands.type_text("It missed.")
+        return None
+
+    def fumble_table(self) -> bool:
+        """
+        Determines if a mob sufferes a negative effect upon rolling a nat 1.
+        """
+        return global_commands.probability(50)
+        
+    def attack_of_oppurtunity(self) -> bool:
+        """
+        Rolls an attack of opportuity against the player
+        """
+        if self.roll_to_hit() - 2 >= self._player.evasion:
+            return True
+        return False
+
+    #NARRATION
+    def roll_narration(self):
+        text = [
+            f"The {self.id} moves to attack.",
+            f"The {self.id} lunges at you.",
+            f"The {self.id} prepares to strike..."
+        ]
+        return text
+    
+    def hit_narration(self):
+        text = [
+            f"You fail to move before the attack hits you.",
+            f"A hit.",
+            f"The {self.id} hits you.",
+            f"It's attack lands.",
+            f"You can't dodge this one.",
+            f"You take a hit.",
+            f"The {self.id} manages to break your guard."
+        ]
+        return text
+    
+    def miss_narration(self):
+        text = [
+            f"It's attack goes wide.",
+            f"Luck is on your side this time.",
+            f"The {self.id} fails.",
+            f"You stave off the attack.",
+            f"The attack flies right by you.",
+            f"You are unscathed.",
+            f"The {self.id} doesn't manage to hit you.",
+            f"You leap out of harm's way."
+        ]
+        return text
+
+    #ROLLS
     def roll_to_hit(self) -> int:
         """
         Rolls an attack (d20)
@@ -239,6 +313,10 @@ class Mob():
 
         taken *= self.damage_taken_multiplier
         if armor_piercing:
+            if self._temp_hp is not None:
+                self._temp_hp -= taken
+                self._temp_hp = None if self._temp_hp <= 0 else self._temp_hp
+                return taken
             self._hp -= taken
             if src == self._player:
                 global_commands.type_text(f"You did {taken} damage to the {self._id}.")
@@ -254,6 +332,10 @@ class Mob():
                     global_commands.type_text(f"The {self._id} took no damage from the {src.damage_header}.")
                 return 0
             else:
+                if self._temp_hp is not None:
+                    self._temp_hp -= taken
+                    self._temp_hp = None if self._temp_hp <= 0 else self._temp_hp
+                    return taken - self.armor
                 self._hp -= taken - self.armor
                 if src == self._player:
                     global_commands.type_text(f"You did {taken - self.armor} damage to the {self._id}.")
@@ -261,6 +343,10 @@ class Mob():
                     global_commands.type_text(f"The {self._id} took {taken - self.armor} damage from the {src.damage_header}.")
                 return taken - self.armor
         else:
+            if self._temp_hp is not None:
+                self._temp_hp -= taken
+                self._temp_hp = None if self._temp_hp <= 0 else self._temp_hp
+                return taken
             self._hp -= taken
             if src == self._player:
                 global_commands.type_text(f"You did {taken} damage to the {self._id}.")
@@ -268,32 +354,37 @@ class Mob():
                 global_commands.type_text(f"The {self._id} took {taken} damage from the {src.damage_header}.")
             return taken
 
-        
-    def fumble_table(self) -> bool:
-        """
-        Determines if a mob sufferes a negative effect upon rolling a nat 1.
-        """
-        return global_commands.probability(50)
-        
-    def attack_of_oppurtunity(self) -> bool:
-        """
-        Rolls an attack of opportuity against the player
-        """
-        if self.roll_attack() - 2 >= self._player.evasion:
-            return True
-        return False
-    
-    #Resources
+    #RESOURCES
     def heal(self, num:int) -> None:
         #heals for the given amount up to max hp value
         prev = self._hp
         self._hp = self._hp + num if (self._hp + num <= self.max_hp) else self.max_hp
         global_commands.type_text(f"The {self._id} healed {self._hp - prev} HP.")
+    
+    def gain_temp_hp(self, num:int) -> None:
+        """
+        Gain a set amount of temp hp. Temp hp is removed before 
+        actual hp during damage calculations. temp hp cannot be
+        healed, and is removed (set back to None) if it ever drops below 0.
+        """
+        if self._temp_hp is None:
+            self._temp_hp = num
+        else: self._temp_hp += num
+        return None
+    
+    def remove_temp_hp(self, num:int) -> None:
+        """
+        Removes a set amount of temp hp, resetting it to None
+        if it drops below 0 as a result. 
+        """
+        if self._temp_hp is None:
+            return None
+        
+        self._temp_hp -= num
+        self._temp_hp = None if self._temp_hp <= 0 else self._temp_hp
+        return None
 
     def spend_ap(self, num:int=1) -> None:
-        """
-        Spends an amount of AP
-        """
         if num == 0:#spend_ap(0) indicates a full round action, uses all AP
             self._ap = 0
             return None
@@ -303,9 +394,6 @@ class Mob():
             raise ValueError("No AP to spend")
         
     def reset_ap(self):
-        """
-        Resets mob's AP to max value
-        """
         self._ap = self.max_ap
 
     def spend_mp(self, num:int=1) -> bool:
@@ -325,6 +413,10 @@ class Mob():
         self._mp += num
         return True
     
+    #SETTERS
+    def set_flee_threshold(self, num:float):
+        self._flee_threshold == num
+    
     #STATUS EFFECTS
     def add_status_effect(self, effect:status_effect.Status_Effect) -> None:
         """
@@ -332,7 +424,7 @@ class Mob():
         """
         if effect.id in self._status_effects:
             #if we have the effect already, run the effect's additional_effect function and kick out
-            applied = self._status_effects[effect.id]
+            applied:status_effect.Status_Effect = self._status_effects[effect.id]
             applied.additional_effect(effect)
             return None
         self._status_effects[effect.id] = effect
@@ -346,7 +438,7 @@ class Mob():
         effect.cleanse()
         return None
 
-    #Updates
+    #UPDATES
     def calculate_loot(self):
         """
         Adds a random extra amount of XP and Gold per level it is above base
@@ -377,14 +469,22 @@ class Mob():
             self.remove_status_effect(effect)
         inactive = []
 
+    #SPECIAL
     def special(self):
         """
         Mob's special move
         """
-        raise NotImplementedError
+        if "Enraged" in self._status_effects:
+            return False
+        return True
     
     def trigger(self):
         """
-        Trigger that determines if the mob should do their special move
+        Trigger that determines if the mob should do their special move.
+        Mobs can't do specials while under certain effects, and each mob
+        runs it's parent trigger function to see if it is able to do it's special
+        or if it must attack due to effects.
         """
-        return False
+        if "Enraged" in self._status_effects:
+            return False
+        return True

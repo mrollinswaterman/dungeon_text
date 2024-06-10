@@ -34,7 +34,7 @@ long_sword = Weapon("Long Sword", "Common")
 long_sword.set_damage_dice((1,8))
 long_sword.set_crit_multiplier(2)
 
-leather_armor = Armor("Leather Armor", "Light", "Common")
+leather_armor = Armor("Padded Leather Armor", "Common", "Light")
 leather_armor.set_armor_value(2)
 
 PLAYER.equip(leather_armor, True)

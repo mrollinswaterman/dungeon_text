@@ -1,4 +1,5 @@
 #Hobgoblin mob file
+import random
 import mob, global_commands
 from conditions import Stat_Buff_Debuff
 
@@ -36,6 +37,8 @@ class Hobgoblin(mob.Mob):
         For Hobgoblins it's if the player's evasion is >= 10, 
         and the player is not currently suffering from a Hobgoblin's taunt
         """
+        if not super().trigger():
+            return False
         return self._player.evasion >= 10 and not self.applied
 
 
@@ -58,5 +61,38 @@ class Hobgoblin(mob.Mob):
             taunt.set_stat("base_evasion")
             self._player.add_status_effect(taunt)
         return None
+    
+    def roll_narration(self):
+        generic = super().roll_narration()        
+        me = [
+            f"The {self.id} swings it's club at you.",
+            f"The {self.id} tries to bash your head in.",
+            f"The {self.id} winds up for a strike.",
+            f"The {self.id} charges you, it's club raised.",
+            f"The {self.id} lets out a fierce battle cry, and hoists it's club in preperation..."
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
+
+    def hit_narration(self):
+        generic = super().hit_narration()
+        me = [
+            f"The {self.id}'s club smashes through your defense.",
+            f"You can't dodge it's club's powerful smash.",
+            f"The {self.id}'s club catches your arm.",
+            f"The club moves fast for something so cumbersome looking..."
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
+
+    def miss_narration(self):
+        generic = super().miss_narration()
+        me = [
+            f"You manage to dash of the club's strike radius",
+            f"The {self.id}'s attack is strong, but slow. You step out of it's way.",
+            f"You dodge out of the club's wide arc."
+        ]
+        final = generic + me
+        global_commands.type_text(random.choice(final))
 
 object = Hobgoblin

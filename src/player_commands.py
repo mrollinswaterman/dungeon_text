@@ -4,13 +4,17 @@ import items
 
 GOD_MODE = False
 
-def start_turn():
+def turn():
     """
     Runs the player's turn
     """
     import global_variables
     import enemy_commands
     import controller
+    from command_dict import all
+
+    actions = all["actions"]
+    combat_tricks = all["combat_tricks"]
 
     global_variables.PLAYER.update()
 
@@ -20,42 +24,27 @@ def start_turn():
 
     while global_variables.PLAYER.can_act:
         turn_options()
+        done = False
+        while not done:
+            code = global_commands.get_cmd()
 
-        command = input(">> ").lower()
-        print("")
-
-        if command == "exit":
-            global_variables.RUNNING = False
-            global_commands.exit()
-        if command == "reset":
-            reset()
-            sys.exit()
-        try:
-            command = int(command)
+            #check if code is an item hotkey
             try:
-                item = list(global_variables.PLAYER.inventory.values())[command - 1]
-            except IndexError:
-                item = None
-            use_an_item(item, controller.SCENE.enemy)
-        except ValueError:
-            pass
-        match command:
-            case "a": #attack
-                attack()
-            case "c": #combat tricks
-                combat_tricks()
-            case "i": #show inventory
-                show_inventory()
-            case "test": #test suite
-                print(global_variables.PLAYER.evasion)
-            case "p": #pass the turn
-                global_variables.PLAYER.spend_ap(0)
-            case "s": #cleanse an effect
-                cleanse_an_effect()
-            case "f": #attempt to flee
-                global_variables.RUNNING = False
-                flee()
-
+                code = int(code)
+                item = global_variables.PLAYER.get_item_by_index(code-1)
+                if use_an_item(item, controller.SCENE.enemy):
+                    done = True
+            except ValueError:
+                pass
+            
+            #if not item hotkey, see which code it is, then run the function associated with it
+            if (code in actions and code in combat_tricks) or code in actions:
+                done = True
+                actions[code]()
+            if code in combat_tricks:
+                done = True
+                combat_tricks[code]()
+        
         if controller.SCENE.enemy.dead:
             global_variables.PLAYER.reset_ap()
             global_variables.RUNNING = False
@@ -66,10 +55,13 @@ def start_turn():
             global_commands.type_with_lines("")
     
     if global_variables.RUNNING:
-        global_commands.type_with_lines("")#shorthand, just prints the #s
-        enemy_commands.start_turn()
+        global_commands.type_with_lines("")#shorthand, just prints the '=' signs
+        enemy_commands.turn()
         return None
-    
+
+    return None
+
+def back():
     return None
 
 def turn_options():
@@ -79,14 +71,49 @@ def turn_options():
     import global_variables
 
     header = f"What would you like to do? \t"
-    hp = f"HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp) + "]"} \t"
-    ap = f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap} \t"
-    gold = f"Gold: {global_variables.PLAYER.gold}g \t"
-    xp = f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level} \t"
     global_commands.type_text(header, 0.03, False)
-    print(hp + ap + gold + xp + "\n")
-    options = "\t Attack - (a) | Combat Tricks - (c) | Attempt to Cleanse a Status Effect - (s) | Inventory - (i) | Pass Turn - (p) | Flee - (f)"
-    print(options)
+    stats = {
+        "hp": f"HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp) + "]"}",
+        "ap": f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}",
+        "gold": f"Gold: {global_variables.PLAYER.gold}g",
+        "xp": f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level}"
+    }
+    for stat in stats:
+        print(stats[stat] + " \t", end="")
+    print("\n")
+
+    options = [
+        "Attack - (a)", "Combat Tricks - (c)",
+        "Status Effects - (e)", "Inventory - (i)",
+        "Wait - (w)", "Retreat - (r)"
+    ]
+    print("\t", end="")
+    for item in options:
+        print(item + " | ", end="")
+    print("\n")
+
+def combat_tricks():
+    from command_dict import all
+    ct = all["combat_tricks"]
+
+    global_commands.type_text("Select a trick to use -OR- Go Back - (b)")
+    options = [
+        "Power Attack - (p)",
+        "Feint - (f)"
+    ]
+    print("\t", end='')
+    for item in options:
+        print(item + " | ", end='')
+    print("\n")
+
+    done = False
+    while not done:
+        code = global_commands.get_cmd()
+        if code in ct:
+            done = True
+            ct[code]()
+        else:
+            global_commands.type_text(f"Invalid command '{code}'. Please try again.", 0.01)
 
 def cleanse_an_effect():
     """
@@ -94,7 +121,10 @@ def cleanse_an_effect():
     """
     import global_variables
     import status_effect
-    global_commands.type_text("Select an effect to cleanse OR Cancel - (c)")
+    from command_dict import all
+    effects = all["cleanse_an_effect"]
+
+    global_commands.type_text("Select an effect to cleanse -OR- Go Back - (b)")
     for idx, entry in enumerate(global_variables.PLAYER.status_effects):
         effect: status_effect.Status_Effect = global_variables.PLAYER.status_effects[entry]
         string = f"{idx+1}. {effect.id}"
@@ -107,100 +137,114 @@ def cleanse_an_effect():
     if len(global_variables.PLAYER.status_effects) > 0:
         print("\n")
 
-    while True:
-        cmd = input(">> ").lower()
-        print("")
-        match cmd:
-            case "exit":
-                global_commands.exit()
-            case "c":
-                return None
-            case _:
-                try:
-                    num = int(cmd)
-                    try: 
-                        effect:status_effect.Status_Effect = list(global_variables.PLAYER.status_effects.values())[num-1]
-                        global_variables.PLAYER.spend_ap()
-                        effect.attempt_cleanse(global_variables.PLAYER.roll_a_check(effect.cleanse_stat))
-                        return None
-                    except KeyError:
-                        global_commands.type_text(f"Invalid effect number '{cmd}'. Please try again.")
-                except ValueError:
-                    global_commands.type_text(f"Invalid effect number '{cmd}'. Please try again.")
-
-def combat_tricks():
-    pass
-
-def attack() -> None:
-    """
-    Runs the player attack action
-    """
-    import global_variables
-    
-    global_variables.PLAYER.attack()
+    done = False
+    while not done:
+        code = global_commands.get_cmd()
+        if code in effects:
+            done = True
+            effects[code]()
+        else:
+            try:
+                num = int(code)
+                try: 
+                    effect:status_effect.Status_Effect = list(global_variables.PLAYER.status_effects.values())[num-1]
+                    global_variables.PLAYER.spend_ap()
+                    effect.attempt_cleanse(global_variables.PLAYER.roll_a_check(effect.cleanse_stat))
+                    done = True
+                except KeyError:
+                    global_commands.type_text(f"Invalid effect number '{num}'. Please try again.",0.01)
+            except ValueError:
+                global_commands.type_text(f"Invalid effect number '{code}'. Please try again.",0.01)
     return None
 
 def show_inventory() -> None:
     import global_variables
     global_variables.PLAYER.print_inventory()
-    select_an_item()
+    item_select()
 
-def select_an_item() -> None:
+def item_select() -> None:
     """
     Lets the player select an inventory item to use
     """
     import global_variables
     import controller
+    from command_dict import all
+    item_selection = all["item_select"]
 
-    global_commands.type_text("Enter an Item's number to use it | Go Back - (b)")
-    while True:
-        cmd = input(">> ").lower()
-        print("")
-        match cmd:
-            case "exit":
-                global_commands.exit()
-            case "b":
-                return None
-            case _:
-                try:
-                    cmd = int(cmd)
-                    try:
-                        item = global_variables.PLAYER.get_item_by_index(cmd-1)
-                        return use_an_item(item, controller.SCENE.enemy)
-                    except IndexError:
-                        global_commands.type_text("Please enter a valid item number.")
-                except ValueError:
-                    global_commands.type_text("Please enter a valid command.")
+    global_commands.type_text("Enter an Item's number to use it -OR- Go Back - (b)")
 
+    done = False
+    while not done:
+        code = global_commands.get_cmd()
+        if code in item_selection:
+            done = True
+            item_selection[code]()
+        else:
+            print(code)
+            try:
+                num = int(code)
+                item = global_variables.PLAYER.get_item_by_index(num-1)
+                if item is not None:
+                    done = True
+                    return use_an_item(item, controller.SCENE.enemy)
+                global_commands.type_text(f"Invalid item number '{code}'. Please try again.", 0.01)
+            except ValueError:
+                global_commands.type_text("Please enter a valid command.", 0.01)
 
-def use_an_item(item:items.Item, target=None) -> None:
+def use_an_item(item:items.Item, target=None) -> bool:
     """
-    Uses an item if the player has the item in their inventory
+    Uses an item if the player has the item in their inventory.
+    Returns False if item is None, else True
     """
     import global_variables
-    if item is None:
-        global_commands.type_text("Invalid item selected. Please try again.")
-        return None
 
-    if global_variables.PLAYER.has_item(item) is True:#check the player has the item
-        if item.is_consumable is True:
-            item = global_variables.PLAYER.inventory[item.id]
-            held_item:items.Consumable = item
+    if item is None:
+        global_commands.type_text("Invalid item selected. Please try again.", 0.01)
+        return False
+
+    if global_variables.PLAYER.has_item(item):#check the player has the item
+        if item.is_consumable:
+            held_item:items.Consumable = global_variables.PLAYER.get_item_by_id(item.id)
             if held_item.quantity == 0: #if the items quantity is 0, remove it
                 global_variables.PLAYER.drop(held_item)
                 global_commands.type_text(f"No {item.name} avaliable!")
-                select_an_item()
-                return None
+                item_select()
+                return True
             if held_item.use(target):
                 global_variables.PLAYER.spend_ap()
-            return None
+            return True
         else:
             global_commands.type_text(f"{item.name} is not a consumable.")
-            select_an_item()
-            return None
+            item_select()
+            return True
     else:
-        global_commands.type_text(f"No {item.name} avaliable!")
-        select_an_item()
+        global_commands.type_text(f"You don't have any {item.name}!")
+        item_select()
+        return None
+
+def flee() -> None:
+    """
+    Attempts to run away from the current encounter
+    """
+    import global_variables
+    import narrator
+    import controller
+
+    if "Enraged" in global_variables.PLAYER.status_effects:
+        global_commands.type_text("You cannot flee while Enraged.")
+        return None
+    
+    global_variables.RUNNING = False
+    global_commands.type_text("You attempt to flee...")
+    
+    if global_commands.probability(90 - int((global_variables.PLAYER.hp / global_variables.PLAYER.max_hp) * 100)):
+        #higher HP == lower chase chance
+        stop_flee_attempt()
+        return None
+    else:
+        global_commands.type_text(f"The {controller.SCENE.enemy.id} lets you go.")
+        global_variables.PLAYER.spend_ap(0)
+        narrator.continue_run()
         return None
 
 def stop_flee_attempt() -> None:
@@ -221,26 +265,8 @@ def stop_flee_attempt() -> None:
     narrator.continue_run()
     return None
 
-def flee() -> None:
-    """
-    Attempts to run away from the current encounter
-    """
-    import global_variables
-    import narrator
-    import controller
 
-    global_commands.type_text("You attempt to flee...")
-    
-    if global_commands.probability(90 - int((global_variables.PLAYER.hp / global_variables.PLAYER.max_hp) * 100)):
-        #higher HP == lower chase chance
-        stop_flee_attempt()
-        return None
-    else:
-        global_commands.type_text(f"The {controller.SCENE.enemy.id} lets you go.")
-        global_variables.PLAYER.spend_ap(0)
-        narrator.continue_run()
-        return None
-
+#META FUNCTIONS
 def end_game():
     """
     End game message
@@ -263,6 +289,7 @@ def reset():
     """
     Wipes the player.csv and inventory.csv files
     """
+    import global_variables
     with open('player.csv', "r+") as file:
         file.truncate(0)
         file.close()
@@ -270,3 +297,6 @@ def reset():
     with open('inventory.csv', "r+") as file:
         file.truncate(0)
         file.close()
+
+    global_variables.RUNNING = False
+    sys.exit()

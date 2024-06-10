@@ -15,9 +15,8 @@ This file contains a list of tasks and ideas
 - [ ] Shopkeep “mood” meter → different narration lines depending on how much he likes you (impacted by how much you buy+sell, and charisma) 
 - [ ] Templates → demonic, hellish, angelic, divine → templates that can be applied to mobs that give them stat bonus + special abilities?
 - [X] Fix status effects
-- [X] Multiple special moves,  each with different triggers
 - [ ] Player special moves (power attack, feint, etc)
-- [ ] Add mob specific attack narration (ie the ___ swings it’s dagger at you, the dragon breathes a gout of flame in your direction, etc)
+- [X] Add mob specific attack narration (ie the ___ swings it’s dagger at you, the dragon breathes a gout of flame in your direction, etc)
 - [X] Give status effect their own file like item compendium where each individual effect is made its own subclass of status effect
 - [ ] Add a companion, Gears the friendly Clockwork Hound. If you have a Clockwork Heart and some scrap, you have a chance to encounter him, can repair him with an int check, he joins you. Increases loot chances???
 - [ ] Add a drop chance dictionary to item_compendium instead of drop chance being hard coded into classes
@@ -25,7 +24,7 @@ This file contains a list of tasks and ideas
 actually printing, maybe the print function just tells you what lines should be printed, ie durability
 for weapons/armor, quantity for consumables, etc, then the print inventory function prints each line
 as necessary for formatting)
-- [ ] Make a switch statement so rolls that should be paired with "an" are paired with "an" instead of "a". (ie "You rolled 'an' 18." instead of "'a' 18.")
+- [X] Make a switch statement so rolls that should be paired with "an" are paired with "an" instead of "a". (ie "You rolled 'an' 18." instead of "'a' 18.")
 
 ## Mechanics
 
@@ -51,8 +50,12 @@ as necessary for formatting)
 
 ## Items
 
-- [ ] Add an "attack bonus" to weapons, based on rarity, which is a flat bonus to the player's attack roll with said weapon, also add BAB scaling to player class 
+- [X] Add an "attack bonus" to weapons, based on rarity, which is a flat bonus to the player's attack roll with said weapon, also add BAB scaling to player class 
 - [X] Firebomb → does a set amount of damage, target can dex save for half, if they beat by more than 10, save for full. Chance to set on fire if they don't save by for full
+- [ ] Add "Scroll" type items that can be used to cast spells. Every 3-5 uses (maybe Int dependent) can roll an int check to "learn" the spell, permanently adding it to your spellbook. Scrolls have a use cap (6-10, Int dependent as well??) and cannt be repaired. 
+
+## Legendary Items
+
 - [ ] Clockwork Maul --> A great hammer crafted from clockwork scrap. Always loses durability on-hit.
 Special move, uses half max durability for a double damage on the attack (can miss, takes 1/4 durability instead of 1/2). passively regens some durability per turn 
 - [ ] Sharkbone Greatsword --> greatsword made from Land Shark teeth and bone. Serrated edge, causes bleed, DoT on hit. some form of blood related buff, either a +1 to damage per kill until you leave the dungeon (capped at your level) or does bonus damage to enemies below HP thresholds (ie +2 to below 50%, +3 to below 30%, etc)
@@ -63,6 +66,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 
 ## Mobs
 
+- [X] Multiple special moves for mobs, each with different triggers
 - [ ] Add level scaling to mobs (ie every 2 levels, add +1 to a random stat)
 - [X] Clockwork hound that eats your equipped gear → takes some amount of durability off it, and heals itself for that amount
 - [ ] Cave spider that shoots webbing at you, can dodge with a dex check. If you get hit, either -1 AP, or no AP for next turn(s). Either way, can roll str on your turn to end all effects
@@ -70,10 +74,11 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Lesser angel → winged fighters that attack you with flaming swords → chance to be set on fire on hit → burn damage per turn, can put it out on your turn with 1 AP. 
 - [ ] Greater angel → same as above but can mitigate / heal damage
 - [X] Land shark → can burrow underground to either increase its armor or its evasion (i haven't decided yet)
-- [ ] Mimic: takes the form of a random enemy (or the last enemy you fought), copies only stats not abilities (subject to change), 5% chance you fight a clone of yourself. 
+- [ ] Mimic: takes the form of a random enemy, copies stats and abilities(subject to change), 5% chance you fight a clone of yourself. changes form when below 50% HP to something stronger, and again at 25% HP.
 - [ ] Gorgon: have to fight with your eyes closed (ie blind), 50% miss chance on all attacks before attack is even rolled. Can choose to look into its eyes, no more miss chance, but massive dex penalty 
 - [ ] Decaying clockwork golem: Heals for half its max hp every round, but its max hp “decays” by a certain amount each round as well.
 - [ ] Armordillo: deals ⅓ (or ½ or just some flat amount) of any damage taken back to the player. Can “curl up” defensively to halve all damage he takes during the next turn (does this frequently, never chases after the player just wants to be left alone. Give him a really good drop???)
+- [ ] Flaming Skull --> chance to catch fire on attack, regens to full when killed, but max_hp decays each resurrection, to a minimum of 5-10. Dies for good if you one-shot it (from full??), ie do its max hp in one attack.
 
 ## Events
 
@@ -87,11 +92,12 @@ Special move, uses half max durability for a double damage on the attack (can mi
 ## Balance
 
 - [X] HP potions should restore double their power in health (ie 4 instead of 2)
+- [ ] Can only use 1 combat trick per round???
+
 
 ## Combat Tricks
 
-- [ ] Can only use 1 combat trick per round???
-- [ ] Power Attack(1AP): no dex bonus to attack roll, but roll damage twice (take highest) and add x1.5 str to attack
+- [X] Power Attack(1AP): no dex bonus to attack roll, but roll damage twice (take highest) and add x1.5 str to attack
 - [ ] Feint(1AP): If you beat the enemy in a Cha check, add +2 or +Cha whichever is higher to base-evasion for 3 rounds. if you lose add 1/2 that (either 1 or 1/2 cha, whichever is higher)
 - [ ] Riposte(2AP): Gain +2 to base-evasion, if they miss by your dex or more, deal 1/2 of the attack's potential damage back to them instead
 - [ ] Total Defense(All AP): add 5+(level//5) to base-evasion for enemy's next turn, but on your next turn, no dex bonus to attacks (potenitally more penalties like roll twice and take lowest on attacks)
@@ -104,3 +110,4 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] check_inventory should print equipped items even if inventory is empty
 - [ ] buying a consumable at the store does not reprint the shopkeep's inventory
 - [ ] Extra line printed after re-entering dungeon
+- [ ] Add specific text for when a mob damages itself on a crit fail

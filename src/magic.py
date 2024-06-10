@@ -8,10 +8,11 @@ class Spell():
     caster is the player or not
     """
 
-    def __init__(self, caster:player.Player | mob.Mob, id):
+    def __init__(self, caster:player.Player | mob.Mob, id:str, code:str):
         import global_variables
         self._id = id
         self._caster = caster
+        self.code = code
         self._min_level = 1
 
         #determines if the caster is the player

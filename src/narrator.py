@@ -60,17 +60,23 @@ def continue_run():
     import controller
 
     global_commands.type_with_lines("Continue? y/n")
-    command = input(">> ").lower()
-    if command == "y":   
-        next_scene_options()
-        controller.next_scene()
-    elif command == "n":
-        exit_the_dungeon()
-    elif command == "exit":
-        global_commands.exit()
-    else:
-        global_commands.type_text("Invalid command. Please try again.")
-        continue_run()
+    done = False
+    while not done:
+        cmd = input(">> ").lower()
+        match cmd:
+            case "exit":
+                done = True
+                global_commands.exit()
+            case "y":
+                done = True
+                next_scene_options()
+                controller.next_scene()
+            case "n":
+                done = True
+                print("")
+                exit_the_dungeon()
+            case _:
+                global_commands.type_text(f"Invalid command '{cmd}'. Please try again.")
 
 def exit_the_dungeon():
     global_variables.RUNNING = False
@@ -164,25 +170,30 @@ def rest():
     PREV_MENU()
 
 def select_item():
-    global_commands.type_text("Enter an item's number to equip it OR (b) - Go Back")
-    cmd = input(">> ").lower()
-    print("")
-    match cmd:
-        case "exit":
-            global_commands.exit()
-        case "b":
-            PREV_MENU()
-        case _:
-            try:
-                item = global_variables.PLAYER.get_item_by_index(int(cmd) - 1)
-                if global_variables.PLAYER.equip(item) is True:
-                    show_inventory()
-                else:
-                    global_commands.type_text("Can't equip that.")
-                    select_item()
-            except ValueError:
-                global_commands.type_text("Invalid command, please try again.")
-                select_item()
+    global_commands.type_text("Enter an item's number to use it OR (b) - Go Back")
+    done = False
+    while not done:
+        cmd = input(">> ").lower()
+        print("")
+        match cmd:
+            case "exit":
+                done = True
+                global_commands.exit()
+            case "b":
+                done = True
+                PREV_MENU()
+            case _:
+                pass
+        try:
+            item = global_variables.PLAYER.get_item_by_index(int(cmd) - 1)
+            if global_variables.PLAYER.use(item):
+                done = True
+                show_inventory()
+            else:
+                global_commands.type_text("Can't use that.")
+        except ValueError:
+            global_commands.type_text("Invalid command, please try again.")
+    return None
 
 def show_inventory():
     global_variables.PLAYER.print_inventory()

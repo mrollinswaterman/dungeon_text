@@ -1,21 +1,8 @@
 import random, time, os, csv
 import global_commands
 from items import Item, Consumable, Weapon, Armor
-import item_compendium
 from status_effect import Status_Effect
 from conditions import Stat_Buff_Debuff as sbd
-
-HP_POT = None
-FIREBOMB = None
-
-ITEM_TYPES = {
-    "Weapon": Weapon,
-    "Armor": Armor,
-    "Item": Item,
-    "Consumable": Consumable,
-    "Health_Potion": item_compendium.Health_Potion,
-    "Firebomb": item_compendium.Firebomb
-}
 
 class Player():
 
@@ -178,46 +165,135 @@ class Player():
     def set_level(self, num:int) -> None:
         self._level = num
 
-    #COMBAT TRICKS
-    def crit(self, on=True) -> bool:
-        global_commands.type_text("A critical hit!")
-        if self.weapon.broken:
-            self._stats["damage_multiplier"] += 1 if on else -1
-        else:
-            self._stats["damage_multiplier"] += (self.weapon.crit-1) if on else -(self.weapon.crit-1)
-        return on
-
-
+    #ACTIONS
     def attack(self) -> None:
-        """
-        Returns an attack roll (d20 + dex bonus)
-        """
         import player_commands, controller
         enemy = controller.SCENE.enemy
 
-        roll = 1000 if player_commands.GOD_MODE else self.roll_to_hit()
+        roll = 10000 if player_commands.GOD_MODE else self.roll_to_hit()
         self.spend_ap()
+        processed = self.process_roll(roll)
+        self.roll_narration(processed)
 
-        roll_text = f"natural 20!" if roll == 0 else f"{roll}."
-        crit = self.crit(True) if roll == 0 else None#turns crit on
-        
-        global_commands.type_text(f"You attack the {enemy.id}, rolling a {roll_text}")
+        match roll:
+            case 0:
+                return self.crit()
+            case 1:
+                return self.crit_fail()
+            case _:
+                pass
 
-        if roll == 1:
-            global_commands.type_text("Crtical Fail!")
-
-        if roll >= controller.SCENE.enemy.evasion or roll == 0:
-            global_commands.type_text(f"You hit the {enemy.id}")
-            if player_commands.GOD_MODE:
-                taken = enemy.take_damage(1000, self, True)
-            else:
-                taken = enemy.take_damage(self.roll_damage(), self)
-            crit = self.crit(False) if roll == 0 else None#turns crit off
+        if roll >= controller.SCENE.enemy.evasion:
+            self.hit_narration()
+            dmg = 10000 if player_commands.GOD_MODE else self.roll_damage()
+            taken = enemy.take_damage(dmg, self)
             return None
-        else:
-            global_commands.type_text("You missed.")
+
+        self.miss_narration()
         return None
 
+    def process_roll(self, roll) -> None | str:
+        vowel = f"rolling an {roll}."
+        match roll:
+            case 0:
+                return f"rolling a natural 20!"
+            case 1:
+                return "rolling a natural 1!"
+            case 8:
+                return vowel
+            case 11:
+                return vowel
+            case 18:
+                return vowel
+            case _:
+                return f"rolling a {roll}."
+
+    def crit(self) -> None:
+        import controller
+        enemy = controller.SCENE.enemy
+
+        global_commands.type_text("A critical hit!")
+        no_weapon = True if self.weapon.broken else False
+
+        if no_weapon:
+            self._stats["damage_multiplier"] += 1
+        else:
+            self._stats["damage_multiplier"] += (self.weapon.crit-1)
+
+        taken = enemy.take_damage(self.roll_damage(), self)
+
+        if no_weapon:
+            self._stats["damage_multiplier"] -= 1
+        else:
+            self._stats["damage_multiplier"] -= (self.weapon.crit-1)
+        return None
+    
+    def crit_fail(self) -> None:
+        global_commands.type_text("You critically failed!")
+        return None
+    
+    def use(self, item:Item):
+        """
+        If the item is consumable, use it. If equippable, equip it.
+        Anything else, return False
+        """
+        if item is None: return False
+
+        if item.is_consumable:
+            import player_commands
+            player_commands.use_an_item(item, self)
+            self.reset_ap()
+        elif item.type != "Item":
+            self.equip(item)
+        else:
+            return False
+        
+        return True
+    
+    #NARRATION --> prints statements based on given situation
+    def roll_narration(self, roll_text):
+        import controller as c
+        enemy = c.SCENE.enemy
+        text = [
+            f"You heft your {self.weapon.id} and attack the {enemy.id}, ",
+            f"You charge the {enemy.id}, ",
+            f"You swing your {self.weapon.id}, ",
+            f"Brandishing your {self.weapon.id}, you prepare to strike..."
+        ]
+        global_commands.type_text(random.choice(text) + f"{roll_text}")
+        return None
+
+    def hit_narration(self) -> None:
+        import controller as c
+        enemy = c.SCENE.enemy
+        text = [
+            f"A hit.",
+            f"The {enemy.id} didn't get out of the way in time.",
+            f"You hit the {enemy.id}.",
+            f"Your attack lands.",
+            f"Your {self.weapon.id} strike true.",
+            f"The {enemy.id} wasn't able to dodge this one.",
+            f"Sucess."
+        ]
+        global_commands.type_text(random.choice(text))
+        return None
+
+    def miss_narration(self) -> None:
+        import controller as c
+        enemy = c.SCENE.enemy
+        text = [
+            f"You missed.",
+            f"No luck this time.",
+            f"The {enemy.id} deftly dodges your attack.",
+            f"Your attack whizzes by, missing by a hair.",
+            f"You don't crack the {enemy.id}'s defenses this time.",
+            f"It leaps out of the way in the nick of time.",
+            f"A miss."
+        ]
+        global_commands.type_text(random.choice(text))
+        return None
+
+    #COMBAT TRICKS
     def power_attack(self) -> int:
         import controller
         enemy = controller.SCENE.enemy
@@ -244,6 +320,9 @@ class Player():
 
     #ROLLS
     def roll_to_hit(self) -> int:
+        """
+        Returns an attack roll (d20 + dex bonus + BAB + weapon attack bonus)
+        """
         weapon:Weapon = self._equipped["Weapon"]
         if weapon.broken is True:
             raise ValueError("Weapon is broken")
@@ -254,7 +333,7 @@ class Player():
             case 20:
                 return 0
             case _:
-                return roll + self.bonus("dex") + weapon.attack_bonus
+                return roll + self.bonus("dex") + self.level // 5 + weapon.attack_bonus
             
     def roll_damage(self) -> int:
         """
@@ -443,8 +522,8 @@ class Player():
         if item is None:
             return False
         if self.can_carry(item):
-            if self.has_item(item) is True and item.is_consumable is True:
-                held_item:Consumable = self._inventory[item.id]
+            if self.has_item(item)and item.is_consumable:
+                held_item:Consumable = self.get_item_by_id(item.id)
                 held_item.increase_quantity(item.quantity)
                 if silently is False:
                     (item.pickup_message + "\n")
@@ -516,7 +595,6 @@ class Player():
 
         Return the item if its there and False if not
         """
-
         if item is None:
             return False
 
@@ -539,72 +617,74 @@ class Player():
             return None
     
     def get_item_by_index(self, idx:int) -> Item:
-        """"""
+        """
+        Gets an item by index. Returns None if no item at that index
+        """
         try:
             return list(self._inventory.values())[idx]
         except IndexError:
             return None
 
-    def print_inventory(self) -> None:
-        global_commands.type_with_lines("")
-        print(f"{25 * " "} Inventory: {25 * " "} {1 * "\t"} \t\t Equipped:\n")
+    def print_inventory(self, line_len=25) -> None:
         line_len = 25
-        idx = 0
-        last = False
-        while(idx < len(self._inventory)):
+        global_commands.type_with_lines("")
+        print(f"{line_len * " "} Inventory: {line_len * " "} {1 * "\t"} \t\t Equipped:\n")
+        
+        self.format_inventory()
+        
+        print("\n")
+        print(f"Gold: {self.gold}g", end='')
+        time.sleep(0.05)
+        print(f"\tCarrying Capacity: {self.current_weight}/{self.carrying_capacity} lbs\n")
+        global_commands.type_with_lines("")
 
+    def format_inventory(self, line_len=25):
+        last = False
+        idx = 0
+        mx = max(3, len(self._inventory))
+        while(idx < mx):
             if idx % 2 == 0 and idx != 0:
                 time.sleep(0.05)
                 print("\n")
-            
-            first = list(self._inventory.values())[idx].format()
-            try:
-                second = list(self._inventory.values())[idx + 1].format()
-            except IndexError:
-                last = True
-                second = first
-            weapon = self._equipped["Weapon"].format()
-            armor = self._equipped["Armor"].format()
 
-            header1 = f"{idx+1}. {first[0]}"
-            header2 = f"{idx+2}. {second[0]}" if not last else " "
-            w_header = " "
-            a_header = " "
-            if idx == 0:
-                w_header = f"1. {weapon[0]}"
-                
-            if idx == 2:
-                a_header = f"2. {armor[0]}"
-            
-            header1 = global_commands.match(header1, line_len)
-            header2 = global_commands.match(header2, line_len)
-            w_header = global_commands.match(w_header, line_len)
-            a_header = global_commands.match(a_header, line_len)
+            weapon = self._equipped["Weapon"].format() if idx == 0 else []
+            w_header = f"1. {weapon[0]}" if idx == 0 else " "
+
+            armor = self._equipped["Armor"].format() if idx == 2 else []
+            a_header = f"2. {armor[0]}" if idx == 2 else " "
+
+            first = second = []
+            header1 = header2 = " "
+            if idx < len(self._inventory):
+                first = list(self._inventory.values())[idx].format()
+                try:
+                    second = list(self._inventory.values())[idx + 1].format()
+                except IndexError:
+                    last = True
+                    second = first
+                header1 = f"{idx+1}. {first[0]}"
+                header2 = f"{idx+2}. {second[0]}" if not last else " "
+
+            headers = (header1, header2, w_header, a_header)
+ 
+            header1, header2, w_header, a_header = global_commands.match(headers, line_len)
 
             equipped_header = w_header if idx == 0 else a_header
             print(f" {header1} {1 * "\t"} {header2} \t\t {equipped_header}")#print ids + weapon
-            long = max(len(first), len(second))
+            long = max(len(first), len(second), len(weapon), len(armor))
             for i in range(1, long):
                 str1 = first[i] if i < len(first) else " "
                 str2 = second[i] if i < len(second) and not last else " "
                 w = weapon[i] if idx == 0 and i < len(weapon) else " "
                 a = armor[i] if idx == 2 and i < len(armor) else " "
 
-                str1 = global_commands.match(str1, line_len)
-                str2 = global_commands.match(str2, line_len)
-                w = global_commands.match(w, line_len)
-                a = global_commands.match(a, line_len)
+                string = str1, str2, w, a
+                str1, str2, w, a = global_commands.match(string, line_len)
 
                 equipped = w if idx == 0 else a
                 print(f" {str1} {1 * "\t"} {str2} \t\t {equipped}")
 
             idx += 2 if len(self._inventory) - idx >= 2 else 1
-
-        print("\n")
-        print(f"Gold: {self.gold}g", end='')
-        time.sleep(0.05)
-        print(f"\tCarrying Capacity: {self.current_weight}/{self.carrying_capacity} lbs\n")
-        global_commands.type_with_lines("")
 
     def recieve_reward(self, reward:dict) -> None:
         for entry in reward:
@@ -700,6 +780,7 @@ class Player():
         self.load_inventory(inventory_file)
     
     def load_inventory(self, filename) -> None:
+        import items
         self._inventory = {}
         size = 0
         with open(filename, encoding="utf-8") as file:
@@ -710,17 +791,16 @@ class Player():
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
-                if row["type"] in ITEM_TYPES:
-                    item:Item = ITEM_TYPES[row["type"]](row["rarity"])
-                    item.save()
-                    with open("temp.csv", "w", newline='') as temp_file:
-                        temp_file.truncate(0)
-                        w = csv.DictWriter(temp_file, fieldnames=list(item.tod.keys()))
-                        w.writeheader()
-                        w.writerow(row)
-                        temp_file.close()
+                item:Item = items.generate_item(row["id"], row["rarity"], row["type"])
+                item.save()
+                with open("temp.csv", "w", newline='') as temp_file:
+                    temp_file.truncate(0)
+                    w = csv.DictWriter(temp_file, fieldnames=list(item.tod.keys()))
+                    w.writeheader()
+                    w.writerow(row)
+                    temp_file.close()
 
-                    item.load("temp.csv")
+                item.load("temp.csv")
                 if idx == size - 2 or idx == size - 1:#if item is equipped weapon or armor
                     self.equip(item, True)
                 else:
