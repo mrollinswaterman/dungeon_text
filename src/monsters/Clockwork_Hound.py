@@ -30,12 +30,12 @@ class Clockwork_Hound(mob.Mob):
         super().__init__(id, level, statblock)
 
         if global_commands.probability(50):
-            scrap:items.Item = items.Item("Clockwork Scrap", "Uncommon")
+            scrap:items.Resource = items.Resource("Clockwork Scrap", "Uncommon", random.randrange(1, (self.level // 2)))
             scrap.set_weight(1.5)
             self._loot["drops"].append(scrap)
 
         if global_commands.probability(3):
-            heart = items.Item("Clockwork Heart", "Epic")
+            heart = items.Resource("Clockwork Heart", "Epic")
             heart.set_weight(2)
             self._loot["drops"].append(heart)
             

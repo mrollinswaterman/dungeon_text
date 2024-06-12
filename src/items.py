@@ -495,9 +495,25 @@ class Consumable(Item):
     def __str__(self) -> str:
         return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n"
 
+
+class Resource(Item):
+
+    def __init__(self, id, rarity="Common", quantity=1):
+        super().__init__(id, rarity)
+        self._quantity = quantity
+        self._pickup_message = f"You picked up x{self._quantity} {self.id}."
+        self._durability = 1
+        self._max_durability = 1
+        self._type = "Resource"
+
+    @property
+    def quantity(self):
+        return self._quantity
+
 TYPES = {
     "Item": Item,
     "Weapon": Weapon,
     "Armor": Armor,
-    "Consumable": Consumable
+    "Consumable": Consumable,
+    "Resource": Resource
 }

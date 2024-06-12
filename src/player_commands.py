@@ -2,7 +2,7 @@ import time, sys
 import global_commands
 import items
 
-GOD_MODE = False
+GOD_MODE = True
 
 def turn():
     """

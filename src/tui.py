@@ -40,7 +40,7 @@ def begin():
     if not controller.TEST:
         controller.SCENE.enemy = monster_manual.spawn_random_mob()  
     else:
-        controller.SCENE.enemy = monster_manual.spawn_mob("Bandit")
+        controller.SCENE.enemy = monster_manual.spawn_mob("Clockwork Hound")
 
     done = False
     while not done:

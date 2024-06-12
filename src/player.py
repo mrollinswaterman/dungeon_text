@@ -521,20 +521,21 @@ class Player():
         """
         if item is None:
             return False
+
         if self.can_carry(item):
             if self.has_item(item)and item.is_consumable:
                 held_item:Consumable = self.get_item_by_id(item.id)
                 held_item.increase_quantity(item.quantity)
-                if silently is False:
-                    (item.pickup_message + "\n")
+                if not silently:
+                    global_commands.type_text(item.pickup_message)
                 return True
             self._inventory[item.id] = item
             item.set_owner(self)
-            if silently is False:
-                print(item.pickup_message+ "\n")
+            if not silently:
+                global_commands.type_text(item.pickup_message)
             return True
         else:
-            if silently is False:
+            if not silently:
                 global_commands.type_text("Not enough inventory space.")
         
     def drop(self, item: Item) -> None:
@@ -687,13 +688,14 @@ class Player():
             idx += 2 if len(self._inventory) - idx >= 2 else 1
 
     def recieve_reward(self, reward:dict) -> None:
+        print(reward)
         for entry in reward:
             match entry:
                 case "gold":
                     self.gain_gold(reward[entry])
                 case "xp":
                     self.gain_xp(reward[entry])
-                case "drop":
+                case "drops":
                     for item in reward[entry]:
                         self.pick_up(item)        
         return None
