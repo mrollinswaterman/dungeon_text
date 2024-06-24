@@ -67,34 +67,31 @@ class Goblin(mob.Mob):
             self._flee_threshold = 1.01
         return None
     
-    def roll_narration(self):
-        generic = super().roll_narration()        
+    def roll_text(self):
+        base = super().roll_text()    
         me = [
             f"The {self.id} jabs its dagger towards you.",
             f"The {self.id} jumps at you.",
             f"The {self.id} slashes at your legs.",
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def hit_narration(self):
-        generic = super().hit_narration()
+    def hit_text(self):
+        base = super().hit_text()
         me = [
             f"The {self.id}'s dagger finds a chink in your armor.",
             f"The {self.id}'s small frame slips past your guard."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def miss_narration(self):
-        generic = super().miss_narration()
+    def miss_text(self):
+        base = super().miss_text()
         me = [
             f"You easily dodge the {self.id}'s wild swing.",
             f"It's dagger bounces off your own weapon.",
             f"The {self.id} stabs the spot you were just stading in.",
             f"The {self.id}'s small stature means you can easily parry it's frontal assault."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
 object = Goblin

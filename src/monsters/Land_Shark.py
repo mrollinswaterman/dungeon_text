@@ -87,8 +87,8 @@ class Land_Shark(mob.Mob):
             self._burrowed = False
             return True
     
-    def roll_narration(self):
-        generic = super().roll_narration()        
+    def roll_text(self):
+        base = super().roll_text()        
         me = [
             f"The {self.id} rushes you.",
             f"The {self.id} smells blood and closes in...",
@@ -96,29 +96,26 @@ class Land_Shark(mob.Mob):
             f"The {self.id} bares its razor sharp teeth and throws itself towards you."
             f"The {self.id}'s unfeeling gaze bores through you, a predator stalking it's prey."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def hit_narration(self):
-        generic = super().hit_narration()
+    def hit_text(self):
+        base = super().hit_text()
         me = [
             f"The {self.id} proves as agile as it's aquatic counterpart. It hits you.",
             f"Its jagged teeth find your soft flesh.",
             f"The {self.id}'s massive bulk slams into you.",
             f"You are unable to avoid the surprisingly spry behemoth."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def miss_narration(self):
-        generic = super().miss_narration()
+    def miss_text(self):
+        base = super().miss_text()
         me = [
             f"The {self.id}'s teeth barely miss you.",
             f"You get a face-full of teeth, but manage to keep yourself intact.",
             f"You roll beneath the {self.id}'s thick torso, avoiding its wrath for now.",
             f"The {self.id}'s toothy maw nearly catches you.",
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
 object = Land_Shark

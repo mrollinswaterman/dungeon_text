@@ -6,15 +6,16 @@ import controller
 def turn():
     import global_variables
     import controller
+    enemy = controller.SCENE.enemy
 
-    if controller.SCENE.enemy is not None:
-        controller.SCENE.enemy.update()
+    if enemy is not None:
+        enemy.update()
 
-        if controller.SCENE.enemy.dead:
+        if enemy.dead:
             controller.end_scene()
             return None
 
-        while controller.SCENE.enemy.can_act:
+        while enemy.can_act:
             done = turn_options()
             
             if done is None:#wait for turn_options to finish running before checking states
@@ -22,16 +23,18 @@ def turn():
                     player_commands.end_game()
                     return None
             
-                if controller.SCENE.enemy.dead:
+                if enemy.dead:
                     controller.end_scene()
                     return None
             
-                if controller.SCENE.enemy.can_act and not controller.SCENE.enemy.fleeing:
-                    global_commands.type_with_lines("")
+                if enemy.can_act and not enemy.fleeing:
+                    print("\n")
 
         if global_variables.RUNNING:
             global_commands.type_with_lines("")
             player_commands.turn()
+        
+        return None
     
     else:
         raise ValueError("Enemy is None.")
@@ -40,16 +43,18 @@ def turn_options():
     """
     Chooses a course of action for the enemy
     """
-    if controller.SCENE.enemy.fleeing:
-        controller.SCENE.enemy.spend_ap(0)
+    enemy = controller.SCENE.enemy
+
+    if enemy.fleeing:
+        enemy.spend_ap(0)
         return enemy_flee_attempt()
 
-    if controller.SCENE.enemy.trigger() and global_commands.probability(99):#if trigger is active, 75% chance of special
-            return True if controller.SCENE.enemy.special() else enemy_attack()
-    elif global_commands.probability(99):#if no trigger, only 10% chance of special
-            return True if controller.SCENE.enemy.special() else enemy_attack()
-    else:
-        return enemy_attack()
+    #if trigger is active, 85% chance to try special
+    if enemy.trigger() and global_commands.probability(99):
+            return True if enemy.special() else enemy_attack()
+
+    #if no trigger, don't special
+    return enemy_attack()
 
 def enemy_flee_attempt():
     """
@@ -59,8 +64,9 @@ def enemy_flee_attempt():
     import global_variables
     import player_commands
     import narrator
+    enemy = controller.SCENE.enemy
 
-    global_commands.type_text(f"The {controller.SCENE.enemy.id} attempts to flee...")
+    global_commands.type_text(f"The {enemy.id} attempts to flee...")
     global_commands.type_text("Try to stop them? y/n")
     done = False
     while not done:
@@ -70,16 +76,16 @@ def enemy_flee_attempt():
             case "exit":
                 global_commands.exit()
             case "y":
-                if global_variables.PLAYER.roll_attack() >= controller.SCENE.enemy.evasion:
-                    global_commands.type_text(f"You cut off the {controller.SCENE.enemy.id}'s escape. It turns to fight...")
+                if global_variables.PLAYER.roll_attack() >= enemy.evasion:
+                    global_commands.type_text(f"You cut off the {enemy.id}'s escape. It turns to fight...")
                     global_commands.type_with_lines("")
                     player_commands.turn()
                 else:
-                    global_commands.type_text(f"You try catching the {controller.SCENE.enemy.id} to no avail. It got away.")
+                    global_commands.type_text(f"You try catching the {enemy.id} to no avail. It got away.")
                     narrator.continue_run()
                 return None
             case "n":
-                global_commands.type_text(f"You let the {controller.SCENE.enemy.id} go.")
+                global_commands.type_text(f"You let the {enemy.id} go.")
                 narrator.continue_run()
                 return None
             case _:

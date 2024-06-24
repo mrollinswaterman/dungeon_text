@@ -108,6 +108,6 @@ Special move, uses half max durability for a double damage on the attack (can mi
 ## Bugs
 
 - [ ] check_inventory should print equipped items even if inventory is empty
-- [ ] buying a consumable at the store does not reprint the shopkeep's inventory
-- [ ] Extra line printed after re-entering dungeon
+- [X] buying a consumable at the store does not reprint the shopkeep's inventory
+- [X] Extra line printed after re-entering dungeon
 - [ ] Add specific text for when a mob damages itself on a crit fail

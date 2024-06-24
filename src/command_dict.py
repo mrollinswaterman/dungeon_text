@@ -28,6 +28,7 @@ all = {
 
     "combat_tricks": {
         "p": global_variables.PLAYER.power_attack,
+        "f":global_variables.PLAYER.feint,
     },
 
     "overworld_menu": {

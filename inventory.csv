@@ -1,0 +1,3 @@
+type,id,name,rarity,durability,damage_dice,num_damage_dice,crit,weight_class,quantity,unit_weight,unit_value
+Weapon,Long Sword,Long Sword,Common,6,8,1,2,,,,
+Armor,Padded Leather Armor,Padded Leather Armor,Common,7,,,,Light,,,

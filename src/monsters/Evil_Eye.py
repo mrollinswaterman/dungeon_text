@@ -45,21 +45,20 @@ class Evil_Eye(mob.Mob):
         return (self._mp / self.max_mp)
     @property
     def execute_trigger(self):
-        return self._mp >= 2 and self._player.hp < self._player.max_hp // 2
+        return self._mp >= 3 and self._player.hp < self._player.max_hp // 2
     @property
     def death_ray_damage(self) -> str:
         return "2d6"
 
     def trigger(self):
         """
-        Returns True if you have more than 5 MP or player is below 50% HP
+        Returns True if the player is low hp or if I can cast, else False
         """
-        if self._mp > 5 or self._player.hp < self._player.max_hp // 2:
-            return True
-        #if player not below execute threshold, and less than half MP, 70% of just magic missiling again
-        elif global_commands.probability(70) and self._mp > 0:
-            return True
-        return False
+        if not super().trigger():
+            return False
+
+        return self.execute_trigger or self.can_cast
+
 
     def spell(self):
         self.spend_ap()
@@ -116,40 +115,33 @@ class Evil_Eye(mob.Mob):
         """
         Picks which magic attack the Evil Eye uses
         """
-        if not super().trigger():
-            return False
-        if self._player.hp < self._player.max_hp // 2 and self._mp > 3:
-            if self.can_full_round:
-                self.death_ray()
-            else: return False
-        elif self._mp > 0:
+        if self.execute_trigger and self.can_full_round:
+            self.death_ray()
+        else:
             self.spell()
-        else:#if no MP, must attack
-            return False
-
+        
         return True
+
     
-    def roll_narration(self):
-        generic = super().roll_narration()        
+    def roll_text(self):
+        base = super().roll_text()        
         me = [
             f"",
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def hit_narration(self):
-        generic = super().hit_narration()
+    def hit_text(self):
+        base = super().hit_text()
         me = [
             f"",
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def miss_narration(self):
-        generic = super().miss_narration()
+    def miss_text(self):
+        base = super().miss_text()
         me = [
             f"",
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
+
 object = Evil_Eye

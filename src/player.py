@@ -298,7 +298,7 @@ class Player():
         import controller
         enemy = controller.SCENE.enemy
 
-        global_commands.type_text(f"You wind up a Power Attack...")
+        global_commands.type_text(f"You wind up for a powerful attack...")
         roll = self.roll_to_hit()
         self.spend_ap()
 
@@ -317,6 +317,27 @@ class Player():
             return None
         else:
             global_commands.type_text("No luck.")
+    
+    def feint(self) -> None:
+        import controller
+        from conditions import Stat_Buff_Debuff
+        enemy = controller.SCENE.enemy
+
+        global_commands.type_text("You attempt a feint...")
+        roll = self.roll_a_check("cha")
+        self.spend_ap()
+
+        if roll >= enemy.roll_a_check("cha"):
+            global_commands.type_text(f"You faked out the {enemy.id}!")
+            def_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
+            def_bonus.set_stat("base_evasion")
+            def_bonus.set_duration(2)
+            def_bonus.set_potency(max(2, self.bonus("cha")))
+            self.add_status_effect(def_bonus)
+        else:
+            global_commands.type_text(f"The {enemy.id} spots your trick.")
+
+        return None
 
     #ROLLS
     def roll_to_hit(self) -> int:
@@ -689,7 +710,7 @@ class Player():
         Adds a status effect to the player's status effect list and applies it
         """
         if effect.id in self._status_effects:#if effect already in status_effects
-            applied = self._status_effects[effect.id]
+            applied:Status_Effect = self._status_effects[effect.id]
             applied.additional_effect(effect)#...apply the effect's additional_effect function
         else:
             self._status_effects[effect.id] = effect

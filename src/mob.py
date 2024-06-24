@@ -70,6 +70,7 @@ class Mob():
 
         self._retreating = False
         self._my_effect_id = ""
+        self._prev_narration = ""
 
         self.update()
         self.calculate_loot()
@@ -193,7 +194,7 @@ class Mob():
 
         roll = self.roll_to_hit()
         self.spend_ap()
-        self.roll_narration()
+        self.narrate(self.roll_text)
         match roll:
             case 0:
                 return self.crit()
@@ -202,11 +203,11 @@ class Mob():
             case _:
                 pass
         if roll >= player.evasion:
-            self.hit_narration()
+            self.narrate(self.hit_text)
             taken = player.take_damage(self.roll_damage(), self)
             return None
 
-        self.miss_narration()
+        self.narrate(self.miss_text)
         return None
 
     def crit(self) -> bool:
@@ -242,7 +243,16 @@ class Mob():
         return False
 
     #NARRATION
-    def roll_narration(self):
+    def narrate(self, func) -> None:
+        text:list = func()
+        if self._prev_narration in text:
+            text.remove(self._prev_narration)
+        final = random.choice(text)
+        self._prev_narration = final
+        global_commands.type_text(final)
+        return None
+
+    def roll_text(self) -> list[str]:
         text = [
             f"The {self.id} moves to attack.",
             f"The {self.id} lunges at you.",
@@ -250,7 +260,7 @@ class Mob():
         ]
         return text
     
-    def hit_narration(self):
+    def hit_text(self) -> list[str]:
         text = [
             f"You fail to move before the attack hits you.",
             f"A hit.",
@@ -262,7 +272,7 @@ class Mob():
         ]
         return text
     
-    def miss_narration(self):
+    def miss_text(self) -> list[str]:
         text = [
             f"It's attack goes wide.",
             f"Luck is on your side this time.",
@@ -485,6 +495,4 @@ class Mob():
         runs it's parent trigger function to see if it is able to do it's special
         or if it must attack due to effects.
         """
-        if "Enraged" in self._status_effects:
-            return False
-        return True
+        return "Enraged" in self._status_effects

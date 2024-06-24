@@ -42,9 +42,10 @@ class Clockwork_Hound(mob.Mob):
     def trigger(self) -> bool:
         if not super().trigger():
             return False
-        return self._hp < self.max_hp // 2
+        return self._hp < self.max_hp // 3
 
     def special(self) -> None:
+        
         self.spend_ap()
 
         if self._player is None:
@@ -64,9 +65,11 @@ class Clockwork_Hound(mob.Mob):
             self.heal(self.bonus("str"))
         else:
             global_commands.type_text("It missed.")
+
+        return True
     
-    def roll_narration(self):
-        generic = super().roll_narration()        
+    def roll_text(self):
+        base = super().roll_text()        
         me = [
             f"The {self.id} snarls and dashes towards you.",
             f"The {self.id}'s gears screech and grind as it prepares to tear into you.",
@@ -75,22 +78,20 @@ class Clockwork_Hound(mob.Mob):
             f"The mechanical beast growls and crouches low, ready to pounce.",
             f"The {self.id} gnashes it's teeth and snaps at your midsection.",
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def hit_narration(self):
-        generic = super().hit_narration()
+    def hit_text(self):
+        base = super().hit_text()
         me = [
             f"The {self.id}'s fluid movements are far from mechanical. It catches you.",
             f"It's metal teeth tear through your defenses.",
             f"The {self.id}'s metal claws find your body.",
             f"You feel cold steel on your skin, then a burst of pain."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def miss_narration(self):
-        generic = super().miss_narration()
+    def miss_text(self):
+        base = super().miss_text()
         me = [
             f"Just as the {self.id} would have struck you, it's internal machines sputter causing it to fall short.",
             f"The {self.id}'s jerky, robotic motions are easy enough to dodge this time."
@@ -98,7 +99,6 @@ class Clockwork_Hound(mob.Mob):
             f"It's jaws clamp down on the empty space where you once stood.",
             f"Failing to hit you, it skitters to a stop before whipping back around to face you, metal fangs bared."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
 object = Clockwork_Hound

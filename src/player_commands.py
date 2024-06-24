@@ -49,7 +49,7 @@ def turn():
                 actions[code]()
                 done = True
             except KeyError:
-                global_commands.error_message(code)
+                response = global_commands.error_message(code) if not done else None
         
         if controller.SCENE.enemy.dead:
             global_variables.PLAYER.reset_ap()
@@ -105,7 +105,7 @@ def combat_tricks():
     global_commands.type_text("Select a trick to use -OR- Cancel - (c)")
     options = [
         "Power Attack - (p)",
-        "Feint - (f)"
+        "Feint - (f)",
     ]
     print("\t", end='')
     for item in options:

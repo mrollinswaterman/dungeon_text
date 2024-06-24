@@ -62,8 +62,8 @@ class Hobgoblin(mob.Mob):
             self._player.add_status_effect(taunt)
         return None
     
-    def roll_narration(self):
-        generic = super().roll_narration()        
+    def roll_text(self):
+        base = super().roll_text()        
         me = [
             f"The {self.id} swings it's club at you.",
             f"The {self.id} tries to bash your head in.",
@@ -71,28 +71,25 @@ class Hobgoblin(mob.Mob):
             f"The {self.id} charges you, it's club raised.",
             f"The {self.id} lets out a fierce battle cry, and hoists it's club in preperation..."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def hit_narration(self):
-        generic = super().hit_narration()
+    def hit_text(self):
+        base = super().hit_text()
         me = [
             f"The {self.id}'s club smashes through your defense.",
             f"You can't dodge it's club's powerful smash.",
             f"The {self.id}'s club catches your arm.",
             f"The club moves fast for something so cumbersome looking..."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
-    def miss_narration(self):
-        generic = super().miss_narration()
+    def miss_text(self):
+        base = super().miss_text()
         me = [
             f"You manage to dash of the club's strike radius",
             f"The {self.id}'s attack is strong, but slow. You step out of it's way.",
             f"You dodge out of the club's wide arc."
         ]
-        final = generic + me
-        global_commands.type_text(random.choice(final))
+        return base + me
 
 object = Hobgoblin
