@@ -271,7 +271,7 @@ class Player():
             f"The {enemy.id} didn't get out of the way in time.",
             f"You hit the {enemy.id}.",
             f"Your attack lands.",
-            f"Your {self.weapon.id} strike true.",
+            f"Your {self.weapon.id} strikes true.",
             f"The {enemy.id} wasn't able to dodge this one.",
             f"Sucess."
         ]
@@ -606,25 +606,6 @@ class Player():
                 return item == self._inventory[item.id]
             except KeyError:
                 return False
-    
-    def get_item_by_id(self, id:str) -> Item:
-        """
-        Get an item in the player's inventory by it's id
-        Returns the item, None if not found
-        """
-        try:
-            return self._inventory[id]
-        except IndexError:
-            return None
-    
-    def get_item_by_index(self, idx:int) -> Item:
-        """
-        Gets an item by index. Returns None if no item at that index
-        """
-        try:
-            return list(self._inventory.values())[idx]
-        except IndexError:
-            return None
 
     def print_inventory(self, line_len=25) -> None:
         line_len = 25
@@ -688,7 +669,6 @@ class Player():
             idx += 2 if len(self._inventory) - idx >= 2 else 1
 
     def recieve_reward(self, reward:dict) -> None:
-        print(reward)
         for entry in reward:
             match entry:
                 case "gold":
@@ -701,7 +681,6 @@ class Player():
         return None
 
     #STATUS EFFECTS / MODIFY STAT FUNCTIONS
-
     def modify_stat(self, stat, num):
         self._stats[stat] += num
 
@@ -747,8 +726,45 @@ class Player():
         for effect in inactive:
             self.remove_status_effect(effect)
 
-    ##MISC.
+    #GETTERS
+    def get_item_by_id(self, id:str) -> Item:
+        """
+        Get an item in the player's inventory by it's id
+        Returns the item, None if not found
+        """
+        try:
+            return self._inventory[id]
+        except KeyError:
+            return None
+    
+    def get_item_by_index(self, idx:int) -> Item:
+        """
+        Gets an item by index. Returns None if no item at that index
+        """
+        try:
+            return list(self._inventory.values())[idx]
+        except IndexError:
+            return None
+    
+    def get_se_by_index(self, idx:int) -> Status_Effect | None:
+        """
+        Same as items but for status effects (se)
+        """
+        try:
+            return list(self._status_effects.values())[idx]
+        except IndexError:
+            return None
 
+    def get_se_by_id(self, id:str) -> Status_Effect | None:
+        """
+        Same as items but for status effects (se)
+        """
+        try: 
+            return self._status_effects[id]
+        except KeyError:
+            return None
+
+    ##MISC.
     def save_to_dict(self) -> dict:
         self.cleanse_all()#for now, cleanse all status effects before saving
         player_tod = {

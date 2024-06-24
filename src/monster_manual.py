@@ -6,11 +6,10 @@ import monsters
 LEVELCAP = 7
 
 def spawn_mob(name:str):
-    for entry in monsters.mobs:
-        mob_object: mob.Mob = entry()
-        if mob_object.id == name:
-            return mob_object
-    raise ValueError(f"No mob by id '{name}'.")
+    try:
+        return monsters.dict[name]()
+    except KeyError:
+        raise ValueError(f"No mob by id '{name}'.")
 
 def spawn_random_mob():
     """
@@ -21,7 +20,7 @@ def spawn_random_mob():
     if global_variables.PLAYER.level >= LEVELCAP:
         raise ValueError("Player level too high!")
 
-    enemy:mob.Mob = random.choice(monsters.mobs)()
+    enemy:mob.Mob = random.choice(list(monsters.dict.values()))()
 
     if global_variables.PLAYER.level in range(enemy.range[0],enemy.range[1]):
         return enemy

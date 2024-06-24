@@ -84,66 +84,76 @@ class Shopkeep():
         return len(self._inventory)
 
     #BUY/SELL
-    def sell(self, item:Item, buyer, num:int=1) -> bool:
+    def sell(self, item:Item) -> bool:
         """
         Sells an item to a player if the item is in the Shopkeep's 
         inventory and the player has sufficient gold
 
         Returns True if the sale goes through, False otherwise
         """
+        if item is None:
+            return False
+
+        import narrator
         if item.is_consumable:
-            self.sell_consumable(item, buyer, num)
-        else:
-            if item in self._inventory:
-                if buyer.can_carry(item) is True:
-                    if buyer.spend_gold(item.value) is True:
-                        self._gold += item.value
-                        self._inventory.remove(item)
-                        global_commands.type_text(self.generate_successful_sale_message(item))
-                        buyer.pick_up(item) 
-                        return True
-                    else:
-                        global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.id}'s price. You don't have the coin.")
-                        return False
-                else:
-                    global_commands.type_text(f"You can't carry the {item.id}.")
-                    return False
-            else:
-                global_commands.type_text(f"The Shopkeep doesn't have any {item.id}s right now. Come back another time.")
-                return True
-        
-    def sell_consumable(self, item: Consumable, buyer, quantity) -> bool:
-        if item in self._inventory and item.quantity > 0:
-            buyer_version = copy.deepcopy(item)
-            my_version:Consumable = self.find_item(item.id)
-            if quantity > my_version.quantity:
-                global_commands.type_text(f"The Shopkeep does not have {quantity} {item.id}s. He'll sell you all that he has.")
-                quantity = my_version.quantity
-                
-            buyer_version.set_quantity(quantity)
-            if buyer.can_carry(buyer_version) is True:
-                if buyer.spend_gold(buyer_version.total_value) is True:
-                    self._gold += buyer_version.total_value
-                    my_version.decrease_quantity(quantity)
-                    global_commands.type_text(self.generate_successful_sale_message(buyer_version))
-                    buyer.pick_up(buyer_version)
+            num = narrator.ask_quantity()
+            return self.sell_consumable(item, num)
+
+        if item in self._inventory:
+            if self._player.can_carry(item) is True:
+                if self._player.spend_gold(item.value) is True:
+                    self._gold += item.value
+                    self._inventory.remove(item)
+                    global_commands.type_text(self.generate_successful_sale_message(item))
+                    self._player.pick_up(item) 
                     return True
                 else:
                     global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.id}'s price. You don't have the coin.")
                     return False
             else:
-                global_commands.type_text(f"You can't carry {quantity} {item.id}s.")
+                global_commands.type_text(f"You can't carry the {item.id}.")
                 return False
         else:
             global_commands.type_text(f"The Shopkeep doesn't have any {item.id}s right now. Come back another time.")
             return False
         
-    def buy(self, item:Item, seller, num:int=1) -> bool:
-        if item.id in seller.inventory:
+    def sell_consumable(self, item: Consumable, quantity) -> bool:
+        if item is None:
+            return False
+
+        if item in self._inventory and item.quantity > 0:
+            buyer_version = copy.deepcopy(item)
+            my_version:Consumable = self.get_item_by_id(item.id)
+            if quantity > my_version.quantity:
+                global_commands.type_text(f"The Shopkeep does not have {quantity} {item.id}s. He'll sell you all that he has.")
+                quantity = my_version.quantity
+                
+            buyer_version.set_quantity(quantity)
+            if self._player.can_carry(buyer_version) is True:
+                if self._player.spend_gold(buyer_version.total_value) is True:
+                    self._gold += buyer_version.total_value
+                    my_version.decrease_quantity(quantity)
+                    if my_version.quantity <= 0:
+                        self._inventory.remove(my_version)
+                    global_commands.type_text(self.generate_successful_sale_message(buyer_version))
+                    self._player.pick_up(buyer_version)
+                    return True
+                else:
+                    global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.id}'s price. You don't have the coin.")
+                    return False
+            else:
+                global_commands.type_text(f"You can't carry {quantity} {item.name}.")
+                return False
+        else:
+            global_commands.type_text(f"The Shopkeep doesn't have any {item.name} right now. Come back another time.")
+            return False
+        
+    def buy(self, item:Item, num:int=1) -> bool:
+        if item.id in self._player.inventory:
             if self._gold >= item.value:
                 self._gold -= item.value
-                seller.gain_gold(item.value)
-                seller.drop(item, num)
+                self._player.gain_gold(item.value)
+                self._player.drop(item, num)
                 self.stock(item)
                 return True
         else:
@@ -171,9 +181,9 @@ class Shopkeep():
             
             print(string + 2*"\t", end='')
             
-        print("\n\n")#double newline after last item
-
-        global_commands.type_text(f"Your Gold: {global_variables.PLAYER.gold} \tCarrying Capacity: {global_variables.PLAYER.current_weight}/{global_variables.PLAYER.carrying_capacity}")
+        print("\n")#double newline after last item
+        global_commands.type_with_lines("")
+        global_commands.type_text(f"Your Gold: {global_variables.PLAYER.gold} \tCarrying Capacity: {global_variables.PLAYER.current_weight}/{global_variables.PLAYER.carrying_capacity}", 0.012)
 
     def restock(self, warehouse:list, amount:int) -> None:
         ready_to_stock = set()
@@ -199,10 +209,17 @@ class Shopkeep():
         for item in ready_to_stock:
             self.stock(item)
 
-    def find_item(self, id:str) -> Item:
+    def get_item_by_id(self, id:str) -> Item | None:
         for item in self._inventory:
             if item.id == id:
                 return item
+        return None
+    
+    def get_item_by_index(self, idx:int) -> Item | None:
+        try:
+            return self.inventory[idx]
+        except IndexError:
+            return None
             
     def empty_inventory(self):
         self._inventory = []
@@ -216,7 +233,7 @@ class Shopkeep():
             f"He nods silently and makes the exchange.",
             f"Gold is gold.",
             f"The Shopkeep grins. You have the coin this time.",
-            f"As you take the {item.name}, you wonder if it will be enough."
+            f"As you take the {item.name}, you wonder if it will be enough to save you..."
         ]
 
         return random.choice(message_list)

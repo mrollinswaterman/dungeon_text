@@ -24,12 +24,10 @@ def numerical_rarity_to_str(rare:int):
 def generate_item(id, rarity, type):
     import item_compendium
 
-    print(item_compendium.master)
-
-    if id in item_compendium.master:
-        return item_compendium.master[id](id, rarity)
-
-    return TYPES[type](id, rarity)
+    try:
+        return item_compendium.dict[id](id, rarity)
+    except KeyError:
+        return TYPES[type](id, rarity)
 
 class Item():
 
@@ -461,6 +459,10 @@ class Consumable(Item):
     def set_target(self, tar) -> None:
         self._target = tar
 
+    def set_weight(self, num: int) -> None:
+        super().set_weight(num)
+        self._unit_weight = num
+
     def update(self) -> None:
         self._plural = True if self._quantity > 1 else False
         self._value = self._unit_value * self._quantity
@@ -496,19 +498,28 @@ class Consumable(Item):
         return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n"
 
 
-class Resource(Item):
+class Resource(Consumable):
 
     def __init__(self, id, rarity="Common", quantity=1):
-        super().__init__(id, rarity)
-        self._quantity = quantity
+        super().__init__(id, rarity, quantity)
         self._pickup_message = f"You picked up x{self._quantity} {self.id}."
         self._durability = 1
         self._max_durability = 1
         self._type = "Resource"
+        self._plural = False
 
     @property
-    def quantity(self):
-        return self._quantity
+    def pickup_message(self):
+        return f"You picked up x{self._quantity} {self.id}."
+
+    def format(self) -> list[str]:
+        forms = [
+            f"{self.id} ({self._rarity})",
+            f"Quantity: {self._quantity}",
+            f"Value: {self._value}g",
+            f"Weight: {self.total_weight} lbs"
+        ]
+        return forms
 
 TYPES = {
     "Item": Item,

@@ -8,11 +8,10 @@ import events
 #]
 
 def spawn_event(name:str):
-    for entry in events.scenarios:
-        event_obj:ev.Event = entry() 
-        if event_obj.id == name:
-            return event_obj
-    raise ValueError(f"No event by id '{name}'.")
+    try:
+        return events.dict[name]()
+    except KeyError:
+        raise ValueError(f"No event by id '{name}'.")
 
 def spawn_random_event():
-    return random.choice(events.scenarios)()
+    return random.choice(list(events.dict.values()))()

@@ -3,7 +3,7 @@ import items, global_commands
 
 class Repair_Kit(items.Consumable):
 
-    def __init__(self, id="Repair_Kit", rarity="Uncommon", quantity=0):
+    def __init__(self, id="Repair Kit", rarity="Uncommon", quantity=0):
         super().__init__(id, rarity, quantity)
         self._unit_value = 10 * self._numerical_rarity
         self._unit_weight = .5
@@ -16,7 +16,7 @@ class Repair_Kit(items.Consumable):
         """
         if target.durability[0] < target._durability[1]:#ie item is damaged
             self.decrease_quantity(1)
-            global_commands.type_text(f"{self.id} used. {self._quantity} remaining.")
+            global_commands.type_text(f"{self._id} used. {self._quantity} remaining.")
             target.repair()
             return True
         return False

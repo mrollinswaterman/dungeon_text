@@ -37,13 +37,19 @@ def turn():
             except ValueError:
                 pass
             
-            #if not item hotkey, see which code it is, then run the function associated with it
-            if (code in actions and code in combat_tricks) or code in actions:
-                done = True
-                actions[code]()
-            if code in combat_tricks:
-                done = True
+            #check if code is a combat trick hotkey
+            try:
                 combat_tricks[code]()
+                done = True
+            except KeyError:
+                pass
+
+            #finally, check if code is a valid action
+            try:
+                actions[code]()
+                done = True
+            except KeyError:
+                global_commands.error_message(code)
         
         if controller.SCENE.enemy.dead:
             global_variables.PLAYER.reset_ap()
@@ -61,7 +67,7 @@ def turn():
 
     return None
 
-def back():
+def cancel():
     return None
 
 def turn_options():
@@ -83,7 +89,7 @@ def turn_options():
     print("\n")
 
     options = [
-        "Attack - (a)", "Combat Tricks - (c)",
+        "Attack - (a)", "Combat Tricks - (ct)",
         "Status Effects - (e)", "Inventory - (i)",
         "Wait - (w)", "Retreat - (r)"
     ]
@@ -96,7 +102,7 @@ def combat_tricks():
     from command_dict import all
     ct = all["combat_tricks"]
 
-    global_commands.type_text("Select a trick to use -OR- Go Back - (b)")
+    global_commands.type_text("Select a trick to use -OR- Cancel - (c)")
     options = [
         "Power Attack - (p)",
         "Feint - (f)"
@@ -113,7 +119,9 @@ def combat_tricks():
             done = True
             ct[code]()
         else:
-            global_commands.type_text(f"Invalid command '{code}'. Please try again.", 0.01)
+            global_commands.error_message(code)
+    
+    return None
 
 def cleanse_an_effect():
     """
@@ -124,7 +132,7 @@ def cleanse_an_effect():
     from command_dict import all
     effects = all["cleanse_an_effect"]
 
-    global_commands.type_text("Select an effect to cleanse -OR- Go Back - (b)")
+    global_commands.type_text("Select an effect to cleanse -OR- Cancel - (c)")
     for idx, entry in enumerate(global_variables.PLAYER.status_effects):
         effect: status_effect.Status_Effect = global_variables.PLAYER.status_effects[entry]
         string = f"{idx+1}. {effect.id}"
@@ -146,16 +154,16 @@ def cleanse_an_effect():
         else:
             try:
                 num = int(code)
-                try: 
-                    effect:status_effect.Status_Effect = list(global_variables.PLAYER.status_effects.values())[num-1]
+                effect:status_effect.Status_Effect = global_variables.PLAYER.get_se_by_index(num-1)
+                if effect is not None:
                     global_variables.PLAYER.spend_ap()
                     effect.attempt_cleanse(global_variables.PLAYER.roll_a_check(effect.cleanse_stat))
                     done = True
-                except KeyError:
-                    global_commands.type_text(f"Invalid effect number '{num}'. Please try again.",0.01)
-            except ValueError:
-                global_commands.type_text(f"Invalid effect number '{code}'. Please try again.",0.01)
-    return None
+                    return None
+            except TypeError:
+                pass
+
+            global_commands.error_message(code)
 
 def show_inventory() -> None:
     import global_variables
@@ -171,7 +179,7 @@ def item_select() -> None:
     from command_dict import all
     item_selection = all["item_select"]
 
-    global_commands.type_text("Enter an Item's number to use it -OR- Go Back - (b)")
+    global_commands.type_text("Enter an Item's number to use it -OR- Cancel - (c)")
 
     done = False
     while not done:
@@ -180,16 +188,16 @@ def item_select() -> None:
             done = True
             item_selection[code]()
         else:
-            print(code)
             try:
                 num = int(code)
                 item = global_variables.PLAYER.get_item_by_index(num-1)
                 if item is not None:
                     done = True
                     return use_an_item(item, controller.SCENE.enemy)
-                global_commands.type_text(f"Invalid item number '{code}'. Please try again.", 0.01)
+                else:
+                    global_commands.type_text(f"Invalid item number '{code}'. Please try again.", 0.01)
             except ValueError:
-                global_commands.type_text("Please enter a valid command.", 0.01)
+                global_commands.error_message(code)
 
 def use_an_item(item:items.Item, target=None) -> bool:
     """

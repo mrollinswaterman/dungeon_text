@@ -35,7 +35,7 @@ BONUS = {
 }
 
 end_line = [
-    ".", "!"
+    ".", "!", ",", "?"
 ]
 
 def exit():
@@ -161,6 +161,19 @@ def type_with_lines(text:str, num:int=1, speed:float = 0.03, newln=True, delay=T
     if num > 1:
         print("="*110+"\n")
 
+def error_message(cmd:str="", text:str="") -> None:
+
+    if text == "":
+        text = f'Inavlid command "{cmd}". Please try again.'
+
+    lst = text.split(" ")
+
+    for i in lst:
+        print(i + " ", end='', flush=True)
+        time.sleep(.05)
+    
+    print("\n")
+
 def type_text(text:str, speed:float=0.03, newln=True, delay=True) -> None:
     """
     Adds "typing" effect to text
@@ -172,27 +185,45 @@ def type_text(text:str, speed:float=0.03, newln=True, delay=True) -> None:
 
     text = " " + text
     count = 0
+    prev = ""
 
     if delay:
         time.sleep(0.2)
 
-    match speed: #if speed is default, adjust it, otherwise dont
+    #if speed is default, adjust it for length, otherwise dont
+    match speed: 
         case 0.03:
             if len(text) > 25:
                 #print("over 25")
-                speed = 0.018
+                speed = 0.017
             elif len(text) > 15:
                 #print("over 15")
                 speed = 0.025
         case _:
             pass
-        
-    for char in text:
+
+
+
+    for idx, char in enumerate(text):
         time.sleep(speed)
         print(char, end='', flush=True)
         count += 1
         if (count >= 120) and char in end_line:
             print("\n")
             count = 0
+        
+        #wait after punctuation and repeated punctuation (ie "...")
+        if char in end_line:
+            time.sleep(.1)
+            if char == prev:
+                time.sleep(.25)
+
+        #wait after end of text
+        if idx == len(text):
+            time.sleep(0.4)
+        
+        prev = char
+
+    #newline after typing text
     if newln:
-        print("\n")#newline after typing text
+        print("\n")

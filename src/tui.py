@@ -30,6 +30,7 @@ def ltd():
     """
     player_commands.load()
     narrator.exit_the_dungeon()
+
 def begin():
     from command_dict import all
 
@@ -50,10 +51,9 @@ def begin():
             done = True
             tui[cmd]()
         else:
-            global_commands.type_text(f"Invalid command '{cmd}'. Please try again.", 0.01)
+            global_commands.error_message()
 
-
+print("")
 while global_variables.START_CMD is True:
     global_variables.START_CMD = False
-    print("")
     begin()
