@@ -86,7 +86,7 @@ class Clockwork_Hound(mob.Mob):
             f"The {self.id}'s fluid movements are far from mechanical. It catches you.",
             f"It's metal teeth tear through your defenses.",
             f"The {self.id}'s metal claws find your body.",
-            f"You feel cold steel on your skin, then a burst of pain."
+            f"You feel cold steel on your skin, then a burst of pain.",
         ]
         return base + me
 
@@ -94,10 +94,10 @@ class Clockwork_Hound(mob.Mob):
         base = super().miss_text()
         me = [
             f"Just as the {self.id} would have struck you, it's internal machines sputter causing it to fall short.",
-            f"The {self.id}'s jerky, robotic motions are easy enough to dodge this time."
+            f"The {self.id}'s jerky, robotic motions are easy enough to dodge this time.",
             f"The {self.id}'s targeting systems failed. It misses you completely.",
             f"It's jaws clamp down on the empty space where you once stood.",
-            f"Failing to hit you, it skitters to a stop before whipping back around to face you, metal fangs bared."
+            f"Failing to hit you, it skitters to a stop before whipping back around to face you, metal fangs bared.",
         ]
         return base + me
 

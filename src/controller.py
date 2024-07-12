@@ -4,7 +4,7 @@ import event as ev
 import dm_guide
 import narrator
 
-TEST = True
+TEST = False
 
 class Scene():
 
@@ -34,7 +34,7 @@ def next_scene():
             SCENE.event = next_event
             global_variables.PLAYER.update()#update player before event text goes off
             next_event.start()#prints event start text
-            global_commands.type_with_lines("")
+            global_commands.type_with_lines()
             run_event(next_event)
 
 def begin_encounter():
@@ -47,7 +47,7 @@ def begin_encounter():
         return None
 
     global_commands.type_text(f"You encounter a Level {SCENE.enemy.level} {SCENE.enemy.id}!")
-    global_commands.type_with_lines("")
+    global_commands.type_with_lines()
 
 def end_scene():
     global_commands.type_text(f"You killed the {SCENE.enemy.id}!")
@@ -80,7 +80,7 @@ def run_event(event: ev.Event):
                     else:
                         level_up_player()
                 elif event.tries is True:# if not passed yet, and still tries left, run it again
-                    global_commands.type_with_lines("")
+                    global_commands.type_with_lines()
                 else: # if failed, tell the player and move on
                     done = True
                     event.failure()

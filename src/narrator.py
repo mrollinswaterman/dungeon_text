@@ -114,7 +114,7 @@ def buy_something():
     done = False
     while not done:
         global_variables.SHOPKEEP.print_inventory()
-        global_commands.type_with_lines("")
+        global_commands.type_with_lines()
         print("Enter an item's number to purchase it -OR- Go Back - (b)\n")
         cmd = global_commands.get_cmd()
         if cmd in options:

@@ -31,7 +31,7 @@ def turn():
                     print("\n")
 
         if global_variables.RUNNING:
-            global_commands.type_with_lines("")
+            global_commands.type_with_lines()
             player_commands.turn()
         
         return None
@@ -78,7 +78,7 @@ def enemy_flee_attempt():
             case "y":
                 if global_variables.PLAYER.roll_attack() >= enemy.evasion:
                     global_commands.type_text(f"You cut off the {enemy.id}'s escape. It turns to fight...")
-                    global_commands.type_with_lines("")
+                    global_commands.type_with_lines()
                     player_commands.turn()
                 else:
                     global_commands.type_text(f"You try catching the {enemy.id} to no avail. It got away.")

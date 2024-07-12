@@ -155,73 +155,54 @@ def XdY(damage:str | list | int):
 def probability(chance):
     return random.random() < (chance / 100)
 
-def type_with_lines(text:str, num:int=1, speed:float = 0.03, newln=True, delay=True) -> None:
+def type_with_lines(text:str=None, num:int=1, speed:float=None, newln=True) -> None:
     print("="*110+"\n")
-    type_text(text, speed, newln, delay)
+    type_text(text, speed, newln)
     if num > 1:
         print("="*110+"\n")
 
-def error_message(cmd:str="", text:str="") -> None:
+def error_message(cmd:str="", text:str=None) -> None:
 
-    if text == "":
-        text = f'Inavlid command "{cmd}". Please try again.'
+    text = f'Inavlid command "{cmd}". Please try again.' if text is None else text
+    type_text(text)
 
-    lst = text.split(" ")
-
-    for i in lst:
-        print(i + " ", end='', flush=True)
-        time.sleep(.05)
-    
-    print("\n")
-
-def type_text(text:str, speed:float=0.03, newln=True, delay=True) -> None:
+def type_text(text:str=None, speed:float=None, newln=True) -> None:
     """
     Adds "typing" effect to text
 
     speed: an integer denoting the delay between characters
     """
-    if text == "":
+    if text is None:
         return None
 
     text = " " + text
-    count = 0
     prev = ""
 
-    if delay:
-        time.sleep(0.2)
-
     #if speed is default, adjust it for length, otherwise dont
-    match speed: 
-        case 0.03:
-            if len(text) > 25:
-                #print("over 25")
-                speed = 0.017
-            elif len(text) > 15:
-                #print("over 15")
-                speed = 0.025
-        case _:
-            pass
-
-
+    #speed = (len(text) * 0.1) / 2 if speed is None else speed
+    speed = 2.5
 
     for idx, char in enumerate(text):
-        time.sleep(speed)
         print(char, end='', flush=True)
-        count += 1
-        if (count >= 120) and char in end_line:
-            print("\n")
-            count = 0
-        
-        #wait after punctuation and repeated punctuation (ie "...")
-        if char in end_line:
-            time.sleep(.1)
-            if char == prev:
-                time.sleep(.25)
+        waitTime = speed/100
 
-        #wait after end of text
-        if idx == len(text):
-            time.sleep(0.4)
-        
+        #add waitTime time if char is punctuation
+        waitTime += 0.3 if char in end_line else 0
+
+        #add waitTime time for ellipses (...)
+        try:
+            next = text[idx+1]
+        except IndexError:
+            next = None
+        waitTime += 0.25 if (next == char or char == prev) and char in end_line else 0
+
+        #add waitTime time for end of text
+        waitTime += 0.4 if idx == len(text) else 0
+
+        time.sleep(waitTime)
+
+        if idx / 120 >= 1.0 and char in end_line:
+            print("\n")
         prev = char
 
     #newline after typing text

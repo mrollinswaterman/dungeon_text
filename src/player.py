@@ -258,7 +258,7 @@ class Player():
             f"You heft your {self.weapon.id} and attack the {enemy.id}, ",
             f"You charge the {enemy.id}, ",
             f"You swing your {self.weapon.id}, ",
-            f"Brandishing your {self.weapon.id}, you prepare to strike..."
+            f"Brandishing your {self.weapon.id}, you prepare to strike... ",
         ]
         global_commands.type_text(random.choice(text) + f"{roll_text}")
         return None
@@ -630,7 +630,7 @@ class Player():
 
     def print_inventory(self, line_len=25) -> None:
         line_len = 25
-        global_commands.type_with_lines("")
+        global_commands.type_with_lines()
         print(f"{line_len * " "} Inventory: {line_len * " "} {1 * "\t"} \t\t Equipped:\n")
         
         self.format_inventory()
@@ -639,7 +639,7 @@ class Player():
         print(f"Gold: {self.gold}g", end='')
         time.sleep(0.05)
         print(f"\tCarrying Capacity: {self.current_weight}/{self.carrying_capacity} lbs\n")
-        global_commands.type_with_lines("")
+        global_commands.type_with_lines()
 
     def format_inventory(self, line_len=25):
         last = False

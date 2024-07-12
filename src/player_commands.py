@@ -2,7 +2,7 @@ import time, sys
 import global_commands
 import items
 
-GOD_MODE = True
+GOD_MODE = False
 
 def turn():
     """
@@ -28,28 +28,28 @@ def turn():
         while not done:
             code = global_commands.get_cmd()
 
-            #check if code is an item hotkey
-            try:
-                code = int(code)
-                item = global_variables.PLAYER.get_item_by_index(code-1)
-                if use_an_item(item, controller.SCENE.enemy):
-                    done = True
-            except ValueError:
-                pass
-            
-            #check if code is a combat trick hotkey
-            try:
-                combat_tricks[code]()
-                done = True
-            except KeyError:
-                pass
-
-            #finally, check if code is a valid action
             try:
                 actions[code]()
                 done = True
             except KeyError:
-                response = global_commands.error_message(code) if not done else None
+                 #check if code is an item hotkey
+                try:
+                    code = int(code)
+                    item = global_variables.PLAYER.get_item_by_index(code-1)
+                    use_an_item(item, controller.SCENE.enemy)
+                    done = True
+                        
+                except ValueError:
+                    pass
+                #check if code is a combat trick hotkey
+                try:
+                    combat_tricks[code]()
+                    done = True
+                except KeyError:
+                    pass
+            
+            #if none of the above, throw an error
+            response = global_commands.error_message(code) if not done else None
         
         if controller.SCENE.enemy.dead:
             global_variables.PLAYER.reset_ap()
@@ -58,10 +58,10 @@ def turn():
             return None
         
         if global_variables.PLAYER.can_act:
-            global_commands.type_with_lines("")
+            global_commands.type_with_lines()
     
     if global_variables.RUNNING:
-        global_commands.type_with_lines("")#shorthand, just prints the '=' signs
+        global_commands.type_with_lines()#shorthand, just prints the '=' signs
         enemy_commands.turn()
         return None
 
@@ -76,14 +76,15 @@ def turn_options():
     """
     import global_variables
 
-    header = f"What would you like to do? \t"
-    global_commands.type_text(header, 0.03, False)
+    header = f"What would you like to do?"
+    global_commands.type_text(header, None, False)
     stats = {
         "hp": f"HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp) + "]"}",
         "ap": f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}",
         "gold": f"Gold: {global_variables.PLAYER.gold}g",
         "xp": f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level}"
     }
+    print("\t", end="")
     for stat in stats:
         print(stats[stat] + " \t", end="")
     print("\n")
@@ -195,7 +196,7 @@ def item_select() -> None:
                     done = True
                     return use_an_item(item, controller.SCENE.enemy)
                 else:
-                    global_commands.type_text(f"Invalid item number '{code}'. Please try again.", 0.01)
+                    global_commands.error_message(None, f"Invalid item number '{code}'. Please try again.")
             except ValueError:
                 global_commands.error_message(code)
 
@@ -207,7 +208,7 @@ def use_an_item(item:items.Item, target=None) -> bool:
     import global_variables
 
     if item is None:
-        global_commands.type_text("Invalid item selected. Please try again.", 0.01)
+        global_commands.error_message(None, "Invalid item selected. Please try again.")
         return False
 
     if global_variables.PLAYER.has_item(item):#check the player has the item
@@ -216,19 +217,15 @@ def use_an_item(item:items.Item, target=None) -> bool:
             if held_item.quantity == 0: #if the items quantity is 0, remove it
                 global_variables.PLAYER.drop(held_item)
                 global_commands.type_text(f"No {item.name} avaliable!")
-                item_select()
-                return True
+                return False
             if held_item.use(target):
                 global_variables.PLAYER.spend_ap()
             return True
         else:
-            global_commands.type_text(f"{item.name} is not a consumable.")
-            item_select()
-            return True
-    else:
-        global_commands.type_text(f"You don't have any {item.name}!")
-        item_select()
-        return None
+            global_commands.error_message(None, f"Your {item.id} is not consumable. Please try again.")
+            return False
+
+    raise ValueError("""Item passed "use_an_item" to not in player's inventory.""")
 
 def flee() -> None:
     """
