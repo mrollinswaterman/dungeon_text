@@ -389,9 +389,16 @@ class Player():
         import mob
         import player_commands
 
+        #make sure incoming damage is in integer form
+        taken *= self.damage_taken_multiplier
+        taken = int(taken)
+
+        #
         src:magic.Spell | mob.Mob | Status_Effect | Item = src
+
+        #Ignores armor (Magic damage or Armor Piercing)
         if armor_piercing is True:
-            self._hp -= int(taken)
+            self._hp -= taken
             strings = [
             f"You took {taken} damage from the {src.damage_header}.",
             f"The {src.damage_header} dealt {taken} damage to you."]
@@ -401,9 +408,8 @@ class Player():
                 return None
             return taken
 
+        #Physical damage (everything else)
         armor:Armor = self._equipped["Armor"]
-        taken *= self.damage_taken_multiplier
-
         if src.damage_type == "Physical" or src.damage_type is None:
             if armor.broken is False:
                 armor.lose_durability()
@@ -414,7 +420,7 @@ class Player():
                     global_commands.type_text(random.choice(strings))
                     return 0 
                 else:
-                    self._hp -= (taken - self.armor.armor_value)
+                    self._hp -= taken - self.armor.armor_value
                     strings = [
                         f"You took {taken - self.armor.armor_value} damage from the {src.damage_header}.",
                         f"The {src.damage_header} dealt {taken - self.armor.armor_value} damage to you."]
@@ -426,6 +432,7 @@ class Player():
             else:
                 global_commands.type_text(f"Broken {armor.id} does you no good...")
 
+        #No armor (broken/not equipped)
         self._hp -= taken
         strings = [
             f"You took {taken} damage from the {src.damage_header}.",
@@ -438,6 +445,8 @@ class Player():
 
     def lose_hp(self, num:int) -> None:
         import player_commands
+
+        num = int(num)
 
         self._hp -= num
         if self.dead:
@@ -631,7 +640,7 @@ class Player():
     def print_inventory(self, line_len=25) -> None:
         line_len = 25
         global_commands.type_with_lines()
-        print(f"{line_len * " "} Inventory: {line_len * " "} {1 * "\t"} \t\t Equipped:\n")
+        print(f'{line_len * " "} Inventory: {line_len * " "} \t \t\t Equipped:\n')
         
         self.format_inventory()
         
@@ -673,7 +682,7 @@ class Player():
             header1, header2, w_header, a_header = global_commands.match(headers, line_len)
 
             equipped_header = w_header if idx == 0 else a_header
-            print(f" {header1} {1 * "\t"} {header2} \t\t {equipped_header}")#print ids + weapon
+            print(f" {header1} \t {header2} \t\t {equipped_header}")#print ids + weapon
             long = max(len(first), len(second), len(weapon), len(armor))
             for i in range(1, long):
                 str1 = first[i] if i < len(first) else " "
@@ -685,7 +694,7 @@ class Player():
                 str1, str2, w, a = global_commands.match(string, line_len)
 
                 equipped = w if idx == 0 else a
-                print(f" {str1} {1 * "\t"} {str2} \t\t {equipped}")
+                print(f" {str1} \t {str2} \t\t {equipped}")
 
             idx += 2 if len(self._inventory) - idx >= 2 else 1
 

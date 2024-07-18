@@ -35,7 +35,11 @@ BONUS = {
 }
 
 end_line = [
-    ".", "!", ",", "?"
+    ".", "!", "?"
+]
+
+pause_chars = [
+    ",", ":", ";"
 ]
 
 def exit():
@@ -178,9 +182,8 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
     text = " " + text
     prev = ""
 
-    #if speed is default, adjust it for length, otherwise dont
-    #speed = (len(text) * 0.1) / 2 if speed is None else speed
-    speed = 2.5
+    #typing speed, lower = faster
+    speed = 2
 
     for idx, char in enumerate(text):
         print(char, end='', flush=True)
@@ -189,12 +192,15 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
         #add waitTime time if char is punctuation
         waitTime += 0.3 if char in end_line else 0
 
+        #add waitTime if char is a "pause character" ie ",", ":", etc
+        waitTime += 0.15 if char in pause_chars else 0
+
         #add waitTime time for ellipses (...)
         try:
             next = text[idx+1]
         except IndexError:
             next = None
-        waitTime += 0.25 if (next == char or char == prev) and char in end_line else 0
+        waitTime += 0.2 if (next == char or char == prev) and char in end_line else 0
 
         #add waitTime time for end of text
         waitTime += 0.4 if idx == len(text) else 0

@@ -79,7 +79,7 @@ def turn_options():
     header = f"What would you like to do?"
     global_commands.type_text(header, None, False)
     stats = {
-        "hp": f"HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp) + "]"}",
+        "hp": f'HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp) + "]"}',
         "ap": f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}",
         "gold": f"Gold: {global_variables.PLAYER.gold}g",
         "xp": f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level}"

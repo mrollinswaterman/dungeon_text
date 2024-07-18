@@ -326,7 +326,7 @@ class Armor(Item):
         super().__init__(id, rarity)
         self._weight_class = weight_class
         self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
-        self._armor_value = int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2))
+        self._armor_value:int = int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2))
         self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
         self._broken = False
         self._weight = (self._numerical_weight_class * 5) + self._armor_value
