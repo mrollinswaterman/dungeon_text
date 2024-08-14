@@ -2,6 +2,7 @@
 import mob
 
 stats = {
+    "base_level": 2,
     "str": 14,
     "dex": 10,
     "con": 14,

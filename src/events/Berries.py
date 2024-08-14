@@ -25,7 +25,7 @@ failure = {
             "You squint at the berries trying to glean some kind of information from them, but all you can think about is how long it's been since you've eaten.",
             "You can't recall anything specific about these types of berries."],
 
-    "wis": ["Your gut is telling you... that you're hungry.", "Berries aren't you're strong suite."]
+    "wis": ["Your gut is telling you... that you're hungry.", "Berries aren't your strong suite."]
 }
 
 end = [

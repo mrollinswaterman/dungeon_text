@@ -3,6 +3,7 @@ import global_commands
 import status_effect
 
 default = {
+    "base_level": 1,
     "hit_dice": 8,
     "str": 10,
     "dex": 10,
@@ -27,7 +28,7 @@ default = {
 
 class Mob():
 
-    def __init__(self, id:str="Anonymous_Mob", level:tuple= (1, 20), statblock=None):
+    def __init__(self, id:str="Anonymous_Mob", level:tuple=(1, 20), statblock=None):
         #identification
         import global_variables
         import player
@@ -460,6 +461,15 @@ class Mob():
             self._loot["gold"] += x_gold * self._level // 3
             self._loot["xp"] += x_xp * max(self._level // 5, 1)
 
+    def initialize(self):
+        from global_variables import STATS
+
+        level_mod = self.level - self._stats["base_level"] // 2
+
+        for i in range(level_mod):
+            stat = random.choice(list(STATS.keys()))
+            stat += 1
+
     def update(self):
         """
         Updates all relevant stats when a mob's level is changed,
@@ -477,7 +487,7 @@ class Mob():
                 inactive.append(effect)
         for effect in inactive:
             self.remove_status_effect(effect)
-        inactive = []
+        inactive = []       
 
     #SPECIAL
     def special(self):

@@ -285,10 +285,12 @@ class Player():
             f"You missed.",
             f"No luck this time.",
             f"The {enemy.id} deftly dodges your attack.",
-            f"Your attack whizzes by, missing by a hair.",
+            f"Your attack whizzes past the {enemy.id}, missing by a hair.",
             f"You don't crack the {enemy.id}'s defenses this time.",
             f"It leaps out of the way in the nick of time.",
-            f"A miss."
+            f"A miss.",
+            f"The {enemy.id} ducks your strike.",
+            f"The {enemy.id} manages to weather your onslaught for now."
         ]
         global_commands.type_text(random.choice(text))
         return None

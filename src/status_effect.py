@@ -68,6 +68,9 @@ class Status_Effect():
         self._potency = num
         self.update_message()
 
+    def set_stacks(self) -> None:
+        raise NotImplementedError
+
     def set_duration(self, num:int) -> None:
         self._duration = num
         self.update_message()

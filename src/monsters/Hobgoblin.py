@@ -4,6 +4,7 @@ import mob, global_commands
 from conditions import Stat_Buff_Debuff
 
 stats = {
+    "base_level": 1,
     "str": 12,
     "dex": 12,
     "con": 12,

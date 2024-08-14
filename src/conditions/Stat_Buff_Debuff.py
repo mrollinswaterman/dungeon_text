@@ -1,5 +1,5 @@
 #Stat buffs and debuffs
-import status_effect, global_commands
+import status_effect
 
 class Stat_Buff(status_effect.Status_Effect):
     def __init__(self, src, target=None, id="Buff"):
@@ -18,10 +18,11 @@ class Stat_Buff(status_effect.Status_Effect):
         return self._stat
 
     def update_message(self):
+        from global_variables import STATS
         if self._stat != "":
             self._id = f"{self._stat} {self._id}"
-            self._message = f"{self._target_header} {global_commands.TAG_TO_STAT[self._stat]} increased by {self._potency}."
-            self._cleanse_message = f"{self._target_header} {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
+            self._message = f"{self._target_header} {STATS[self._stat]} increased by {self._potency}."
+            self._cleanse_message = f"{self._target_header} {STATS[self._stat]} has returned to normal."
 
     def set_stat(self, stat:str) -> None:
         self._stat = stat
@@ -46,10 +47,11 @@ class Stat_Debuff(Stat_Buff):
         super().__init__(src, target, id)
 
     def update_message(self):
+        from global_variables import STATS
         if self._stat != "":
             self._id = f"{self._stat} {self._id}"
-            self._message = f"{self._target_header} {global_commands.TAG_TO_STAT[self._stat]} decreased by {-self._potency}."
-            self._cleanse_message = f"{self._target_header} {global_commands.TAG_TO_STAT[self._stat]} has returned to normal."
+            self._message = f"{self._target_header} {STATS[self._stat]} decreased by {-self._potency}."
+            self._cleanse_message = f"{self._target_header} {STATS[self._stat]} has returned to normal."
 
     def set_potency(self, num: int) -> None:
         super().set_potency(num)

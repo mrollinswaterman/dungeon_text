@@ -3,7 +3,7 @@ import random, time, copy
 from items import Item, Consumable, Weapon, Armor
 import global_variables, global_commands
 
-STATS = {
+STOCK = {
     "Common": 0,
     "Uncommon": 0,
     "Rare": 0,
@@ -44,7 +44,7 @@ class Blacksmith():
             tag, id, stats = mold
             item:Item = self._tag_map[tag](id)
             item.set_stats(stats)
-            STATS[item.rarity] += 1
+            STOCK[item.rarity] += 1
             self._storehouse[tag].append(item)
 
     def add_to_forge_list(self, items):

@@ -4,6 +4,7 @@ import mob, global_commands
 from spells import Magic_Missile as mm
 
 stats = {
+    "base_level": 6,
     "str": 9,
     "dex": 14,
     "con": 10,

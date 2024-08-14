@@ -5,6 +5,7 @@ from conditions import Vulnerable
 import items, status_effect
 
 stats = {
+    "base_level": 3,
     "str": 15,
     "dex": 9,
     "con": 16,

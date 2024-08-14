@@ -3,6 +3,7 @@ import random
 import mob, global_commands
 
 stats = {
+    "base_level": 1,
     "str": 10,
     "dex": 16,
     "con": 10,

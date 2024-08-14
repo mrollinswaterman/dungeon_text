@@ -15,11 +15,10 @@ This file contains a list of tasks and ideas
 - [ ] Shopkeep “mood” meter → different narration lines depending on how much he likes you (impacted by how much you buy+sell, and charisma) 
 - [ ] Templates → demonic, hellish, angelic, divine → templates that can be applied to mobs that give them stat bonus + special abilities?
 - [X] Fix status effects
-- [ ] Player special moves (power attack, feint, etc)
+- [ ] ~~Player special moves (power attack, feint, etc)~~ now WIP
 - [X] Add mob specific attack narration (ie the ___ swings it’s dagger at you, the dragon breathes a gout of flame in your direction, etc)
 - [X] Give status effect their own file like item compendium where each individual effect is made its own subclass of status effect
 - [ ] Add a companion, Gears the friendly Clockwork Hound. If you have a Clockwork Heart and some scrap, you have a chance to encounter him, can repair him with an int check, he joins you. Increases loot chances???
-- [ ] Add a drop chance dictionary to item_compendium instead of drop chance being hard coded into classes
 - [X] Overhaul how player inventory is displayed, and how items are printed to the console (instead of 
 actually printing, maybe the print function just tells you what lines should be printed, ie durability
 for weapons/armor, quantity for consumables, etc, then the print inventory function prints each line
@@ -98,8 +97,8 @@ Special move, uses half max durability for a double damage on the attack (can mi
 ## Combat Tricks
 
 - [X] Power Attack(1AP): no dex bonus to attack roll, but roll damage twice (take highest) and add x1.5 str to attack
-- [ ] Feint(1AP): If you beat the enemy in a Cha check, add +2 or +Cha whichever is higher to base-evasion for 3 rounds. if you lose add 1/2 that (either 1 or 1/2 cha, whichever is higher)
-- [ ] Riposte(2AP): Gain +2 to base-evasion, if they miss by your dex or more, deal 1/2 of the attack's potential damage back to them instead
+- [X] Feint(1AP): If you beat the enemy in a Cha check, add +2 or +Cha whichever is higher to base-evasion for 3 rounds. if you lose add 1/2 that (either 1 or 1/2 cha, whichever is higher)
+- [ ] Riposte(2AP): Gain +2 to base-evasion, if they miss next att by your dex or more, deal 1/2 of the attack's potential damage back to them instead
 - [ ] Total Defense(All AP): add 5+(level//5) to base-evasion for enemy's next turn, but on your next turn, no dex bonus to attacks (potenitally more penalties like roll twice and take lowest on attacks)
 - [ ] All-out(All AP): no dex bonus to evasion (and enemies get to roll twice take highest vs you??) for next turn, but attack rolls now add str+dex or dex+dex, whichever is highest
 - [ ] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
@@ -107,7 +106,8 @@ Special move, uses half max durability for a double damage on the attack (can mi
 
 ## Bugs
 
-- [ ] check_inventory should print equipped items even if inventory is empty
+- [X] check_inventory should print equipped items even if inventory is empty
 - [X] buying a consumable at the store does not reprint the shopkeep's inventory
 - [X] Extra line printed after re-entering dungeon
 - [ ] Add specific text for when a mob damages itself on a crit fail
+- [ ] Make 'y/n' prompts look more natural

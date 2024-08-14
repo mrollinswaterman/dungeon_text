@@ -26,6 +26,37 @@ BONUS = {
     20: 5
 }
 
+STATS = {
+    "str": "Strength",
+    "dex": "Dexterity",
+    "con": "Constitution",
+    "int": "Intelligence",
+    "wis": "Wisdom",
+    "cha": "Charisma",
+    "base_evasion": "Evasion",
+    "damage_take_multiplier": "Vulnerability",
+    "damage_multiplier": "Damage",
+    "armor": "Armor",
+    "max_hp": "Maximum Health"
+}
+
+RARITY_DICT = {
+    "Common": 1,
+    "Uncommon": 2,
+    "Rare": 3,
+    "Epic": 4,
+    "Legendary": 5,
+    "Unique": 6 
+}
+
+WEIGHT_CLASS = {
+    "None": 0,
+    "Light": 2,
+    "Medium": 4,
+    "Heavy": 6,
+    "Superheavy": 8
+}
+
 #create constants
 START_CMD = True
 RUNNING = False

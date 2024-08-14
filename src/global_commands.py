@@ -1,20 +1,6 @@
 import time, sys, csv, random
 import global_variables
 
-TAG_TO_STAT = {
-    "str": "Strength",
-    "dex": "Dexterity",
-    "con": "Constitution",
-    "int": "Intelligence",
-    "wis": "Wisdom",
-    "cha": "Charisma",
-    "base_evasion": "Evasion",
-    "damage_take_multiplier": "Vulnerability",
-    "damage_multiplier": "Damage",
-    "armor": "Armor",
-    "max_hp": "Maximum Health"
-}
-
 BONUS = {
     5: -4,
     6: -3,
@@ -33,14 +19,6 @@ BONUS = {
     19: 4,
     20: 5
 }
-
-end_line = [
-    ".", "!", "?"
-]
-
-pause_chars = [
-    ",", ":", ";"
-]
 
 def exit():
     global_variables.RUNNING = False
@@ -170,6 +148,14 @@ def error_message(cmd:str="", text:str=None) -> None:
     text = f'Inavlid command "{cmd}". Please try again.' if text is None else text
     type_text(text)
 
+end_line = [
+    ".", "!", "?"
+]
+
+pause_chars = [
+    ",", ":", ";", "*"
+]
+
 def type_text(text:str=None, speed:float=None, newln=True) -> None:
     """
     Adds "typing" effect to text
@@ -179,14 +165,15 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
     if text is None:
         return None
 
-    text = " " + text
-    prev = ""
+    text = " " + text + " "
 
     #typing speed, lower = faster
     speed = 2
 
     for idx, char in enumerate(text):
+
         print(char, end='', flush=True)
+
         waitTime = speed/100
 
         #add waitTime time if char is punctuation
@@ -195,13 +182,6 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
         #add waitTime if char is a "pause character" ie ",", ":", etc
         waitTime += 0.15 if char in pause_chars else 0
 
-        #add waitTime time for ellipses (...)
-        try:
-            next = text[idx+1]
-        except IndexError:
-            next = None
-        waitTime += 0.2 if (next == char or char == prev) and char in end_line else 0
-
         #add waitTime time for end of text
         waitTime += 0.4 if idx == len(text) else 0
 
@@ -209,7 +189,6 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
 
         if idx / 120 >= 1.0 and char in end_line:
             print("\n")
-        prev = char
 
     #newline after typing text
     if newln:

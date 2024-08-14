@@ -94,6 +94,7 @@ def run_event(event: ev.Event):
 
 def level_up_player():
     from command_dict import all
+    from global_variables import STATS
     stats = all["stats"]
 
     narrator.level_up_options()
@@ -107,7 +108,7 @@ def level_up_player():
             else:
                 stats[cmd]()
 
-    global_commands.type_text(f"Your {global_commands.TAG_TO_STAT[cmd]} increased by 1. You are now Level {global_variables.PLAYER.level}")
+    global_commands.type_text(f"Your {STATS[cmd]} increased by 1. You are now Level {global_variables.PLAYER.level}")
     if global_variables.PLAYER.can_level_up is True:
         level_up_player()
     else:
