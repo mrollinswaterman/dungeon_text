@@ -4,7 +4,7 @@
 WEAPONS_DICTIONARY = [
     (("WP"), "Battleaxe", "1d8,x2"),
     (("WP"), "Light Flail", "1d8,x2"),
-    (("WP"), "Scimitar", "1d6,x4"),
+    (("WP"), "Scimitar", "1d6,x3,18"),
     (("WP"), "Trident", "1d10,x2"),
     (("WP"), "Mace", "1d8,x2"),
     (("WP"), "Greatsword", "2d6,x2"),

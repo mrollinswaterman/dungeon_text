@@ -188,12 +188,8 @@ class Item():
             "rarity": self._rarity,
             "durability": self._durability,
         }
-        #weapons special stats
-        self._tod["damage_dice"] = None
-        self._tod["num_damage_dice"] = None
-        self._tod["crit"] = None
-        #armor special stats
-        self._tod["weight_class"] = None
+        #eqiupment special stats
+        self._tod["mold"] = None
         #consumable special stats
         self._tod["quantity"] = None
         self._tod["unit_weight"] = None
@@ -225,84 +221,71 @@ class Item():
 
 class Weapon(Item):
 
-    def __init__(self, id, rarity=None):
+    def __init__(self, id, rarity=None, mold:dict=None):
         super().__init__(id, rarity)
-        self._value = 15 * self._numerical_rarity
+        self._mold = mold
+        #durability
         self._max_durability = 10 * self._numerical_rarity
         self._durability = self._max_durability
-        self._damage_dice = 0
-        self._num_damage_dice = 0
-        self._crit = 0
+        #value
+        self._value = 15 * self._numerical_rarity
+
         self._type = "Weapon"
+
+        self.smelt()
 
     #properties
     @property
+    def mold(self) -> dict:
+        return self._mold
+    @property
     def damage_dice(self) -> int:
-        return self._damage_dice
+        return int(str(self._mold["damage_dice"]).split("d")[1])
     @property
     def num_damage_dice(self) -> int:
-        return self._num_damage_dice
+        return int(str(self._mold["damage_dice"]).split("d")[0])
     @property
     def stats(self) -> int:
-        return f"{self._num_damage_dice}d{self._damage_dice}, x{self._crit}"
+        return f"{self.num_damage_dice}d{self.damage_dice}, x{self.crit}"
     @property
     def crit(self) -> int:
-        return self._crit
+        return self._mold["crit"]
+    @property
+    def crit_range(self) -> int:
+        return self._mold["crit_range"]
+    @property
+    def max_dex_bonus(self) -> int:
+        return self._mold["max_dex_bonus"]
     @property
     def type(self) -> str:
         return "Weapon"
     @property
     def attack_bonus(self) -> int:
         return self._numerical_rarity
-    
-    def set_stats(self, statblock: str):
-        """
-        Sets a weapons stats based on a tuplized statblock
-
-        Returns nothing
-        """
-        #finds the index of each piece of info
-        num_idx = statblock.index('d')
-        num = eval(statblock[0:num_idx])
-        dice_idx = statblock.index(",")
-        dice = eval(statblock[num_idx+1: dice_idx])
-        crit = eval(statblock[dice_idx+2: len(statblock)])
-
-        #sets the appropriate stats
-        self.set_damage_dice((num, dice))
-        self.set_crit_multiplier(crit)
-        self._weight = int(2.5 * self._num_damage_dice + (self._damage_dice // 2))
-
-    def set_damage_dice(self, dice:tuple[int,int]) -> None:
-        num, type = dice
-        self._damage_dice = type
-        self._num_damage_dice = num
-
-    def set_crit_multiplier(self, num:int)->None:
-        self._crit = num
+    @property
+    def weight(self) -> int:
+        heft = WEIGHT_CLASS[self._mold["weight_class"]]
+        return int(2.5 * heft + (self.damage_dice * self.num_damage_dice)) 
+   
+    def smelt(self, new_mold) -> None:
+        self._mold = new_mold
 
     def roll_damage(self) -> int:
-        return global_commands.XdY([self._num_damage_dice, self._damage_dice])
-
-    def update(self) -> None:
-        self._value = 15 * self._numerical_rarity
-        self._max_durability = 10 * self._numerical_rarity
-        self._weight = int(2.5 * self._num_damage_dice + (self._damage_dice // 2))
+        return global_commands.XdY([self.num_damage_dice, self.damage_dice])
 
     def save(self) -> dict:
         super().save()
-        self._tod["damage_dice"] = self._damage_dice
-        self._tod["num_damage_dice"] = self._num_damage_dice
-        self._tod["crit"] = self._crit
+        self._tod["mold"] = self._mold
 
     def load(self, stats_file, ) -> None:
         super().load(stats_file, )
         with open(stats_file, encoding = 'utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
+                print(row)
+                raise Exception
                 self._damage_dice = int(row["damage_dice"])
                 self._num_damage_dice = int(row["num_damage_dice"])
-
                 self._crit = int(row["crit"])
             file.close()
         self.update()
@@ -310,7 +293,7 @@ class Weapon(Item):
     def format(self) -> list[str]:
         forms = [
             f"{self.id} ({self._rarity})",
-            f"Damage: {self._num_damage_dice}d{self._damage_dice}, x{self._crit}",
+            f"Damage: {self.num_damage_dice}d{self.damage_dice}, x{self.crit}",
             f"Durability: {self._durability}/{self._max_durability}",
             f"Value: {self._value}g",
             f"Weight: {self.weight} lbs",
@@ -318,72 +301,58 @@ class Weapon(Item):
         return forms
     
     def __str__(self) -> str:
-        return (f"{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self._num_damage_dice}d{self._damage_dice}\n Weight: {self.weight} lbs\n")
+        return (f"{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self.num_damage_dice}d{self.damage_dice}\n Weight: {self.weight} lbs\n")
 
 class Armor(Item):
 
-    def __init__(self, id:str, rarity=None, weight_class:int="Light"):
+    def __init__(self, id:str, rarity=None, mold:dict=None):
         super().__init__(id, rarity)
-        self._weight_class = weight_class
-        self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
-        self._armor_value:int = int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2))
-        self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
-        self._broken = False
-        self._weight = (self._numerical_weight_class * 5) + self._armor_value
+        self._mold = mold
         self._type = "Armor"
+        self._value = (25 * self.numerical_rarity) + (10 * self.numerical_weight_class)
+        self._max_durability = 15 * self._numerical_rarity
+        self._durability = self._max_durability
 
     #properties
     @property
+    def mold(self) -> dict:
+        return self._mold
+    @property
     def armor_value(self) -> int:
-        return self._armor_value
+        return self._mold["armor"]
     @property
     def stats(self) -> str:
         return f"{self.weight_class}, {self.armor_value}P"
     @property
     def weight_class(self) -> str:
-        return self._weight_class
+        return self._mold["weight_class"]
     @property
     def numerical_weight_class(self) -> int:
-        return self._numerical_weight_class
+        return WEIGHT_CLASS[self.weight_class]
+    @property
+    def max_dex_bonus(self) -> int:
+        return self._mold["max_dex_bonus"]
+    @property
+    def weight(self) -> int:
+        return self.numerical_weight_class * 5 + 2*self.armor_value
 
     #methods
-    def set_armor_value(self, armor) -> None:
-        self._armor_value = armor
-
-    def set_stats(self, stats) -> None:
-        """
-        Sets armor weight class and armor value (if given),
-        then re-calculates value and armor value as necessary
-        """
-        if stats is None or len(stats) == 0:
-            return None
-
-        weight, armor = stats
-        self._weight_class = weight
-        self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
-        if armor is not None:
-            self.set_armor_value(armor)
-        else:
-            self.set_armor_value(int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2)))
-        self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
-        self._weight = (10 * self._numerical_weight_class) + self._armor_value
-
-    def update(self) -> None:
-        super().update()
-        self._numerical_weight_class = WEIGHT_CLASS[self._weight_class]
-        self._armor_value = int(self._numerical_weight_class + self._numerical_rarity - (self._numerical_weight_class / 2))
-        self._value = (25 * self._numerical_rarity) + (10 * self.numerical_weight_class)
+    def smelt(self, new_mold:dict) -> None:
+        self._mold = new_mold
+        return None
 
     def save(self) -> dict:
         super().save()
-        self._tod["weight_class"] = self._weight_class
+        self._tod["mold"] = self._mold
+        return self._tod
 
     def load(self, stats_file) -> None:
         super().load(stats_file)
         with open(stats_file, encoding = 'utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                self._weight_class = row["weight_class"]
+                print(row)
+                raise Exception
             file.close()
         self.update()
 
@@ -391,7 +360,7 @@ class Armor(Item):
         forms = [
             f"{self.id} ({self._rarity})",
             f"Class: {self.weight_class}",
-            f"Armor: {self._armor_value}P",
+            f"Armor: {self.armor_value}P",
             f"Durability: {self._durability}/{self._max_durability}",
             f"Value: {self._value}g",
             f"Weight: {self._weight} lbs"
@@ -399,7 +368,7 @@ class Armor(Item):
         return forms
 
     def __str__(self) -> str:
-        return f"{self.id}\n Class: {self.weight_class}\n Armor Value: {self._armor_value}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
+        return f"{self.id}\n Class: {self.weight_class}\n Armor Value: {self.armor_value}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 class Consumable(Item):
 

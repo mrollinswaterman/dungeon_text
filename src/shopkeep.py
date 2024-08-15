@@ -1,6 +1,6 @@
 #Shopkeep class
-import random, time, copy
-from items import Item, Consumable, Weapon, Armor
+import random, time, copy, csv
+from items import Item, Consumable, Weapon, Armor, TYPES
 import global_variables, global_commands
 
 STOCK = {
@@ -17,15 +17,11 @@ class Blacksmith():
     then stores them in a set for later use
     """
 
-    def __init__(self, forge_list:list=None):
-        self._forge_list = forge_list
+    def __init__(self):
+        self._forge_list = []
         self._storehouse = {
-            "WP": [],
-            "AR": [],
-        }
-        self._tag_map = {
-            "WP": Weapon,
-            "AR": Armor
+            "Weapons": [],
+            "Armor": [],
         }
 
     #properties
@@ -39,22 +35,22 @@ class Blacksmith():
     def items_of_type(self, type=""):
         return self._storehouse[type]
     
-    def forge(self):
-        for mold in self._forge_list:
+    def forge(self, mold:dict):
+        """for mold in self._forge_list:
             tag, id, stats = mold
             item:Item = self._tag_map[tag](id)
             item.set_stats(stats)
             STOCK[item.rarity] += 1
-            self._storehouse[tag].append(item)
+            self._storehouse[tag].append(item)"""
 
-    def add_to_forge_list(self, items):
-        if self._forge_list is None: self._forge_list = []
+        item:Item = TYPES[mold["type"]](mold["id"], mold["rarity"], mold)
 
-        if type(items) == list:
-            self._forge_list = self._forge_list + items
-        else:
-            self._forge_list.append(items)
-    
+    def initialize(self):
+        with open("equipment_stats.csv", "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                self.forge(row)
+
     def print_storehouse(self):
         for type in self._storehouse:
             for item in self._storehouse[type]:

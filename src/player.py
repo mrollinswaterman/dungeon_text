@@ -38,8 +38,8 @@ class Player():
         self._status_effects:dict[str: status_effect.Status_Effect] = {}
 
         #equipment
-        w:Item = None
-        a:Item = None
+        w:Weapon = None
+        a:Armor = None
         self._equipped = {
             "Weapon": w, 
             "Armor": a
@@ -152,6 +152,10 @@ class Player():
 
     #STATUS
     def bonus(self, stat:str) -> int:
+        if stat == "dex":
+            armor:Armor = self.equipped["Armor"] if self.equipped["Armor"] is not None else None
+            if armor is not None and armor.max_dex_bonus is not None:
+                return min(global_commands.bonus(self._stats[stat]), armor.max_dex_bonus)
         return global_commands.bonus(self._stats[stat])
     
     def die(self) -> None:
@@ -196,7 +200,7 @@ class Player():
         vowel = f"rolling an {roll}."
         match roll:
             case 0:
-                return f"rolling a natural 20!"
+                return f"rolling a critical hit!"
             case 1:
                 return "rolling a natural 1!"
             case 8:
@@ -212,7 +216,7 @@ class Player():
         import controller
         enemy = controller.SCENE.enemy
 
-        global_commands.type_text("A critical hit!")
+        #global_commands.type_text("A critical hit!")
         no_weapon = True if self.weapon.broken else False
 
         if no_weapon:
@@ -349,14 +353,14 @@ class Player():
         weapon:Weapon = self._equipped["Weapon"]
         if weapon.broken is True:
             raise ValueError("Weapon is broken")
-        roll = global_commands.d(20)#rolls a d20
+        roll = global_commands.d(20)
         match roll:
             case 1:
                 return 1
-            case 20:
-                return 0
             case _:
-                return roll + self.bonus("dex") + self.level // 5 + weapon.attack_bonus
+                #checks if the roll is a crit or not. Crits result in a return of 0
+                #attack roll formula: roll + dex bonus + BaB + weapon att bonus
+                return 0 if roll >= self.weapon.crit_range else roll + self.bonus("dex") + self.level // 5 + weapon.attack_bonus
             
     def roll_damage(self) -> int:
         """

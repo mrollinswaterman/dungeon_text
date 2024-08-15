@@ -61,24 +61,13 @@ WEIGHT_CLASS = {
 START_CMD = True
 RUNNING = False
 
-long_sword = Weapon("Long Sword", "Common")
-long_sword.set_damage_dice((1,8))
-long_sword.set_crit_multiplier(2)
-
-leather_armor = Armor("Padded Leather Armor", "Common", "Light")
-leather_armor.set_armor_value(2)
-
-PLAYER.equip(leather_armor, True)
-PLAYER.equip(long_sword, True)
-
 PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
 PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
 SHOPKEEP = Shopkeep()
 BLACKSMITH = Blacksmith()
 
-BLACKSMITH.add_to_forge_list(WEAPONS_DICTIONARY)#add weapons to forge list
-BLACKSMITH.add_to_forge_list(ARMOR_DICTIONARY)#add armors to forge list
+BLACKSMITH.initialize()
 
 def restock_the_shop():
     """

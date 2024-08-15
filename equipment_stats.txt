@@ -1,0 +1,29 @@
+WEAPONS:
+
+Battleaxe (1d8, x3)
+Light Flail (1d8, x2)
+Scimitar (1d6, x2, 18)
+Trident (1d10, x2)
+Mace (1d8, x2)
+Greatsword (2d6, x2)
+Glaive (1d10, x3)
+Greataxe (1d12, x3)
+Scythe (2d4, x4, 16)
+Halberd (1d10, x3)
+Rapier (1d4, x4, 17)
+
+---
+
+ARMOR:
+Studded Leather (Light, None)
+Haramaki (None, 1)
+Chain Shirt (Light, None)
+Breastplate (Medium, None)
+Chainmail (Medium, 6)
+Armored Coat (Medium, None)
+Scale Mail (Medium, None)
+Half-Plate (Heavy, None)
+Stoneplate (Heavy, 9)
+Branded Mail (Heavy, None)
+Full-plate (Heavy, 9)
+
