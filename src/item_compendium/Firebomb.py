@@ -7,7 +7,7 @@ class Firebomb(items.Consumable):
     def __init__(self, id="Firebomb", rarity="Uncommon", quantity=0):
         import mob
         super().__init__(id, rarity, quantity)
-        self._unit_value = 20 * self._numerical_rarity
+        self._unit_value = 20 * self._rarity.value
         self._unit_weight = 1 
         self._target:mob.Mob = None
         self._damage = self._strength
@@ -59,14 +59,14 @@ class Firebomb(items.Consumable):
     def set_on_fire(self) -> None:
         fire:status_effect.Status_Effect = On_Fire(self._owner, self._target)
         fire.set_duration(2)
-        fire.set_potency(self._numerical_rarity)
+        fire.set_potency(self._rarity.value)
         self._target.add_status_effect(fire)
         return None
        
     def update(self) -> None:
         super().update()
         self._damage = self._strength
-        self._unit_value = 20 * self._numerical_rarity
+        self._unit_value = 20 * self._rarity.value
         self._unit_weight = 1
 
 def craft(num=1):

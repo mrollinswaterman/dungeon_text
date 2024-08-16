@@ -596,27 +596,9 @@ class Player():
                 del self._inventory[item.id]
             if silently is False:
                 global_commands.type_text(f"{item.name} equipped.")
-            if item.type == "Armor":
-                self.equip_armor(item)
-                return True
             self._equipped[item.type] = item
             return True
         return False
-
-    def equip_armor(self, armor: Armor) -> None:
-        """
-        Same as above but for armor
-        """
-        self._equipped["Armor"] = armor
-
-        if self.bonus("str") + 1 < armor.numerical_weight_class:
-            print("too-heavy")
-            armor_debuff:Status_Effect = sbd.Stat_Debuff(armor, self)#armor is src, self is target
-            armor_debuff.set_stat("dex")
-            armor_debuff.set_id("Maximum Dexterity Bonus")#placeholder id --> just a flag to find and remove it when equipped armor changes
-            armor_debuff.set_potency((armor.numerical_weight_class - 2))
-            armor_debuff.set_duration(1000000000000)
-            self.add_status_effect(armor_debuff, True)
 
     def can_carry(self, item:Item) -> bool:
         """
@@ -845,28 +827,12 @@ class Player():
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
-                item:Item = items.generate_item(row["id"], row["rarity"], row["type"], row["mold"])
-                item.save()
-                print(item)
-                raise Exception
-                with open("temp.csv", "w", newline='') as temp_file:
-                    temp_file.truncate(0)
-                    w = csv.DictWriter(temp_file, fieldnames=list(item.tod.keys()))
-                    w.writeheader()
-                    w.writerow(row)
-                    temp_file.close()
-
-                item.load("temp.csv")
-                if idx == size - 2 or idx == size - 1:#if item is equipped weapon or armor
+                item = items.load_item(row["type"], row)
+                if idx >= size - 1:
                     self.equip(item, True)
                 else:
                     self.pick_up(item, True)
             file.close()
-
-        if os.path.exists("temp.csv"):
-            os.remove("temp.csv")
-        else:
-            pass
 
 """
 # arush wrote this while drunk, he won't let me delete it

@@ -1,6 +1,6 @@
 #globals variables
 from player import Player
-from items import Weapon, Armor
+from items import Rarity
 import item_compendium
 from shopkeep import Blacksmith, Shopkeep
 
@@ -60,19 +60,17 @@ WEIGHT_CLASS = {
 START_CMD = True
 RUNNING = False
 
-PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
-PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
-
 SHOPKEEP = Shopkeep()
 BLACKSMITH = Blacksmith()
-
 BLACKSMITH.initialize()
 
 starter_weapon = BLACKSMITH.storehouse["Weapon"][0]
 starter_armor = BLACKSMITH.storehouse["Armor"][0]
 
-PLAYER.equip(starter_weapon)
-PLAYER.equip(starter_armor)
+PLAYER.equip(starter_weapon, True)
+PLAYER.equip(starter_armor, True)
+PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
+PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
 def restock_the_shop():
     """
@@ -85,8 +83,7 @@ def restock_the_shop():
     for entry in BLACKSMITH.storehouse:
         SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
 
-    threat_str = numerical_rarity_to_str(max(PLAYER.threat // 5, 1))
-    pots = item_compendium.Health_Potion.craft(threat_str, 5)
+    pots = item_compendium.Health_Potion.craft(max(PLAYER.threat // 5, 1), 5)
     SHOPKEEP.stock(pots)
     #scales HP potions to be higher rarity with player level
 

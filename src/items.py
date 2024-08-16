@@ -1,25 +1,59 @@
 import csv
 import global_commands
 
-RARITY = {
-    "Common": 1,
-    "Uncommon": 2,
-    "Rare": 3,
-    "Epic": 4,
-    "Legendary": 5,
-    "Unique": 6 
-}
+def load_item(type, save_data) -> "Item":
 
-WEIGHT_CLASS = {
-}
+    def load_weapon():
+        mold = {}
+        mold["damage_dice"] = save_data["damage_dice"]
+        mold["crit"] = save_data["crit"]
+        mold["crit_range"] = save_data["crit_range"]
+        mold["weight_class"] = save_data["weight_class"]
+        mold["max_dex_bonus"] = save_data["max_dex_bonus"]
 
-def generate_item(id, rarity, type, mold):
-    import item_compendium
+        obj = Weapon(save_data["id"], save_data["rarity"], mold)
+        obj.load(save_data)
+        return obj
 
-    try:
-        return item_compendium.dict[id](id, rarity)
-    except KeyError:
-        return TYPES[type](id, rarity, mold)
+    def load_armor():
+        mold = {}
+        mold["weight_class"] = save_data["weight_class"]
+        mold["armor"] = save_data["armor"]
+        mold["max_dex_bonus"] = save_data["max_dex_bonus"]
+
+        obj = Armor(save_data["id"], save_data["rarity"], mold)
+        obj.load(save_data)
+        return obj
+
+    def load_consumable():
+        obj = Consumable(save_data["id"], save_data["rarity"], save_data["quantity"])
+        obj.load(save_data)
+
+        return obj
+
+    def load_resource():
+        return load_consumable()
+
+    match type:
+        case "Weapon":
+            return load_weapon()
+        case "Armor":
+            return load_armor()
+        case "Consumable":
+            return load_consumable()
+        case "Resource":
+            return load_resource()
+        case _:
+            raise ValueError(f"Attempted load of unrecognized item type '{type}'.")
+
+def craft_item(type, mold):
+    match type:
+        case "Weapon":
+            return Weapon(mold["id"], mold["rarity"], mold)
+        case "Armor":
+            return Armor(mold["id"], mold["rarity"], mold)
+        case _:
+            raise ValueError(f"Attempted to craft item of incorrect type '{type}'.")
 
 class Rarity():
 
@@ -39,21 +73,20 @@ class Rarity():
             self.string = rarity
         elif rarity in list(codex.values()):
             self.value = rarity
-            self.string = codex.keys()[self.value-1]
+            self.string = list(codex.keys())[self.value-1]
         else:
             raise ValueError("Rarity not found in codex")
 
 class Weight_Class():
 
     def __init__(self, w_class):
-
         codex = {
-            None: 0,
-            "None": 0,
-            "Light": 2,
-            "Medium": 4,
-            "Heavy": 6,
-            "Superheavy": 8
+            None: 2,
+            "None": 2,
+            "Light": 4,
+            "Medium": 6,
+            "Heavy": 8,
+            "Superheavy": 10
         }
 
         if w_class in list(codex.keys()):
@@ -82,7 +115,7 @@ class Item():
         #MISC
         self._durability = self._max_durability
         self._is_consumable = False
-        self._weight = 0
+        self._weight_class = Weight_Class(None)
         self._pickup_message = f"You picked up a {self._id}."
         self._description = ""
         self._broken = False
@@ -127,10 +160,13 @@ class Item():
         return self._is_consumable
     @property
     def weight(self) -> int:
-        return self._weight
+        return self._weight_class.value
+    @property
+    def weight_class(self) -> Weight_Class:
+        return self._weight_class
     @property
     def total_weight(self) -> int:
-        return self._weight
+        return self.weight
     @property
     def pickup_message(self) -> str:
         return self._pickup_message
@@ -175,9 +211,6 @@ class Item():
             print(resultwords)
             self._id = ''.join(resultwords)
 
-    def set_weight(self, num:int) -> None:
-        self._weight = num
-
     def set_pickup_message(self, msg:str) -> None:
         self._pickup_message = msg
 
@@ -187,7 +220,8 @@ class Item():
 
     def destroy(self) -> None:
         self._id = self._id + " Scrap"
-        self._weight = 1
+        self._weight_class.value = 1
+        self._weight_class.string = "None"
         self._max_durability = 0
     
     def set_description(self, words:str) -> None:
@@ -195,16 +229,6 @@ class Item():
 
     def set_owner(self, owner) -> None:
         self._owner = owner
-
-    def update(self) -> None:
-        """
-        Recalculates numerical rarity, value and max durability
-        Only intended to be used after loading an item from
-        a save file
-        """
-        #self._numerical_rarity = RARITY[self._rarity]
-        self._value = 10 * self._rarity.value
-        self._max_durability = 10 * self._rarity.value
 
     def save(self) -> None:
         self._tod = {
@@ -221,17 +245,15 @@ class Item():
         self._tod["unit_weight"] = None
         self._tod["unit_value"] = None
 
-    def load(self, stats_file) -> None:
-        with open(stats_file, encoding = 'utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                self._id = row["id"]
-                self._name = row["name"]
-                self._type = row["type"]
-                self._rarity = Rarity(row["rarity"])
-                self._durability = int(row["durability"])
-            file.close()
-        self.update()
+    def load(self, save:dict) -> None:
+        self._id = save["id"]
+        self._name = save["name"]
+        self._type = save["type"]
+        self._rarity = Rarity(save["rarity"])
+        self._durability = int(save["durability"])
+        self._value = 10 * self._rarity.value
+        self._max_durability = 10 * self._rarity.value
+        return None
 
     def format(self) -> list[str]:
         forms = [
@@ -250,6 +272,7 @@ class Weapon(Item):
     def __init__(self, id, rarity=None, mold:dict=None):
         super().__init__(id, rarity)
         self._mold = mold
+        self._weight_class = Weight_Class(mold["weight_class"])
         #durability
         self._max_durability = 10 * self._rarity.value
         self._durability = self._max_durability
@@ -285,11 +308,10 @@ class Weapon(Item):
         return "Weapon"
     @property
     def attack_bonus(self) -> int:
-        return self._numerical_rarity
+        return self._rarity.value
     @property
     def weight(self) -> int:
-        heft = WEIGHT_CLASS[self._mold["weight_class"]]
-        return int(2.5 * heft + (self.damage_dice * self.num_damage_dice)) 
+        return int(2.5 * self._weight_class.value + (self.damage_dice * self.num_damage_dice)) 
    
     def smelt(self, new_mold) -> None:
         self._mold = new_mold
@@ -299,20 +321,13 @@ class Weapon(Item):
 
     def save(self) -> dict:
         super().save()
-        self._tod["mold"] = self._mold
+        self._tod["mold"] = True
+        for entry in self._mold:
+            self._tod[entry] = self._mold[entry]
+        return self._tod
 
-    def load(self, stats_file, ) -> None:
-        super().load(stats_file, )
-        with open(stats_file, encoding = 'utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                print(row)
-                raise Exception
-                self._damage_dice = int(row["damage_dice"])
-                self._num_damage_dice = int(row["num_damage_dice"])
-                self._crit = int(row["crit"])
-            file.close()
-        self.update()
+    def load(self, stats_file) -> None:
+        super().load(stats_file)
     
     def format(self) -> list[str]:
         forms = [
@@ -332,8 +347,9 @@ class Armor(Item):
     def __init__(self, id:str, rarity=None, mold:dict=None):
         super().__init__(id, rarity)
         self._mold = mold
+        self._weight_class = Weight_Class(mold["weight_class"])
         self._type = "Armor"
-        self._value = (25 * self._rarity.value) + (10 * self.numerical_weight_class)
+        self._value = (20 * self._rarity.value) + (8 * self._weight_class.value)
         self._max_durability = 15 * self._rarity.value
         self._durability = self._max_durability
 
@@ -346,19 +362,16 @@ class Armor(Item):
         return int(self._mold["armor"])
     @property
     def stats(self) -> str:
-        return f"{self.weight_class}, {self.armor_value}P"
+        return f"{self.weight_class.string}, {self.armor_value}P"
     @property
-    def weight_class(self) -> str:
-        return self._mold["weight_class"]
-    @property
-    def numerical_weight_class(self) -> int:
-        return WEIGHT_CLASS[self.weight_class]
+    def weight_class(self) -> Weight_Class:
+        return self._weight_class
     @property
     def max_dex_bonus(self) -> int:
-        return self._mold["max_dex_bonus"]
+        return int(self._mold["max_dex_bonus"])
     @property
     def weight(self) -> int:
-        return self.numerical_weight_class * 5 + 2 * self.armor_value
+        return int(self._weight_class.value * 5 + 2 * self.armor_value)
 
     #methods
     def smelt(self, new_mold:dict) -> None:
@@ -367,38 +380,34 @@ class Armor(Item):
 
     def save(self) -> dict:
         super().save()
-        self._tod["mold"] = self._mold
+        self._tod["mold"] = True
+        for entry in self._mold:
+            self._tod[entry] = self._mold[entry]
         return self._tod
 
     def load(self, stats_file) -> None:
         super().load(stats_file)
-        with open(stats_file, encoding = 'utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                print(row)
-                raise Exception
-            file.close()
-        self.update()
+        return None
 
     def format(self):
         forms = [
             f"{self.id} ({self._rarity.string})",
-            f"Class: {self.weight_class}",
+            f"Class: {self.weight_class.string}",
             f"Armor: {self.armor_value}P",
             f"Durability: {self._durability}/{self._max_durability}",
             f"Value: {self._value}g",
-            f"Weight: {self._weight} lbs"
+            f"Weight: {self.weight} lbs"
         ]
         return forms
 
     def __str__(self) -> str:
-        return f"{self.id}\n Class: {self.weight_class}\n Armor Value: {self.armor_value}\n Rarity: {self._rarity.string}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
+        return f"{self.id}\n Class: {self.weight_class.string}\n Armor Value: {self.armor_value}\n Rarity: {self._rarity.string}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 class Consumable(Item):
 
     def __init__(self, id:str, rarity="Common", quantity=1):
         super().__init__(id, rarity)
-        self._quantity = quantity
+        self._quantity = int(quantity)
         self._plural = True if self._quantity > 1 else False
         self._strength = self._rarity.value * 2
         self._is_consumable = True
@@ -452,10 +461,6 @@ class Consumable(Item):
     def set_target(self, tar) -> None:
         self._target = tar
 
-    def set_weight(self, num: int) -> None:
-        super().set_weight(num)
-        self._unit_weight = num
-
     def update(self) -> None:
         self._plural = True if self._quantity > 1 else False
         self._value = self._unit_value * self._quantity
@@ -467,20 +472,17 @@ class Consumable(Item):
         self._tod["unit_weight"] = self._unit_weight
         self._tod["unit_value"] = self._unit_value
 
-    def load(self, stats_file) -> None:
-        super().load(stats_file)
-        with open(stats_file, encoding = 'utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                self._quantity = int(row["quantity"])
-                self._unit_weight = float(row["unit_weight"])
-                self._unit_value = float(row["unit_value"])
-            file.close()
+    def load(self, save) -> None:
+        super().load(save)
+        self._quantity = int(save["quantity"])
+        self._unit_weight = float(save["unit_weight"])
+        self._unit_value = float(save["unit_value"])
         self.update()
+        return None
     
     def format(self) -> list[str]:
         forms = [
-            f"{self.name} ({self._rarity})",
+            f"{self.name} ({self._rarity.string})",
             f"Quantity: {self._quantity}",
             f"Value: {self._unit_value}g/each",
             f"Total Weight: {self.total_weight} lbs"
@@ -504,6 +506,9 @@ class Resource(Consumable):
     @property
     def pickup_message(self):
         return f"You picked up x{self._quantity} {self.id}."
+    
+    def set_weight(self, num:int) -> None:
+        self._weight_class.value = num
 
     def format(self) -> list[str]:
         forms = [
@@ -513,11 +518,3 @@ class Resource(Consumable):
             f"Weight: {self.total_weight} lbs"
         ]
         return forms
-
-TYPES = {
-    "Item": Item,
-    "Weapon": Weapon,
-    "Armor": Armor,
-    "Consumable": Consumable,
-    "Resource": Resource
-}

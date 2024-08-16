@@ -51,13 +51,23 @@ def save():
     item_dict_list.append(global_variables.PLAYER.armor.tod)
 
     #create fieldnames list from item_to_dict keys
-    fields = list(global_variables.PLAYER.weapon.tod.keys())
+    header1 = list(global_variables.PLAYER.weapon.tod.keys())
+    header2 = list(global_variables.PLAYER.armor.tod.keys())
+
+    fields = merge_minus_dups(header1, header2)
     with open("inventory.csv", "w", newline='') as file:
             file.truncate(0)
             w = csv.DictWriter(file, fieldnames=fields)
             w.writeheader()
             w.writerows(item_dict_list)
             file.close()
+
+def merge_minus_dups(list1:list, list2:list):
+    final = list1
+    for i in list2:
+        if i not in final:
+            final.append(i)
+    return final
 
 def bonus(num:int) -> int:
     return BONUS[num]

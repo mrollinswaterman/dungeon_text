@@ -33,7 +33,7 @@ class Land_Shark(mob.Mob):
         super().__init__(id, level, statblock)
 
         if global_commands.probability(10):
-            tooth = items.Item("Land Shark Tooth", "Epic")
+            tooth = items.Resource("Land Shark Tooth", "Epic")
             tooth.set_weight(0.5)
             self._loot["drops"] = [tooth]
 

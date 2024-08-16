@@ -1,6 +1,6 @@
 #Shopkeep class
 import random, time, copy, csv
-from items import Item, Consumable, Weapon, Armor, TYPES
+from items import Item, Consumable, Weapon, Armor, craft_item
 import global_variables, global_commands
 
 STOCK = {
@@ -43,7 +43,7 @@ class Blacksmith():
             STOCK[item.rarity] += 1
             self._storehouse[tag].append(item)"""
 
-        item:Item = TYPES[mold["type"]](mold["id"], mold["rarity"], mold)
+        item = craft_item(mold["type"], mold)
         self._storehouse[mold["type"]].append(item)
 
     def initialize(self):

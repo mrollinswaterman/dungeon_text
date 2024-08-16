@@ -5,7 +5,7 @@ class Repair_Kit(items.Consumable):
 
     def __init__(self, id="Repair Kit", rarity="Uncommon", quantity=0):
         super().__init__(id, rarity, quantity)
-        self._unit_value = 10 * self._numerical_rarity
+        self._unit_value = 10 * self._rarity.value
         self._unit_weight = .5
         self._name = "Repair Kit"
 
