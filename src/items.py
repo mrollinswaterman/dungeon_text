@@ -11,11 +11,6 @@ RARITY = {
 }
 
 WEIGHT_CLASS = {
-    "None": 0,
-    "Light": 2,
-    "Medium": 4,
-    "Heavy": 6,
-    "Superheavy": 8
 }
 
 def generate_item(id, rarity, type, mold):
@@ -30,7 +25,7 @@ class Rarity():
 
     def __init__(self, rarity):
         
-        rarity_codex = {
+        codex = {
             "Common": 1,
             "Uncommon": 2,
             "Rare": 3,
@@ -39,16 +34,36 @@ class Rarity():
             "Unique": 6 
         }
 
-        if rarity in list(rarity_codex.keys()):
-            self.value = rarity_codex[rarity]
-            self.str = rarity
-
-        elif rarity in list(rarity_codex.values()):
+        if rarity in list(codex.keys()):
+            self.value = codex[rarity]
+            self.string = rarity
+        elif rarity in list(codex.values()):
             self.value = rarity
-            self.str = rarity_codex.keys()[self.value-1]
-
+            self.string = codex.keys()[self.value-1]
         else:
             raise ValueError("Rarity not found in codex")
+
+class Weight_Class():
+
+    def __init__(self, w_class):
+
+        codex = {
+            None: 0,
+            "None": 0,
+            "Light": 2,
+            "Medium": 4,
+            "Heavy": 6,
+            "Superheavy": 8
+        }
+
+        if w_class in list(codex.keys()):
+            self.value = codex[w_class]
+            self.string = w_class
+        elif w_class in list(codex.values()):
+            self.value = w_class
+            self.string = codex.keys(self.value-1)
+        else:
+            raise ValueError("Weight class not found in codex.")
 
 class Item():
 
@@ -61,9 +76,9 @@ class Item():
         self._id = id
         self._name = id
         #RARITY STUFF
-        self._rarity:Rarity = global_commands.generate_item_rarity() if rarity is None else rarity
-        self._value = 10 * self._numerical_rarity
-        self._max_durability = 10 * self._numerical_rarity
+        self._rarity:Rarity = global_commands.generate_item_rarity() if rarity is None else Rarity(rarity)
+        self._value = 10 * self._rarity.value
+        self._max_durability = 10 * self._rarity.value
         #MISC
         self._durability = self._max_durability
         self._is_consumable = False
@@ -85,7 +100,7 @@ class Item():
         """
         Returns the item's full indentifiction, including rarity
         """
-        return f"{self._rarity} {self._name}"
+        return f"{self._rarity.string} {self._name}"
     @property
     def value(self) -> int:
         return self._value
@@ -105,14 +120,8 @@ class Item():
     def durability(self) -> tuple[int, int]:
         return (self._durability, self._max_durability)
     @property
-    def rarity(self) -> str:
+    def rarity(self) -> Rarity:
         return self._rarity
-    @property
-    def numerical_rarity(self) -> int:
-        return self._numerical_rarity
-    @property
-    def stats(self):
-        raise NotImplementedError
     @property
     def is_consumable(self) -> bool:
         return self._is_consumable
@@ -139,7 +148,7 @@ class Item():
         """
         Checks to see if the item loses durability on this use
         """
-        if global_commands.probability((66 // self._numerical_rarity)):
+        if global_commands.probability((66 // self._rarity.value)):
             self._durability -= 1
             if self.broken is True:
                 self.break_item()
@@ -169,9 +178,6 @@ class Item():
     def set_weight(self, num:int) -> None:
         self._weight = num
 
-    def set_stats(self, stats: tuple[int, int, int]):
-        raise NotImplementedError
-
     def set_pickup_message(self, msg:str) -> None:
         self._pickup_message = msg
 
@@ -196,16 +202,16 @@ class Item():
         Only intended to be used after loading an item from
         a save file
         """
-        self._numerical_rarity = RARITY[self._rarity]
-        self._value = 10 * self._numerical_rarity
-        self._max_durability = 10 * self._numerical_rarity
+        #self._numerical_rarity = RARITY[self._rarity]
+        self._value = 10 * self._rarity.value
+        self._max_durability = 10 * self._rarity.value
 
     def save(self) -> None:
         self._tod = {
             "type": self._type,
             "id": self._id,
             "name": self._name,
-            "rarity": self._rarity,
+            "rarity": self._rarity.string,
             "durability": self._durability,
         }
         #eqiupment special stats
@@ -222,14 +228,14 @@ class Item():
                 self._id = row["id"]
                 self._name = row["name"]
                 self._type = row["type"]
-                self._rarity = row["rarity"]
+                self._rarity = Rarity(row["rarity"])
                 self._durability = int(row["durability"])
             file.close()
         self.update()
 
     def format(self) -> list[str]:
         forms = [
-            f"{self.id} ({self._rarity})",
+            f"{self.id} ({self._rarity.string})",
             f"Value: {self._value}g",
             f"Durability: {self._durability}/{self._max_durability}",
             f"Weight: {self.total_weight} lbs"
@@ -237,7 +243,7 @@ class Item():
         return forms
 
     def __str__(self) -> str:
-        return f"{self._id}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
+        return f"{self._id}\n Rarity: {self._rarity.string}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 class Weapon(Item):
 
@@ -245,10 +251,10 @@ class Weapon(Item):
         super().__init__(id, rarity)
         self._mold = mold
         #durability
-        self._max_durability = 10 * self._numerical_rarity
+        self._max_durability = 10 * self._rarity.value
         self._durability = self._max_durability
         #value
-        self._value = 15 * self._numerical_rarity
+        self._value = 15 * self._rarity.value
 
         self._type = "Weapon"
 
@@ -310,7 +316,7 @@ class Weapon(Item):
     
     def format(self) -> list[str]:
         forms = [
-            f"{self.id} ({self._rarity})",
+            f"{self.id} ({self._rarity.string})",
             f"Damage: {self.num_damage_dice}d{self.damage_dice}, x{self.crit}",
             f"Durability: {self._durability}/{self._max_durability}",
             f"Value: {self._value}g",
@@ -327,8 +333,8 @@ class Armor(Item):
         super().__init__(id, rarity)
         self._mold = mold
         self._type = "Armor"
-        self._value = (25 * self.numerical_rarity) + (10 * self.numerical_weight_class)
-        self._max_durability = 15 * self._numerical_rarity
+        self._value = (25 * self._rarity.value) + (10 * self.numerical_weight_class)
+        self._max_durability = 15 * self._rarity.value
         self._durability = self._max_durability
 
     #properties
@@ -376,7 +382,7 @@ class Armor(Item):
 
     def format(self):
         forms = [
-            f"{self.id} ({self._rarity})",
+            f"{self.id} ({self._rarity.string})",
             f"Class: {self.weight_class}",
             f"Armor: {self.armor_value}P",
             f"Durability: {self._durability}/{self._max_durability}",
@@ -386,7 +392,7 @@ class Armor(Item):
         return forms
 
     def __str__(self) -> str:
-        return f"{self.id}\n Class: {self.weight_class}\n Armor Value: {self.armor_value}\n Rarity: {self._rarity}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
+        return f"{self.id}\n Class: {self.weight_class}\n Armor Value: {self.armor_value}\n Rarity: {self._rarity.string}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 class Consumable(Item):
 
@@ -394,12 +400,12 @@ class Consumable(Item):
         super().__init__(id, rarity)
         self._quantity = quantity
         self._plural = True if self._quantity > 1 else False
-        self._strength = self._numerical_rarity * 2
+        self._strength = self._rarity.value * 2
         self._is_consumable = True
         self._type = "Consumable"
         self._target = None
         self._unit_weight = 1
-        self._unit_value = 8 * self._numerical_rarity
+        self._unit_value = 8 * self._rarity.value
         self._value = self._unit_value * self._quantity
 
     #properties
@@ -482,7 +488,7 @@ class Consumable(Item):
         return forms
 
     def __str__(self) -> str:
-        return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity}\n Value: {self._unit_value}g/each\n"
+        return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity.string}\n Value: {self._unit_value}g/each\n"
 
 
 class Resource(Consumable):
@@ -501,7 +507,7 @@ class Resource(Consumable):
 
     def format(self) -> list[str]:
         forms = [
-            f"{self.id} ({self._rarity})",
+            f"{self.id} ({self._rarity.string})",
             f"Quantity: {self._quantity}",
             f"Value: {self._value}g",
             f"Weight: {self.total_weight} lbs"
