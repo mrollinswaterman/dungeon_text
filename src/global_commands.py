@@ -88,16 +88,18 @@ def generate_item_rarity() -> str:
     """
     Generates item rarity based on player level
     """
+    from items import Rarity
+
     if probability(10+global_variables.PLAYER.level):
-        return "Epic"
+        return Rarity("Epic")
     
     if probability(15+global_variables.PLAYER.level * 1.25):
-        return "Rare"
+        return Rarity("Rare")
     
     if probability(33+global_variables.PLAYER.level // 2):
-        return "Uncommon"
+        return Rarity("Uncommon")
     
-    return "Common"
+    return Rarity("Common")
 
 def d(num):
     """

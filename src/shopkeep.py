@@ -20,7 +20,7 @@ class Blacksmith():
     def __init__(self):
         self._forge_list = []
         self._storehouse = {
-            "Weapons": [],
+            "Weapon": [],
             "Armor": [],
         }
 
@@ -44,8 +44,13 @@ class Blacksmith():
             self._storehouse[tag].append(item)"""
 
         item:Item = TYPES[mold["type"]](mold["id"], mold["rarity"], mold)
+        self._storehouse[mold["type"]].append(item)
 
     def initialize(self):
+        self._storehouse = {
+            "Weapon": [],
+            "Armor": [],
+        }
         with open("equipment_stats.csv", "r") as file:
             reader = csv.DictReader(file)
             for row in reader:

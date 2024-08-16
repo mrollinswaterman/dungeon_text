@@ -18,16 +18,37 @@ WEIGHT_CLASS = {
     "Superheavy": 8
 }
 
-def numerical_rarity_to_str(rare:int):
-    return list(RARITY.keys())[rare-1]
-
-def generate_item(id, rarity, type):
+def generate_item(id, rarity, type, mold):
     import item_compendium
 
     try:
         return item_compendium.dict[id](id, rarity)
     except KeyError:
-        return TYPES[type](id, rarity)
+        return TYPES[type](id, rarity, mold)
+
+class Rarity():
+
+    def __init__(self, rarity):
+        
+        rarity_codex = {
+            "Common": 1,
+            "Uncommon": 2,
+            "Rare": 3,
+            "Epic": 4,
+            "Legendary": 5,
+            "Unique": 6 
+        }
+
+        if rarity in list(rarity_codex.keys()):
+            self.value = rarity_codex[rarity]
+            self.str = rarity
+
+        elif rarity in list(rarity_codex.values()):
+            self.value = rarity
+            self.str = rarity_codex.keys()[self.value-1]
+
+        else:
+            raise ValueError("Rarity not found in codex")
 
 class Item():
 
@@ -40,8 +61,7 @@ class Item():
         self._id = id
         self._name = id
         #RARITY STUFF
-        self._rarity = global_commands.generate_item_rarity() if rarity is None else rarity
-        self._numerical_rarity = RARITY[self._rarity]
+        self._rarity:Rarity = global_commands.generate_item_rarity() if rarity is None else rarity
         self._value = 10 * self._numerical_rarity
         self._max_durability = 10 * self._numerical_rarity
         #MISC
@@ -232,8 +252,6 @@ class Weapon(Item):
 
         self._type = "Weapon"
 
-        self.smelt()
-
     #properties
     @property
     def mold(self) -> dict:
@@ -319,7 +337,7 @@ class Armor(Item):
         return self._mold
     @property
     def armor_value(self) -> int:
-        return self._mold["armor"]
+        return int(self._mold["armor"])
     @property
     def stats(self) -> str:
         return f"{self.weight_class}, {self.armor_value}P"
@@ -334,7 +352,7 @@ class Armor(Item):
         return self._mold["max_dex_bonus"]
     @property
     def weight(self) -> int:
-        return self.numerical_weight_class * 5 + 2*self.armor_value
+        return self.numerical_weight_class * 5 + 2 * self.armor_value
 
     #methods
     def smelt(self, new_mold:dict) -> None:

@@ -1,8 +1,7 @@
 #globals variables
 from player import Player
-from items import Weapon, Armor, numerical_rarity_to_str
+from items import Weapon, Armor
 import item_compendium
-from equipment_stats import WEAPONS_DICTIONARY, ARMOR_DICTIONARY
 from shopkeep import Blacksmith, Shopkeep
 
 PLAYER:Player = Player()
@@ -69,6 +68,12 @@ BLACKSMITH = Blacksmith()
 
 BLACKSMITH.initialize()
 
+starter_weapon = BLACKSMITH.storehouse["Weapon"][0]
+starter_armor = BLACKSMITH.storehouse["Armor"][0]
+
+PLAYER.equip(starter_weapon)
+PLAYER.equip(starter_armor)
+
 def restock_the_shop():
     """
     Restocks the shop, emptying its inventory before it does so.
@@ -76,7 +81,7 @@ def restock_the_shop():
     #make sure the shop is up-to-date on player level
     SHOPKEEP.empty_inventory()
 
-    BLACKSMITH.forge()
+    BLACKSMITH.initialize()
     for entry in BLACKSMITH.storehouse:
         SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
 

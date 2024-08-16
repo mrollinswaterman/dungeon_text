@@ -1,5 +1,5 @@
-type,id,name,rarity,durability,damage_dice,num_damage_dice,crit,weight_class,quantity,unit_weight,unit_value
-Consumable,Health Potion,Health Potion,Common,10,,,,,5,0.5,8
-Consumable,Firebomb,Firebomb,Uncommon,20,,,,,5,1,40
-Weapon,Long Sword,Long Sword,Common,10,8,1,2,,,,
-Armor,Padded Leather Armor,Padded Leather Armor,Common,10,,,,Light,,,
+type,id,name,rarity,durability,mold,quantity,unit_weight,unit_value
+Consumable,Health Potion,Health Potion,Common,10,,5,0.5,8
+Consumable,Firebomb,Firebomb,Uncommon,20,,5,1,40
+Weapon,Long Sword,Long Sword,Common,10,"{'type': 'Weapon', 'id': 'Long Sword', 'damage_dice': '1d8', 'crit': '2', 'crit_range': '', 'weight_class': 'Light', 'armor': '', 'max_dex_bonus': '6', 'rarity': 'Common'}",,,
+Armor,Padded Leather,Padded Leather,Common,15,"{'type': 'Armor', 'id': 'Padded Leather', 'damage_dice': '', 'crit': '', 'crit_range': '', 'weight_class': 'Light', 'armor': '2', 'max_dex_bonus': '5', 'rarity': 'Common'}",,,

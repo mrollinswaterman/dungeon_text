@@ -845,8 +845,10 @@ class Player():
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
-                item:Item = items.generate_item(row["id"], row["rarity"], row["type"])
+                item:Item = items.generate_item(row["id"], row["rarity"], row["type"], row["mold"])
                 item.save()
+                print(item)
+                raise Exception
                 with open("temp.csv", "w", newline='') as temp_file:
                     temp_file.truncate(0)
                     w = csv.DictWriter(temp_file, fieldnames=list(item.tod.keys()))
