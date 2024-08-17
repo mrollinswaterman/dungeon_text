@@ -6,10 +6,10 @@ def load_item(type, save_data) -> "Item":
     def load_weapon():
         mold = {}
         mold["damage_dice"] = save_data["damage_dice"]
-        mold["crit"] = save_data["crit"]
+        mold["crit"] = int(save_data["crit"])
         mold["crit_range"] = save_data["crit_range"]
         mold["weight_class"] = save_data["weight_class"]
-        mold["max_dex_bonus"] = save_data["max_dex_bonus"]
+        mold["max_dex_bonus"] = int(save_data["max_dex_bonus"])
 
         obj = Weapon(save_data["id"], save_data["rarity"], mold)
         obj.load(save_data)
@@ -18,17 +18,17 @@ def load_item(type, save_data) -> "Item":
     def load_armor():
         mold = {}
         mold["weight_class"] = save_data["weight_class"]
-        mold["armor"] = save_data["armor"]
-        mold["max_dex_bonus"] = save_data["max_dex_bonus"]
+        mold["armor"] = int(save_data["armor"])
+        mold["max_dex_bonus"] = int(save_data["max_dex_bonus"])
 
         obj = Armor(save_data["id"], save_data["rarity"], mold)
         obj.load(save_data)
         return obj
 
     def load_consumable():
-        obj = Consumable(save_data["id"], save_data["rarity"], save_data["quantity"])
-        obj.load(save_data)
-
+        import item_compendium
+        id = save_data["id"]
+        obj = item_compendium.dict[id](id, save_data["rarity"], save_data["quantity"])
         return obj
 
     def load_resource():
@@ -296,13 +296,15 @@ class Weapon(Item):
         return f"{self.num_damage_dice}d{self.damage_dice}, x{self.crit}"
     @property
     def crit(self) -> int:
-        return self._mold["crit"]
+        return int(self._mold["crit"])
     @property
     def crit_range(self) -> int:
-        return self._mold["crit_range"]
+        if self._mold["crit_range"] == '' or self._mold["crit_range"] is None:
+            return 20
+        else: return int(self._mold["crit_range"])
     @property
     def max_dex_bonus(self) -> int:
-        return self._mold["max_dex_bonus"]
+        return int(self._mold["max_dex_bonus"])
     @property
     def type(self) -> str:
         return "Weapon"
@@ -319,15 +321,19 @@ class Weapon(Item):
     def roll_damage(self) -> int:
         return global_commands.XdY([self.num_damage_dice, self.damage_dice])
 
-    def save(self) -> dict:
+    def save(self) -> None:
         super().save()
         self._tod["mold"] = True
         for entry in self._mold:
             self._tod[entry] = self._mold[entry]
-        return self._tod
 
     def load(self, stats_file) -> None:
         super().load(stats_file)
+        self.update_values()
+
+    def update_values(self) -> None:
+        self._value = 15 * self._rarity.value
+        self._max_durability = 10 * self._rarity.value
     
     def format(self) -> list[str]:
         forms = [
@@ -378,16 +384,20 @@ class Armor(Item):
         self._mold = new_mold
         return None
 
-    def save(self) -> dict:
+    def save(self) -> None:
         super().save()
         self._tod["mold"] = True
         for entry in self._mold:
             self._tod[entry] = self._mold[entry]
-        return self._tod
 
     def load(self, stats_file) -> None:
         super().load(stats_file)
+        self.update_values()
         return None
+    
+    def update_values(self) -> None:
+        self._value = 10 * self._rarity.value
+        self._max_durability = 10 * self._rarity.value
 
     def format(self):
         forms = [

@@ -28,25 +28,22 @@ def turn():
         while not done:
             code = global_commands.get_cmd()
 
-            try:
+            #check if code is an action
+            if code in actions:
                 actions[code]()
                 done = True
-            except KeyError:
-                 #check if code is an item hotkey
-                try:
+            else:
+                #check if code is item hotkey
+                try: 
                     code = int(code)
                     item = global_variables.PLAYER.get_item_by_index(code-1)
                     use_an_item(item, controller.SCENE.enemy)
                     done = True
-                        
-                except ValueError:
-                    pass
-                #check if code is a combat trick hotkey
-                try:
-                    combat_tricks[code]()
-                    done = True
-                except KeyError:
-                    pass
+                except ValueError():
+                    #check if code is combat trick hotkey
+                    if code in combat_tricks:
+                        combat_tricks[code]()
+                        done = True
             
             #if none of the above, throw an error
             response = global_commands.error_message(code) if not done else None
@@ -219,6 +216,7 @@ def use_an_item(item:items.Item, target=None) -> bool:
                 global_commands.type_text(f"No {item.name} avaliable!")
                 return False
             if held_item.use(target):
+                print("USED")
                 global_variables.PLAYER.spend_ap()
             return True
         else:

@@ -45,6 +45,9 @@ class Player():
             "Armor": a
         }
 
+        #statuses
+        self._riposting = False
+
     #properties
     @property
     def dead(self) -> bool:
@@ -818,7 +821,10 @@ class Player():
         return player_tod
     
     def load(self, stats_file, inventory_file) -> None:
-        #set values to save file values
+        #first check if save file is empty
+        empty_check = True if os.stat(stats_file).st_size == 0 else False
+        if empty_check: return None
+        #if it's not, set values to save file values
         with open(stats_file, "r") as file:
             reader = csv.DictReader(file)
             for row in reader:
@@ -832,13 +838,17 @@ class Player():
                 self._xp = int(row["xp"])
                 self._gold = int(row["gold"])
                 self.reset_ap()
+            file.close()
                 
         self.load_inventory(inventory_file)
     
     def load_inventory(self, filename) -> None:
         import items
-        self._inventory = {}
+        #check if inventory file is emtpty
+        empty_check = True if os.stat(filename).st_size == 0 else False
+        if empty_check: return None
         size = 0
+        self._inventory = {}
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for row in reader:
@@ -848,7 +858,7 @@ class Player():
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
                 item = items.load_item(row["type"], row)
-                if idx >= size - 1:
+                if idx >= size -2:
                     self.equip(item, True)
                 else:
                     self.pick_up(item, True)

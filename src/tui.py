@@ -28,7 +28,7 @@ def ltd():
     Short for "Leave the Dungeon", runs when
     the player hits "n" initally.
     """
-    #player_commands.load()
+    player_commands.load()
     narrator.exit_the_dungeon()
 
 def begin():
