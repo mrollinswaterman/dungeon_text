@@ -329,13 +329,17 @@ class Mob():
         """
         import status_effect
         import items
+        import global_variables
 
-        if type(attacker) is not str:
+        dmg_type = "Physical"
+        src = attacker
+        if type(attacker) is status_effect.Status_Effect or type(attacker) is items.Consumable:
             attacker:status_effect.Status_Effect | items.Item = attacker
             src = "the " + attacker.damage_header
+            dmg_type = attacker.damage_type
 
         taken *= self.damage_taken_multiplier
-        if armor_piercing or attacker.damage_type != "Physcial":
+        if armor_piercing or  dmg_type != "Physical":
             self.lose_hp(taken)
             if attacker == self._player:
                 global_commands.type_text(f"You did {taken} damage to the {self._id}.")

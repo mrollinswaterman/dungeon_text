@@ -1,113 +1,103 @@
 #enemy commands file
-import commands.global_commands as global_commands
-import global_variables
-import narrator
-import commands.player_commands as player_commands
-import commands.objects.mob as mob
+import global_commands
+import player_commands
+import controller
 
-ENEMY:mob.Mob = None
-ENEMY_TURN = None
-END_SCENE = None
+def turn():
+    import global_variables
+    import controller
+    enemy = controller.SCENE.enemy
 
-PLAYER_TURN = None
-PLAYER_DEATH = None
+    if enemy is not None:
+        enemy.update()
 
-NEXT_SCENE = None
+        if enemy.dead:
+            controller.end_scene()
+            return None
+
+        while enemy.can_act:
+            done = turn_options()
+            
+            if done is None:#wait for turn_options to finish running before checking states
+                if global_variables.PLAYER.dead:
+                    player_commands.end_game()
+                    return None
+            
+                if enemy.dead:
+                    controller.end_scene()
+                    return None
+            
+                if enemy.can_act and not enemy.fleeing:
+                    print("\n")
+
+        if global_variables.RUNNING:
+            global_commands.type_with_lines()
+            player_commands.turn()
+        
+        return None
+    
+    else:
+        raise ValueError("Enemy is None.")
 
 def turn_options():
-    if ENEMY.dead:
-        END_SCENE()
-    if ENEMY.fleeing:
-        enemy_flee_attempt()
-        return None
-    #if trigger is active, 75% chance of special
-    if ENEMY.trigger() is True:
-        if global_commands.probability(100) is True:#75
-            if ENEMY.special() is True:
-                run_enemy_next()
-                return None
-        else:
-            enemy_attack()
-            return None
-    else: #if trigger not active, 25% of doing special
-        if global_commands.probability(25) is True:
-            if ENEMY.special() is True:
-                run_enemy_next()
-                return None
-        enemy_attack()
-        return None
+    """
+    Chooses a course of action for the enemy
+    """
+    enemy = controller.SCENE.enemy
+
+    if enemy.fleeing:
+        enemy.spend_ap(0)
+        return enemy_flee_attempt()
+
+    #if trigger is active, 85% chance to try special
+    if enemy.trigger() and global_commands.probability(99):
+            return True if enemy.special() else enemy_attack()
+
+    #if no trigger, don't special
+    return enemy_attack()
 
 def enemy_flee_attempt():
     """
     Runs when the enemy tries to escape. Lets the player
     choose whether to let them go or pursue them.
-
-    next = the function to run if the player stops them successfully
     """
-    def enemy_flee_success():
-        global_commands.type_text("It got away.")
-        narrator.continue_run(NEXT_SCENE)
-    def enemy_flee_failure():
-        global_commands.type_text(f"You stopped the {ENEMY.id}. It is forced to continue fighting.")
-        PLAYER_TURN()
-    global_commands.switch(ENEMY.header, f"The {ENEMY.id} attempts to flee...\n")
-    print(" Try to stop them? y/n\n")
-    command = input(">").lower()
-    #print("")#newline after cmd prompt
-    if command == "y":
-        player_commands.attack(enemy_flee_failure, enemy_flee_success)
-    if command == "n":
-        global_commands.type_text(f"You let the {ENEMY.id} go.")
-        narrator.continue_run()
+    import global_variables
+    import player_commands
+    import narrator
+    enemy = controller.SCENE.enemy
 
-def run_enemy_next():
-    """
-    Checks if the enemy can still act and passes the 
-    turn to the appropriate actor
-
-    PLAYER_TURN = function to run if the player goes next
-    enemy_next = ditto but for enemy
-    """
-    if ENEMY.can_act is False:
-        #ENEMY.reset_ap()
-        PLAYER_TURN()
-    else:
-        turn_options()
+    global_commands.type_text(f"The {enemy.id} attempts to flee...")
+    global_commands.type_text("Try to stop them? y/n")
+    done = False
+    while not done:
+        command = input(">> ").lower()
+        print("")
+        match command:
+            case "exit":
+                global_commands.exit()
+            case "y":
+                if global_variables.PLAYER.roll_to_hit() >= enemy.evasion:
+                    global_commands.type_text(f"You cut off the {enemy.id}'s escape. It turns to fight...")
+                    global_commands.type_with_lines()
+                    player_commands.turn()
+                else:
+                    global_commands.type_text(f"You try catching the {enemy.id} to no avail. It got away.")
+                    narrator.continue_run()
+                return None
+            case "n":
+                global_commands.type_text(f"You let the {enemy.id} go.")
+                narrator.continue_run()
+                return None
+            case _:
+                global_commands.type_text(f"Invalid command '{command}'. Please try again.")
+    return None
 
 def enemy_attack():
     """
     Runs the enemy attack
     """
-    ENEMY.spend_ap()
-    attack = ENEMY.roll_attack()
-    global_commands.switch(ENEMY.header, f"The {ENEMY.id} attacks you, rolling a {attack}\n")
-    if attack == 0:
-        global_commands.type_text(f"A critical hit! Uh oh.\n")
-        taken = global_variables.PLAYER.take_damage(ENEMY.roll_damage() * 2)
-        global_commands.type_text(f"The {ENEMY.id} hit you for {taken} damage!\n")
-        if global_variables.PLAYER.dead is False:
-            run_enemy_next()
-        else:
-            PLAYER_DEATH()
-    elif attack == 1:
-        global_commands.type_text(f"It critically failed!\n")
-        if ENEMY.fumble_table() is True:
-            taken = ENEMY.take_damage(ENEMY.roll_damage())
-            global_commands.type_text(f"The {ENEMY.id} hit itself for {taken} damage!")
-        else:
-            global_commands.type_text(f"It missed.")
-        if ENEMY.dead is True:
-            END_SCENE()
-        else:
-            run_enemy_next()
-    else: 
-        if attack >= global_variables.PLAYER.evasion:
-            taken = global_variables.PLAYER.take_damage(ENEMY.roll_damage())
-            global_commands.type_text(f"The {ENEMY.id} hit you for {taken} damage.")
-            if global_variables.PLAYER.dead is True:
-                PLAYER_DEATH()
-            else:
-                run_enemy_next()
-        else:
-            global_commands.type_text(f"The {ENEMY.id} missed.")
-            run_enemy_next()
+    import controller
+
+    controller.SCENE.enemy.attack()
+    return None
+

@@ -1,8 +1,10 @@
 #globals variables
-import commands.objects.player as player
-import objects.items as items
-import helpers.item_compendium as item_compendium
-import commands.objects.shopkeep as shopkeep
+from player import Player
+from items import Rarity
+import item_compendium
+from shopkeep import Blacksmith, Shopkeep
+
+PLAYER:Player = Player()
 
 BONUS = {
     5: -4,
@@ -22,31 +24,53 @@ BONUS = {
     19: 4,
     20: 5
 }
+
+STATS = {
+    "str": "Strength",
+    "dex": "Dexterity",
+    "con": "Constitution",
+    "int": "Intelligence",
+    "wis": "Wisdom",
+    "cha": "Charisma",
+    "base_evasion": "Evasion",
+    "damage_take_multiplier": "Vulnerability",
+    "damage_multiplier": "Damage",
+    "armor": "Armor",
+    "max_hp": "Maximum Health"
+}
+
+RARITY_DICT = {
+    "Common": 1,
+    "Uncommon": 2,
+    "Rare": 3,
+    "Epic": 4,
+    "Legendary": 5,
+    "Unique": 6 
+}
+
+WEIGHT_CLASS = {
+    "None": 0,
+    "Light": 2,
+    "Medium": 4,
+    "Heavy": 6,
+    "Superheavy": 8
+}
+
 #create constants
 START_CMD = True
 RUNNING = False
 
-PLAYER = player.Player()
+SHOPKEEP = Shopkeep()
+BLACKSMITH = Blacksmith()
+BLACKSMITH.initialize()
 
-long_sword = items.Weapon("Long Sword", "Common")
-long_sword.set_damage_dice((1,8))
-long_sword.set_crit_multiplier(2)
+starter_weapon = BLACKSMITH.storehouse["Weapon"][0]
+starter_armor = BLACKSMITH.storehouse["Armor"][0]
 
-leather_armor = items.Armor("Leather Armor", "Light", "Common")
-leather_armor.set_armor_value(2)
-
-#PLAYER.equip(leather_armor, True)
-#PLAYER.equip(long_sword, True)
-
-#PLAYER.gain_gold(300, True)
-PLAYER.pick_up(item_compendium.generate_hp_potions("Common", 5), True)
-PLAYER.pick_up(item_compendium.generate_firebombs(5), True)
-
-SHOPKEEP = shopkeep.Shopkeep()
-BLACKSMITH = shopkeep.Blacksmith()
-
-BLACKSMITH.add_to_forge_list(item_compendium.WEAPONS_DICTIONARY)#add weapons to forge list
-BLACKSMITH.add_to_forge_list(item_compendium.ARMOR_DICTIONARY)#add armors to forge list
+PLAYER.equip(starter_weapon, True)
+PLAYER.equip(starter_armor, True)
+PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
+#PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
 def restock_the_shop():
     """
@@ -54,14 +78,21 @@ def restock_the_shop():
     """
     #make sure the shop is up-to-date on player level
     SHOPKEEP.empty_inventory()
-    SHOPKEEP.set_player_level(PLAYER.level)
 
-    BLACKSMITH.forge()
+    BLACKSMITH.initialize()
     for entry in BLACKSMITH.storehouse:
         SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
 
-    SHOPKEEP.stock(item_compendium.generate_hp_potions(
-        items.numerical_rarity_to_str(max(PLAYER.threat // 5, 1)), 5))
+    pots = item_compendium.Health_Potion.craft(max(PLAYER.threat // 5, 1), 5)
+    SHOPKEEP.stock(pots)
     #scales HP potions to be higher rarity with player level
 
-    SHOPKEEP.stock(item_compendium.generate_repair_kits(5))
+    #SHOPKEEP.stock(item_compendium.Repair_Kit.craft(5))
+
+def start():
+    global START_CMD
+    START_CMD = True
+
+def stop():
+    global START_CMD
+    START_CMD = False

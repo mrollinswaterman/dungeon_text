@@ -1,2 +1,2 @@
 name,level,str,dex,con,int,wis,cha,base_evasion,damage_taken_multiplier,damage_multiplier,max_hp,max_ap,hp,xp,gold
-New Player,1,12,12,12,12,12,12,9,1,1,11,1,11,0,300
+New Player,1,12,12,12,12,12,12,9,1,1,11,1,10,13,24
