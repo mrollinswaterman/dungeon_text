@@ -207,7 +207,12 @@ class Mob():
             self.narrate(self.hit_text)
             taken = player.take_damage(self.roll_damage(), self)
             return None
-
+        
+        if player.riposting is True and roll <= player.evasion + player.bonus("dex"):
+            taken = self.roll_damage()
+            self.take_damage(taken//2, "Your riposte")
+            self._player._riposting = False
+            self._player.remove_status_effect(self._player.get_se_by_id("Ripose"))
         self.narrate(self.miss_text)
         return None
 
@@ -313,59 +318,56 @@ class Mob():
         dmg = global_commands.XdY(self.damage)
         return (dmg + self.bonus("str")) * self.damage_multiplier
     
-    def take_damage(self, taken:int, src, armor_piercing=False) -> int:
+    def take_damage(self, taken:int, attacker, armor_piercing=False) -> int:
         """
         Takes a given amount of damage, reduced by armor
+
+        taken: the amount of damage
+        attacker: a str or class object that determines the narration
+        text of the damage (ie 'your sword' vs 'the boulder')
+
         """
         import status_effect
         import items
 
-        src:status_effect.Status_Effect | items.Item = src
+        if type(attacker) is not str:
+            attacker:status_effect.Status_Effect | items.Item = attacker
+            src = "the " + attacker.damage_header
 
         taken *= self.damage_taken_multiplier
-        if armor_piercing:
-            if self._temp_hp is not None:
-                self._temp_hp -= taken
-                self._temp_hp = None if self._temp_hp <= 0 else self._temp_hp
-                return taken
-            self._hp -= taken
-            if src == self._player:
+        if armor_piercing or attacker.damage_type != "Physcial":
+            self.lose_hp(taken)
+            if attacker == self._player:
                 global_commands.type_text(f"You did {taken} damage to the {self._id}.")
             else:
-                global_commands.type_text(f"The {self._id} took {taken} damage from the {src.damage_header}.")
+                global_commands.type_text(f"The {self._id} took {taken} damage from {src}.")
             return taken
-
-        if src.damage_type == "Physical":
+        else:
             if (taken - self.armor) <= 0:
-                if src == self._player:
+                if attacker == self._player:
                     global_commands.type_text(f"You did no damage to the {self._id}.")
                 else:
-                    global_commands.type_text(f"The {self._id} took no damage from the {src.damage_header}.")
+                    global_commands.type_text(f"The {self._id} took no damage from {src}.")
                 return 0
             else:
-                if self._temp_hp is not None:
-                    self._temp_hp -= taken
-                    self._temp_hp = None if self._temp_hp <= 0 else self._temp_hp
-                    return taken - self.armor
-                self._hp -= taken - self.armor
-                if src == self._player:
+                self.lose_hp(taken - self.armor)
+                if attacker == self._player:
                     global_commands.type_text(f"You did {taken - self.armor} damage to the {self._id}.")
                 else:
-                    global_commands.type_text(f"The {self._id} took {taken - self.armor} damage from the {src.damage_header}.")
+                    global_commands.type_text(f"The {self._id} took {taken - self.armor} damage from {src}.")
                 return taken - self.armor
-        else:
-            if self._temp_hp is not None:
-                self._temp_hp -= taken
-                self._temp_hp = None if self._temp_hp <= 0 else self._temp_hp
-                return taken
-            self._hp -= taken
-            if src == self._player:
-                global_commands.type_text(f"You did {taken} damage to the {self._id}.")
-            else:
-                global_commands.type_text(f"The {self._id} took {taken} damage from the {src.damage_header}.")
-            return taken
+
 
     #RESOURCES
+    def lose_hp(self, num:int) -> None:
+        if self._temp_hp is not None:
+            self._temp_hp -= num
+            self._hp -= abs(self._temp_hp) if self._temp_hp < 0 else 0
+            self._temp_hp = None if self._temp_hp <= 0 else self._temp_hp
+        else:
+            self._hp -= num
+        return None
+
     def heal(self, num:int) -> None:
         #heals for the given amount up to max hp value
         prev = self._hp

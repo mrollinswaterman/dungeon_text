@@ -86,6 +86,9 @@ class Player():
     def needs_healing(self):
         return self._hp < self.max_hp
     @property
+    def riposting(self) -> bool:
+        return self._riposting
+    @property
     def damage_type(self) -> str:
         return "Physical"
     @property
@@ -97,7 +100,8 @@ class Player():
                 total_weight += held_item.total_weight
         for item in self._equipped:
             if self._equipped[item] is not None: #check to make sure an item is equipped, add its weight to the total if it is
-                total_weight += self._equipped[item].weight
+                held_item:Item = self._equipped[item]
+                total_weight += held_item.weight
         return total_weight
     @property
     def gold(self):
@@ -344,6 +348,22 @@ class Player():
             global_commands.type_text(f"The {enemy.id} spots your trick.")
 
         return None
+    
+    def riposte(self) -> None:
+        import controller
+        from conditions import Stat_Buff_Debuff
+        enemy = controller.SCENE.enemy
+
+        global_commands.type_text("You ready yourself to repel any oncoming attacks...")
+
+        rip_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
+        rip_bonus.set_id("Riposte")
+        rip_bonus.set_stat("dex")
+        rip_bonus.set_duration(1)
+        rip_bonus.set_potency(self.bonus("dex")/2)
+        self.add_status_effect(rip_bonus)
+
+        self._riposting = True
 
     #ROLLS
     def roll_to_hit(self) -> int:

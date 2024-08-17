@@ -24,6 +24,9 @@ actually printing, maybe the print function just tells you what lines should be 
 for weapons/armor, quantity for consumables, etc, then the print inventory function prints each line
 as necessary for formatting)
 - [X] Make a switch statement so rolls that should be paired with "an" are paired with "an" instead of "a". (ie "You rolled 'an' 18." instead of "'a' 18.")
+- [ ] Create a new fil/class called "Tag". Tags can be added to attacks or weapons or mobs, and cause the attack/weapon/mob to do something on hit. maybe make it so they
+don't stack???
+- [ ] Make stablocks their own class???? (ie player.stats.dex)
 
 ## Mechanics
 
@@ -79,6 +82,16 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Armordillo: deals ⅓ (or ½ or just some flat amount) of any damage taken back to the player. Can “curl up” defensively to halve all damage he takes during the next turn (does this frequently, never chases after the player just wants to be left alone. Give him a really good drop???)
 - [ ] Flaming Skull --> chance to catch fire on attack, regens to full when killed, but max_hp decays each resurrection, to a minimum of 5-10. Dies for good if you one-shot it (from full??), ie do its max hp in one attack.
 
+## Tags
+
+- [ ] Flaming: chance to set target on fire on hit
+- [ ] Molten/Searing/Super fucking hot: target takes a small amount of damage regardless of if the attack hits, plus a small chance to be set on fire. If the attack hits, larger chance to be set on fire, still take
+small unavoidable damage
+- [ ] AP: ignores armor
+- [ ] Freezing: reduces Action Points by 1 for 2 turns on hit
+- [ ] Poisoned: chance to apply poison on-hit
+- [ ] Draining: heals attacker for some % of pre-mitigation damage done on-hit
+
 ## Events
 
 - [ ] Gnomish miner
@@ -93,12 +106,11 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [X] HP potions should restore double their power in health (ie 4 instead of 2)
 - [ ] Can only use 1 combat trick per round???
 
-
 ## Combat Tricks
 
 - [X] Power Attack(1AP): no dex bonus to attack roll, but roll damage twice (take highest) and add x1.5 str to attack
 - [X] Feint(1AP): If you beat the enemy in a Cha check, add +2 or +Cha whichever is higher to base-evasion for 3 rounds. if you lose add 1/2 that (either 1 or 1/2 cha, whichever is higher)
-- [ ] Riposte(2AP): Gain +2 to base-evasion, if they miss next att by your dex or more, deal 1/2 of the attack's potential damage back to them instead
+- [ ] Riposte(2AP): Gain +2 to base-evasion, if they miss next att by your dex bonus or more, deal 1/2 of the attack's potential damage back to them instead
 - [ ] Total Defense(All AP): add 5+(level//5) to base-evasion for enemy's next turn, but on your next turn, no dex bonus to attacks (potenitally more penalties like roll twice and take lowest on attacks)
 - [ ] All-out(All AP): no dex bonus to evasion (and enemies get to roll twice take highest vs you??) for next turn, but attack rolls now add str+dex or dex+dex, whichever is highest
 - [ ] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
