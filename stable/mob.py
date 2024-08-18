@@ -207,12 +207,13 @@ class Mob():
             self.narrate(self.hit_text)
             taken = player.take_damage(self.roll_damage(), self)
             return None
-        
-        if player.riposting is True and roll <= player.evasion + player.bonus("dex"):
+
+        #check if player is riposting
+        if player.riposting is True: # and roll <= player.evasion + player.bonus("dex")
             taken = self.roll_damage()
             self.take_damage(taken//2, "Your riposte")
             self._player._riposting = False
-            self._player.remove_status_effect(self._player.get_se_by_id("Ripose"))
+
         self.narrate(self.miss_text)
         return None
 

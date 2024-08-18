@@ -15,7 +15,6 @@ def etd():
     "y" initially
     """
     player_commands.load()
-    global_variables.PLAYER.gain_gold(300)
     global_variables.RUNNING = True
     link_start()
 
@@ -32,9 +31,9 @@ def ltd():
     narrator.exit_the_dungeon()
 
 def begin():
-    from command_dict import all
+    from command_dict import commands
 
-    tui = all["tui"]
+    tui = commands["tui"]
 
     global_commands.type_text("Would you like to enter the dungeon? y/n")
 

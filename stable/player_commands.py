@@ -104,6 +104,7 @@ def combat_tricks():
     options = [
         "Power Attack - (p)",
         "Feint - (f)",
+        "Riposte - (ri)"
     ]
     print("\t", end='')
     for item in options:

@@ -11,10 +11,10 @@ SCENE_CHANGE = [
 EXIT_DUNGEON = [
     "You climb out of the darkness.",
     "You take your first breath of fresh in what feels like an eternity.",
-    "Finally, out...",
+    "Finally... out...",
     "The soft moonlight bathes the world in a gentle glow.",
     "The sky above you seems real enough to touch. You barely remember what it looked like...",
-    "As you breathe a sigh of relief, you can't help but wonder if you'll make it out the next time...",
+    "You breathe a sigh of relief, yet you can't help but wonder if you'll make it out the next time...",
     "The openess of the Overworld is a stark contrast to the confines of the Dungeon.",
     "As you emerge from the Dungeon's darkness, the harsh light of day stings your eyes."
 ]
@@ -35,7 +35,7 @@ EXIT_THE_SHOP = [
     "You go on your way.",
     "Your business is concluded.",
     "You slink out of the Shop.",
-    "As you leave, you wonder if you'll see this place again...",
+    "You leave, wondering if you'll see this place again...",
 ]
 
 STATS = "\t Strength - (str) | Dexterity - (dex) | Constitution - (con) | Intelligence - (int) | Wisdom - (wis) | Charisma - (cha)\n"
@@ -90,8 +90,8 @@ def exit_the_dungeon():
     menu_options()
 
 def ask_quantity() -> int | bool:
-    from command_dict import all
-    default = all["_"]
+    from command_dict import commands
+    default = commands["_"]
 
     global_commands.type_text(f"Please enter desired quantity:")
     done = False
@@ -109,8 +109,8 @@ def ask_quantity() -> int | bool:
                 print(f"Invalid quantity '{cmd}'. Please enter a valid quantity.", 0.01)
 
 def buy_something():
-    from command_dict import all
-    options = all["_"]
+    from command_dict import commands
+    options = commands["_"]
     done = False
     while not done:
         global_variables.SHOPKEEP.print_inventory()
@@ -134,8 +134,8 @@ def leave_the_shop():
     menu_options()
 
 def shopkeep_options():
-    from command_dict import all
-    options = all["shopkeep_options"]
+    from command_dict import commands
+    options = commands["shopkeep_options"]
 
     global PREV_MENU
     PREV_MENU = shopkeep_options
@@ -156,8 +156,8 @@ def rest():
     back()
 
 def select_item():
-    from command_dict import all
-    options = all["_"]
+    from command_dict import commands
+    options = commands["_"]
 
     global_commands.type_text("Enter an item's number to use it -OR- Go Back - (b)")
     done = False
@@ -183,8 +183,8 @@ def show_inventory():
     select_item()
 
 def menu_options():
-    from command_dict import all
-    options = all["overworld_menu"]
+    from command_dict import commands
+    options = commands["overworld_menu"]
 
     global PREV_MENU
     PREV_MENU = menu_options

@@ -11,10 +11,10 @@ def turn():
     import global_variables
     import enemy_commands
     import controller
-    from command_dict import all
+    from command_dict import commands
 
-    actions = all["actions"]
-    combat_tricks = all["combat_tricks"]
+    actions = commands["actions"]
+    combat_tricks = commands["combat_tricks"]
 
     global_variables.PLAYER.update()
 
@@ -39,7 +39,7 @@ def turn():
                     item = global_variables.PLAYER.get_item_by_index(code-1)
                     use_an_item(item, controller.SCENE.enemy)
                     done = True
-                except ValueError():
+                except ValueError:
                     #check if code is combat trick hotkey
                     if code in combat_tricks:
                         combat_tricks[code]()
@@ -97,13 +97,14 @@ def turn_options():
     print("\n")
 
 def combat_tricks():
-    from command_dict import all
-    ct = all["combat_tricks"]
+    from command_dict import commands
+    ct = commands["combat_tricks"]
 
     global_commands.type_text("Select a trick to use -OR- Cancel - (c)")
     options = [
         "Power Attack - (p)",
         "Feint - (f)",
+        "Riposte - (ri)"
     ]
     print("\t", end='')
     for item in options:
@@ -127,8 +128,8 @@ def cleanse_an_effect():
     """
     import global_variables
     import status_effect
-    from command_dict import all
-    effects = all["cleanse_an_effect"]
+    from command_dict import commands
+    effects = commands["cleanse_an_effect"]
 
     global_commands.type_text("Select an effect to cleanse -OR- Cancel - (c)")
     for idx, entry in enumerate(global_variables.PLAYER.status_effects):
@@ -174,8 +175,8 @@ def item_select() -> None:
     """
     import global_variables
     import controller
-    from command_dict import all
-    item_selection = all["item_select"]
+    from command_dict import commands
+    item_selection = commands["item_select"]
 
     global_commands.type_text("Enter an Item's number to use it -OR- Cancel - (c)")
 
@@ -216,7 +217,6 @@ def use_an_item(item:items.Item, target=None) -> bool:
                 global_commands.type_text(f"No {item.name} avaliable!")
                 return False
             if held_item.use(target):
-                print("USED")
                 global_variables.PLAYER.spend_ap()
             return True
         else:
@@ -286,7 +286,7 @@ def load():
     Loads the player.csv save file
     """
     import global_variables
-    global_variables.PLAYER.load("player.csv", "inventory.csv")
+    global_variables.PLAYER.load("stable_player.csv", "stable_inventory.csv")
 
 def reset():
     """

@@ -70,7 +70,7 @@ starter_armor = BLACKSMITH.storehouse["Armor"][0]
 PLAYER.equip(starter_weapon, True)
 PLAYER.equip(starter_armor, True)
 PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
-PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
+#PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
 def restock_the_shop():
     """
@@ -87,11 +87,13 @@ def restock_the_shop():
     SHOPKEEP.stock(pots)
     #scales HP potions to be higher rarity with player level
 
-    SHOPKEEP.stock(item_compendium.Repair_Kit.craft(5))
+    #SHOPKEEP.stock(item_compendium.Repair_Kit.craft(5))
 
 def start():
+    import tui
     global START_CMD
     START_CMD = True
+    tui.begin()
 
 def stop():
     global START_CMD

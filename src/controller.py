@@ -23,8 +23,8 @@ def next_scene():
         Starts a new scene with a new enemy or event
         """
         import tui
-        if global_commands.probability(1): #85% chance of an enemy spawning next
-            SCENE.enemy = monster_manual.spawn_mob("Evil Eye")
+        if global_commands.probability(85): #85% chance of an enemy spawning next
+            SCENE.enemy = monster_manual.spawn_random_mob()
             global_variables.RUNNING = False
             tui.link_start()
         else: #remainging 15% chance of an event spawning

@@ -1,7 +1,7 @@
 import global_variables, global_commands
 import player_commands, tui, narrator
 
-all = {
+commands = {
     "tui": {
         "y": tui.etd,
         "n": tui.ltd,
@@ -29,6 +29,7 @@ all = {
     "combat_tricks": {
         "p": global_variables.PLAYER.power_attack,
         "f":global_variables.PLAYER.feint,
+        "ri":global_variables.PLAYER.riposte,
     },
 
     "overworld_menu": {
@@ -55,8 +56,8 @@ all = {
     },
 }
 
-for entry in all:
-    all[entry]["exit"] = global_commands.exit
-    all[entry]["reset"] = player_commands.reset
-    all[entry]["c"] = player_commands.cancel
-    all[entry]["b"] = narrator.back
+for entry in commands:
+    commands[entry]["exit"] = global_commands.exit
+    commands[entry]["reset"] = player_commands.reset
+    commands[entry]["c"] = player_commands.cancel
+    commands[entry]["b"] = narrator.back

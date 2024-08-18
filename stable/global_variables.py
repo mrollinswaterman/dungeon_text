@@ -90,8 +90,10 @@ def restock_the_shop():
     #SHOPKEEP.stock(item_compendium.Repair_Kit.craft(5))
 
 def start():
+    import tui
     global START_CMD
     START_CMD = True
+    tui.begin()
 
 def stop():
     global START_CMD

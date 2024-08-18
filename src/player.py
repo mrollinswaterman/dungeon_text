@@ -353,20 +353,22 @@ class Player():
         return None
     
     def riposte(self) -> None:
-        import controller
         from conditions import Stat_Buff_Debuff
-        enemy = controller.SCENE.enemy
 
         global_commands.type_text("You ready yourself to repel any oncoming attacks...")
 
-        rip_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
-        rip_bonus.set_id("Riposte")
-        rip_bonus.set_stat("dex")
-        rip_bonus.set_duration(1)
-        rip_bonus.set_potency(self.bonus("dex")/2)
-        self.add_status_effect(rip_bonus)
+        self.spend_ap(2)
 
-        self._riposting = True
+        if not self._riposting:
+            rip_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
+            rip_bonus.set_id("Riposte")
+            rip_bonus.set_stat("base_evasion")
+            rip_bonus.set_duration(1000000)
+            rip_bonus.set_potency(2)
+            #rip_bonus.set_cleanse_message("")
+            self.add_status_effect(rip_bonus)
+
+            self._riposting = True
 
     #ROLLS
     def roll_to_hit(self) -> int:
@@ -544,6 +546,9 @@ class Player():
         """
         Spends Action points equal to num
         """
+        if self._riposting:
+            print("Ending riposte...")
+            self._riposting = False
         if num == 0:
             self._ap = 0
         elif self.can_act:
@@ -755,6 +760,9 @@ class Player():
                 #removes effect
                 removed.append(effect)
                 #break
+        if not self._riposting and self.get_se_by_id("Riposte") is not None:
+            print("Removing Riposte buff...")
+            removed.append(self.get_se_by_id("Riposte"))
 
         for effect in removed:
             self.remove_status_effect(effect)
