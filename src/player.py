@@ -363,6 +363,7 @@ class Player():
         self.spend_ap(2)
 
         if not self._riposting:
+            print("no riposte, adding...")
             rip_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
             rip_bonus.set_id("Riposte")
             rip_bonus.set_stat("base_evasion")
@@ -372,6 +373,14 @@ class Player():
             self.add_status_effect(rip_bonus)
 
             self._riposting = True
+
+    def end_riposte(self) -> None:
+        self._riposting = False
+
+        if self.get_se_by_id("Riposte") is not None:
+            self.remove_status_effect(self.get_se_by_id("Riposte"))
+
+        return None
 
     #ROLLS
     def roll_to_hit(self) -> int:
@@ -549,9 +558,7 @@ class Player():
         """
         Spends Action points equal to num
         """
-        if self._riposting:
-            print("Ending riposte...")
-            self._riposting = False
+        self.end_riposte()
         if num == 0:
             self._ap = 0
         elif self.can_act:
@@ -777,11 +784,10 @@ class Player():
             effect:Status_Effect = self._status_effects[entry]
             effect.update()
             if effect.active is False:
-                #removes effect
                 removed.append(effect)
-                #break
-        if not self._riposting and self.get_se_by_id("Riposte") is not None:
-            removed.append(self.get_se_by_id("Riposte"))
+
+        if not self._riposting:
+            self.end_riposte()
 
         for effect in removed:
             self.remove_status_effect(effect)
@@ -834,7 +840,10 @@ class Player():
 
     ##MISC.
     def save_to_dict(self) -> dict:
-        self.cleanse_all()#for now, cleanse all status effects before saving
+        for entry in self._status_effects:
+            effect:Status_Effect = self._status_effects[entry]
+            if effect.src == self:
+                self.remove_status_effect(effect)
         player_tod = {
             "name": self._name,
             "level": self._level

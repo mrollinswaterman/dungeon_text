@@ -124,5 +124,6 @@ small unavoidable damage
 - [ ] Add specific text for when a mob damages itself on a crit fail
 - [ ] Make 'y/n' prompts look more natural
 - [ ] Can't tell if Riposte works properly or not
-- [ ] Shopkeep Inventory bugged
-- [ ] Entering the shop and viewing the for sale items, then attempting to return to the dungeon causes the shopkeep's inventory to print again
+- [X] Shopkeep Inventory bugged
+- [X] Entering the shop and viewing the for sale items, then attempting to return to the dungeon causes the shopkeep's inventory to print again
+- [ ] Fix shopkeep items to properly display all stats (max dex bonus, crit, etc)

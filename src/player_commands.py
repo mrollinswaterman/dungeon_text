@@ -79,7 +79,8 @@ def turn_options():
         "hp": f'HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp) + "]"}',
         "ap": f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}",
         "gold": f"Gold: {global_variables.PLAYER.gold}g",
-        "xp": f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level}"
+        "xp": f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level}",
+        "eva": f"EVASION: {global_variables.PLAYER.evasion}"
     }
     print("\t", end="")
     for stat in stats:
