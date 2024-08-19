@@ -8,10 +8,10 @@ class Firebomb(items.Consumable):
         import mob
         super().__init__(id, rarity, quantity)
         self._unit_value = 20 * self._rarity.value
-        self._unit_weight = 1 
+        self._unit_weight = 3
         self._target:mob.Mob = None
         self._damage = self._strength
-        #self._type = "Firebomb"
+        self._type = "Firebomb"
 
     @property
     def damage_header(self) -> str:
@@ -67,7 +67,7 @@ class Firebomb(items.Consumable):
         super().update()
         self._damage = self._strength
         self._unit_value = 20 * self._rarity.value
-        self._unit_weight = 1
+        self._unit_weight = 3
 
 def craft(num=1):
     fb = Firebomb()

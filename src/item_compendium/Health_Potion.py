@@ -5,7 +5,7 @@ class Health_Potion(items.Consumable):
 
     def __init__(self, id="Health Potion", rarity="Common", quantity=1):
         super().__init__(id, rarity, quantity)
-        self._unit_weight = 0.5
+        self._unit_weight = 1
         self._target = None
 
     def use(self, target=None) -> bool:

@@ -191,16 +191,16 @@ class Shopkeep():
         for entry in warehouse:
             item:Item = entry
 
-            if item.rarity == "Epic":
+            if item.rarity.string == "Epic":
                 if global_commands.probability(5) is True:
                     ready_to_stock.add(item)
-            if item.rarity == "Rare":
+            if item.rarity.string == "Rare":
                 if global_commands.probability(10) is True:
                     ready_to_stock.add(item)
-            if item.rarity == "Uncommon":
+            if item.rarity.string == "Uncommon":
                 if global_commands.probability(33) is True:
                     ready_to_stock.add(item)
-            if item.rarity == "Common":
+            if item.rarity.string == "Common":
                 if global_commands.probability(60 - 2*self._player.level) is True:
                     ready_to_stock.add(item)
             

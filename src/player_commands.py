@@ -286,7 +286,7 @@ def load():
     Loads the player.csv save file
     """
     import global_variables
-    global_variables.PLAYER.load("stable_player.csv", "stable_inventory.csv")
+    global_variables.PLAYER.load("player.csv", "inventory.csv")
 
 def reset():
     """

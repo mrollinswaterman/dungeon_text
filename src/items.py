@@ -138,9 +138,6 @@ class Item():
     def value(self) -> int:
         return self._value
     @property
-    def total_value(self) -> int:
-        return self._value
-    @property
     def owner(self) -> int:
         return self._owner
     @property
@@ -164,9 +161,6 @@ class Item():
     @property
     def weight_class(self) -> Weight_Class:
         return self._weight_class
-    @property
-    def total_weight(self) -> int:
-        return self.weight
     @property
     def pickup_message(self) -> str:
         return self._pickup_message
@@ -313,7 +307,7 @@ class Weapon(Item):
         return self._rarity.value
     @property
     def weight(self) -> int:
-        return int(2.5 * self._weight_class.value + (self.damage_dice * self.num_damage_dice)) 
+        return int(self._weight_class.value + (self.damage_dice - 6) + (self.num_damage_dice - 1)) 
    
     def smelt(self, new_mold) -> None:
         self._mold = new_mold
@@ -444,9 +438,15 @@ class Consumable(Item):
         return self._quantity
     @property
     def weight(self) -> int:
+        return self._unit_weight * self._quantity
+    @property 
+    def unit_weight(self) -> float:
         return self._unit_weight
     @property
     def value(self) -> int:
+        return self._unit_value * self._quantity
+    @property
+    def unit_value(self) -> int:
         return self._unit_value
     @property
     def target(self):
@@ -494,13 +494,13 @@ class Consumable(Item):
         forms = [
             f"{self.name} ({self._rarity.string})",
             f"Quantity: {self._quantity}",
-            f"Value: {self._unit_value}g/each",
-            f"Total Weight: {self.total_weight} lbs"
+            f"Value: {self.unit_value}g/each",
+            f"Total Weight: {self.weight} lbs"
         ]
         return forms
 
     def __str__(self) -> str:
-        return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity.string}\n Value: {self._unit_value}g/each\n"
+        return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity.string}\n Value: {self.value}g/each\n"
 
 
 class Resource(Consumable):
@@ -524,7 +524,7 @@ class Resource(Consumable):
         forms = [
             f"{self.id} ({self._rarity.string})",
             f"Quantity: {self._quantity}",
-            f"Value: {self._value}g",
-            f"Weight: {self.total_weight} lbs"
+            f"Value: {self.value}g",
+            f"Weight: {self.weight} lbs"
         ]
         return forms

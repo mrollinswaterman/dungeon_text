@@ -33,7 +33,7 @@ class Player():
         
         #xp/gold/items
         self._xp = 0
-        self._gold = 0
+        self._gold = 2024
         self._inventory:dict[str, Item] = {}
         self._status_effects:dict[str: status_effect.Status_Effect] = {}
 
@@ -100,7 +100,7 @@ class Player():
         for entry in self._inventory:
             if self._inventory[entry] is not None:#check to make sure the entry is valid
                 held_item:Item = self._inventory[entry]
-                total_weight += held_item.total_weight
+                total_weight += held_item.weight
         for item in self._equipped:
             if self._equipped[item] is not None: #check to make sure an item is equipped, add its weight to the total if it is
                 held_item:Item = self._equipped[item]
@@ -634,7 +634,7 @@ class Player():
 
         Returns True if they can, False if not
         """
-        return self.current_weight + item.total_weight <= self.carrying_capacity
+        return self.current_weight + item.weight <= self.carrying_capacity
 
     def has_item(self, item: Item) -> bool:
         """

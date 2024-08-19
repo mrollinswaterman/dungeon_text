@@ -70,6 +70,7 @@ starter_armor = BLACKSMITH.storehouse["Armor"][0]
 PLAYER.equip(starter_weapon, True)
 PLAYER.equip(starter_armor, True)
 PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
+PLAYER.gain_gold(10000)
 #PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
 def restock_the_shop():
