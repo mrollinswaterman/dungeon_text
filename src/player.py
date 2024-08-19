@@ -33,14 +33,14 @@ class Player():
         
         #xp/gold/items
         self._xp = 0
-        self._gold = 2024
+        self._gold = 0
         self._inventory:dict[str, Item] = {}
         self._status_effects:dict[str: status_effect.Status_Effect] = {}
 
         #equipment
         w:Weapon = None
         a:Armor = None
-        self._equipped = {
+        self._equipped:dict[str, Weapon, Armor] = {
             "Weapon": w, 
             "Armor": a
         }
@@ -86,6 +86,9 @@ class Player():
     def carrying_capacity(self) -> int:
         return int(5.5 * self._stats["str"])
     @property
+    def available_carrying_capacity(self) -> int:
+        return self.carrying_capacity - self.carrying
+    @property
     def needs_healing(self):
         return self._hp < self.max_hp
     @property
@@ -95,7 +98,7 @@ class Player():
     def damage_type(self) -> str:
         return "Physical"
     @property
-    def current_weight(self) -> int:
+    def carrying(self) -> int:
         total_weight = 0
         for entry in self._inventory:
             if self._inventory[entry] is not None:#check to make sure the entry is valid
@@ -634,7 +637,7 @@ class Player():
 
         Returns True if they can, False if not
         """
-        return self.current_weight + item.weight <= self.carrying_capacity
+        return self.carrying + item.weight <= self.carrying_capacity
 
     def has_item(self, item: Item) -> bool:
         """
@@ -663,10 +666,11 @@ class Player():
         print("\n")
         print(f"Gold: {self.gold}g", end='')
         time.sleep(0.05)
-        print(f"\tCarrying Capacity: {self.current_weight}/{self.carrying_capacity} lbs\n")
+        print(f"\t Carrying Capacity: {self.carrying}/{self.carrying_capacity}\n")
         global_commands.type_with_lines()
 
     def format_inventory(self, line_len=25):
+        import items
         last = False
         idx = 0
         mx = max(3, len(self._inventory))
@@ -761,7 +765,6 @@ class Player():
                 removed.append(effect)
                 #break
         if not self._riposting and self.get_se_by_id("Riposte") is not None:
-            print("Removing Riposte buff...")
             removed.append(self.get_se_by_id("Riposte"))
 
         for effect in removed:

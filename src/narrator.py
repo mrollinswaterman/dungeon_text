@@ -10,7 +10,7 @@ SCENE_CHANGE = [
 
 EXIT_DUNGEON = [
     "You climb out of the darkness.",
-    "You take your first breath of fresh in what feels like an eternity.",
+    "You take your first breath of fresh air in what feels like an eternity.",
     "Finally... out...",
     "The soft moonlight bathes the world in a gentle glow.",
     "The sky above you seems real enough to touch. You barely remember what it looked like...",

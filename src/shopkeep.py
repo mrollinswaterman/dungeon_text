@@ -183,8 +183,15 @@ class Shopkeep():
             print(string + 2*"\t", end='')
             
         print("\n")#double newline after last item
+        p = global_variables.PLAYER
+        gold = f"Your Gold: {p.gold} \t"
+        available = f" Available Capacity: {p.available_carrying_capacity} \t"
+        maximum = f" Maximum Capacity {p.carrying}/{p.carrying_capacity}"
+        footer = gold + available + maximum
         global_commands.type_with_lines()
-        global_commands.type_text(f"Your Gold: {global_variables.PLAYER.gold} \tCarrying Capacity: {global_variables.PLAYER.current_weight}/{global_variables.PLAYER.carrying_capacity}", 0.012)
+        print(footer)
+        print("")
+        #global_commands.type_text(footer, 0.012)
 
     def restock(self, warehouse:list, amount:int) -> None:
         ready_to_stock = set()
