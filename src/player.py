@@ -670,6 +670,9 @@ class Player():
         global_commands.type_with_lines()
 
     def format_inventory(self, line_len=25):
+        """
+        Prints the players inventory, line-by-line
+        """
         import items
         last = False
         idx = 0
@@ -679,34 +682,46 @@ class Player():
                 time.sleep(0.05)
                 print("\n")
 
-            weapon = self._equipped["Weapon"].format() if idx == 0 else []
+            weapon = list(self._equipped["Weapon"].format().values()) if idx == 0 else []
             w_header = f"1. {weapon[0]}" if idx == 0 else " "
 
-            armor = self._equipped["Armor"].format() if idx == 2 else []
+            armor = list(self._equipped["Armor"].format().values()) if idx == 2 else []
             a_header = f"2. {armor[0]}" if idx == 2 else " "
 
             first = second = []
             header1 = header2 = " "
             if idx < len(self._inventory):
-                first = list(self._inventory.values())[idx].format()
+                #creates a list of the current item's format dictionary values 
+                first = list(list(self._inventory.values())[idx].format().values())
                 try:
-                    second = list(self._inventory.values())[idx + 1].format()
+                    #checks if this is the last item in the inventory or not
+                    second = list(list(self._inventory.values())[idx + 1].format().values())
                 except IndexError:
                     last = True
                     second = first
+                #sets the items' headers (ex. "1. Greatsword (Uncommon)     2. Plated Steelcaps (Rare)")
                 header1 = f"{idx+1}. {first[0]}"
                 header2 = f"{idx+2}. {second[0]}" if not last else " "
 
             headers = (header1, header2, w_header, a_header)
- 
             header1, header2, w_header, a_header = global_commands.match(headers, line_len)
 
+            #sets header for equipped item, first weapon, then armor
             equipped_header = w_header if idx == 0 else a_header
-            print(f" {header1} \t {header2} \t\t {equipped_header}")#print ids + weapon
+
+            #print headers (first two item ids + weapon id)
+            print(f" {header1} \t {header2} \t\t {equipped_header}")
+
+            #finds longest necessary iteration length (ie longest item.format dictionary)
             long = max(len(first), len(second), len(weapon), len(armor))
+
             for i in range(1, long):
+                #sets whats going to be printed on the current line
                 str1 = first[i] if i < len(first) else " "
+                #if the item.format dictionary doesn't go past the current index, print " "
                 str2 = second[i] if i < len(second) and not last else " "
+
+                #ditto, but for equipped items
                 w = weapon[i] if idx == 0 and i < len(weapon) else " "
                 a = armor[i] if idx == 2 and i < len(armor) else " "
 
@@ -714,8 +729,9 @@ class Player():
                 str1, str2, w, a = global_commands.match(string, line_len)
 
                 equipped = w if idx == 0 else a
+                #prints current line
                 print(f" {str1} \t {str2} \t\t {equipped}")
-
+            #if there's 2 or more items left, increment index by 2, else 1
             idx += 2 if len(self._inventory) - idx >= 2 else 1
 
     def recieve_reward(self, reward:dict) -> None:

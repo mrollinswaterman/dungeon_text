@@ -1,4 +1,4 @@
-import csv
+import csv, random
 import global_commands
 
 def load_item(type, save_data) -> "Item":
@@ -250,16 +250,21 @@ class Item():
         return None
 
     def format(self) -> list[str]:
-        forms = [
-            f"{self.id} ({self._rarity.string})",
-            f"Value: {self._value}g",
-            f"Durability: {self._durability}/{self._max_durability}",
-            f"Weight: {self.total_weight} lbs"
-        ]
+        forms = {
+            "id": f"{self.id} ({self._rarity.string})",
+            "value": f"Value: {self._value}g",
+            "durability": f"Durability: {self._durability}/{self._max_durability}",
+            "weight": f"Weight: {self.weight} lbs"
+        }
         return forms
 
     def __str__(self) -> str:
-        return f"{self._id}\n Rarity: {self._rarity.string}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
+        me = ""
+        forms = self.format()
+        for entry in forms:
+            me = me + forms[entry] +"\n"
+
+        return me
 
 class Weapon(Item):
 
@@ -329,18 +334,17 @@ class Weapon(Item):
         self._value = 15 * self._rarity.value
         self._max_durability = 10 * self._rarity.value
     
-    def format(self) -> list[str]:
-        forms = [
-            f"{self.id} ({self._rarity.string})",
-            f"Damage: {self.num_damage_dice}d{self.damage_dice}, x{self.crit}",
-            f"Durability: {self._durability}/{self._max_durability}",
-            f"Value: {self._value}g",
-            f"Weight: {self.weight} lbs",
-        ]
+    def format(self) -> dict[str, str]:
+        forms = {
+            "id": f"{self.id} ({self._rarity.string})",
+            "damage":f"Damage: {self.num_damage_dice}d{self.damage_dice}",
+            "crit": f"Critical: {self.crit_range}–20/x{self.crit}", 
+            "max_dex_bonus": f"Max Dex Bonus: +{self.max_dex_bonus}",
+            "durability": f"Durability: {self._durability}/{self._max_durability}",
+            "value": f"Value: {self._value}g",
+            "weight": f"Weight: {self.weight}",
+        }
         return forms
-    
-    def __str__(self) -> str:
-        return (f"{self.id}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n Damage Dice: {self.num_damage_dice}d{self.damage_dice}\n Weight: {self.weight} lbs\n")
 
 class Armor(Item):
 
@@ -349,7 +353,7 @@ class Armor(Item):
         self._mold = mold
         self._weight_class = Weight_Class(mold["weight_class"])
         self._type = "Armor"
-        self._value = (20 * self._rarity.value) + (8 * self._weight_class.value)
+        self._value = (15 * self._rarity.value) + (15 * self._weight_class.value) + random.randrange(self.armor_value, 5*self.armor_value)
         self._max_durability = 15 * self._rarity.value
         self._durability = self._max_durability
 
@@ -371,7 +375,7 @@ class Armor(Item):
         return int(self._mold["max_dex_bonus"])
     @property
     def weight(self) -> int:
-        return int(self._weight_class.value * 5 + 2 * self.armor_value)
+        return int(self._weight_class.value * 4 + 2 * self.armor_value)
 
     #methods
     def smelt(self, new_mold:dict) -> None:
@@ -394,18 +398,16 @@ class Armor(Item):
         self._max_durability = 10 * self._rarity.value
 
     def format(self):
-        forms = [
-            f"{self.id} ({self._rarity.string})",
-            f"Class: {self.weight_class.string}",
-            f"Armor: {self.armor_value}P",
-            f"Durability: {self._durability}/{self._max_durability}",
-            f"Value: {self._value}g",
-            f"Weight: {self.weight} lbs"
-        ]
+        forms = {
+            "id": f"{self.id} ({self._rarity.string})",
+            "weight_class": f"Class: {self.weight_class.string}",
+            "armor": f"Armor: {self.armor_value}P",
+            "max_dex_bonus": f"Max Dex Bonus: +{self.max_dex_bonus}",
+            "durability": f"Durability: {self._durability}/{self._max_durability}",
+            "value": f"Value: {self._value}g",
+            "weight": f"Weight: {self.weight}"
+        }
         return forms
-
-    def __str__(self) -> str:
-        return f"{self.id}\n Class: {self.weight_class.string}\n Armor Value: {self.armor_value}\n Rarity: {self._rarity.string}\n Value: {self._value}g\n Durability: {self._durability}/{self._max_durability}\n"
 
 class Consumable(Item):
 
@@ -419,7 +421,6 @@ class Consumable(Item):
         self._target = None
         self._unit_weight = 1
         self._unit_value = 8 * self._rarity.value
-        self._value = self._unit_value * self._quantity
 
     #properties
     @property
@@ -491,17 +492,14 @@ class Consumable(Item):
         return None
     
     def format(self) -> list[str]:
-        forms = [
-            f"{self.name} ({self._rarity.string})",
-            f"Quantity: {self._quantity}",
-            f"Value: {self.unit_value}g/each",
-            f"Total Weight: {self.weight} lbs"
-        ]
+        forms = {
+            "id": f"{self.name} ({self._rarity.string})",
+            "quantity": f"Quantity: {self._quantity}",
+            "value": f"Value: {self.unit_value}g/each",
+            "unit_weight": f"Unit Weight: {self.unit_weight}/each",
+            "weight": f"Total Weight: {self.weight}"
+        }
         return forms
-
-    def __str__(self) -> str:
-        return f"{self.id}\n Quantity: {self._quantity}\n Rarity: {self._rarity.string}\n Value: {self.value}g/each\n"
-
 
 class Resource(Consumable):
 
@@ -520,11 +518,3 @@ class Resource(Consumable):
     def set_weight(self, num:int) -> None:
         self._weight_class.value = num
 
-    def format(self) -> list[str]:
-        forms = [
-            f"{self.id} ({self._rarity.string})",
-            f"Quantity: {self._quantity}",
-            f"Value: {self.value}g",
-            f"Weight: {self.weight} lbs"
-        ]
-        return forms

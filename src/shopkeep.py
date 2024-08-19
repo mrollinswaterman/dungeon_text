@@ -176,7 +176,9 @@ class Shopkeep():
             if i % 2 == 0 and i != 0:
                 time.sleep(.05)
                 print("\n\n")
-
+            
+            if fix me:
+            # the below needs fixin!
             string = f" {i+1}. {item.name} ({item.stats}): {item.value}g, {item.weight} lbs"
             string = global_commands.match(string, 55)
             
