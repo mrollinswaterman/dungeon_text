@@ -31,6 +31,7 @@ def turn():
                     print("\n")
 
         if global_variables.RUNNING:
+            global_variables.PLAYER.end_riposte()
             global_commands.type_with_lines()
             player_commands.turn()
         

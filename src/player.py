@@ -361,24 +361,21 @@ class Player():
         global_commands.type_text("You ready yourself to repel any oncoming attacks...")
 
         self.spend_ap(2)
+        rip_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
+        rip_bonus.set_id("Riposte")
+        rip_bonus.set_cleanse_message("Your Riposte has ended.")
+        rip_bonus.set_stat("base_evasion")
+        rip_bonus.set_duration(1000000)
+        rip_bonus.set_potency(2)
+        self.add_status_effect(rip_bonus)
 
-        if not self._riposting:
-            print("no riposte, adding...")
-            rip_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
-            rip_bonus.set_id("Riposte")
-            rip_bonus.set_stat("base_evasion")
-            rip_bonus.set_duration(1000000)
-            rip_bonus.set_potency(2)
-            #rip_bonus.set_cleanse_message("")
-            self.add_status_effect(rip_bonus)
-
-            self._riposting = True
+        self._riposting = True
 
     def end_riposte(self) -> None:
         self._riposting = False
 
-        if self.get_se_by_id("Riposte") is not None:
-            self.remove_status_effect(self.get_se_by_id("Riposte"))
+        if self.get_effect_by_id("Riposte") is not None:
+            self.remove_status_effect(self.get_effect_by_id("Riposte"))
 
         return None
 
@@ -786,8 +783,7 @@ class Player():
             if effect.active is False:
                 removed.append(effect)
 
-        if not self._riposting:
-            self.end_riposte()
+        self.end_riposte()
 
         for effect in removed:
             self.remove_status_effect(effect)
@@ -820,7 +816,7 @@ class Player():
         except IndexError:
             return None
     
-    def get_se_by_index(self, idx:int) -> Status_Effect | None:
+    def get_effect_by_index(self, idx:int) -> Status_Effect | None:
         """
         Same as items but for status effects (se)
         """
@@ -829,7 +825,7 @@ class Player():
         except IndexError:
             return None
 
-    def get_se_by_id(self, id:str) -> Status_Effect | None:
+    def get_effect_by_id(self, id:str) -> Status_Effect | None:
         """
         Same as items but for status effects (se)
         """
@@ -840,10 +836,17 @@ class Player():
 
     ##MISC.
     def save_to_dict(self) -> dict:
+        self_imposed = []
         for entry in self._status_effects:
             effect:Status_Effect = self._status_effects[entry]
             if effect.src == self:
-                self.remove_status_effect(effect)
+                self_imposed.append(effect)
+
+        for effect in self_imposed:
+            #silence the effect's cleanse message then remove it
+            effect.set_cleanse_message("")
+            self.remove_status_effect(effect)
+
         player_tod = {
             "name": self._name,
             "level": self._level

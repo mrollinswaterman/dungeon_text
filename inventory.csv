@@ -1,4 +1,4 @@
 type,id,name,rarity,durability,mold,quantity,unit_weight,unit_value,damage_dice,crit,crit_range,weight_class,armor,max_dex_bonus
 Consumable,Health Potion,Health Potion,Common,10,,5,1,8,,,,,,
 Weapon,Long Sword,Long Sword,Common,10,True,,,,1d8,2,,Light,,6
-Armor,Padded Leather,Padded Leather,Common,14,True,,,,,,,Light,2,5
+Armor,Padded Leather,Padded Leather,Common,15,True,,,,,,,Light,2,5

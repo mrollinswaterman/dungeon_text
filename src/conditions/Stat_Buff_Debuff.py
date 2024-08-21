@@ -2,12 +2,11 @@
 import status_effect
 
 class Stat_Buff(status_effect.Status_Effect):
-    def __init__(self, src, target=None, id="Buff"):
+    def __init__(self, src, target=None, id=""):
         super().__init__(src, target, id)
         import global_variables
         self._target = global_variables.PLAYER if target is None else self._target
         self._stat = ""
-        self._id = self._stat +" " + id
         self._target_header = f"Your"
         if self._target != global_variables.PLAYER:
             self._target_header = f"The {self._target.id}'s"
@@ -19,14 +18,15 @@ class Stat_Buff(status_effect.Status_Effect):
 
     def update_message(self):
         from global_variables import STATS
-        if self._stat != "":
-            self._id = f"{self._stat} {self._id}"
-            self._message = f"{self._target_header} {STATS[self._stat]} increased by {self._potency}."
+        self._message = f"{self._target_header} {STATS[self._stat]} increased by {self._potency}."
+        if self._cleanse_message == "":
             self._cleanse_message = f"{self._target_header} {STATS[self._stat]} has returned to normal."
+        if self._id == "":
+            self._id = f"{self._stat} Buff"
 
     def set_stat(self, stat:str) -> None:
         self._stat = stat
-        self.update_message()
+        self.update_message()   
 
     def apply(self):
         super().apply()
@@ -43,15 +43,16 @@ class Stat_Buff(status_effect.Status_Effect):
         return None
 
 class Stat_Debuff(Stat_Buff):
-    def __init__(self, src, target=None, id="Debuff"):
+    def __init__(self, src, target=None, id=""):
         super().__init__(src, target, id)
 
     def update_message(self):
         from global_variables import STATS
-        if self._stat != "":
-            self._id = f"{self._stat} {self._id}"
-            self._message = f"{self._target_header} {STATS[self._stat]} decreased by {-self._potency}."
-            self._cleanse_message = f"{self._target_header} {STATS[self._stat]} has returned to normal."
+        self._message = f"{self._target_header} {STATS[self._stat]} decreased by {-self._potency}."
+        self._cleanse_message = f"{self._target_header} {STATS[self._stat]} has returned to normal."
+
+        if self._id == "":
+            self._id = f"{self._id} Debuff"
 
     def set_potency(self, num: int) -> None:
         super().set_potency(num)

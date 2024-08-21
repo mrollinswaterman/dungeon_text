@@ -110,7 +110,7 @@ small unavoidable damage
 
 - [X] Power Attack(1AP): no dex bonus to attack roll, but roll damage twice (take highest) and add x1.5 str to attack
 - [X] Feint(1AP): If you beat the enemy in a Cha check, add +2 or +Cha whichever is higher to base-evasion for 3 rounds. if you lose add 1/2 that (either 1 or 1/2 cha, whichever is higher)
-- [ ] Riposte(2AP): Gain +2 to base-evasion, if they miss next att by your dex bonus or more, deal 1/2 of the attack's potential damage back to them instead
+- [X] Riposte(2AP): Gain +2 to base-evasion, if enemy misses next att by (your dex bonus - 5) or more, deal 1/2 of the attack's potential damage back to them instead. ends at the end of the enemy's turn regardless of outcome.
 - [ ] Total Defense(All AP): add 5+(level//5) to base-evasion for enemy's next turn, but on your next turn, no dex bonus to attacks (potenitally more penalties like roll twice and take lowest on attacks)
 - [ ] All-out(All AP): no dex bonus to evasion (and enemies get to roll twice take highest vs you??) for next turn, but attack rolls now add str+dex or dex+dex, whichever is highest
 - [ ] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
@@ -127,3 +127,5 @@ small unavoidable damage
 - [X] Shopkeep Inventory bugged
 - [X] Entering the shop and viewing the for sale items, then attempting to return to the dungeon causes the shopkeep's inventory to print again
 - [ ] Fix shopkeep items to properly display all stats (max dex bonus, crit, etc)
+- [ ] Find a better way to handle Riposte / other "states" the player can put themselves in, right now the enemy_commands file ends the player's
+riposte state, which is bad i think

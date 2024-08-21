@@ -211,10 +211,9 @@ class Mob():
         self.narrate(self.miss_text)
 
         #check if player is riposting
-        if player.riposting is True: # and roll <= player.evasion + player.bonus("dex")
+        if player.riposting is True: # and player.evasion - roll >= (self._player.bonus("dex") - 5)
             taken = self.roll_damage()
             self.take_damage(max(1, taken//2), "your riposte")
-            self._player._riposting = False
 
         return None
 

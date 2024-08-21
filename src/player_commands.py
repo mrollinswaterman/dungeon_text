@@ -75,12 +75,13 @@ def turn_options():
 
     header = f"What would you like to do?"
     global_commands.type_text(header, None, False)
+    b_e = global_variables.PLAYER.stats["base_evasion"]
     stats = {
         "hp": f'HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.max_hp-global_variables.PLAYER.hp) + "]"}',
         "ap": f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.max_ap}",
         "gold": f"Gold: {global_variables.PLAYER.gold}g",
         "xp": f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level}",
-        "eva": f"EVASION: {global_variables.PLAYER.evasion}"
+        "eva": f"Base Evasion: {b_e}"
     }
     print("\t", end="")
     for stat in stats:
@@ -154,7 +155,7 @@ def cleanse_an_effect():
         else:
             try:
                 num = int(code)
-                effect:status_effect.Status_Effect = global_variables.PLAYER.get_se_by_index(num-1)
+                effect:status_effect.Status_Effect = global_variables.PLAYER.get_effect_by_index(num-1)
                 if effect is not None:
                     global_variables.PLAYER.spend_ap()
                     effect.attempt_cleanse(global_variables.PLAYER.roll_a_check(effect.cleanse_stat))
