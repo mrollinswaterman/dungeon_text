@@ -27,6 +27,7 @@ as necessary for formatting)
 - [ ] Create a new fil/class called "Tag". Tags can be added to attacks or weapons or mobs, and cause the attack/weapon/mob to do something on hit. maybe make it so they
 don't stack???
 - [ ] Make stablocks their own class???? (ie player.stats.dex)
+- [ ] Maybe make a stance class (riposte, total defense, defensive, offensive, all-out, etc) each with different effects.
 
 ## Mechanics
 
@@ -123,9 +124,10 @@ small unavoidable damage
 - [X] Extra line printed after re-entering dungeon
 - [ ] Add specific text for when a mob damages itself on a crit fail
 - [ ] Make 'y/n' prompts look more natural
-- [ ] Can't tell if Riposte works properly or not
+- [X] Can't tell if Riposte works properly or not
 - [X] Shopkeep Inventory bugged
 - [X] Entering the shop and viewing the for sale items, then attempting to return to the dungeon causes the shopkeep's inventory to print again
 - [ ] Fix shopkeep items to properly display all stats (max dex bonus, crit, etc)
 - [ ] Find a better way to handle Riposte / other "states" the player can put themselves in, right now the enemy_commands file ends the player's
 riposte state, which is bad i think
+

@@ -141,6 +141,9 @@ class Item():
     def owner(self) -> int:
         return self._owner
     @property
+    def level(self) -> int:
+        return self._owner.level
+    @property
     def broken(self) -> bool:
         return self._durability <= 0 and not self.destroyed
     @property
@@ -174,6 +177,9 @@ class Item():
     def tod(self) -> dict:
         return self._tod
     #methods
+    def initialize(self) -> None:
+        return None
+
     def lose_durability(self) -> None:
         """
         Checks to see if the item loses durability on this use

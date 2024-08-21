@@ -1,6 +1,5 @@
 #Firebomb
-import items, status_effect, global_commands
-from conditions import On_Fire
+import items, global_commands
 
 class Firebomb(items.Consumable):
     
@@ -11,7 +10,6 @@ class Firebomb(items.Consumable):
         self._unit_weight = 3
         self._target:mob.Mob = None
         self._damage = self._strength
-        self._type = "Firebomb"
 
     @property
     def damage_header(self) -> str:
@@ -45,22 +43,21 @@ class Firebomb(items.Consumable):
             global_commands.type_text(f"The {self._target.id} partially dodged your {self._id}.")
             taken = self._target.take_damage(int(self._damage // 2), self)
             if global_commands.probability(50 - dodge):
-                self.set_on_fire()
+                self.apply_tags()
             return True
         
         if throw > dodge:
             global_commands.type_text(f"You hit the {self._target.id}.")
             taken = self._target.take_damage(int(self._damage), self)
-            if global_commands.probability(75):#--> if statement is a formattting thing the message doesn't change 
-                self.set_on_fire()
+            if global_commands.probability(75):
+                self.apply_tags()
 
         return True
 
-    def set_on_fire(self) -> None:
-        fire:status_effect.Status_Effect = On_Fire(self._owner, self._target)
-        fire.set_duration(2)
-        fire.set_potency(self._rarity.value)
-        self._target.add_status_effect(fire)
+    def apply_tags(self) -> None:
+        for tag in self._tags:
+            if tag.on_hit:
+                tag.apply()
         return None
        
     def update(self) -> None:
