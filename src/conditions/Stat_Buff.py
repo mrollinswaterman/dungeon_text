@@ -1,8 +1,8 @@
-#Stat buffs and debuffs
+#Stat buffs
 import status_effect
 
 class Stat_Buff(status_effect.Status_Effect):
-    def __init__(self, src, target=None, id=""):
+    def __init__(self, src, target=None, id="Buff"):
         super().__init__(src, target, id)
         import global_variables
         self._target = global_variables.PLAYER if target is None else self._target
@@ -42,19 +42,4 @@ class Stat_Buff(status_effect.Status_Effect):
         self._count += 1
         return None
 
-class Stat_Debuff(Stat_Buff):
-    def __init__(self, src, target=None, id=""):
-        super().__init__(src, target, id)
-
-    def update_message(self):
-        from global_variables import STATS
-        self._message = f"{self._target_header} {STATS[self._stat]} decreased by {-self._potency}."
-        self._cleanse_message = f"{self._target_header} {STATS[self._stat]} has returned to normal."
-
-        if self._id == "":
-            self._id = f"{self._id} Debuff"
-
-    def set_potency(self, num: int) -> None:
-        super().set_potency(num)
-        self._potency = -self._potency
-        self.update_message()
+object = Stat_Buff

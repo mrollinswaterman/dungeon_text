@@ -49,3 +49,5 @@ class Entangled(status_effect.Status_Effect):
         global_commands.type_text("The entanglment's duration grows...")
         self._duration += 1
         return None
+ 
+object = Entangled

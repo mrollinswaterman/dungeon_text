@@ -319,49 +319,48 @@ class Mob():
         dmg = global_commands.XdY(self.damage)
         return (dmg + self.bonus("str")) * self.damage_multiplier
     
-    def take_damage(self, taken:int, attacker, armor_piercing=False) -> int:
+    def take_damage(self, taken:int, src) -> int:
         """
         Takes a given amount of damage, reduced by armor
 
         taken: the amount of damage
-        attacker: a str or class object that determines the narration
+        src: a str or class object that determines the narration
         text of the damage (ie 'your sword' vs 'the boulder')
 
         """
         import status_effect
         import items
-        import global_variables
+        from player import Player
 
-        dmg_type = "Physical"
-        src = attacker
-        if type(attacker) is status_effect.Status_Effect or type(attacker) is items.Consumable:
-            attacker:status_effect.Status_Effect | items.Item = attacker
-            src = "the " + attacker.damage_header
-            dmg_type = attacker.damage_type
+        src:Player = src
+        header = src
+        #if the source of the damage is status effect or item, change header accordingly, else leave it as is
+        if type(src) is status_effect.Status_Effect or type(src) is items.Consumable:
+            src:status_effect.Status_Effect | items.Item = src
+            header = "the " + src.damage_header
 
         taken *= self.damage_taken_multiplier
-        if armor_piercing or  dmg_type != "Physical":
+        if src.damage_type != "Physical":
             self.lose_hp(taken)
-            if attacker == self._player:
+            if src == self._player:
                 global_commands.type_text(f"You did {taken} damage to the {self._id}.")
             else:
-                global_commands.type_text(f"The {self._id} took {taken} damage from {src}.")
+                global_commands.type_text(f"The {self._id} took {taken} damage from {header}.")
             return taken
         else:
             if (taken - self.armor) <= 0:
-                if attacker == self._player:
+                if src == self._player:
                     global_commands.type_text(f"You did no damage to the {self._id}.")
                 else:
-                    global_commands.type_text(f"The {self._id} took no damage from {src}.")
+                    global_commands.type_text(f"The {self._id} took no damage from {header}.")
                 return 0
             else:
                 self.lose_hp(taken - self.armor)
-                if attacker == self._player:
+                if src == self._player:
                     global_commands.type_text(f"You did {taken - self.armor} damage to the {self._id}.")
                 else:
-                    global_commands.type_text(f"The {self._id} took {taken - self.armor} damage from {src}.")
+                    global_commands.type_text(f"The {self._id} took {taken - self.armor} damage from {header}.")
                 return taken - self.armor
-
 
     #RESOURCES
     def lose_hp(self, num:int) -> None:

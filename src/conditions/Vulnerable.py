@@ -1,8 +1,8 @@
 #Vulnerable condition
 import status_effect 
-from conditions import Stat_Buff_Debuff
+from src.conditions import Stat_Buff
 
-class Vulnerable(Stat_Buff_Debuff.Stat_Buff):
+class Vulnerable(Stat_Buff.Stat_Buff):
     """
     Makes the target vulnerable,
     meaning they take x2 damage for the duration
@@ -32,3 +32,5 @@ class Vulnerable(Stat_Buff_Debuff.Stat_Buff):
 
     def additional_effect(self, effect: status_effect.Status_Effect):
         self._potency += 1#might need re-balancing
+
+object = Vulnerable

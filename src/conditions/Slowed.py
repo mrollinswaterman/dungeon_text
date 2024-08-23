@@ -1,8 +1,8 @@
 #Vulnerable condition
 import status_effect 
-from conditions import Stat_Buff_Debuff
+from src.conditions import Stat_Buff
 
-class Slowed(Stat_Buff_Debuff.Stat_Buff):
+class Slowed(Stat_Buff.Stat_Buff):
     """
     Slow the target, reducing their max AP for a period of time.
     Often applied from ice attacks
@@ -30,3 +30,5 @@ class Slowed(Stat_Buff_Debuff.Stat_Buff):
 
     def additional_effect(self, effect: status_effect.Status_Effect):
         self._duration += 1
+
+object = Slowed

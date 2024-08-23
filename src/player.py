@@ -2,7 +2,7 @@ import random, time, os, csv
 import global_commands
 from items import Item, Consumable, Weapon, Armor
 from status_effect import Status_Effect
-from conditions import Stat_Buff_Debuff as sbd
+#from conditions import Stat_Buff
 
 class Player():
 
@@ -45,7 +45,9 @@ class Player():
             "Armor": a
         }
 
-        #statuses
+        self._tags = set()
+
+        #stances
         self._riposting = False
 
     #properties
@@ -180,6 +182,24 @@ class Player():
         self._level = num
 
     #ACTIONS
+    def apply_on_attacks(self):
+        from items import Weapon
+        import controller
+        w:Weapon = self._equipped["Weapon"]
+
+        for effect in w.atomic_effects:
+            effect.target = controller.SCENE.enemy
+            effect.on_attack()
+
+    def apply_on_hits(self):
+        from items import Weapon
+        import controller
+        w:Weapon = self._equipped["Weapon"]
+
+        for effect in w.atomic_effects:
+            effect.target = controller.SCENE.enemy
+            effect.on_hit()
+
     def attack(self) -> None:
         import player_commands, controller
         enemy = controller.SCENE.enemy
@@ -188,6 +208,8 @@ class Player():
         self.spend_ap()
         processed = self.process_roll(roll)
         self.roll_narration(processed)
+
+        self.apply_on_attacks()
 
         match roll:
             case 0:
@@ -201,6 +223,7 @@ class Player():
             self.hit_narration()
             dmg = 10000 if player_commands.GOD_MODE else self.roll_damage()
             taken = enemy.take_damage(dmg, self)
+            self.apply_on_hits()
             return None
 
         self.miss_narration()
@@ -336,7 +359,7 @@ class Player():
     
     def feint(self) -> None:
         import controller
-        from conditions import Stat_Buff_Debuff
+        from src.conditions import Stat_Buff
         enemy = controller.SCENE.enemy
 
         global_commands.type_text("You attempt a feint...")
@@ -345,7 +368,7 @@ class Player():
 
         if roll >= enemy.roll_a_check("cha"):
             global_commands.type_text(f"You faked out the {enemy.id}!")
-            def_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
+            def_bonus = Stat_Buff.Stat_Buff(self, self)
             def_bonus.set_stat("base_evasion")
             def_bonus.set_duration(2)
             def_bonus.set_potency(max(2, self.bonus("cha")))
@@ -356,12 +379,12 @@ class Player():
         return None
     
     def riposte(self) -> None:
-        from conditions import Stat_Buff_Debuff
+        from src.conditions import Stat_Buff
 
         global_commands.type_text("You ready yourself to repel any oncoming attacks...")
 
         self.spend_ap(2)
-        rip_bonus = Stat_Buff_Debuff.Stat_Buff(self, self)
+        rip_bonus = Stat_Buff.Stat_Buff(self, self)
         rip_bonus.set_id("Riposte")
         rip_bonus.set_cleanse_message("Your Riposte has ended.")
         rip_bonus.set_stat("base_evasion")
@@ -421,7 +444,7 @@ class Player():
             case _:
                 return roll + self.bonus(stat)
     
-    def take_damage(self, taken: int, src, armor_piercing=False) -> int:
+    def take_damage(self, taken: int, src) -> int:
         """
         Reduces the players hp by a damage amount, reduced by armor
         """
@@ -437,11 +460,13 @@ class Player():
         src:magic.Spell | mob.Mob | Status_Effect | Item = src
 
         #Ignores armor (Magic damage or Armor Piercing)
-        if armor_piercing is True:
+        if src.damage_type != "Physical":
             self._hp -= taken
             strings = [
             f"You took {taken} damage from the {src.damage_header}.",
-            f"The {src.damage_header} dealt {taken} damage to you."]
+            f"The {src.damage_header} dealt {taken} damage to you.",
+            f"The {src.damage_header} did {taken} damage.",
+            ]
             global_commands.type_text(random.choice(strings))
             if self.dead:
                 player_commands.end_game()
@@ -450,27 +475,30 @@ class Player():
 
         #Physical damage (everything else)
         armor:Armor = self._equipped["Armor"]
-        if src.damage_type == "Physical" or src.damage_type is None:
-            if armor.broken is False:
-                armor.lose_durability()
-                if (taken - self.armor.armor_value) <= 0:
-                    strings = [
-                        f"You took no damage from the {src.damage_header}!",
-                        f"The {src.damage_header} did no damage to you!"]
-                    global_commands.type_text(random.choice(strings))
-                    return 0 
-                else:
-                    self._hp -= taken - self.armor.armor_value
-                    strings = [
-                        f"You took {taken - self.armor.armor_value} damage from the {src.damage_header}.",
-                        f"The {src.damage_header} dealt {taken - self.armor.armor_value} damage to you."]
-                    global_commands.type_text(random.choice(strings))
-                    if self.dead:
-                        player_commands.end_game()
-                        return None
-                    return taken - self.armor.armor_value
+        if armor.broken is False:
+            armor.lose_durability()
+            if (taken - self.armor.armor_value) <= 0:
+                strings = [
+                    f"You took no damage from the {src.damage_header}!",
+                    f"The {src.damage_header} did no damage to you!",
+                    f"The {src.damage_header} hit you for no damage.",
+                    ]
+                global_commands.type_text(random.choice(strings))
+                return 0 
             else:
-                global_commands.type_text(f"Broken {armor.id} does you no good...")
+                self._hp -= taken - self.armor.armor_value
+                strings = [
+                    f"You took {taken - self.armor.armor_value} damage from the {src.damage_header}.",
+                    f"The {src.damage_header} dealt {taken - self.armor.armor_value} damage to you.",
+                    f"The {src.damage_header} hit you for {taken - self.armor.armor_value} damage.",
+                    ]
+                global_commands.type_text(random.choice(strings))
+                if self.dead:
+                    player_commands.end_game()
+                    return None
+                return taken - self.armor.armor_value
+        else:
+            global_commands.type_text(f"Broken {armor.id} does you no good...")
 
         #No armor (broken/not equipped)
         self._hp -= taken
@@ -623,6 +651,8 @@ class Player():
         """
         Equips the player with a given weapon
         """
+        import echantments
+        import items
         if item.type in self._equipped:
             prev:Item = self._equipped[item.type]
             if prev is not None and prev.id != item.id:#if its not none and not the same item, swap it to inventory
@@ -632,6 +662,10 @@ class Player():
             if silently is False:
                 global_commands.type_text(f"{item.name} equipped.")
             self._equipped[item.type] = item
+            if item.type == "Weapon":
+                test = echantments.Flaming.Effect(None, self)
+                item:items.Weapon = item
+                item.add_atomic_effect(test)
             return True
         return False
 

@@ -276,6 +276,7 @@ class Weapon(Item):
 
     def __init__(self, id, rarity=None, mold:dict=None):
         super().__init__(id, rarity)
+        from atomic import Atomic_Effect
         self._mold = mold
         self._weight_class = Weight_Class(mold["weight_class"])
         #durability
@@ -285,6 +286,7 @@ class Weapon(Item):
         self._value = 15 * self._rarity.value
         self._type = "Weapon"
         self._damage_type = "Physical"
+        self.atomic_effects:set[Atomic_Effect] = set()
 
     #properties
     @property
@@ -325,6 +327,12 @@ class Weapon(Item):
 
     def roll_damage(self) -> int:
         return global_commands.XdY([self.num_damage_dice, self.damage_dice])
+    
+    def add_atomic_effect(self, effect):
+        print(f"Adding effect: {effect}\n")
+        from atomic import Atomic_Effect
+        effect:Atomic_Effect = effect
+        self.atomic_effects.add(effect)
 
     def save(self) -> None:
         super().save()

@@ -1,6 +1,6 @@
 #Enraged condition. 
 import global_commands, status_effect
-from conditions import Stat_Buff_Debuff as sbd
+from src.conditions import Stat_Buff as sbd
 
 class Enraged(status_effect.Status_Effect):
     """
@@ -56,6 +56,5 @@ class Enraged(status_effect.Status_Effect):
 
         self.target.set_flee_threshold(self._old_flee)
         return None
-
-        
-
+     
+object = Enraged

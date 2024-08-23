@@ -29,3 +29,5 @@ class On_Fire(status_effect.Status_Effect):
     
     def additional_effect(self, effect: status_effect.Status_Effect):
         global_commands.type_text("More fire has no effect.")
+
+object = On_Fire

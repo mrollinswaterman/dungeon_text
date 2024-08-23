@@ -28,6 +28,7 @@ as necessary for formatting)
 don't stack???
 - [ ] Make stablocks their own class???? (ie player.stats.dex)
 - [ ] Maybe make a stance class (riposte, total defense, defensive, offensive, all-out, etc) each with different effects.
+- [ ] Make a damage class to store info about an object damage (type, src, amount, etc), and do the same for weapon types?
 
 ## Mechanics
 

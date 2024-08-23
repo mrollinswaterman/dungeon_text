@@ -66,3 +66,5 @@ class Poisoned(status_effect.Status_Effect):
     
     def apply(self) -> None:
         super().apply()
+
+object = Poisoned
