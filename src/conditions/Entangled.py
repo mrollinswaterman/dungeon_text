@@ -1,7 +1,7 @@
 #Entangled condition
 import status_effect, global_commands
 
-class Entangled(status_effect.Status_Effect):
+class Condition(status_effect.Status_Effect):
 
     def __init__(self, src, target=None, id="Entangled"):
         """
@@ -49,5 +49,3 @@ class Entangled(status_effect.Status_Effect):
         global_commands.type_text("The entanglment's duration grows...")
         self._duration += 1
         return None
- 
-object = Entangled

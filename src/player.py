@@ -651,7 +651,7 @@ class Player():
         """
         Equips the player with a given weapon
         """
-        import echantments
+        from enchantments import Flaming
         import items
         if item.type in self._equipped:
             prev:Item = self._equipped[item.type]
@@ -663,7 +663,7 @@ class Player():
                 global_commands.type_text(f"{item.name} equipped.")
             self._equipped[item.type] = item
             if item.type == "Weapon":
-                test = echantments.Flaming.Effect(None, self)
+                test = Flaming.Effect(None, self)
                 item:items.Weapon = item
                 item.add_atomic_effect(test)
             return True

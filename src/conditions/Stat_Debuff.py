@@ -43,7 +43,7 @@ class Stat_Buff(status_effect.Status_Effect):
         self._count += 1
         return None
 
-class Stat_Debuff(Stat_Buff):
+class Condition(Stat_Buff):
     def __init__(self, src, target=None, id="Debuff"):
         super().__init__(src, target, id)
 
@@ -59,5 +59,3 @@ class Stat_Debuff(Stat_Buff):
         super().set_potency(num)
         self._potency = -self._potency
         self.update_message()
-
-object = Stat_Debuff

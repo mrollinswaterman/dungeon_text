@@ -1,8 +1,7 @@
 #Enraged condition. 
 import global_commands, status_effect
-from src.conditions import Stat_Buff as sbd
 
-class Enraged(status_effect.Status_Effect):
+class Condition(status_effect.Status_Effect):
     """
     Enraged condition. Gain str and con, lose dex, lose int.
     Gain temp hp equal to con bonus, and enraged creatures
@@ -12,6 +11,8 @@ class Enraged(status_effect.Status_Effect):
     def __init__(self, src, target, id="Enraged"):
         super().__init__(src, target, id)
         self._old_flee = None
+
+        if src is None: return None
         
         if self.player:
             self._message = "You become Enraged."
@@ -56,5 +57,3 @@ class Enraged(status_effect.Status_Effect):
 
         self.target.set_flee_threshold(self._old_flee)
         return None
-     
-object = Enraged

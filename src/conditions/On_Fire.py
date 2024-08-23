@@ -1,7 +1,7 @@
 #On Fire condition
 import status_effect, global_commands
 
-class On_Fire(status_effect.Status_Effect): 
+class Condition(status_effect.Status_Effect): 
     def __init__(self, src, target=None, id="On Fire"):
         super().__init__(src, target, id)
         import global_variables
@@ -29,5 +29,3 @@ class On_Fire(status_effect.Status_Effect):
     
     def additional_effect(self, effect: status_effect.Status_Effect):
         global_commands.type_text("More fire has no effect.")
-
-object = On_Fire

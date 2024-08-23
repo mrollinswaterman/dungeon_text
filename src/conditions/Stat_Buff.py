@@ -1,7 +1,7 @@
 #Stat buffs
 import status_effect
 
-class Stat_Buff(status_effect.Status_Effect):
+class Condition(status_effect.Status_Effect):
     def __init__(self, src, target=None, id="Buff"):
         super().__init__(src, target, id)
         import global_variables
@@ -41,5 +41,3 @@ class Stat_Buff(status_effect.Status_Effect):
         self.apply()
         self._count += 1
         return None
-
-object = Stat_Buff

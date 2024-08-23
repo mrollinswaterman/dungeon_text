@@ -1,7 +1,7 @@
 #Poisoned condition
 import status_effect, global_commands
 
-class Poisoned(status_effect.Status_Effect):
+class Condition(status_effect.Status_Effect):
     def __init__(self, src, target=None, id="Poisoned"):
         super().__init__(src, target, id)
         import global_variables
@@ -66,5 +66,3 @@ class Poisoned(status_effect.Status_Effect):
     
     def apply(self) -> None:
         super().apply()
-
-object = Poisoned

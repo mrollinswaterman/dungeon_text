@@ -8,6 +8,7 @@ class Status_Effect():
         self._id = id
         self._src = src
         self._target:player.Player | mob.Mob = target
+        self.player = False
         if self._target == global_variables.PLAYER:
             self.player = True
         self._potency = 1
