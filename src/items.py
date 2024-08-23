@@ -1,4 +1,4 @@
-import csv, random
+import csv, random, enum
 import global_commands
 
 def load_item(type, save_data) -> "Item":
@@ -283,8 +283,8 @@ class Weapon(Item):
         self._durability = self._max_durability
         #value
         self._value = 15 * self._rarity.value
-
         self._type = "Weapon"
+        self._damage_type = "Physical"
 
     #properties
     @property
