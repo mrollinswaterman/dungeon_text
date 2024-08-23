@@ -33,7 +33,7 @@ def turn():
         if global_variables.RUNNING:
             global_variables.PLAYER.end_riposte()
             global_commands.type_with_lines()
-            player_commands.turn()
+            controller.SCENE.turn_order.go()
         
         return None
     
@@ -63,7 +63,6 @@ def enemy_flee_attempt():
     choose whether to let them go or pursue them.
     """
     import global_variables
-    import player_commands
     import narrator
     enemy = controller.SCENE.enemy
 
@@ -80,7 +79,7 @@ def enemy_flee_attempt():
                 if global_variables.PLAYER.roll_to_hit() >= enemy.evasion:
                     global_commands.type_text(f"You cut off the {enemy.id}'s escape. It turns to fight...")
                     global_commands.type_with_lines()
-                    player_commands.turn()
+                    controller.SCENE.turn_order.go()
                 else:
                     global_commands.type_text(f"You try catching the {enemy.id} to no avail. It got away.")
                     narrator.continue_run()
@@ -101,4 +100,3 @@ def enemy_attack():
 
     controller.SCENE.enemy.attack()
     return None
-

@@ -4,11 +4,6 @@ import player_commands
 import narrator
 import controller
 
-def link_start() -> None:
-    controller.begin_encounter()
-    global_variables.RUNNING = True
-    player_commands.turn()
-
 def etd():
     """
     Short for "Enter the Dungeon", runs when the player hits
@@ -16,7 +11,7 @@ def etd():
     """
     player_commands.load()
     global_variables.RUNNING = True
-    link_start()
+    controller.SCENE.begin_encounter()
 
 def test():
     player_commands.load()
@@ -37,11 +32,6 @@ def begin():
 
     global_commands.type_text("Would you like to enter the dungeon? y/n")
 
-    if not controller.TEST:
-        controller.SCENE.enemy = monster_manual.spawn_random_mob()  
-    else:
-        controller.SCENE.enemy = monster_manual.spawn_mob("Clockwork Hound")
-
     done = False
     while not done:
         cmd = global_commands.get_cmd()
@@ -50,7 +40,7 @@ def begin():
             done = True
             tui[cmd]()
         else:
-            global_commands.error_message()
+            global_commands.error_message(cmd)
 
 print("")
 while global_variables.START_CMD is True:

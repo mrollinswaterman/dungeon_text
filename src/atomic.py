@@ -5,8 +5,12 @@ class Atomic_Effect():
         from player import Player
         from mob import Mob
         from items import Item
+        from status_effect import Status_Effect
         self.target:Player | Mob | Item = target
         self.src: Item | Mob = src
+        self.id = "None"
+
+        self.effects: set[Status_Effect] = set()
 
         self.methods = {
             "deal_damage":self.deal_damage,
@@ -20,8 +24,9 @@ class Atomic_Effect():
             "execute":self.execute,
         }
 
+
+
     def deal_damage(self, value:int):
-        print(f"Dealing {value} damage to {self.target.id}\n")
         self.target.take_damage(value, self.src)
 
     def heal(self, value:int):
@@ -36,18 +41,16 @@ class Atomic_Effect():
     def gain_temp_hp(self, value:int):
         self.target.gain_temp_hp(value)
 
-    def apply_an_effect(self, effect):
-        from status_effect import Status_Effect
-        import conditions
-        print(conditions.dict)
-        effect:Status_Effect = effect
+    def apply_an_effect(self, effect=None):
         self.target.add_status_effect(effect)
 
     def damage_an_item(self, value):
         self.target.lose_durability(value)
 
     def steal_an_item(self):
-        self.target.owner.drop_item(self.target)
+        from player import Player
+        owner:Player = self.target.owner
+        owner.drop(self.target)
         self.src.loot["drops"].append(self.target)
 
     def execute(self):

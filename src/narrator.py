@@ -3,9 +3,12 @@ import global_commands, global_variables
 
 SCENE_CHANGE = [
     "You press towards your goal...\n",
-    "Your resolve steeled, you continue forwards...\n",
-    "Your weary legs carry you on...\n",
-    "You venture deeper into the dungeon...\n"
+    "Your resolve steeled, you continue on...\n",
+    "Your weary legs carry you ever fruther...\n",
+    "You venture deeper into the dungeon...\n",
+    "May your limbs never tire, may your heart never waiver, and may you never look back...",
+    "There is no way but onward, no path but forward, no place but here...",
+    "Do you even remeber what you're searching for? Perhaops you never were..."
 ]
 
 EXIT_DUNGEON = [
@@ -75,7 +78,7 @@ def continue_run():
             case "y":
                 done = True
                 next_scene_options()
-                controller.next_scene()
+                controller.SCENE.select_next()
             case "n":
                 done = True
                 print("")

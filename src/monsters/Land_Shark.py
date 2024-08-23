@@ -1,5 +1,4 @@
 #Land Shark mob file
-import random
 import mob, global_commands
 from conditions import Vulnerable
 import items, status_effect
@@ -35,7 +34,7 @@ class Land_Shark(mob.Mob):
         if global_commands.probability(10):
             tooth = items.Resource("Land Shark Tooth", "Epic")
             tooth.set_weight(0.5)
-            self._loot["drops"] = [tooth]
+            self._loot["drops"].append(tooth)
 
         self._burrowed = False
 
@@ -81,7 +80,7 @@ class Land_Shark(mob.Mob):
             self.spend_ap()
             global_commands.type_text(f"The {self._id} erupts from the ground.")
             self._stats["base_evasion"] -= 3
-            vul:status_effect.Status_Effect = Vulnerable(self, self)#double all damage taken for 3 turns
+            vul:status_effect.Status_Effect = Vulnerable.Condition(self, self)#double all damage taken for 3 turns
             self._my_effect_id = vul.id
             vul.set_duration(3)
             self.add_status_effect(vul)

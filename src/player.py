@@ -2,7 +2,6 @@ import random, time, os, csv
 import global_commands
 from items import Item, Consumable, Weapon, Armor
 from status_effect import Status_Effect
-#from conditions import Stat_Buff
 
 class Player():
 
@@ -161,6 +160,10 @@ class Player():
         Checks if the player can act (ie AP > 0)
         """
         return self._ap > 0 and not self.dead
+    @property
+    def enemy(self):
+        import controller
+        return controller.SCENE.enemy
 
     #STATUS
     def bonus(self, stat:str) -> int:
@@ -184,25 +187,22 @@ class Player():
     #ACTIONS
     def apply_on_attacks(self):
         from items import Weapon
-        import controller
         w:Weapon = self._equipped["Weapon"]
 
         for effect in w.atomic_effects:
-            effect.target = controller.SCENE.enemy
+            effect.target = self.enemy
             effect.on_attack()
 
     def apply_on_hits(self):
         from items import Weapon
-        import controller
         w:Weapon = self._equipped["Weapon"]
 
         for effect in w.atomic_effects:
-            effect.target = controller.SCENE.enemy
+            effect.target = self.enemy
             effect.on_hit()
 
     def attack(self) -> None:
-        import player_commands, controller
-        enemy = controller.SCENE.enemy
+        import player_commands
 
         roll = 10000 if player_commands.GOD_MODE else self.roll_to_hit()
         self.spend_ap()
@@ -219,10 +219,10 @@ class Player():
             case _:
                 pass
 
-        if roll >= controller.SCENE.enemy.evasion:
+        if roll >= self.enemy.evasion:
             self.hit_narration()
             dmg = 10000 if player_commands.GOD_MODE else self.roll_damage()
-            taken = enemy.take_damage(dmg, self)
+            taken = self.enemy.take_damage(dmg, self)
             self.apply_on_hits()
             return None
 
@@ -246,8 +246,6 @@ class Player():
                 return f"rolling a {roll}."
 
     def crit(self) -> None:
-        import controller
-        enemy = controller.SCENE.enemy
 
         #global_commands.type_text("A critical hit!")
         no_weapon = True if self.weapon.broken else False
@@ -257,12 +255,14 @@ class Player():
         else:
             self._stats["damage_multiplier"] += (self.weapon.crit-1)
 
-        taken = enemy.take_damage(self.roll_damage(), self)
+        taken = self.enemy.take_damage(self.roll_damage(), self)
 
         if no_weapon:
             self._stats["damage_multiplier"] -= 1
         else:
             self._stats["damage_multiplier"] -= (self.weapon.crit-1)
+
+        self.apply_on_hits()
         return None
     
     def crit_fail(self) -> None:
@@ -289,11 +289,9 @@ class Player():
     
     #NARRATION --> prints statements based on given situation
     def roll_narration(self, roll_text):
-        import controller as c
-        enemy = c.SCENE.enemy
         text = [
-            f"You heft your {self.weapon.id} and attack the {enemy.id}, ",
-            f"You charge the {enemy.id}, ",
+            f"You heft your {self.weapon.id} and attack the {self.enemy.id}, ",
+            f"You charge the {self.enemy.id}, ",
             f"You swing your {self.weapon.id}, ",
             f"Brandishing your {self.weapon.id}, you prepare to strike... ",
         ]
@@ -301,42 +299,35 @@ class Player():
         return None
 
     def hit_narration(self) -> None:
-        import controller as c
-        enemy = c.SCENE.enemy
         text = [
             f"A hit.",
-            f"The {enemy.id} didn't get out of the way in time.",
-            f"You hit the {enemy.id}.",
+            f"The {self.enemy.id} didn't get out of the way in time.",
+            f"You hit the {self.enemy.id}.",
             f"Your attack lands.",
             f"Your {self.weapon.id} strikes true.",
-            f"The {enemy.id} wasn't able to dodge this one.",
+            f"The {self.enemy.id} wasn't able to dodge this one.",
             f"Sucess."
         ]
         global_commands.type_text(random.choice(text))
         return None
 
     def miss_narration(self) -> None:
-        import controller as c
-        enemy = c.SCENE.enemy
         text = [
             f"You missed.",
             f"No luck this time.",
-            f"The {enemy.id} deftly dodges your attack.",
-            f"Your attack whizzes past the {enemy.id}, missing by a hair.",
-            f"You don't crack the {enemy.id}'s defenses this time.",
+            f"The {self.enemy.id} deftly dodges your attack.",
+            f"Your attack whizzes past the {self.enemy.id}, missing by a hair.",
+            f"You don't crack the {self.enemy.id}'s defenses this time.",
             f"It leaps out of the way in the nick of time.",
             f"A miss.",
-            f"The {enemy.id} ducks your strike.",
-            f"The {enemy.id} manages to weather your onslaught for now."
+            f"The {self.enemy.id} ducks your strike.",
+            f"The {self.enemy.id} manages to weather your onslaught for now."
         ]
         global_commands.type_text(random.choice(text))
         return None
 
     #COMBAT TRICKS
     def power_attack(self) -> int:
-        import controller
-        enemy = controller.SCENE.enemy
-
         global_commands.type_text(f"You wind up for a powerful attack...")
         roll = self.roll_to_hit()
         self.spend_ap()
@@ -346,45 +337,43 @@ class Player():
         if roll != 0:
             roll -= self.bonus("dex")
 
-        hit_text = f"A critical hit!" if roll == 0 else f"You hit the {enemy.id}."
-        if roll >= enemy.evasion or roll == 0:
+        hit_text = f"A critical hit!" if roll == 0 else f"You hit the {self.enemy.id}."
+        if roll >= self.enemy.evasion or roll == 0:
             global_commands.type_text(hit_text)
             dmg = max(self.roll_damage(), self.roll_damage())
             dmg += (self.bonus("str") // 2) * self.damage_multiplier
-            taken = enemy.take_damage(dmg, self)
+            taken = self.enemy.take_damage(dmg, self)
             self._stats["damage_multiplier"] -= 1 if roll == 0 else 0
             return None
         else:
             global_commands.type_text("No luck.")
     
     def feint(self) -> None:
-        import controller
-        from src.conditions import Stat_Buff
-        enemy = controller.SCENE.enemy
+        from conditions import Stat_Buff
 
         global_commands.type_text("You attempt a feint...")
         roll = self.roll_a_check("cha")
         self.spend_ap()
 
-        if roll >= enemy.roll_a_check("cha"):
-            global_commands.type_text(f"You faked out the {enemy.id}!")
-            def_bonus = Stat_Buff.Stat_Buff(self, self)
+        if roll >= self.enemy.roll_a_check("cha"):
+            global_commands.type_text(f"You faked out the {self.enemy.id}!")
+            def_bonus = Stat_Buff.Condition(self, self)
             def_bonus.set_stat("base_evasion")
             def_bonus.set_duration(2)
             def_bonus.set_potency(max(2, self.bonus("cha")))
             self.add_status_effect(def_bonus)
         else:
-            global_commands.type_text(f"The {enemy.id} spots your trick.")
+            global_commands.type_text(f"The {self.enemy.id} spots your trick.")
 
         return None
     
     def riposte(self) -> None:
-        from src.conditions import Stat_Buff
+        from conditions import Stat_Buff
 
         global_commands.type_text("You ready yourself to repel any oncoming attacks...")
 
         self.spend_ap(2)
-        rip_bonus = Stat_Buff.Stat_Buff(self, self)
+        rip_bonus = Stat_Buff.Condition(self, self)
         rip_bonus.set_id("Riposte")
         rip_bonus.set_cleanse_message("Your Riposte has ended.")
         rip_bonus.set_stat("base_evasion")

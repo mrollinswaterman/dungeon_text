@@ -2,14 +2,13 @@ import time, sys
 import global_commands
 import items
 
-GOD_MODE = False
+GOD_MODE = True
 
 def turn():
     """
     Runs the player's turn
     """
     import global_variables
-    import enemy_commands
     import controller
     from command_dict import commands
 
@@ -59,7 +58,7 @@ def turn():
     
     if global_variables.RUNNING:
         global_commands.type_with_lines()#shorthand, just prints the '=' signs
-        enemy_commands.turn()
+        controller.SCENE.turn_order.go()
         return None
 
     return None

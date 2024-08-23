@@ -49,7 +49,7 @@ class Smog(event.Event):
 
     def failure(self):
         super().failure()
-        poison:status_effect.Status_Effect = Poisoned(self)
+        poison:status_effect.Status_Effect = Poisoned.Condition(self)
         poison.set_stacks(3)
         poison.set_potency(1)
         self._player.add_status_effect(poison)

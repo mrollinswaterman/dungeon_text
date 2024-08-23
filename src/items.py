@@ -329,10 +329,11 @@ class Weapon(Item):
         return global_commands.XdY([self.num_damage_dice, self.damage_dice])
     
     def add_atomic_effect(self, effect):
-        print(f"Adding effect: {effect}\n")
         from atomic import Atomic_Effect
         effect:Atomic_Effect = effect
         self.atomic_effects.add(effect)
+
+        self._id = f"{effect.id} {self._id}"
 
     def save(self) -> None:
         super().save()
