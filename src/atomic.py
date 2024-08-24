@@ -24,8 +24,7 @@ class Atomic_Effect():
             "execute":self.execute,
         }
 
-
-
+    #Effects
     def deal_damage(self, value:int):
         self.target.take_damage(value, self.src)
 
@@ -56,8 +55,12 @@ class Atomic_Effect():
     def execute(self):
         self.target.die()
 
+    #Triggers
     def on_hit(self) -> None:
         return None
     
     def on_attack(self) -> None:
+        return None
+    
+    def on_use(self) -> None:
         return None

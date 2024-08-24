@@ -124,7 +124,7 @@ class Shopkeep():
 
         if item in self._inventory and item.quantity > 0:
             buyer_version = copy.deepcopy(item)
-            my_version:Consumable = self.get_item_by_id(item.id)
+            my_version:Consumable = self.get_item(item.id)
             if quantity > my_version.quantity:
                 global_commands.type_text(f"The Shopkeep does not have {quantity} {item.id}s. He'll sell you all that he has.")
                 quantity = my_version.quantity
@@ -218,18 +218,19 @@ class Shopkeep():
         for item in ready_to_stock:
             self.stock(item)
 
-    def get_item_by_id(self, id:str) -> Item | None:
-        for item in self._inventory:
-            if item.id == id:
-                return item
-        return None
-    
-    def get_item_by_index(self, idx:int) -> Item | None:
-        try:
-            return self.inventory[idx]
-        except IndexError:
-            return None
-            
+    def get_item(self, ref:str|int) -> Item | None:
+        match ref:
+            case str():
+                for item in self._inventory:
+                    if item.id == ref:
+                        return item
+                return None
+            case int():
+                try:
+                    return self.inventory[ref]
+                except IndexError:
+                    return None
+      
     def empty_inventory(self):
         self._inventory = []
             

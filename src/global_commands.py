@@ -177,12 +177,17 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
     if text is None:
         return None
 
+    first = True#tracks if the first letter of text has been made uppercase
     text = " " + text + " "
 
     #typing speed, lower = faster
     speed = 2
 
     for idx, char in enumerate(text):
+
+        if first and char.isalpha():
+            char = char.upper()
+            first = False
 
         print(char, end='', flush=True)
 

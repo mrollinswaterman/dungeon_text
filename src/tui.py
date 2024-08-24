@@ -30,7 +30,7 @@ def begin():
 
     tui = commands["tui"]
 
-    global_commands.type_text("Would you like to enter the dungeon? y/n")
+    global_commands.type_text("would you like to enter the dungeon? y/n")
 
     done = False
     while not done:

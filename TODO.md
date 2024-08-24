@@ -56,9 +56,10 @@ don't stack???
 
 - [X] Add an "attack bonus" to weapons, based on rarity, which is a flat bonus to the player's attack roll with said weapon, also add BAB scaling to player class 
 - [X] Firebomb → does a set amount of damage, target can dex save for half, if they beat by more than 10, save for full. Chance to set on fire if they don't save by for full
+- [ ] Distilled Rage -> self-buff, induces enraged condition for 3(?) rounds when used
 - [ ] Add "Scroll" type items that can be used to cast spells. Every 3-5 uses (maybe Int dependent) can roll an int check to "learn" the spell, permanently adding it to your spellbook. Scrolls have a use cap (6-10, Int dependent as well??) and can't be repaired. 
 
-## Legendary Items
+## Unique Items
 
 - [ ] Clockwork Maul --> A great hammer crafted from clockwork scrap. Always loses durability on-hit.
 Special move, uses half max durability for a double damage on the attack (can miss, takes 1/4 durability instead of 1/2). passively regens some durability per turn 

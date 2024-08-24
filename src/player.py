@@ -187,17 +187,21 @@ class Player():
     #ACTIONS
     def apply_on_attacks(self):
         from items import Weapon
+        from atomic import Atomic_Effect
         w:Weapon = self._equipped["Weapon"]
 
-        for effect in w.atomic_effects:
+        for entry in w.enchantments:
+            effect:Atomic_Effect = w.enchantments[entry]
             effect.target = self.enemy
             effect.on_attack()
 
     def apply_on_hits(self):
         from items import Weapon
+        from atomic import Atomic_Effect
         w:Weapon = self._equipped["Weapon"]
 
-        for effect in w.atomic_effects:
+        for entry in w.enchantments:
+            effect:Atomic_Effect = w.enchantments[entry]
             effect.target = self.enemy
             effect.on_hit()
 
@@ -386,8 +390,8 @@ class Player():
     def end_riposte(self) -> None:
         self._riposting = False
 
-        if self.get_effect_by_id("Riposte") is not None:
-            self.remove_status_effect(self.get_effect_by_id("Riposte"))
+        if self.get_status_effect("Riposte") is not None:
+            self.remove_status_effect(self.get_status_effect("Riposte"))
 
         return None
 
@@ -612,7 +616,7 @@ class Player():
 
         if self.can_carry(item):
             if self.has_item(item)and item.is_consumable:
-                held_item:Consumable = self.get_item_by_id(item.id)
+                held_item:Consumable = self.get_item(item.id)
                 held_item.increase_quantity(item.quantity)
                 if not silently:
                     global_commands.type_text(item.pickup_message)
@@ -651,10 +655,6 @@ class Player():
             if silently is False:
                 global_commands.type_text(f"{item.name} equipped.")
             self._equipped[item.type] = item
-            if item.type == "Weapon":
-                test = Flaming.Effect(None, self)
-                item:items.Weapon = item
-                item.add_atomic_effect(test)
             return True
         return False
 
@@ -820,42 +820,36 @@ class Player():
             self.remove_status_effect(effect)
 
     #GETTERS
-    def get_item_by_id(self, id:str) -> Item:
-        """
-        Get an item in the player's inventory by it's id
-        Returns the item, None if not found
-        """
-        try:
-            return self._inventory[id]
-        except KeyError:
-            return None
-    
-    def get_item_by_index(self, idx:int) -> Item:
-        """
-        Gets an item by index. Returns None if no item at that index
-        """
-        try:
-            return list(self._inventory.values())[idx]
-        except IndexError:
-            return None
-    
-    def get_effect_by_index(self, idx:int) -> Status_Effect | None:
-        """
-        Same as items but for status effects (se)
-        """
-        try:
-            return list(self._status_effects.values())[idx]
-        except IndexError:
-            return None
 
-    def get_effect_by_id(self, id:str) -> Status_Effect | None:
-        """
-        Same as items but for status effects (se)
-        """
-        try: 
-            return self._status_effects[id]
-        except KeyError:
-            return None
+    def get_item(self, ref:str|int) -> Item:
+        match ref:
+            case str():
+                try:
+                    return self._inventory[ref]
+                except KeyError:
+                    return None
+            
+            case int():
+                try:
+                    return list(self._inventory.values())[ref]
+                except IndexError:
+                    return None
+                
+            case _:
+                raise ValueError(f"Unrecogized type '{type(ref)}'.")
+            
+    def get_status_effect(self, ref: str|int) -> Status_Effect:
+        match ref:
+            case str():
+                try: 
+                    return self._status_effects[ref]
+                except KeyError:
+                    return None
+            case int():
+                try:
+                    return list(self._status_effects.values())[ref]
+                except IndexError:
+                    return None
 
     ##MISC.
     def save_to_dict(self) -> dict:

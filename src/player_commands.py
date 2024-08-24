@@ -35,7 +35,7 @@ def turn():
                 #check if code is item hotkey
                 try: 
                     code = int(code)
-                    item = global_variables.PLAYER.get_item_by_index(code-1)
+                    item = global_variables.PLAYER.get_item(code-1)
                     use_an_item(item, controller.SCENE.enemy)
                     done = True
                 except ValueError:
@@ -50,7 +50,7 @@ def turn():
         if controller.SCENE.enemy.dead:
             global_variables.PLAYER.reset_ap()
             global_variables.RUNNING = False
-            controller.end_scene()
+            controller.SCENE.end()
             return None
         
         if global_variables.PLAYER.can_act:
@@ -154,7 +154,7 @@ def cleanse_an_effect():
         else:
             try:
                 num = int(code)
-                effect:status_effect.Status_Effect = global_variables.PLAYER.get_effect_by_index(num-1)
+                effect:status_effect.Status_Effect = global_variables.PLAYER.get_status_effect(num-1)
                 if effect is not None:
                     global_variables.PLAYER.spend_ap()
                     effect.attempt_cleanse(global_variables.PLAYER.roll_a_check(effect.cleanse_stat))
@@ -190,7 +190,7 @@ def item_select() -> None:
         else:
             try:
                 num = int(code)
-                item = global_variables.PLAYER.get_item_by_index(num-1)
+                item = global_variables.PLAYER.get_item(num-1)
                 if item is not None:
                     done = True
                     return use_an_item(item, controller.SCENE.enemy)
@@ -212,7 +212,7 @@ def use_an_item(item:items.Item, target=None) -> bool:
 
     if global_variables.PLAYER.has_item(item):#check the player has the item
         if item.is_consumable:
-            held_item:items.Consumable = global_variables.PLAYER.get_item_by_id(item.id)
+            held_item:items.Consumable = global_variables.PLAYER.get_item(item.id)
             if held_item.quantity == 0: #if the items quantity is 0, remove it
                 global_variables.PLAYER.drop(held_item)
                 global_commands.type_text(f"No {item.name} avaliable!")

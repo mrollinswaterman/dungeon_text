@@ -105,6 +105,7 @@ class Item():
         Init function for the base Item class
         """
         import player
+        from atomic import Atomic_Effect
         self._type = "Item"
         self._id = id
         self._name = id
@@ -123,6 +124,7 @@ class Item():
         self._owner:"player.Player" = None
 
         self._tod = {}
+        self.enchantments:dict[str, Atomic_Effect] = {}
 
     #properties
     @property
@@ -230,7 +232,39 @@ class Item():
     def set_owner(self, owner) -> None:
         self._owner = owner
 
+    def enchant(self, effect) -> None:
+        from atomic import Atomic_Effect
+        effect:Atomic_Effect = effect
+        self.enchantments[effect.id] = effect
+        self._id = f"{effect.id} {self._id}"
+
+    def disenchant(self, effect) -> None:
+        from atomic import Atomic_Effect
+        match effect:
+            case str():
+                del self.enchantments[effect]
+                self._id = self._id.replace(f"{effect} ", "")
+            case Atomic_Effect():
+                del self.enchantments[effect.id]
+                self._id = self._id.replace(f"{effect.id} ", "")
+            case _:
+                raise ValueError("Unrecogized effect type (not string or Atomic_Effect)")
+
+    def cleanse_enchantments(self) -> None:
+        cleanse_pool = list(self.enchantments.keys())
+
+        for entry in cleanse_pool:
+            self.disenchant(entry)
+
     def save(self) -> None:
+        from atomic import Atomic_Effect
+
+        save_enchants = ""
+        for current in self.enchantments:
+            save_enchants = f"{save_enchants} {self.enchantments[current].id}"
+
+        self.cleanse_enchantments()
+
         self._tod = {
             "type": self._type,
             "id": self._id,
@@ -244,8 +278,10 @@ class Item():
         self._tod["quantity"] = None
         self._tod["unit_weight"] = None
         self._tod["unit_value"] = None
+        self._tod["enchantments"] = save_enchants
 
     def load(self, save:dict) -> None:
+        import enchantments
         self._id = save["id"]
         self._name = save["name"]
         self._type = save["type"]
@@ -253,6 +289,13 @@ class Item():
         self._durability = int(save["durability"])
         self._value = 10 * self._rarity.value
         self._max_durability = 10 * self._rarity.value
+
+        saved_enchants:str = str(save["enchantments"])
+        saved_enchants = saved_enchants.split(' ')
+
+        for i in saved_enchants:
+            if i in enchantments.dict:
+                self.enchant(enchantments.dict[i](None, self))
         return None
 
     def format(self) -> list[str]:
@@ -286,18 +329,23 @@ class Weapon(Item):
         self._value = 15 * self._rarity.value
         self._type = "Weapon"
         self._damage_type = "Physical"
-        self.atomic_effects:set[Atomic_Effect] = set()
 
     #properties
     @property
     def mold(self) -> dict:
         return self._mold
     @property
+    def damage_type(self) -> str:
+        return self._damage_type
+    @property
     def damage_dice(self) -> int:
         return int(str(self._mold["damage_dice"]).split("d")[1])
     @property
     def num_damage_dice(self) -> int:
         return int(str(self._mold["damage_dice"]).split("d")[0])
+    @property
+    def damage_header(self) -> str:
+        return  f"your {self.id}"
     @property
     def stats(self) -> int:
         return f"{self.num_damage_dice}d{self.damage_dice}, x{self.crit}"
@@ -327,13 +375,6 @@ class Weapon(Item):
 
     def roll_damage(self) -> int:
         return global_commands.XdY([self.num_damage_dice, self.damage_dice])
-    
-    def add_atomic_effect(self, effect):
-        from atomic import Atomic_Effect
-        effect:Atomic_Effect = effect
-        self.atomic_effects.add(effect)
-
-        self._id = f"{effect.id} {self._id}"
 
     def save(self) -> None:
         super().save()
@@ -486,6 +527,9 @@ class Consumable(Item):
     
     def set_target(self, tar) -> None:
         self._target = tar
+
+    def enchant(self, effect) -> None:
+        raise ValueError("Consumable items cannot be enchanted.")
 
     def update(self) -> None:
         self._plural = True if self._quantity > 1 else False

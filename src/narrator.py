@@ -125,7 +125,7 @@ def buy_something():
         else:
             try:
                 item_index = int(cmd) - 1
-                item = global_variables.SHOPKEEP.get_item_by_index(item_index)
+                item = global_variables.SHOPKEEP.get_item(item_index)
                 if global_variables.SHOPKEEP.sell(item):
                     done = True
                     buy_something()
@@ -172,7 +172,7 @@ def select_item():
             options[cmd]()
         else:
             try:
-                item = global_variables.PLAYER.get_item_by_index(int(cmd) - 1)
+                item = global_variables.PLAYER.get_item(int(cmd) - 1)
                 if global_variables.PLAYER.use(item):
                     done = True
                     show_inventory()

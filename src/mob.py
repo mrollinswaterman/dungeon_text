@@ -328,18 +328,21 @@ class Mob():
         text of the damage (ie 'your sword' vs 'the boulder')
 
         """
-        import status_effect
-        import items
+        from status_effect import Status_Effect
+        from items import Item 
         from player import Player
 
-        src:Player = src
-        header = src
-        #if the source of the damage is status effect or item, change header accordingly, else leave it as is
-        if type(src) is status_effect.Status_Effect or type(src) is items.Consumable:
-            src:status_effect.Status_Effect | items.Item = src
-            header = "the " + src.damage_header
+        match src:
+            #if the source of the damage is status effect or item, change header accordingly, else leave it as is
+            case str():
+                header = src
+            case Status_Effect() | Item():
+                src:Player | Item | Status_Effect | str = src
+                header = src.damage_header
+            
 
         taken *= self.damage_taken_multiplier
+
         if src.damage_type != "Physical":
             self.lose_hp(taken)
             if src == self._player:
