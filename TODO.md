@@ -85,15 +85,27 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Armordillo: deals ⅓ (or ½ or just some flat amount) of any damage taken back to the player. Can “curl up” defensively to halve all damage he takes during the next turn (does this frequently, never chases after the player just wants to be left alone. Give him a really good drop???)
 - [ ] Flaming Skull --> chance to catch fire on attack, regens to full when killed, but max_hp decays each resurrection, to a minimum of 5-10. Dies for good if you one-shot it (from full??), ie do its max hp in one attack.
 
-## Tags
+## Atmoics
 
-- [ ] Flaming: chance to set target on fire on hit
-- [ ] Molten/Searing/Super fucking hot: target takes a small amount of damage regardless of if the attack hits, plus a small chance to be set on fire. If the attack hits, larger chance to be set on fire, still take
-small unavoidable damage
+- [X] Flaming: chance to set target on fire on hit
+- [ ] Molten/Searing/Super fucking hot: target takes a small amount of damage regardless of if the attack hits, plus a small chance to be set on fire. If the attack hits, larger chance to be set on fire, still take small unavoidable damage
 - [ ] AP: ignores armor
 - [ ] Freezing: reduces Action Points by 1 for 2 turns on hit
 - [ ] Poisoned: chance to apply poison on-hit
 - [ ] Draining: heals attacker for some % of pre-mitigation damage done on-hit
+
+## Spells:
+
+- [ ] Diamond Body: reduce all incoming (physical only?) damage by 1/3 for X rounds.
+- [ ] Immunity: make yourself unable to take on any new status effects, good or bad, for X rounds
+- [ ] Poison Arrow: apply poison to a single target
+- [ ] Noxious Cloud: creates a cloud lasting for X rounds that applies poison to all combatants (stacks with each round you stay in it)
+- [ ] Burning Vengeance: deals damage to an enemy equal to 1/2 damage recently taken, up to X rounds max
+- [ ] Reversal: switch all status effects with an enemy
+- [ ] Repair: repair an item
+- [ ] Vampiric Touch: next attack against an enemy drains them for 33% of attack's damage.
+- [ ] Bitter end: if target is below 25% HP and fails a con check, freeze them from the inside out, executing them
+- [ ] Acid Rain: reduces targets armor by X for Y rounds. targets with 0 armor become Vulnerable instead
 
 ## Events
 

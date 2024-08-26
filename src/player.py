@@ -1,7 +1,14 @@
-import random, time, os, csv
+import random, time, os, csv, enum
 import global_commands
 from items import Item, Consumable, Weapon, Armor
 from status_effect import Status_Effect
+
+class Stance(enum.Enum):
+
+    NONE = 0
+    RIPOSTE = 1
+    TOTAL_DEFENSE = 2
+    ALL_OUT = 3
 
 class Player():
 
@@ -47,6 +54,7 @@ class Player():
         self._tags = set()
 
         #stances
+        self._stance = Stance(0)
         self._riposting = False
 
     #properties
@@ -385,6 +393,7 @@ class Player():
         rip_bonus.set_potency(2)
         self.add_status_effect(rip_bonus)
 
+        self._stance = Stance(1)
         self._riposting = True
 
     def end_riposte(self) -> None:
