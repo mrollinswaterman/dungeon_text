@@ -14,9 +14,6 @@ class Firebomb(items.Consumable):
     @property
     def damage_header(self) -> str:
         return self._id
-    @property
-    def damage_type(self) -> str:
-        return "Physical"
 
     def use(self, target=None) -> bool:
         """

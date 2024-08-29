@@ -16,6 +16,7 @@ default = {
     "damage_multiplier": 1,
     "max_hp": 0,
     "max_ap": 1,
+    "max_mp": 0,
     "armor": 0,
     "damage": "1d6",
     "dc": 10,

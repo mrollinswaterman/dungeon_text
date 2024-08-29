@@ -8,13 +8,12 @@ class Atomic_Effect():
         from status_effect import Status_Effect
         self.target:Player | Mob | Item = target
         self.src: Item | Mob = src
-        self.id = "None"
+        self.id:str = ""
 
-        self.effects: set[Status_Effect] = set()
+        self.effects: dict[str, set[Status_Effect]] = {"hit": set(), "attack": set()}
 
         self.methods = {
             "deal_damage":self.deal_damage,
-            "heal":self.heal,
             "self_heal": self.self_heal,
             "drain": self.drain,
             "apply_an_effect":self.apply_an_effect,
@@ -28,9 +27,6 @@ class Atomic_Effect():
     def deal_damage(self, value:int):
         self.target.take_damage(value, self.src)
 
-    def heal(self, value:int):
-        self.target.heal(value)
-
     def self_heal(self, value:int):
         self.src.heal(value)
 
@@ -41,7 +37,11 @@ class Atomic_Effect():
         self.target.gain_temp_hp(value)
 
     def apply_an_effect(self, effect=None):
-        self.target.add_status_effect(effect)
+        if effect is None:
+            for entry in self.effects:
+                self.target.add_status_effect(entry)
+        else:
+            self.target.add_status_effect(effect)
 
     def damage_an_item(self, value):
         self.target.lose_durability(value)

@@ -106,6 +106,7 @@ class Item():
         """
         import player
         from atomic import Atomic_Effect
+        from game_object import Damage_Type
         self._type = "Item"
         self._id = id
         self._name = id
@@ -120,6 +121,7 @@ class Item():
         self._pickup_message = f"You picked up a {self._id}."
         self._description = ""
         self._broken = False
+        self.damage_type:Damage_Type = Damage_Type(1)
 
         self._owner:"player.Player" = None
 
@@ -328,15 +330,11 @@ class Weapon(Item):
         #value
         self._value = 15 * self._rarity.value
         self._type = "Weapon"
-        self._damage_type = "Physical"
 
     #properties
     @property
     def mold(self) -> dict:
         return self._mold
-    @property
-    def damage_type(self) -> str:
-        return self._damage_type
     @property
     def damage_dice(self) -> int:
         return int(str(self._mold["damage_dice"]).split("d")[1])
