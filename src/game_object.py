@@ -71,6 +71,14 @@ class Game_Object():
         return self.stats["max_mp"]
     
     @property
+    def damage_taken_multiplier(self):
+        return self.stats["damage_taken_multiplier"]
+
+    @property
+    def damage_multiplier(self):
+        return self.stats["damage_multiplier"]
+    
+    @property
     def caster_level(self) -> int:
         return 1 + (self.level // 5)
 
@@ -128,6 +136,37 @@ class Game_Object():
 
         num = int(num)
         self.hp -= num
+
+    def heal(self, num:int):
+        """Heals the Object for num amount"""
+        self.hp += num
+
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
+        self.heal_narration(num)
+
+    def heal_narration(self, num:int):
+        """Handles specific narration for Object's healing"""
+        raise NotImplementedError
+
+    def spend_ap(self, num=1) -> bool:
+        """
+        Spends Action points equal to num, 0 spends max AP points
+        """
+        if num == 0 and self.ap == self.max_ap:
+            self.ap = 0
+        elif num == 0:
+            return False
+        elif self.can_act:
+            self.ap -= num
+        else:
+            raise ValueError(f"Not enough AP. {num} required, and only {self.ap} available!")
+
+        return True
+
+    def reset_ap(self) -> None:
+        self._ap = self.stats["max_ap"]
 
     def modify_stat(self, stat, num):
         self.stats[stat] += num

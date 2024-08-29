@@ -20,17 +20,16 @@ class Player(Game_Object):
 
         #stances
         self._stance = Stance(0)
-        self._riposting = False
 
+    #PROPERTIES
     @property
     def carrying_capacity(self) -> int:
         return int(5.5 * self.stats["str"])
+
     @property
     def available_carrying_capacity(self) -> int:
         return self.carrying_capacity - self.carrying
-    @property
-    def riposting(self) -> bool:
-        return self._riposting
+
     @property
     def carrying(self) -> int:
         total_weight = 0
@@ -40,29 +39,12 @@ class Player(Game_Object):
                 total_weight += held_item.weight
         total_weight += self.weapon.weight + self.armor.weight
         return total_weight
-    @property
-    def damage_taken_multiplier(self):
-        return self.stats["damage_taken_multiplier"]
-    @property
-    def damage_multiplier(self):
-        return self.stats["damage_multiplier"]
-    @property
-    def threat(self):
-        """
-        Returns the player's current threat level which effect mob spawns
-        """
-        if int(self._level * 1.5) == 1:
-            return 2
-        return int(self._level * 1.5)
+
     @property
     def can_level_up(self):
-        """
-        Checks if the player has enough XP to level up
-        """
+        """Checks if the player has enough XP to level up"""
         return self.xp >= (15 * self._level)
-    @property
-    def equipped(self):
-        return self._equipped
+
     @property
     def target(self):
         import controller
@@ -72,13 +54,11 @@ class Player(Game_Object):
     def bonus(self, stat:str) -> int:
         if stat == "dex":
             if self.armor is not None and self.armor.max_dex_bonus is not None:
-                return min(global_commands.bonus(self.stats[stat]),self. armor.max_dex_bonus)
+                return min(global_commands.bonus(self.stats[stat]),self.armor.max_dex_bonus)
+
         return super().bonus(stat)
     
     def die(self) -> None:
-        """
-        Kils the player. Lose gold and inventory on death
-        """
         self._gold = 0
         self._inventory = []
         #other stuff to be added
@@ -309,7 +289,7 @@ class Player(Game_Object):
             case _:
                 #checks if the roll is a crit or not. Crits result in a return of 0
                 #attack roll formula: roll + dex bonus + BaB + weapon att bonus
-                return 0 if roll >= self.weapon.crit_range else roll + self.bonus("dex") + (self.level // 5) + weapon.attack_bonus
+                return 0 if roll >= self.weapon.crit_range else roll + self.bonus("dex") + (self.level // 5) + self.weapon.attack_bonus
             
     def roll_damage(self) -> int:
         """
@@ -321,19 +301,6 @@ class Player(Game_Object):
         
         self.weapon.lose_durability()
         return (self.weapon.roll_damage() + self.bonus("str")) * self.damage_multiplier
-
-    def roll_a_check(self, stat: str) -> int:
-        """
-        Returns a check with a given stat (d20 + stat bonus)
-        """
-        roll = global_commands.d(20)
-        match roll:
-            case 1:
-                return 1
-            case 20:
-                return 0
-            case _:
-                return roll + self.bonus(stat)
     
     def take_damage(self, taken: int, src) -> int:
         """
@@ -454,39 +421,8 @@ class Player(Game_Object):
         global_commands.type_text(f"{num} gold spent. {self.gold} gold remaining.")
         return True
 
-    def spend_ap(self, num=1) -> None:
-        """
-        Spends Action points equal to num
-        """
-        self.end_riposte()
-        if num == 0:
-            self._ap = 0
-        elif self.can_act:
-            self._ap -= num
-        else:
-            raise ValueError(f"You don't have {num} AP to spend.")
-        return None
-
-    def reset_ap(self) -> None:
-        self._ap = self._stats["max_ap"]
-
     def change_name(self, name:str) -> None:
         self._name = name
-
-    def heal(self, healing: int) -> None:
-        """
-        Heals the player for a given amount
-        """
-        if self._hp <= (self.max_hp - healing):
-            self._hp += healing
-            global_commands.type_text(f"You healed {healing} HP.")
-            return None
-        if self._hp + healing > self.max_hp:
-            self._hp = self.max_hp
-            if self.max_hp == self._hp:#if you were already full HP, say nothing
-                return None
-            global_commands.type_text(f"You only healed {self.max_hp - self._hp} HP.")
-            return None
 
     #INVENTORY STUFF
     def pick_up(self, item: Item | Consumable, silently:bool = False) -> bool:
