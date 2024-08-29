@@ -28,7 +28,7 @@ def exit():
 
 def save():
     import items
-    player_dict = global_variables.PLAYER.save_to_dict()
+    player_dict = global_variables.PLAYER.save()
     with open('player.csv', "w", newline='') as file:
         file.truncate(0)
         w = csv.DictWriter(file, player_dict.keys())
@@ -62,7 +62,7 @@ def save():
             w.writerows(item_dict_list)
             file.close()
 
-def merge_minus_dups(list1:list, list2:list):
+def merge_minus_dups(list1:list, list2:list) -> list:
     final = list1
     for i in list2:
         if i not in final:
@@ -72,7 +72,7 @@ def merge_minus_dups(list1:list, list2:list):
 def bonus(num:int) -> int:
     return BONUS[num]
 
-def get_cmd():
+def get_cmd() -> str:
     cmd = input(">> ").lower()
     print("")
     return cmd
@@ -94,7 +94,7 @@ def match(text:str | list | tuple, size:int) -> str | tuple:
         
         return tuple(final)
 
-def generate_item_rarity() -> str:
+def generate_item_rarity():
     """
     Generates item rarity based on player level
     """
@@ -112,37 +112,29 @@ def generate_item_rarity() -> str:
     return Rarity("Common")
 
 def d(num):
-    """
-    Rolls a dX where X is some number (ie d6, d20, etc)
-    """
+    """Rolls a dX where X is some number (ie d6, d20, etc)"""
     return random.randrange(1, num+1)
 
 def XdY(damage:str | list | int):
-    """
-    Rolls X dYs and returns the total (ie 2d4, 3d6, etc)
-    """
-    ty:str | list | int = type(damage)
+    """Rolls X dYs and returns the total (ie 2d4, 3d6, etc)"""
     final = 0
     num = None
     dice = None
 
-    if ty == str:
-        num = int(damage.split("d")[0])
-        dice = int(damage.split("d")[1])
-
-    elif ty == list or ty == tuple:
-        num = damage[0]
-        dice = damage[1]
-    
-    elif ty == int:
-        num = 1
-        dice = damage
-    
-    else:
-        raise ValueError(f"Invalid type '{ty}' for XdY.")
+    match damage:
+        case str():
+            num = int(damage.split("d")[0])
+            dice = int(damage.split("d")[1])
+        case list() | tuple():
+            num, dice = damage
+        case int():
+            num = 1
+            dice = damage
+        case _:
+            raise ValueError(f"Invalid type '{type(damage)}' for XdY.")
 
     for _ in range(num):
-            final += d(dice)
+        final += d(dice)
     return final
     
 

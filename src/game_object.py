@@ -1,53 +1,190 @@
 #Game Object class
-import enum
+from __future__ import annotations
+import enum, random, csv
 from typing import Any
 import global_commands
+import items
 
 class Damage_Type(enum.Enum):
     TRUE = 0
     PHYSICAL = 1
     MAGIC = 2
 
+class Statblock():
+
+    def __init__(self, parent):
+        from items import Armor
+
+        self.parent:Game_Object = parent
+        self.id = f"{self.parent.id} Statblock"
+
+        #Core Stats
+        self.level = self.parent.level
+        self.hit_dice = 8
+
+        #Ability Scores
+        self.str = 12
+        self.dex = 12
+        self.con = 12
+        self.int = 12
+        self.wis = 12
+        self.cha = 12
+
+        #Derived stats
+        self.base_evasion = 9
+        self.damage_taken_multiplier = 1
+        self.damage_multiplier = 1
+
+        #Resources
+        self.max_hp = 1
+        self.max_ap = 1
+        self.max_mp = 0
+        self.temp_hp = 0
+        
+        #Combat Stats (mob only)
+        self.armor:Armor | int | None = None
+        self.damage: int | str | None = None
+        self.dc = 0
+
+        self.dict = {
+            "level": self.level,
+            "hit_dice": self.hit_dice,
+            "str": self.str,
+            "dex": self.dex,
+            "con": self.con,
+            "int": self.int,
+            "wis": self.wis,
+            "cha": self.cha,
+            "base_evasion": self.base_evasion,
+            "damage_taken_multiplier": self.damage_taken_multiplier,
+            "damage_multiplier": self.damage_multiplier,
+            "max_hp": self.max_hp,
+            "max_ap": self.max_ap,
+            "max_mp": self.max_mp,
+            "temp_hp": self.temp_hp,
+            "armor": self.armor,
+            "damage": self.damage,
+            "dc": self.dc
+        }
+
+    def value(self, stat:str) -> int | str:
+        return self.dict[stat]
+    
+    def bonus(self, stat:str) -> int:
+        return global_commands.bonus(self.dict[stat])
+    
+    def modify(self, stat:str, num:int):
+        target = self.dict[stat]
+        target += num
+
+    def load(self, filename:str):
+
+        with open(filename, "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                for entry in row:
+                    if entry in self.dict:
+                        self.dict[entry] = int(row[entry])
+    
+    def copy(self, source:dict):
+        for entry in source:
+            if entry in self.dict:
+                self.dict[entry] = source[entry]
+
+
+class Status_Effects_Handler():
+
+    from status_effect import Status_Effect
+    def __init__(self, parent):
+        from status_effect import Status_Effect
+
+        self.parent:Game_Object = parent
+        self.dict:dict[str: Status_Effect] = {}
+        self.cleanse_pool: set[Status_Effect] = set()
+
+    @property
+    def effects(self) -> list[Status_Effect]:
+        return list(self.dict.values())
+
+    def get(self, effect:Status_Effect | str | int) -> Status_Effect | None:
+        """Returns a status effect from the status effect list's dictionary.
+            Can access by str(id) or int(index)"""
+        try:
+            match effect:
+                case str():
+                    return self.dict[effect]
+                case int():
+                    return self.effects[effect]
+                case _:
+                    return self.dict[effect.id]
+        except IndexError | KeyError:
+            return None
+
+    def add(self, effect:Status_Effect):
+        if effect.id not in self.dict:
+            self.dict[effect.id] = effect
+        else:
+            effect = self.get(effect)
+            if effect is not None:
+                effect.additional_effect()
+
+    def update(self):
+        for effect in self.effects:
+            effect.update()
+            if effect.active is False:
+                self.cleanse_pool.add(effect)
+
+        for effect in self.cleanse_pool:
+            self.cleanse(effect)
+        self.cleanse_pool = set()
+    
+    def cleanse(self, effect:Status_Effect | str | int) -> bool:
+        effect = self.get(effect)
+        if effect is not None:
+            effect.cleanse()
+            del self.dict[effect.id]
+            return True
+        else: return False
+
+    def cleanse_all(self):
+        for effect in self.effects:
+            self.cleanse_pool.add(effect)
+
+        for effect in self.cleanse_pool:
+            self.cleanse(effect)
+        self.cleanse_pool = set()
+
 class Game_Object():
 
     def __init__(self, id="Game Object"):
         from items import Item, Weapon, Armor
-        from status_effect import Status_Effect
+
+        #Core properties
         self.id = id
         self.name = self.id
-
         self.level = 1
+        self.statblock:Statblock = Statblock(self)
 
-        self.stats:dict[str: Any] = {
-            "str": 12,
-            "dex": 12,
-            "con": 12,
-            "int": 12,
-            "wis": 12,
-            "cha": 12,
-            "base_evasion": 9,
-            "damage_taken_multiplier": 1,
-            "damage_multiplier": 1,
-            "max_hp": 0,
-            "max_ap": 1,
-            "max_mp": 0,
-            "temp_hp": None,
-        }
+        #Derived stats
+        self.statblock.max_hp = 10 + self.bonus("con")
+        self.hp = self.statblock.max_hp
+        self.ap = self.statblock.max_ap
 
-        self.stats["max_hp"] = 10 + self.bonus("con")
-        self.hp = self.max_hp
-        self.ap = self.max_ap
-
+        #Resources
         self.xp = 0
         self.gold = 0
 
+        #Items / Equipment
         self.inventory:dict[str, Item] = {}
         self.weapon: Weapon | None = None
         self.armor: Armor | int | None = None
 
-        self.status_effects:dict[str: Status_Effect] = {}
-
+        #Combat tools
+        self.status_effects:Status_Effects_Handler = Status_Effects_Handler(self)
         self.damage_type:Damage_Type = Damage_Type(1)
+
+        #Misc.
+        self.prev_narration = ""
 
     #PROPERTIES
     @property
@@ -56,39 +193,16 @@ class Game_Object():
         return self.hp <= 0
     
     @property
-    def max_hp(self) -> int:
-        """Returns the Object's max hp value from it's statblock"""
-        return self.stats["max_hp"]
-    
-    @property
-    def max_ap(self) -> int:
-        """Returns the Object's max action point value from it's statblock"""
-        return self.stats["max_ap"]
-    
-    @property
-    def max_mp(self) -> int:
-        """Returns the Object's max magic point value from it's statblock"""
-        return self.stats["max_mp"]
-    
-    @property
-    def damage_taken_multiplier(self):
-        return self.stats["damage_taken_multiplier"]
-
-    @property
-    def damage_multiplier(self):
-        return self.stats["damage_multiplier"]
-    
-    @property
     def caster_level(self) -> int:
         return 1 + (self.level // 5)
 
     @property
     def evasion(self) -> int:
-        return self.stats["base_evasion"] + self.bonus("dex")
+        return self.statblock.base_evasion + self.bonus("dex")
     
     @property
-    def needs_healing(self):
-        return self.hp < self.max_hp
+    def needs_healing(self) -> bool:
+        return self.hp < self.statblock.max_hp
     
     @property
     def can_act(self) -> bool:
@@ -96,19 +210,21 @@ class Game_Object():
         return self.ap > 0 and not self.dead
     
     @property
-    def target(self):
+    def target(self) -> Game_Object:
         """Returns the Object's target"""
         raise NotImplementedError
 
     #METHODS
+    def update(self):
+        self.reset_ap()
+        self.status_effects.update() 
+
     def bonus(self, stat:str) -> int:
-        return global_commands.bonus(self.stats[stat])
+        return self.statblock.bonus(stat)
 
     #ROLLS
-    def roll_a_check(self, stat: str) -> int:
-        """
-        Returns a check with a given stat (d20 + stat bonus)
-        """
+    def roll_a_check(self, stat:str) -> int:
+        """Returns a check with a given stat (d20 + stat bonus)"""
         roll = global_commands.d(20)
         match roll:
             case 1:
@@ -118,14 +234,12 @@ class Game_Object():
             case _:
                 return roll + self.bonus(stat)
 
-    def roll_to_hit(self):
+    def roll_to_hit(self) -> int:
         roll = global_commands.d(20)
-
         if roll == 1:
             return 1
         if roll == 20:
             return 0
-        
         return roll + self.bonus("dex") + (self.level // 5)
     
     def roll_damage(self):
@@ -133,28 +247,28 @@ class Game_Object():
 
     #MODIFY RESOURCES
     def lose_hp(self, num:int):
-
+        """Removes HP from the Object, starting with temp HP"""
         num = int(num)
-        self.hp -= num
+        if self.statblock.temp_hp > 0:
+            self.statblock.temp_hp -= num
+            self.statblock.temp_hp = 0 if self.statblock.temp_hp < 0 else self.statblock.temp_hp
+        else:
+            self.hp -= num
+
+    def gain_temp_hp(self, num:int):
+        """Adds temp HP to the Object"""
+        self.statblock.temp_hp += int(num)
 
     def heal(self, num:int):
         """Heals the Object for num amount"""
         self.hp += num
-
-        if self.hp > self.max_hp:
-            self.hp = self.max_hp
-
+        if self.hp > self.statblock.max_hp:
+            self.hp = self.statblock.max_hp
         self.heal_narration(num)
 
-    def heal_narration(self, num:int):
-        """Handles specific narration for Object's healing"""
-        raise NotImplementedError
-
-    def spend_ap(self, num=1) -> bool:
-        """
-        Spends Action points equal to num, 0 spends max AP points
-        """
-        if num == 0 and self.ap == self.max_ap:
+    def spend_ap(self, num:int=1) -> bool:
+        """Spends Action points equal to num, 0 spends max AP points"""
+        if num == 0 and self.ap == self.statblock.max_ap:
             self.ap = 0
         elif num == 0:
             return False
@@ -162,14 +276,29 @@ class Game_Object():
             self.ap -= num
         else:
             raise ValueError(f"Not enough AP. {num} required, and only {self.ap} available!")
-
         return True
 
     def reset_ap(self) -> None:
-        self._ap = self.stats["max_ap"]
+        self._ap = self.statblock.max_ap
 
-    def modify_stat(self, stat, num):
-        self.stats[stat] += num
+    def spend_mp(self, num:int=1) -> bool:
+        if num == 0:
+            self.mp = 0
+            return False
+        if self.mp >= num:
+            self.mp -= num
+            return True
+        return False
+    
+    def regain_mp(self, num:int | None=None):
+        if num is None:
+            self.mp = self.statblock.max_mp
+            return True
+        self.mp += num
+        return True
+
+    def modify(self, stat, num:int):
+        self.statblock.modify(stat, num)
 
     def gain_gold(self, num:int) -> int:
         self.gold += num
@@ -177,7 +306,6 @@ class Game_Object():
 
     def lose_gold(self, num:int) -> int:
         """Takes an amount of gold from the Object, up to their total gold. Returns the amount of gold lost"""
-
         if (self.gold - num) >= 0:
             self.gold -= num
             return num
@@ -186,47 +314,135 @@ class Game_Object():
             self._gold = 0
             return g
 
-    def set_level(self, num:int) -> None:
-        self.level = num
+    #COMBAT
+    def attack(self):
+        roll = self.roll_to_hit()
+        self.spend_ap()
+        self.narrate(self.roll_narration, roll)
+        self.apply_on_attacks()
 
-    def take_damage(self, taken:int, src):
-        from items import Item, Armor
-        src: Item | Game_Object | str = src
+        match roll:
+            case 0: return self.critical_hit()
 
-        taken *= self.stats["damage_taken_multiplier"]
+            case 1: return self.critical_fail()
+
+            case _:
+                if roll >= self.target.evasion:
+                    self.narrate(self.hit_narration)
+                    taken = self.target.take_damage(self.roll_damage(), self)
+                    self.apply_on_hits()
+                else:
+                    self.narrate(self.miss_narration)
+        return None
+
+    def take_damage(self, taken:int, source:Game_Object | items.Item | str):
+        taken *= self.statblock.damage_taken_multiplier
         taken = int(taken)
-
-        match src:
-            case Game_Object() | Item():
-                if src.damage_type.name == "PHYSICAL":
-                    final = 0
+        match source:
+            case Game_Object() | items.Item():
+                if source.damage_type.name == "PHYSICAL":
+                    final = taken
+                    #Reduce damage taken by self.armor, adjusted depending on if self.armor is an item object or an int
                     match self.armor:
-                        case Armor(): final -= self.armor.armor_value
+                        case items.Armor(): final -= self.armor.armor_value
                         case _: final -= self.armor
             case _:
                 final = taken
 
         self.lose_hp(final)
-        self.take_damage_narration(final, src)
+        self.narrate(self.take_damage_narration(), (final, source))
+
+    def use(self, item:items.Item):
+        raise NotImplementedError
+
+    #ENCHANTMENTS
+    def apply_on_attacks(self):
+        raise NotImplementedError
+    
+    def apply_on_hits(self):
+        raise NotImplementedError
+
+    #CRITS
+    def critical_hit(self):
+        global_commands.type_text("A critical hit! Uh oh...")
+        self.statblock.damage_multiplier = 2
+        taken = self.target.take_damage(self.roll_damage(), self)
+        self.apply_on_hits()
+        self.statblock.damage_multiplier = 1
+        return None
+    
+    def critical_fail(self):
+        global_commands.type_text("A critical fail!")
+        self.fumble_table()
+
+    def fumble_table(self):
+        raise NotImplementedError
+
+    #NARRATION
+    def narrate(self, func, param=None) -> None:
+        text:list[str] = func() if param is None else func(param)
+        if self.prev_narration in text:
+            text.remove(self.prev_narration)
+        final = random.choice(text)
+        self.prev_narration = final
+        global_commands.type_text(final)
+        return None
+
+    def roll_narration(self) -> list[str]:
+        text = [
+            f"The {self.id} moves to attack, ",
+            f"The {self.id} lunges at you, ",
+            f"The {self.id} prepares to strike... "
+        ]
+        return text
+
+    def hit_narration(self) -> list[str]:
+        text = [
+            f"You fail to move before the attack hits you.",
+            f"A hit.",
+            f"The {self.id} hits you.",
+            f"It's attack lands.",
+            f"You can't dodge this one.",
+            f"You take a hit.",
+            f"The {self.id} manages to break your guard."
+        ]
+        return text
+    
+    def miss_narration(self) -> list[str]:
+        text = [
+            f"It's attack goes wide.",
+            f"Luck is on your side this time.",
+            f"The {self.id} fails.",
+            f"You stave off the attack.",
+            f"The attack flies right by you.",
+            f"You are unscathed.",
+            f"The {self.id} doesn't manage to hit you.",
+            f"You leap out of harm's way."
+        ]
+        return text
+
+    def take_damage_narration(self, taken:int, source:Game_Object) -> list[str]:
+        raise NotImplementedError
+    
+    
+    def heal_narration(self, num:int) -> list[str]:
+        """Handles specific narration for Object's healing"""
+        raise NotImplementedError
 
     #INVENTORY
-    def pick_up(self, item, silent=False):
+    def pick_up(self, item:items.Item, silent=False):
         """Adds an item to the Object's inventory"""
-
-        from items import Item, Consumable, Resource
-        item:Item = item
-
         match item:
-            case Consumable() | Resource():
+            case items.Consumable() | items.Resource():
                 #if you have a stack of those items already
-                held:Consumable | None = self.get_item(item.id)
+                held:items.Consumable | None = self.get_item(item.id)
                 if held is not None:
                     held.increase_quantity(item.quantity)
                     item = held
                 #if you don't
                 else:
                     self.inventory[item.id] = item
-            case Item():
+            case items.Item():
                 self.inventory[item.id] = item
             case _:
                 raise ValueError(f"Unrecognized object {item}.")
@@ -234,25 +450,19 @@ class Game_Object():
         item.set_owner(self)
         if not silent: global_commands.type_text(item.pickup_message)
     
-    def drop(self, item):
-        from items import Item
-        item:Item = self.get_item(item)
-        
+    def drop(self, item:items.Item):
+        item = self.get_item(item)
         if item is not None:
             del self.inventory[item.id]
             item.set_owner(None)
 
-    def get_item(self, ref):
+    def get_item(self, ref: items.Item | str | int | None):
         """
         Checks if the Object has an item in it's inventory. 
         Returns the item if so, else None
 
         ref: can be str (item id), int (item index), or an instance of the Item class
         """
-
-        from items import Item
-        ref:Item | str | int | None = ref
-
         match ref:
             case str():
                 try: return self.inventory[ref]
@@ -262,8 +472,9 @@ class Game_Object():
                 try: return list(self.inventory.values())[ref]
                 except IndexError: return None
 
-            case Item():
+            case items.Item():
                 try: return self.inventory[ref.id]
                 except KeyError: return None
 
             case _: raise ValueError(f"Unrecogized type '{type(ref)}'.")
+

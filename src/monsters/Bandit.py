@@ -3,7 +3,8 @@ import random
 import global_commands, mob
 
 stats = {
-    "base_level": 2,
+    "level": (2,7),
+    "hit_dice": 10,
     "str": 14,
     "dex": 12,
     "con": 12,
@@ -17,24 +18,21 @@ stats = {
     "max_ap": 0,
     "armor": 1,
     "damage": "2d4",
-    "dc": 10,
-    "hit_dice": 10,
-    "loot": {
-        "gold": 15,
-        "xp": 8,
-        "drops": []
-    }
+    "dc": 10
 }
 
 class Bandit(mob.Mob):
-    def __init__(self, id="Bandit", level = (2,7), statblock=stats):
-        super().__init__(id, level, statblock)
+    def __init__(self, id="Bandit", stat_dict=stats):
+        super().__init__(id, stat_dict)
+        #base gold & xp
+        self.gold += 15
+        self.xp += 8
 
     def special(self) -> bool:
         return False
 
-    def roll_text(self):
-        base = super().roll_text()        
+    def roll_narration(self):
+        base = super().roll_narration()        
         me = [
             f"The {self.id} slashes at you with it's sword.",
             f"The {self.id} readies it's blade to strike.",
@@ -42,15 +40,15 @@ class Bandit(mob.Mob):
         ]
         return base + me
 
-    def hit_text(self):
-        base = super().hit_text()
+    def hit_narration(self):
+        base = super().hit_narration()
         me = [
             f"The {self.id}'s sword cuts through your defense."
         ]
         return base + me
 
-    def miss_text(self):
-        base = super().miss_text()
+    def miss_narrartion(self):
+        base = super().miss_narration()
         me = [
             f"You easily dodge the {self.id}'s wayward strike.",
             f"You duck out of reach of it's sword.",

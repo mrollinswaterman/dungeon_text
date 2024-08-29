@@ -1,6 +1,5 @@
 #globals variables
 from player import Player
-from items import Rarity
 import item_compendium
 from shopkeep import Blacksmith, Shopkeep
 
@@ -25,6 +24,15 @@ BONUS = {
     20: 5
 }
 
+CORE_STATS = {
+    "str": "Strength",
+    "dex": "Dexterity",
+    "con": "Constitution",
+    "int": "Intelligence",
+    "wis": "Wisdom",
+    "cha": "Charisma",
+}
+
 STATS = {
     "str": "Strength",
     "dex": "Dexterity",
@@ -37,23 +45,6 @@ STATS = {
     "damage_multiplier": "Damage",
     "armor": "Armor",
     "max_hp": "Maximum Health"
-}
-
-RARITY_DICT = {
-    "Common": 1,
-    "Uncommon": 2,
-    "Rare": 3,
-    "Epic": 4,
-    "Legendary": 5,
-    "Unique": 6 
-}
-
-WEIGHT_CLASS = {
-    "None": 0,
-    "Light": 2,
-    "Medium": 4,
-    "Heavy": 6,
-    "Superheavy": 8
 }
 
 #create constants
@@ -84,9 +75,9 @@ def restock_the_shop():
     for entry in BLACKSMITH.storehouse:
         SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
 
-    pots = item_compendium.Health_Potion.craft(max(PLAYER.threat // 5, 1), 5)
-    SHOPKEEP.stock(pots)
     #scales HP potions to be higher rarity with player level
+    pots = item_compendium.Health_Potion.craft(max(PLAYER.level // 4), 5)
+    SHOPKEEP.stock(pots)
 
     #SHOPKEEP.stock(item_compendium.Repair_Kit.craft(5))
 

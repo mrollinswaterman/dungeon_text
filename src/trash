@@ -1,0 +1,11 @@
+    def recieve_reward(self, reward:dict) -> None:
+        for entry in reward:
+            match entry:
+                case "gold":
+                    self.gain_gold(reward[entry])
+                case "xp":
+                    self.gain_xp(reward[entry])
+                case "drops":
+                    for item in reward[entry]:
+                        self.pick_up(item)        
+        return None
