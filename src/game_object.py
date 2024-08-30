@@ -5,6 +5,7 @@ from typing import Any
 import global_commands
 import items
 
+
 class Damage_Type(enum.Enum):
     TRUE = 0
     PHYSICAL = 1
@@ -13,83 +14,62 @@ class Damage_Type(enum.Enum):
 class Statblock():
 
     def __init__(self, parent):
-        from items import Armor
+        from equipment import Armor
 
         self.parent:Game_Object = parent
-        self.id = f"{self.parent.id} Statblock"
+        self.id:str = f"{self.parent.id} Statblock"
 
         #Core Stats
-        self.level = self.parent.level
-        self.hit_dice = 8
+        self.level:int = self.parent.level
+        self.level_range:tuple[int, int] = (1, 20)
+        self.hit_dice:int = 8
 
         #Ability Scores
-        self.str = 12
-        self.dex = 12
-        self.con = 12
-        self.int = 12
-        self.wis = 12
-        self.cha = 12
+        self.str:int = 12
+        self.dex:int = 12
+        self.con:int = 12
+        self.int:int = 12
+        self.wis:int = 12
+        self.cha:int = 12
 
         #Derived stats
-        self.base_evasion = 9
-        self.damage_taken_multiplier = 1
-        self.damage_multiplier = 1
+        self.base_evasion:int = 9
+        self.damage_taken_multiplier:int = 1
+        self.damage_multiplier:int = 1
 
         #Resources
-        self.max_hp = 1
-        self.max_ap = 1
-        self.max_mp = 0
-        self.temp_hp = 0
+        self.max_hp:int = 1
+        self.max_ap:int = 1
+        self.max_mp:int = 0
+        self.temp_hp:int = 0
         
         #Combat Stats (mob only)
         self.armor:Armor | int | None = None
         self.damage: int | str | None = None
-        self.dc = 0
-
-        self.dict = {
-            "level": self.level,
-            "hit_dice": self.hit_dice,
-            "str": self.str,
-            "dex": self.dex,
-            "con": self.con,
-            "int": self.int,
-            "wis": self.wis,
-            "cha": self.cha,
-            "base_evasion": self.base_evasion,
-            "damage_taken_multiplier": self.damage_taken_multiplier,
-            "damage_multiplier": self.damage_multiplier,
-            "max_hp": self.max_hp,
-            "max_ap": self.max_ap,
-            "max_mp": self.max_mp,
-            "temp_hp": self.temp_hp,
-            "armor": self.armor,
-            "damage": self.damage,
-            "dc": self.dc
-        }
+        self.dc:int = 0
 
     def value(self, stat:str) -> int | str:
-        return self.dict[stat]
+        return self.__dict__[stat]
     
     def bonus(self, stat:str) -> int:
-        return global_commands.bonus(self.dict[stat])
+        return global_commands.bonus(self.__dict__[stat])
     
     def modify(self, stat:str, num:int):
-        target = self.dict[stat]
-        target += num
+        self.__dict__[stat] += num
 
     def load(self, filename:str):
-
         with open(filename, "r") as file:
             reader = csv.DictReader(file)
             for row in reader:
-                for entry in row:
-                    if entry in self.dict:
-                        self.dict[entry] = int(row[entry])
+                self.copy(row)
     
     def copy(self, source:dict):
         for entry in source:
-            if entry in self.dict:
-                self.dict[entry] = source[entry]
+            if entry in self.__dict__:
+                match self.__dict__[entry]:
+                    case str(): self.__dict__[entry] = source[entry]
+                    case int():self.__dict__[entry] = int(source[entry])
+                    case _: self.__dict__[entry] = source[entry]
 
 
 class Status_Effects_Handler():
@@ -157,18 +137,19 @@ class Status_Effects_Handler():
 class Game_Object():
 
     def __init__(self, id="Game Object"):
-        from items import Item, Weapon, Armor
+        from items import Item
+        from equipment import Weapon, Armor
 
         #Core properties
         self.id = id
         self.name = self.id
         self.level = 1
-        self.statblock:Statblock = Statblock(self)
+        self.stats:Statblock = Statblock(self)
 
         #Derived stats
-        self.statblock.max_hp = 10 + self.bonus("con")
-        self.hp = self.statblock.max_hp
-        self.ap = self.statblock.max_ap
+        self.stats.max_hp = 10 + self.bonus("con")
+        self.hp = self.stats.max_hp
+        self.ap = self.stats.max_ap
 
         #Resources
         self.xp = 0
@@ -198,11 +179,11 @@ class Game_Object():
 
     @property
     def evasion(self) -> int:
-        return self.statblock.base_evasion + self.bonus("dex")
+        return self.stats.base_evasion + self.bonus("dex")
     
     @property
     def needs_healing(self) -> bool:
-        return self.hp < self.statblock.max_hp
+        return self.hp < self.stats.max_hp
     
     @property
     def can_act(self) -> bool:
@@ -220,7 +201,7 @@ class Game_Object():
         self.status_effects.update() 
 
     def bonus(self, stat:str) -> int:
-        return self.statblock.bonus(stat)
+        return self.stats.bonus(stat)
 
     #ROLLS
     def roll_a_check(self, stat:str) -> int:
@@ -249,26 +230,26 @@ class Game_Object():
     def lose_hp(self, num:int):
         """Removes HP from the Object, starting with temp HP"""
         num = int(num)
-        if self.statblock.temp_hp > 0:
-            self.statblock.temp_hp -= num
-            self.statblock.temp_hp = 0 if self.statblock.temp_hp < 0 else self.statblock.temp_hp
+        if self.stats.temp_hp > 0:
+            self.stats.temp_hp -= num
+            self.stats.temp_hp = 0 if self.stats.temp_hp < 0 else self.stats.temp_hp
         else:
             self.hp -= num
 
     def gain_temp_hp(self, num:int):
         """Adds temp HP to the Object"""
-        self.statblock.temp_hp += int(num)
+        self.stats.temp_hp += int(num)
 
     def heal(self, num:int):
         """Heals the Object for num amount"""
         self.hp += num
-        if self.hp > self.statblock.max_hp:
-            self.hp = self.statblock.max_hp
+        if self.hp > self.stats.max_hp:
+            self.hp = self.stats.max_hp
         self.heal_narration(num)
 
     def spend_ap(self, num:int=1) -> bool:
         """Spends Action points equal to num, 0 spends max AP points"""
-        if num == 0 and self.ap == self.statblock.max_ap:
+        if num == 0 and self.ap == self.stats.max_ap:
             self.ap = 0
         elif num == 0:
             return False
@@ -279,7 +260,7 @@ class Game_Object():
         return True
 
     def reset_ap(self) -> None:
-        self._ap = self.statblock.max_ap
+        self._ap = self.stats.max_ap
 
     def spend_mp(self, num:int=1) -> bool:
         if num == 0:
@@ -292,13 +273,13 @@ class Game_Object():
     
     def regain_mp(self, num:int | None=None):
         if num is None:
-            self.mp = self.statblock.max_mp
+            self.mp = self.stats.max_mp
             return True
         self.mp += num
         return True
 
     def modify(self, stat, num:int):
-        self.statblock.modify(stat, num)
+        self.stats.modify(stat, num)
 
     def gain_gold(self, num:int) -> int:
         self.gold += num
@@ -316,7 +297,8 @@ class Game_Object():
 
     #COMBAT
     def attack(self):
-        roll = self.roll_to_hit()
+        import player_commands
+        roll = self.roll_to_hit() if not player_commands.GOD_MODE else 999
         self.spend_ap()
         self.narrate(self.roll_narration, roll)
         self.apply_on_attacks()
@@ -329,15 +311,17 @@ class Game_Object():
             case _:
                 if roll >= self.target.evasion:
                     self.narrate(self.hit_narration)
-                    taken = self.target.take_damage(self.roll_damage(), self)
+                    taken = self.roll_damage() if not player_commands.GOD_MODE else 999
+                    self.target.take_damage(taken, self)
                     self.apply_on_hits()
                 else:
                     self.narrate(self.miss_narration)
         return None
 
     def take_damage(self, taken:int, source:Game_Object | items.Item | str):
-        taken *= self.statblock.damage_taken_multiplier
+        taken *= self.stats.damage_taken_multiplier
         taken = int(taken)
+        if self.armor is None: self.armor = 0
         match source:
             case Game_Object() | items.Item():
                 if source.damage_type.name == "PHYSICAL":
@@ -350,7 +334,7 @@ class Game_Object():
                 final = taken
 
         self.lose_hp(final)
-        self.narrate(self.take_damage_narration(), (final, source))
+        self.narrate(self.take_damage_narration, (final, source))
 
     def use(self, item:items.Item):
         raise NotImplementedError
@@ -365,10 +349,10 @@ class Game_Object():
     #CRITS
     def critical_hit(self):
         global_commands.type_text("A critical hit! Uh oh...")
-        self.statblock.damage_multiplier = 2
+        self.stats.damage_multiplier = 2
         taken = self.target.take_damage(self.roll_damage(), self)
         self.apply_on_hits()
-        self.statblock.damage_multiplier = 1
+        self.stats.damage_multiplier = 1
         return None
     
     def critical_fail(self):
@@ -421,7 +405,7 @@ class Game_Object():
         ]
         return text
 
-    def take_damage_narration(self, taken:int, source:Game_Object) -> list[str]:
+    def take_damage_narration(self, info:tuple[int, Game_Object | items.Item]) -> list[str]:
         raise NotImplementedError
     
     

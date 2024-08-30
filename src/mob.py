@@ -4,7 +4,8 @@ import status_effect
 from game_object import Game_Object
 
 default = {
-    "level": (1,20),
+    "level": 1,
+    "level_range": (1, 20),
     "hit_dice": 8,
     "str": 10,
     "dex": 10,
@@ -28,9 +29,9 @@ class Mob(Game_Object):
     def __init__(self, id:str="Anonymous_Mob", stat_dict:dict=default):
         #identification
         super().__init__(id)
-        self.statblock.copy(stat_dict)
-        self.level = random.randrange(self.statblock.level)
-        self.statblock.level = self.level
+        self.stats.copy(stat_dict)
+        self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])
+        self.stats.level = self.level
 
         self.retreating = False
         self.load()
@@ -41,16 +42,16 @@ class Mob(Game_Object):
         return max(1, self.level // 5)
     @property
     def evasion(self) -> int:
-        return self.statblock.base_evasion + self.bonus("dex")
+        return self.stats.base_evasion + self.bonus("dex")
     @property
     def can_act(self) -> bool:
-        return self._ap > 0 and not self.dead
+        return self.ap > 0 and not self.dead
     @property
     def can_cast(self) -> bool:
         return self.mp > 0
     @property
     def can_full_round(self) -> bool:
-        return self._ap == self.statblock.max_ap
+        return self.ap == self.stats.max_ap
     @property
     def flee_threshold(self) -> float:
     #Percent current HP threshold at which the enemy tries to flee (higher==more cowardly)"""
@@ -66,16 +67,16 @@ class Mob(Game_Object):
     #METHODS
     def flee_check(self):
         """Checks if the mob's health is low enough to attempt a flee"""
-        if self._hp <= self.statblock.max_hp * (self.flee_threshold/100) and self.roll_a_check("cha") < 13:
-            self._retreating = True
-            return self._retreating
+        if self.hp <= self.stats.max_hp * (self.flee_threshold/100) and self.roll_a_check("cha") < 13:
+            self.retreating = True
+            return self.retreating
         return False
 
     #ROLLS
     def roll_damage(self) -> int:
         """Rolls damage (damage dice)"""
-        dmg = global_commands.XdY(self.statblock.damage)
-        return (dmg + self.bonus("str")) * self.statblock.damage_multiplier
+        dmg = global_commands.XdY(self.stats.damage)
+        return (dmg + self.bonus("str")) * self.stats.damage_multiplier
 
     #COMBAT
     def attack(self) -> None:
@@ -99,15 +100,6 @@ class Mob(Game_Object):
         return super().apply_on_hits()
 
     #NARRATION
-    def narrate(self, func) -> None:
-        text:list = func()
-        if self._prev_narration in text:
-            text.remove(self._prev_narration)
-        final = random.choice(text)
-        self._prev_narration = final
-        global_commands.type_text(final)
-        return None
-
     def roll_narration(self) -> list[str]:
         text = [
             f"The {self.id} moves to attack.",
@@ -121,16 +113,16 @@ class Mob(Game_Object):
             f"You fail to move before the attack hits you.",
             f"A hit.",
             f"The {self.id} hits you.",
-            f"It's attack lands.",
+            f"Its attack lands.",
             f"You can't dodge this one.",
-            f"You take a hit.",
+            f"That's going to leave a mark...",
             f"The {self.id} manages to break your guard."
         ]
         return text
     
     def miss_narration(self) -> list[str]:
         text = [
-            f"It's attack goes wide.",
+            f"Its attack goes wide.",
             f"Luck is on your side this time.",
             f"The {self.id} fails.",
             f"You stave off the attack.",
@@ -141,30 +133,48 @@ class Mob(Game_Object):
         ]
         return text
 
+    def take_damage_narration(self, info) -> list[str]:
+        from player import Player
+        from items import Item
+        taken, source = info
+        if taken > 0:
+            match source:
+                case Player():
+                    text = [
+                        f"You did {taken} damage to the {self.id}.",
+                        f"The {self.id} took {taken} damage.",
+                        f"You hit the {self.id} for {taken} damage.",
+                        ]    
+                case Item():
+                    text = [
+                        f"Your {source.id} did {taken} damage.",
+                        f"The {source.id} dealt {taken} damage to the {self.id}.",
+                        f"The {self.id} took {taken} damage from your {source.id}."
+                    ]
+        else: text = [f"The {self.id} took no damage!"] 
+        return text
+      
     #LOAD
     def load(self):
         """Updates the mob's loot, stats, and ability scores after level has been assigned"""
-        self.gold, self.xp = 0
-        self.statblock.max_ap = 1 + (self.level // 5)
-        self._ap = self.statblock.max_ap
+        self.gold = 0
+        self.xp = 0
+        self.stats.max_ap = 1 + (self.level // 5)
+        self.ap = self.stats.max_ap
         #calculate stats
         self.calculate_loot()
         self.calculate_hp()
-        #add ability scores based on level
-        from global_variables import CORE_STATS
-        for _ in range(self.level+1):
-            stat = random.choice(list(CORE_STATS.keys()))
-            self.statblock.dict[stat] += 1
+        self.calculate_ability_scores
 
     def calculate_hp(self) -> None:
         """Re-calculates mob's HP based on current level"""
-        self.statblock.max_hp = 0
-        temp = self.statblock.hit_dice + self.bonus("con")
+        self.stats.max_hp = 0
+        temp = self.stats.hit_dice + self.bonus("con")
         for _ in range(self.level-1):
-            temp += global_commands.d(self.statblock.hit_dice) + self.bonus("con")
+            temp += global_commands.d(self.stats.hit_dice) + self.bonus("con")
 
-        self.statblock.max_hp = temp
-        self._hp = self.statblock.max_hp
+        self.stats.max_hp = temp
+        self.hp = self.stats.max_hp
 
     def calculate_loot(self):
         """Adds a random extra amount of XP and Gold per level it is above base to the mob"""
@@ -173,6 +183,13 @@ class Mob(Game_Object):
             xtra_xp = global_commands.d(6)
             self.gold += xtra_gold * self.level // 3
             self.xp += xtra_xp * max(self.level // 5, 1)
+
+    def calculate_ability_scores(self):
+        """Randomly adds extra points to a mob's ability scores, increasing based on level"""
+        from global_variables import CORE_STATS
+        for _ in range(self.level + 1 // 2):
+            stat = random.choice(list(CORE_STATS.keys()))
+            self.stats.__dict__[stat] += 1
 
     #SPECIALs + TRIGGER
     def special(self):

@@ -74,10 +74,10 @@ def turn_options():
 
     header = f"What would you like to do?"
     global_commands.type_text(header, None, False)
-    b_e = global_variables.PLAYER.statblock.base_evasion
+    b_e = global_variables.PLAYER.stats.base_evasion
     stats = {
-        "hp": f'HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.statblock.max_hp-global_variables.PLAYER.hp) + "]"}',
-        "ap": f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.statblock.max_ap}",
+        "hp": f'HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.stats.max_hp-global_variables.PLAYER.hp) + "]"}',
+        "ap": f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.stats.max_ap}",
         "gold": f"Gold: {global_variables.PLAYER.gold}g",
         "xp": f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level}",
         "eva": f"Base Evasion: {b_e}"

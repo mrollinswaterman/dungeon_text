@@ -3,7 +3,8 @@ import random
 import mob, global_commands
 
 stats = {
-    "level": (1, 4),
+    "level": 1,
+    "level_range": (1, 4),
     "hit_dice": 10,
     "str": 10,
     "dex": 16,
@@ -24,8 +25,8 @@ stats = {
 class Goblin(mob.Mob):
     def __init__(self, id="Goblin", stat_dict=stats):
         super().__init__(id, stat_dict)
-        self._flee_threshold = 30
-        self._stolen = False
+        self.flee_threshold = 30
+        self.stolen = False
         #base xp & gold
         self.gold += 10
         self.xp += 5
@@ -35,7 +36,7 @@ class Goblin(mob.Mob):
         return 25
     @property
     def retreat(self):
-        return self.gold >= (1.5 * self.target.gold) and self._stolen
+        return self.gold >= (1.5 * self.target.gold) and self.stolen
     
     def trigger(self):
         """Returns True if the player has more gold than the goblin, or if the goblin has x1.5 the player's gold"""
@@ -57,7 +58,7 @@ class Goblin(mob.Mob):
                 actual = self.target.lose_gold(prospective)
                 global_commands.type_text(f"The {self.id} stole {actual} gold from you!")
                 self.gold += actual
-                self._stolen = actual > 0
+                self.stolen = actual > 0
             return None
         else:
             self.flee_threshold = 100

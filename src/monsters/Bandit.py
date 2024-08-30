@@ -3,7 +3,8 @@ import random
 import global_commands, mob
 
 stats = {
-    "level": (2,7),
+    "level": 1,
+    "level_range": (2, 7),
     "hit_dice": 10,
     "str": 14,
     "dex": 12,

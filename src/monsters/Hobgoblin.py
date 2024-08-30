@@ -4,7 +4,8 @@ import mob, global_commands
 from conditions import Stat_Debuff
 
 stats = {
-    "level": (1,6),
+    "level": 1,
+    "level_range": (1, 6),
     "hit_dice": 10,
     "str": 12,
     "dex": 12,
@@ -25,7 +26,7 @@ stats = {
 class Hobgoblin(mob.Mob):
     def __init__(self, id="Hobgoblin", stat_dict=stats):
         super().__init__(id, stat_dict)
-        self.statblock.dc = 24 + self.bonus("cha")#12 + cha
+        self.stats.dc = 24 + self.bonus("cha")#12 + cha
         #base gold & xp
         self.gold += 10
         self.xp += 5

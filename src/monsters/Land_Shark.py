@@ -4,7 +4,8 @@ from conditions import Vulnerable
 import items, status_effect
 
 stats = {
-    "level": (3,10),
+    "level": 1, 
+    "level_range": (3, 10),
     "hit_dice": 12,
     "str": 15,
     "dex": 9,
@@ -34,7 +35,7 @@ class Land_Shark(mob.Mob):
             tooth.set_weight(0.5)
             self.pick_up(tooth, True)
 
-        self._burrowed = False
+        self.burrowed = False
 
     @property
     def applied(self) -> bool:
@@ -43,14 +44,14 @@ class Land_Shark(mob.Mob):
     def trigger(self):
         if not super().trigger():
             return False
-        if self._burrowed is True and not self.applied and global_commands.probability(33):
+        if self.burrowed is True and not self.applied and global_commands.probability(33):
             return True
         
-        if global_commands.probability(100 - ((self._hp * 100) / self.statblock.max_hp)):
+        if global_commands.probability(100 - ((self.hp * 100) / self.stats.max_hp)):
             # %HP determines directly determines burrow chance
             return True
         
-        return len(self.status_effects.effects) >= 2 and self._burrowed is False#if I have status effects and not burrowed, burrow
+        return len(self.status_effects.effects) >= 2 and self.burrowed is False#if I have status effects and not burrowed, burrow
 
     def special(self) -> bool:
         """
@@ -59,22 +60,22 @@ class Land_Shark(mob.Mob):
         doubles all damage done and taken after use, reverts evasion
         changes made by burrow
         """
-        if not self._burrowed:
+        if not self.burrowed:
             self.spend_ap(0) #indicates a full round action
             global_commands.type_text(f"The {self.id} burrows underground, making itself harder to hit.")
-            self.statblock.base_evasion += 3
-            self.statblock.armor += 2
-            self._burrowed = True
+            self.stats.base_evasion += 3
+            self.stats.armor += 2
+            self.burrowed = True
             return True
         else:
             self.spend_ap()
             global_commands.type_text(f"The {self.id} erupts from the ground.")
-            self.statblock.base_evasion -= 3
-            self.statblock.armor -= 2
+            self.stats.base_evasion -= 3
+            self.stats.armor -= 2
             vul:status_effect.Status_Effect = Vulnerable.Condition(self, self)#double all damage taken for 3 turns
             vul.set_duration(3)
             self.status_effects.add(vul)
-            self._burrowed = False
+            self.burrowed = False
             return True
     
     def roll_narration(self):

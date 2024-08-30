@@ -17,7 +17,11 @@ BONUS = {
     17: 3,
     18: 4,
     19: 4,
-    20: 5
+    20: 5,
+    21: 5,
+    22: 6,
+    23: 6,
+    24: 7
 }
 
 def exit():
@@ -42,17 +46,17 @@ def save():
     for entry in global_variables.PLAYER.inventory:
         item:items.Item = global_variables.PLAYER.inventory[entry]
         item.save()
-        item_dict_list.append(item.tod)
+        item_dict_list.append(item.saved)
 
     #append equipped weapon and armor as dicts to the list
     global_variables.PLAYER.weapon.save()
     global_variables.PLAYER.armor.save()
-    item_dict_list.append(global_variables.PLAYER.weapon.tod)
-    item_dict_list.append(global_variables.PLAYER.armor.tod)
+    item_dict_list.append(global_variables.PLAYER.weapon.saved)
+    item_dict_list.append(global_variables.PLAYER.armor.saved)
 
     #create fieldnames list from item_to_dict keys
-    header1 = list(global_variables.PLAYER.weapon.tod.keys())
-    header2 = list(global_variables.PLAYER.armor.tod.keys())
+    header1 = list(global_variables.PLAYER.weapon.saved.keys())
+    header2 = list(global_variables.PLAYER.armor.saved.keys())
 
     fields = merge_minus_dups(header1, header2)
     with open("inventory.csv", "w", newline='') as file:
@@ -95,9 +99,7 @@ def match(text:str | list | tuple, size:int) -> str | tuple:
         return tuple(final)
 
 def generate_item_rarity():
-    """
-    Generates item rarity based on player level
-    """
+    """Generates item rarity based on player level"""
     from items import Rarity
 
     if probability(10+global_variables.PLAYER.level):
@@ -110,6 +112,21 @@ def generate_item_rarity():
         return Rarity("Uncommon")
     
     return Rarity("Common")
+
+def load_item(item_type, save_data):
+    print(item_type)
+    raise Exception
+    pass
+
+def craft_item(blueprint):
+    from equipment import Weapon, Armor, Anvil
+    blueprint: Anvil = blueprint
+
+    match blueprint.anvil_type.split(" ")[0]:
+        case "Weapon":
+            return Weapon(blueprint.id, blueprint.rarity.string,)
+
+    raise Exception
 
 def d(num):
     """Rolls a dX where X is some number (ie d6, d20, etc)"""

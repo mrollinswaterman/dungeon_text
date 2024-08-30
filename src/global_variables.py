@@ -1,6 +1,6 @@
 #globals variables
 from player import Player
-import item_compendium
+#import item_compendium
 from shopkeep import Blacksmith, Shopkeep
 
 PLAYER:Player = Player()
@@ -21,7 +21,7 @@ BONUS = {
     17: 3,
     18: 4,
     19: 4,
-    20: 5
+    20: 5,
 }
 
 CORE_STATS = {
@@ -60,9 +60,9 @@ starter_armor = BLACKSMITH.storehouse["Armor"][0]
 
 PLAYER.equip(starter_weapon, True)
 PLAYER.equip(starter_armor, True)
-PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
+#PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
 PLAYER.gain_gold(10000)
-PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
+#PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
 def restock_the_shop():
     """
@@ -76,7 +76,7 @@ def restock_the_shop():
         SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
 
     #scales HP potions to be higher rarity with player level
-    pots = item_compendium.Health_Potion.craft(max(PLAYER.level // 4), 5)
+    #pots = item_compendium.Health_Potion.craft(max(PLAYER.level // 4, 1), 5)
     SHOPKEEP.stock(pots)
 
     #SHOPKEEP.stock(item_compendium.Repair_Kit.craft(5))

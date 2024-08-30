@@ -88,9 +88,6 @@ class Event():
     @property
     def damage_header(self) -> str:
         return self._damage_header
-    @property
-    def damage_type(self):
-        return None
     
     #methods
 

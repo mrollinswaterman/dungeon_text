@@ -26,9 +26,11 @@ as necessary for formatting)
 - [X] Make a switch statement so rolls that should be paired with "an" are paired with "an" instead of "a". (ie "You rolled 'an' 18." instead of "'a' 18.")
 - [ ] Create a new fil/class called "Tag". Tags can be added to attacks or weapons or mobs, and cause the attack/weapon/mob to do something on hit. maybe make it so they
 don't stack???
-- [ ] Make stablocks their own class???? (ie player.stats.dex)
+- [X] Make stablocks their own class???? (ie player.stats.dex)
 - [ ] Maybe make a stance class (riposte, total defense, defensive, offensive, all-out, etc) each with different effects.
 - [ ] Make a damage class to store info about an object damage (type, src, amount, etc), and do the same for weapon types?
+- [ ] Split statuses and effects. Statuses are named conditions (ie On Fire, Poisoned, Slowed, etc), while effects are the mechanical things that happen
+(ie damage over time, increasing or reducing a stat for a given period, one-time damage, )
 
 ## Mechanics
 

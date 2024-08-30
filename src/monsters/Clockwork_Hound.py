@@ -3,7 +3,8 @@ import random
 import mob, global_commands, items
 
 stats = {
-    "base_level": (6, 13),
+    "level": 1,
+    "level_range": (6, 13),
     "hit_dice": 10,
     "str": 16,
     "dex": 14,
@@ -41,7 +42,7 @@ class Clockwork_Hound(mob.Mob):
     def trigger(self) -> bool:
         if not super().trigger():
             return False
-        return self._hp < self.statblock.max_hp // 3
+        return self.hp < self.stats.max_hp // 3
 
     def special(self) -> None:
         self.spend_ap()

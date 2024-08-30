@@ -1,7 +1,8 @@
 import random, time, os, csv, enum
 import global_commands
 from game_object import Game_Object
-from items import Item, Consumable, Weapon, Armor
+from items import Item, Consumable
+from equipment import Weapon, Armor
 
 class Stance(enum.Enum):
     NONE = 0
@@ -14,15 +15,14 @@ class Player(Game_Object):
     def __init__(self, id="Player"):
         super().__init__(id)
         self.level = 1
-        self.statblock.max_ap = 1 + (self.level // 5)
-
+        self.stats.max_ap = 1 + (self.level // 5)
         #stances
         self.stance = Stance(0)
 
     #PROPERTIES
     @property
-    def carrying_capacity(self) -> int:
-        return int(5.5 * self.statblock.str)
+    def carrying_capacity(self) -> float:
+        return 5.5 * self.stats.str
 
     @property
     def available_carrying_capacity(self) -> int:
@@ -31,11 +31,12 @@ class Player(Game_Object):
     @property
     def carrying(self) -> int:
         total_weight = 0
-        for entry in self._inventory:
-            if self._inventory[entry] is not None:#check to make sure the entry is valid
-                held_item:Item = self._inventory[entry]
+        for entry in self.inventory:
+            if self.inventory[entry] is not None:#check to make sure the entry is valid
+                held_item:Item = self.inventory[entry]
                 total_weight += held_item.weight
-        total_weight += self.weapon.weight + self.armor.weight
+        if self.armor is not None: total_weight += self.armor.weight
+        if self.weapon is not None: total_weight += self.weapon.weight
         return total_weight
 
     @property
@@ -58,8 +59,8 @@ class Player(Game_Object):
                 return super().bonus(stat)
     
     def die(self) -> None:
-        self._gold = 0
-        self._inventory = []
+        self.gold = 0
+        self.inventory = []
         #other stuff to be added
 
     #ROLLS
@@ -80,10 +81,10 @@ class Player(Game_Object):
         """Returns a damage roll (weapon dice + str bonus)"""
         if self.weapon.broken:
             global_commands.type_text(f"You can't use a broken {self.weapon.id}, so your hands will have to do.")
-            return (global_commands.d(4) + self.bonus("str")) * self.statblock.damage_multiplier
+            return (global_commands.d(4) + self.bonus("str")) * self.stats.damage_multiplier
         
         self.weapon.lose_durability()
-        return (self.weapon.roll_damage() + self.bonus("str")) * self.statblock.damage_multiplie
+        return (self.weapon.roll_damage() + self.bonus("str")) * self.stats.damage_multiplier
 
     #MODIFY RESOURCES
     def lose_hp(self, num:int) -> None:
@@ -95,15 +96,15 @@ class Player(Game_Object):
 
     def level_up(self, stat: str) -> None:
         """Levels up a given stat"""
-        self.statblock.dict[stat] += 1
+        self.stats.dict[stat] += 1
         self.xp -= 15 * self.level
         self.level += 1
-        prev_max = self.statblock.max_hp
-        self.statblock.max_hp += (global_commands.d(self.statblock.hit_dice) + self.bonus("con"))
-        if self._hp == prev_max:# ie, you were full HP before level up
-            self._hp = self.statblock.max_hp
-        if self._hp < (prev_max * .5): #if you were under 1/2 HP, heal to 1/2 HP
-            self._hp = (self.statblock.max_hp * 0.5)
+        prev_max = self.stats.max_hp
+        self.stats.max_hp += (global_commands.d(self.stats.hit_dice) + self.bonus("con"))
+        if self.hp == prev_max:# ie, you were full HP before level up
+            self.hp = self.stats.max_hp
+        if self.hp < (prev_max * .5): #if you were under 1/2 HP, heal to 1/2 HP
+            self.hp = (self.stats.max_hp * 0.5)
 
     def gain_xp(self, xp:int) -> None:
         """Increases player XP by a given amount"""
@@ -124,18 +125,13 @@ class Player(Game_Object):
         """Reduces player gold by a given amount. Return False if the player doesnt have enough gold to spend"""
         if num > self.gold:   
             return False
-        self._gold -= num
+        self.gold -= num
         global_commands.type_text(f"{num} gold spent. {self.gold} gold remaining.")
         return True
 
     #COMBAT
     def attack(self) -> None:
-        import player_commands
-
-        if not player_commands.GOD_MODE:
-            return super().attack()
-        else:
-            pass
+        return super().attack()
 
     def take_damage(self, taken: int, source) -> int:
         if self.armor is None:
@@ -156,10 +152,10 @@ class Player(Game_Object):
     #CRITS
     def critical_hit(self) -> None:
         crit = 2 if self.weapon.broken or self.weapon is None else self.weapon.crit
-        self.statblock.damage_multiplier = crit
+        self.stats.damage_multiplier = crit
         taken = self.target.take_damage(self.roll_damage(), self)
         self.apply_on_hits()
-        self.statblock.damage_multiplier = 1
+        self.stats.damage_multiplier = 1
         return None
 
     #NARRATION
@@ -171,8 +167,9 @@ class Player(Game_Object):
             f"You swing your {self.weapon.id},",
             f"Brandishing your {self.weapon.id}, you prepare to strike...",
         ]
-        for entry in text:
-            entry = f"{entry} {roll_text}"
+        for idx, entry in enumerate(text):
+            entry = entry + " " + roll_text
+            text[idx] = entry
         return text
 
     def hit_narration(self) -> None:
@@ -195,6 +192,7 @@ class Player(Game_Object):
             f"Your attack whizzes past the {self.target.id}, missing by a hair.",
             f"You don't crack the {self.target.id}'s defenses this time.",
             f"It leaps out of the way in the nick of time.",
+            f"No dice.",
             f"A miss.",
             f"The {self.target.id} ducks your strike.",
             f"The {self.target.id} manages to weather your onslaught for now."
@@ -274,11 +272,11 @@ class Player(Game_Object):
         rip_bonus.set_potency(2)
         self.add_status_effect(rip_bonus)
 
-        self._stance = Stance(1)
-        self._riposting = True
+        self.stance = Stance(1)
+        self.riposting = True
 
     def end_riposte(self) -> None:
-        self._riposting = False
+        self.riposting = False
 
         if self.get_status_effect("Riposte") is not None:
             self.remove_status_effect(self.get_status_effect("Riposte"))
@@ -310,9 +308,10 @@ class Player(Game_Object):
         if not silent: global_commands.type_text(f"{item.name} equipped.")
         return True
 
-    def can_carry(self, item:Item) -> bool:
+    def can_carry(self, item:Item | None) -> bool:
         """Checks if the player can carry item. Returns True if they can, False if not"""
-        return self.carrying + item.weight <= self.carrying_capacity
+        if item is None: return False
+        else: return self.carrying + item.weight <= self.carrying_capacity
 
     def print_inventory(self, line_len=25) -> None:
         line_len = 25
@@ -332,7 +331,7 @@ class Player(Game_Object):
         import items
         last = False
         idx = 0
-        mx = max(3, len(self._inventory))
+        mx = max(3, len(self.inventory))
         while(idx < mx):
             if idx % 2 == 0 and idx != 0:
                 time.sleep(0.05)
@@ -343,12 +342,12 @@ class Player(Game_Object):
             a_header = f"2. {armor[0]}" if idx == 2 else " "
             first = second = []
             header1 = header2 = " "
-            if idx < len(self._inventory):
+            if idx < len(self.inventory):
                 #creates a list of the current item's format dictionary values 
-                first = list(list(self._inventory.values())[idx].format().values())
+                first = list(list(self.inventory.values())[idx].format().values())
                 try:
                     #checks if this is the last item in the inventory or not
-                    second = list(list(self._inventory.values())[idx + 1].format().values())
+                    second = list(list(self.inventory.values())[idx + 1].format().values())
                 except IndexError:
                     last = True
                     second = first
@@ -377,7 +376,7 @@ class Player(Game_Object):
                 #prints current line
                 print(f" {str1} \t {str2} \t\t {equipped}")
             #if there's 2 or more items left, increment index by 2, else 1
-            idx += 2 if len(self._inventory) - idx >= 2 else 1
+            idx += 2 if len(self.inventory) - idx >= 2 else 1
 
     ##MISC.
     def update(self) -> None:
@@ -395,8 +394,8 @@ class Player(Game_Object):
             "gold":self.gold
         }
 
-        for entry in self.statblock.dict:
-            player_tod[entry] = self.statblock.dict[entry]
+        for entry in self.stats.__dict__:
+            player_tod[entry] = self.stats.__dict__[entry]
 
         return player_tod
     
@@ -415,7 +414,7 @@ class Player(Game_Object):
                 self.gold = int(row["gold"])
                 self.reset_ap()
 
-                self.statblock.load(stats_file)
+                self.stats.load(stats_file)
             file.close()
                 
         self.load_inventory(inventory_file)
@@ -426,7 +425,7 @@ class Player(Game_Object):
         empty_check = True if os.stat(filename).st_size == 0 else False
         if empty_check: return None
         size = 0
-        self._inventory = {}
+        self.inventory = {}
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for row in reader:

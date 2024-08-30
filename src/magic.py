@@ -41,9 +41,6 @@ class Spell():
     @property
     def damage_header(self) -> str:
         return self.name
-    @property
-    def damage_type(self) -> str:
-        return "Magic"
 
     def cast(self, target:player.Player | mob.Mob):
         if self.player:

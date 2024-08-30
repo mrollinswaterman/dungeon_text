@@ -4,10 +4,6 @@ import player_commands
 import narrator
 import controller
 
-import item_enchantments
-
-
-
 def etd():
     """
     Short for "Enter the Dungeon", runs when the player hits

@@ -1,6 +1,7 @@
 #Shopkeep class
 import random, time, copy, csv
-from items import Item, Consumable, Weapon, Armor, craft_item
+from items import Item, Consumable
+from equipment import Weapon, Armor, Anvil
 import global_variables, global_commands
 
 STOCK = {
@@ -35,16 +36,9 @@ class Blacksmith():
     def items_of_type(self, type=""):
         return self._storehouse[type]
     
-    def forge(self, mold:dict):
-        """for mold in self._forge_list:
-            tag, id, stats = mold
-            item:Item = self._tag_map[tag](id)
-            item.set_stats(stats)
-            STOCK[item.rarity] += 1
-            self._storehouse[tag].append(item)"""
-
-        item = craft_item(mold["type"], mold)
-        self._storehouse[mold["type"]].append(item)
+    def forge(self, anvil:Anvil):
+        item = global_commands.craft_item(anvil)
+        self._storehouse[anvil["type"]].append(item)
 
     def initialize(self):
         self._storehouse = {
@@ -54,7 +48,9 @@ class Blacksmith():
         with open("equipment_stats.csv", "r") as file:
             reader = csv.DictReader(file)
             for row in reader:
-                self.forge(row)
+                template = Anvil()
+                template.copy(row)
+                self.forge(template)
 
     def print_storehouse(self):
         for type in self._storehouse:

@@ -4,7 +4,8 @@ import mob, global_commands
 from spells import Magic_Missile as mm
 
 stats = {
-    "base_level": (6, 11),
+    "level": 1,
+    "level_range": (6, 11),
     "hit_dice": 6,
     "str": 9,
     "dex": 14,
@@ -30,20 +31,17 @@ class Evil_Eye(mob.Mob):
         self.xp += 8
 
         #self.roll_damage()
-        self.statblock.max_mp = 10 + self.bonus("int")
-        self.mp = self.statblock.max_mp
+        self.stats.max_mp = 10 + self.bonus("int")
+        self.mp = self.stats.max_mp
 
     @property
     def flee_threshold(self) -> float:
         if self.remaining_mp > 0:
-            return 10 + 2 * (self.statblock.max_mp / self.remaining_mp)
-        else: return 10 + 2 * self.statblock.max_mp
-    @property
-    def damage_type(self):
-        return "Magic" 
+            return 10 + 2 * (self.stats.max_mp / self.remaining_mp)
+        else: return 10 + 2 * self.stats.max_mp
     @property
     def remaining_mp(self):
-        return (self.mp - self.statblock.max_mp)
+        return (self.mp - self.stats.max_mp)
     @property
     def execute_trigger(self):
         return self.mp >= 3 and self.target.hp < self.target.statblock.max_hp // 2
@@ -69,7 +67,7 @@ class Evil_Eye(mob.Mob):
         import player_commands
 
         self.spend_ap(0)
-        self._mp -= 3
+        self.mp -= 3
 
         global_commands.type_text(f"The {self.id} begins charging its Death Ray...")
 
@@ -78,18 +76,18 @@ class Evil_Eye(mob.Mob):
         match roll:
             case 0:
                 global_commands.type_text("A critical hit. Uh oh...")
-                self._stats["damage_multiplier"] += 1
+                self.stats.damage_multiplier += 1
                 dmg = global_commands.XdY(self.death_ray_damage)
-                dmg = (dmg + (self.bonus("int") // 2)) * self.statblock.damage_multiplier
+                dmg = (dmg + (self.bonus("int") // 2)) * self.stats.damage_multiplier
                 taken = self.target.take_damage(dmg, self)
-                self.statblock.damage_multiplier -= 1
+                self.stats.damage_multiplier -= 1
             case 1:
                 return self.critical_fail()
             case _:
                 if roll > self.target.evasion:
                     global_commands.type_text("The magic beam hit you.")
                     dmg = global_commands.XdY(self.death_ray_damage)
-                    dmg = (dmg + (self.bonus("int") // 2)) * self.statblock.damage_multiplier
+                    dmg = (dmg + (self.bonus("int") // 2)) * self.stats.damage_multiplier
                     taken = self.target.take_damage(dmg, self)
                 else:
                     global_commands.type_text("It missed.")

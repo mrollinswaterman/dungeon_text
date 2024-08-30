@@ -46,9 +46,6 @@ class Status_Effect():
     @property
     def damage_header(self):
         return self._id
-    @property
-    def damage_type(self):
-        return None
     
     #methods
     def update_message(self):

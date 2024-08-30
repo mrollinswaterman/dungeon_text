@@ -2,7 +2,8 @@
 import mob
 
 stats = {
-    "base_level": (2,6),
+    "level": 1,
+    "level_range": (2, 6),
     "hit_dice": 8,
     "str": 14,
     "dex": 10,
@@ -25,8 +26,8 @@ class Goblin_Gang(mob.Mob):
         super().__init__(id, stat_dict)
         
         #goblin_gang gets x1.5 HP
-        self.statblock.max_hp *= 1.5
-        self.hp = self.statblock.max_hp
+        self.stats.max_hp *= 1.5
+        self.hp = self.stats.max_hp
         
         self.gold += 20
         self.xp += 10
