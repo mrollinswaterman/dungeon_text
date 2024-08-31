@@ -1,7 +1,7 @@
 #Repair Kit
-import items, global_commands
+import src.item as item, global_commands
 
-class Repair_Kit(items.Consumable):
+class Repair_Kit(item.Consumable):
 
     def __init__(self, id="Repair Kit", rarity="Uncommon", quantity=0):
         super().__init__(id, rarity, quantity)
@@ -9,7 +9,7 @@ class Repair_Kit(items.Consumable):
         self._unit_weight = 5
         self._name = "Repair Kit"
 
-    def use(self, target:items.Item) -> bool:
+    def use(self, target:item.Item) -> bool:
         """
         Repairs the item to full durability,
         Returns True if the item is not already full durability

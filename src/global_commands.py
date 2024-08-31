@@ -31,7 +31,7 @@ def exit():
     sys.exit()
 
 def save():
-    import items
+    from item import Item
     player_dict = global_variables.PLAYER.save()
     with open('player.csv', "w", newline='') as file:
         file.truncate(0)
@@ -44,7 +44,7 @@ def save():
 
     #append all inventory item_to_dicts to list
     for entry in global_variables.PLAYER.inventory:
-        item:items.Item = global_variables.PLAYER.inventory[entry]
+        item:Item = global_variables.PLAYER.inventory[entry]
         item.save()
         item_dict_list.append(item.saved)
 
@@ -82,11 +82,7 @@ def get_cmd() -> str:
     return cmd
 
 def match(text:str | list | tuple, size:int) -> str | tuple:
-    """
-    Adds " " to the end of a given string until it is
-    the desired length.
-    Used for formatting mostly
-    """
+    """Adds " " to the end of a given string until it is the desired length. Used for formatting mostly"""
     if type(text) == str:
         while(len(text) < size):
             text = text + " "
@@ -100,33 +96,28 @@ def match(text:str | list | tuple, size:int) -> str | tuple:
 
 def generate_item_rarity():
     """Generates item rarity based on player level"""
-    from items import Rarity
+    from item import Rarity
 
-    if probability(10+global_variables.PLAYER.level):
+    if probability(5+global_variables.PLAYER.level):
         return Rarity("Epic")
     
-    if probability(15+global_variables.PLAYER.level * 1.25):
+    if probability(10+global_variables.PLAYER.level * 1.25):
         return Rarity("Rare")
     
-    if probability(33+global_variables.PLAYER.level // 2):
+    if probability(25+global_variables.PLAYER.level // 2):
         return Rarity("Uncommon")
     
     return Rarity("Common")
 
-def load_item(item_type, save_data):
-    print(item_type)
-    raise Exception
-    pass
-
-def craft_item(blueprint):
-    from equipment import Weapon, Armor, Anvil
-    blueprint: Anvil = blueprint
-
-    match blueprint.anvil_type.split(" ")[0]:
+def create_item(source_dict):
+    from equipment import Anvil, Weapon, Armor
+    cast = Anvil()
+    cast.copy(source_dict)
+    match cast.anvil_type:
         case "Weapon":
-            return Weapon(blueprint.id, blueprint.rarity.string,)
-
-    raise Exception
+            return Weapon(cast)
+        case "Armor":
+            return Armor(cast)
 
 def d(num):
     """Rolls a dX where X is some number (ie d6, d20, etc)"""

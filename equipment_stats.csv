@@ -1,4 +1,4 @@
-type,id,damage,crit,crit_range,weight_class,armor,max_dex_bonus,rarity
+type,id,damage,crit,crit_range,weight_class,armor_value,max_dex_bonus,rarity
 Weapon,Long Sword,1d8,2,,Light,,6,Common
 Weapon,Battleaxe,1d8,3,,Medium,,3
 Weapon,Light Flail,1d8,2,,Medium,,4
@@ -10,11 +10,11 @@ Weapon,Glaive,1d10,3,,Medium,,4
 Weapon,Greataxe,1d12,3,,Heavy,,2
 Weapon,Scythe,2d4,4,16,Heavy,,
 Weapon,Halberd,1d10,3,,Medium,,4
-Weapon,Rapier,1d4,4,17,None,,None
+Weapon,Rapier,1d4,4,17,None,,12
 Weapon,Ultra Greatsword,2d10,2,,Heavy,,0
 Armor,Padded Leather,,,,Light,2,5,Common
 Armor,Studded Leather,,,,Light,3,5
-Armor,Haramaki,,,,None,1,None
+Armor,Haramaki,,,,None,1,12
 Armor,Chain Shirt,,,,Light,4,4
 Armor,Breastplate,,,,Medium,6,3
 Armor,Chain Mail,,,,Medium,6,2

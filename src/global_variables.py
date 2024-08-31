@@ -1,7 +1,7 @@
 #globals variables
 from player import Player
 #import item_compendium
-from shopkeep import Blacksmith, Shopkeep
+from shopkeep import Armory, Shopkeep, forge_all_items
 
 PLAYER:Player = Player()
 
@@ -52,34 +52,15 @@ START_CMD = True
 RUNNING = False
 
 SHOPKEEP = Shopkeep()
-BLACKSMITH = Blacksmith()
-BLACKSMITH.initialize()
+ARMORY = Armory()
 
-starter_weapon = BLACKSMITH.storehouse["Weapon"][0]
-starter_armor = BLACKSMITH.storehouse["Armor"][0]
+forge_all_items()
 
-PLAYER.equip(starter_weapon, True)
-PLAYER.equip(starter_armor, True)
+PLAYER.equip(ARMORY.get("Long Sword"), True)
+PLAYER.equip(ARMORY.get("Padded Leather"), True)
 #PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
 PLAYER.gain_gold(10000)
 #PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
-
-def restock_the_shop():
-    """
-    Restocks the shop, emptying its inventory before it does so.
-    """
-    #make sure the shop is up-to-date on player level
-    SHOPKEEP.empty_inventory()
-
-    BLACKSMITH.initialize()
-    for entry in BLACKSMITH.storehouse:
-        SHOPKEEP.restock(BLACKSMITH.storehouse[entry], 5)
-
-    #scales HP potions to be higher rarity with player level
-    #pots = item_compendium.Health_Potion.craft(max(PLAYER.level // 4, 1), 5)
-    SHOPKEEP.stock(pots)
-
-    #SHOPKEEP.stock(item_compendium.Repair_Kit.craft(5))
 
 def start():
     import tui

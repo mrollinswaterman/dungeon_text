@@ -44,7 +44,7 @@ class Evil_Eye(mob.Mob):
         return (self.mp - self.stats.max_mp)
     @property
     def execute_trigger(self):
-        return self.mp >= 3 and self.target.hp < self.target.statblock.max_hp // 2
+        return self.mp >= 3 and self.target.hp < self.target.stats.max_hp // 2
     @property
     def death_ray_damage(self) -> str:
         return "2d6"
@@ -94,8 +94,8 @@ class Evil_Eye(mob.Mob):
                     return None
         
         if self.execute_trigger:
-            missing_hp = self.target.statblock.max_hp - self.target.hp
-            percent_missing = (missing_hp * 100) / self.target.statblock.max_hp
+            missing_hp = self.target.stats.max_hp - self.target.hp
+            percent_missing = (missing_hp * 100) / self.target.stats.max_hp
             #execute chance is a magic number but it increases with missing HP
             execute_chance = percent_missing * (0.1 + (percent_missing / 10))
             if global_commands.probability(execute_chance):

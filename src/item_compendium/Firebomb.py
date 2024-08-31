@@ -1,7 +1,7 @@
 #Firebomb
-import items, global_commands
+import src.item as item, global_commands
 
-class Firebomb(items.Consumable):
+class Firebomb(item.Consumable):
     
     def __init__(self, id="Firebomb", rarity="Uncommon", quantity=0):
         import mob

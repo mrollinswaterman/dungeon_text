@@ -135,7 +135,7 @@ class Mob(Game_Object):
 
     def take_damage_narration(self, info) -> list[str]:
         from player import Player
-        from items import Item
+        from item import Item
         taken, source = info
         if taken > 0:
             match source:

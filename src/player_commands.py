@@ -1,6 +1,6 @@
 import time, sys
 import global_commands
-import items
+from item import Item
 
 GOD_MODE = True
 
@@ -199,7 +199,7 @@ def item_select() -> None:
             except ValueError:
                 global_commands.error_message(code)
 
-def use_an_item(item:items.Item, target=None) -> bool:
+def use_an_item(item:Item, target=None) -> bool:
     """
     Uses an item if the player has the item in their inventory.
     Returns False if item is None, else True
@@ -212,7 +212,7 @@ def use_an_item(item:items.Item, target=None) -> bool:
 
     if global_variables.PLAYER.has_item(item):#check the player has the item
         if item.is_consumable:
-            held_item:items.Consumable = global_variables.PLAYER.get_item(item.id)
+            held_item:item.Consumable = global_variables.PLAYER.get_item(item.id)
             if held_item.quantity == 0: #if the items quantity is 0, remove it
                 global_variables.PLAYER.drop(held_item)
                 global_commands.type_text(f"No {item.name} avaliable!")

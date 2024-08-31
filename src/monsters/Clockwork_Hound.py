@@ -1,6 +1,8 @@
 #Clockwork Hound mob file
 import random
-import mob, global_commands, items
+import mob, global_commands
+from stackable import Stackable
+from equipment import Equipment
 
 stats = {
     "level": 1,
@@ -29,15 +31,15 @@ class Clockwork_Hound(mob.Mob):
         self.gold += 30
         self.xp += 15
 
-        if global_commands.probability(50):
-            scrap:items.Resource = items.Resource("Clockwork Scrap", "Uncommon", random.randrange(1, (self.level // 2)))
-            scrap.set_weight(1.5)
+        """if global_commands.probability(50):
+            scrap:Stackable = Stackable("Clockwork Scrap", "Uncommon", random.randrange(1, (self.level // 2)))
+            scrap.unit_weight = 1.5
             self.pick_up(scrap, True)
 
         if global_commands.probability(3):
-            heart = items.Resource("Clockwork Heart", "Epic")
-            heart.set_weight(2)
-            self.pick_up(heart, True)
+            heart = Stackable("Clockwork Heart", "Epic")
+            heart.unit_weight = 2
+            self.pick_up(heart, True)"""
             
     def trigger(self) -> bool:
         if not super().trigger():
@@ -46,7 +48,7 @@ class Clockwork_Hound(mob.Mob):
 
     def special(self) -> None:
         self.spend_ap()
-        meal:items.Item = self.target.weapon
+        meal:Equipment = self.target.weapon
         if self.target.weapon.durability < self.target.armor.durability:
             meal = self.target.armor
         

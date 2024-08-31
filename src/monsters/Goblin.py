@@ -25,7 +25,6 @@ stats = {
 class Goblin(mob.Mob):
     def __init__(self, id="Goblin", stat_dict=stats):
         super().__init__(id, stat_dict)
-        self.flee_threshold = 30
         self.stolen = False
         #base xp & gold
         self.gold += 10
@@ -33,7 +32,7 @@ class Goblin(mob.Mob):
     
     @property
     def flee_threshold(self) -> float:
-        return 25
+        return 30
     @property
     def retreat(self):
         return self.gold >= (1.5 * self.target.gold) and self.stolen

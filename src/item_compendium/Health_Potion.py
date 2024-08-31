@@ -1,7 +1,7 @@
 #HP Pot
-import items, global_commands
+import src.item as item, global_commands
 
-class Health_Potion(items.Consumable):
+class Health_Potion(item.Consumable):
 
     def __init__(self, id="Health Potion", rarity="Common", quantity=1):
         super().__init__(id, rarity, quantity)

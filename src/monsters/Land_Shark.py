@@ -1,7 +1,8 @@
 #Land Shark mob file
 import mob, global_commands
 from conditions import Vulnerable
-import items, status_effect
+import status_effect
+from stackable import Stackable
 
 stats = {
     "level": 1, 
@@ -30,10 +31,10 @@ class Land_Shark(mob.Mob):
         self.gold += 15
         self.xp += 8
 
-        if global_commands.probability(10):
-            tooth = items.Resource("Land Shark Tooth", "Epic")
-            tooth.set_weight(0.5)
-            self.pick_up(tooth, True)
+        """if global_commands.probability(10):
+            tooth = Stackable("Land Shark Tooth", "Epic")
+            tooth.unit_weight = 0.5
+            self.pick_up(tooth, True)"""
 
         self.burrowed = False
 

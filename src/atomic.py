@@ -4,7 +4,7 @@ class Atomic_Effect():
     def __init__(self, target, src):
         from player import Player
         from mob import Mob
-        from items import Item
+        from item import Item
         from status_effect import Status_Effect
         self.target:Player | Mob | Item = target
         self.src: Item | Mob = src

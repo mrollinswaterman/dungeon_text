@@ -1,8 +1,9 @@
 import random, time, os, csv, enum
 import global_commands
 from game_object import Game_Object
-from items import Item, Consumable
+from item import Item
 from equipment import Weapon, Armor
+from stackable import Stackable
 
 class Stance(enum.Enum):
     NONE = 0
@@ -284,7 +285,7 @@ class Player(Game_Object):
         return None
 
     #INVENTORY STUFF
-    def pick_up(self, item: Item | Consumable, silent:bool=False) -> bool:
+    def pick_up(self, item: Item | Stackable, silent:bool=False) -> bool:
         if self.can_carry(item):
             return super().pick_up(item, silent)
         else:
@@ -305,8 +306,10 @@ class Player(Game_Object):
                 self.armor = item
             case _:
                 return False
-        if not silent: global_commands.type_text(f"{item.name} equipped.")
+        if not silent: global_commands.type_text(f"{item.id} equipped.")
         return True
+
+    #Add an unequip function
 
     def can_carry(self, item:Item | None) -> bool:
         """Checks if the player can carry item. Returns True if they can, False if not"""
@@ -328,7 +331,6 @@ class Player(Game_Object):
 
     def format_inventory(self, line_len=25):
         """Formats and prints the players inventory, line-by-line"""
-        import items
         last = False
         idx = 0
         mx = max(3, len(self.inventory))
@@ -378,6 +380,7 @@ class Player(Game_Object):
             #if there's 2 or more items left, increment index by 2, else 1
             idx += 2 if len(self.inventory) - idx >= 2 else 1
 
+        self.weapon.remove_durability(2)
     ##MISC.
     def update(self) -> None:
         self.reset_ap()
@@ -420,12 +423,13 @@ class Player(Game_Object):
         self.load_inventory(inventory_file)
     
     def load_inventory(self, filename) -> None:
-        import items
         #check if inventory file is emtpty
         empty_check = True if os.stat(filename).st_size == 0 else False
         if empty_check: return None
         size = 0
         self.inventory = {}
+        self.weapon = None
+        self.armor = None
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for row in reader:
@@ -434,8 +438,9 @@ class Player(Game_Object):
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
-                item = items.load_item(row["type"], row)
-                if idx >= size -2:
+                item = global_commands.create_item(row)
+                #item.load(row)
+                if idx >= size - 2:
                     self.equip(item, True)
                 else:
                     self.pick_up(item, True)

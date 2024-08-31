@@ -89,7 +89,7 @@ def continue_run():
 def exit_the_dungeon():
     global_variables.RUNNING = False
     global_commands.type_with_lines(random.choice(EXIT_DUNGEON))
-    global_variables.restock_the_shop()
+    global_variables.SHOPKEEP.restock()
     menu_options()
 
 def ask_quantity() -> int | bool:

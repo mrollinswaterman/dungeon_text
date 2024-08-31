@@ -3,7 +3,9 @@ from __future__ import annotations
 import enum, random, csv
 from typing import Any
 import global_commands
-import items
+from item import Item, Anvil
+from equipment import Weapon, Armor
+from stackable import Stackable
 
 
 class Damage_Type(enum.Enum):
@@ -137,7 +139,7 @@ class Status_Effects_Handler():
 class Game_Object():
 
     def __init__(self, id="Game Object"):
-        from items import Item
+        from item import Item
         from equipment import Weapon, Armor
 
         #Core properties
@@ -318,17 +320,17 @@ class Game_Object():
                     self.narrate(self.miss_narration)
         return None
 
-    def take_damage(self, taken:int, source:Game_Object | items.Item | str):
+    def take_damage(self, taken:int, source:Game_Object | Item | str):
         taken *= self.stats.damage_taken_multiplier
         taken = int(taken)
         if self.armor is None: self.armor = 0
         match source:
-            case Game_Object() | items.Item():
+            case Game_Object() | Item():
                 if source.damage_type.name == "PHYSICAL":
                     final = taken
                     #Reduce damage taken by self.armor, adjusted depending on if self.armor is an item object or an int
                     match self.armor:
-                        case items.Armor(): final -= self.armor.armor_value
+                        case Armor(): final -= self.armor.armor_value
                         case _: final -= self.armor
             case _:
                 final = taken
@@ -336,7 +338,7 @@ class Game_Object():
         self.lose_hp(final)
         self.narrate(self.take_damage_narration, (final, source))
 
-    def use(self, item:items.Item):
+    def use(self, item:Item):
         raise NotImplementedError
 
     #ENCHANTMENTS
@@ -405,7 +407,7 @@ class Game_Object():
         ]
         return text
 
-    def take_damage_narration(self, info:tuple[int, Game_Object | items.Item]) -> list[str]:
+    def take_damage_narration(self, info:tuple[int, Game_Object | Item]) -> list[str]:
         raise NotImplementedError
     
     
@@ -414,33 +416,33 @@ class Game_Object():
         raise NotImplementedError
 
     #INVENTORY
-    def pick_up(self, item:items.Item, silent=False):
+    def pick_up(self, item:Item, silent=False):
         """Adds an item to the Object's inventory"""
         match item:
-            case items.Consumable() | items.Resource():
+            case Stackable():
                 #if you have a stack of those items already
-                held:items.Consumable | None = self.get_item(item.id)
+                held:Stackable | None = self.get_item(id)
                 if held is not None:
-                    held.increase_quantity(item.quantity)
+                    held.quantity += held.quantity
                     item = held
                 #if you don't
                 else:
-                    self.inventory[item.id] = item
-            case items.Item():
-                self.inventory[item.id] = item
+                    self.inventory[id] = item
+            case Item():
+                self.inventory[id] = item
             case _:
                 raise ValueError(f"Unrecognized object {item}.")
 
-        item.set_owner(self)
+        item.owner = self
         if not silent: global_commands.type_text(item.pickup_message)
     
-    def drop(self, item:items.Item):
+    def drop(self, item:Item):
         item = self.get_item(item)
         if item is not None:
-            del self.inventory[item.id]
-            item.set_owner(None)
+            del self.inventory[id]
+            item.owner = None
 
-    def get_item(self, ref: items.Item | str | int | None):
+    def get_item(self, ref: Item | str | int | None):
         """
         Checks if the Object has an item in it's inventory. 
         Returns the item if so, else None
@@ -456,7 +458,7 @@ class Game_Object():
                 try: return list(self.inventory.values())[ref]
                 except IndexError: return None
 
-            case items.Item():
+            case Item():
                 try: return self.inventory[ref.id]
                 except KeyError: return None
 
