@@ -331,56 +331,22 @@ class Player(Game_Object):
 
     def format_inventory(self, line_len=25):
         """Formats and prints the players inventory, line-by-line"""
-        last = False
-        idx = 0
-        mx = max(3, len(self.inventory))
-        while(idx < mx):
-            if idx % 2 == 0 and idx != 0:
-                time.sleep(0.05)
-                print("\n")
-            weapon = list(self.weapon.format().values()) if idx == 0 else []
-            w_header = f"1. {weapon[0]}" if idx == 0 else " "
-            armor = list(self.armor.format().values()) if idx == 2 else []
-            a_header = f"2. {armor[0]}" if idx == 2 else " "
-            first = second = []
-            header1 = header2 = " "
-            if idx < len(self.inventory):
-                #creates a list of the current item's format dictionary values 
-                first = list(list(self.inventory.values())[idx].format().values())
-                try:
-                    #checks if this is the last item in the inventory or not
-                    second = list(list(self.inventory.values())[idx + 1].format().values())
-                except IndexError:
-                    last = True
-                    second = first
-                #sets the items' headers (ex. "1. Greatsword (Uncommon)     2. Plated Steelcaps (Rare)")
-                header1 = f"{idx+1}. {first[0]}"
-                header2 = f"{idx+2}. {second[0]}" if not last else " "
-            headers = (header1, header2, w_header, a_header)
-            header1, header2, w_header, a_header = global_commands.match(headers, line_len)
-            #sets header for equipped item, first weapon, then armor
-            equipped_header = w_header if idx == 0 else a_header
-            #print headers (first two item ids + weapon id)
-            print(f" {header1} \t {header2} \t\t {equipped_header}")
-            #finds longest necessary iteration length (ie longest item.format dictionary)
-            long = max(len(first), len(second), len(weapon), len(armor))
-            for i in range(1, long):
-                #sets whats going to be printed on the current line
-                str1 = first[i] if i < len(first) else " "
-                #if the item.format dictionary doesn't go past the current index, print " "
-                str2 = second[i] if i < len(second) and not last else " "
-                #ditto, but for equipped items
-                w = weapon[i] if idx == 0 and i < len(weapon) else " "
-                a = armor[i] if idx == 2 and i < len(armor) else " "
-                string = str1, str2, w, a
-                str1, str2, w, a = global_commands.match(string, line_len)
-                equipped = w if idx == 0 else a
-                #prints current line
-                print(f" {str1} \t {str2} \t\t {equipped}")
-            #if there's 2 or more items left, increment index by 2, else 1
-            idx += 2 if len(self.inventory) - idx >= 2 else 1
+        item_index = 0
 
-        self.weapon.remove_durability(2)
+        empty = ['', '', '', '', '', '', '']
+
+        while (item_index < len(self.inventory)+2):
+            line_index = 0
+            item1 = list(self.get_item(item_index).format.values()) if self.get_item(item_index) is not None else empty
+            item2 = list(self.get_item(item_index + 1).format.values()) if self.get_item(item_index + 1) is not None else empty
+            while (line_index < 6):
+                current_line = f"{item1[line_index]} \t {item2[line_index]} \t {self.weapon.format[line_index]}"
+                print(current_line)
+                time.sleep(0.5)
+                line_index += 1
+
+            item_index += 2
+
     ##MISC.
     def update(self) -> None:
         self.reset_ap()

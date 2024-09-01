@@ -121,6 +121,15 @@ class Weapon(Equipment):
     def stats(self) -> str:
         return f"{self.num_damage_dice}d{self.damage_die}, x{self.crit}"
 
+    @property
+    def format(self) -> dict[str: str]:
+        return {
+            "id": f"{self.id} ({self.rarity.string})",
+            "price_info": f"Cost - {self.value} gp  Weight - {self.weight} lbs.",
+            "damage_info": f"Damage - {self.anvil.damage}   Critical - {self.crit_range}–20/x{self.crit}",
+            "misc_info": f"Max Dex Bonus - +{self.max_dex_bonus}     Class - {self.weight_class.string}",
+            "durability": f"Durability: {self.durability}/{self.max_durability}",
+        }
     #methods
     def smelt(self) -> None:
         super().smelt()
@@ -142,18 +151,6 @@ class Weapon(Equipment):
 
     def load(self, stats_file) -> None:
         super().load(stats_file)
-    
-    def format(self) -> dict[str, str]:
-        forms = {
-            "id": f"{self.id} ({self.rarity.string})",
-            "damage":f"Damage: {self.num_damage_dice}d{self.damage_die}",
-            "crit": f"Critical: {self.crit_range}–20/x{self.crit}", 
-            "max_dex_bonus": f"Max Dex Bonus: +{self.max_dex_bonus}",
-            "durability": f"Durability: {self.durability}/{self.max_durability}",
-            "value": f"Value: {self.value}g",
-            "weight": f"Weight: {self.weight}",
-        }
-        return forms
 
 class Armor(Equipment):
 
@@ -178,10 +175,9 @@ class Armor(Equipment):
     def stats(self) -> str:
         return f"{self.weight_class.string}, {self.armor_value}P"
 
-    #methods
-    #META functions (save/load/format, etc)
-    def format(self):
-        forms = {
+    @property
+    def format(self) -> dict[str: str]:
+        return {
             "id": f"{self.id} ({self.rarity.string})",
             "weight_class": f"Class: {self.weight_class.string}",
             "armor": f"Armor: {self.armor_value}P",
@@ -190,4 +186,5 @@ class Armor(Equipment):
             "value": f"Value: {self.value}g",
             "weight": f"Weight: {self.weight}"
         }
-        return forms
+
+    #methods

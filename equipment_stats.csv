@@ -1,5 +1,5 @@
 type,id,damage,crit,crit_range,weight_class,armor_value,max_dex_bonus,rarity
-Weapon,Long Sword,1d8,2,,Light,,6,Common
+Weapon,Longsword,1d8,2,,Light,,6,Common
 Weapon,Battleaxe,1d8,3,,Medium,,3
 Weapon,Light Flail,1d8,2,,Medium,,4
 Weapon,Scimitar,1d6,2,18,Light,,6

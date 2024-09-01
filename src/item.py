@@ -103,7 +103,7 @@ class Item():
     def __init__(self, id:str, rarity=None):
         from game_object import Game_Object
         self.id = id
-        self._name = ""
+        self._name = self.id
         self.rarity:Rarity = None
         match rarity:
             case str() | int(): self.rarity = Rarity(rarity)
@@ -133,6 +133,14 @@ class Item():
     @property
     def name(self) -> str:
         return self._name
+    
+    @property
+    def format(self) -> dict[str: str]:
+        return {
+            "id": f"{self.id} ({self.rarity.string})",
+            "value": f"Value: {self.value}g",
+            "weight": f"Weight: {self.weight} lbs"
+        }
 
     #methods
     def initialize(self) -> None:
@@ -153,14 +161,6 @@ class Item():
                 self.__dict__[entry] = save_file[entry]
         
         self.rarity = Rarity(self.rarity)
-
-    def format(self) -> list[str]:
-        forms = {
-            "id": f"{self.id} ({self.rarity.string})",
-            "value": f"Value: {self.value}g",
-            "weight": f"Weight: {self.weight} lbs"
-        }
-        return forms
 
     def __str__(self) -> str:
         me = ""
