@@ -1,2 +1,2 @@
 name,level,hp,xp,gold,parent,id,level_range,hit_dice,str,dex,con,int,wis,cha,base_evasion,damage_taken_multiplier,damage_multiplier,max_hp,max_ap,max_mp,temp_hp,armor,damage,dc
-Player,1,11,0,10000,<player.Player object at 0x7f3287e4fd00>,Player Statblock,"(1, 20)",8,12,12,12,12,12,12,9,1,1,11,1,0,0,,,0
+Player,1,11,0,10000,<player.Player object at 0x102ddfc50>,Player Statblock,"(1, 20)",8,12,12,12,12,12,12,9,1,1,11,1,0,0,,,0

@@ -1,6 +1,5 @@
 #Land Shark mob file
 import mob, global_commands
-from conditions import Vulnerable
 import status_effect
 from stackable import Stackable
 
@@ -73,9 +72,9 @@ class Land_Shark(mob.Mob):
             global_commands.type_text(f"The {self.id} erupts from the ground.")
             self.stats.base_evasion -= 3
             self.stats.armor -= 2
-            vul:status_effect.Status_Effect = Vulnerable.Condition(self, self)#double all damage taken for 3 turns
-            vul.set_duration(3)
-            self.status_effects.add(vul)
+            #vul:status_effect.Status_Effect = Vulnerable.Condition(self, self)#double all damage taken for 3 turns
+            #vul.set_duration(3)
+            #self.status_effects.add(vul)
             self.burrowed = False
             return True
     

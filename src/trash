@@ -48,3 +48,14 @@
                 print(f" {str1} \t {str2} \t\t {equipped}")
             #if there's 2 or more items left, increment index by 2, else 1
             idx += 2 if len(self.inventory) - idx >= 2 else 1
+
+
+        for j, lst in enumerate(master):
+            if lst == master[0]:
+                current = f" {lst[i]}"
+            else: current = f"{current} {lst[i]}"
+            #print(len(current), end="~")
+            if len(current) < max_width * (j + 1):
+                current = current + (" " * ((max_width * (j + 1)) - len(current))) + "|"
+            print(len(current), end='/')
+        print(current)

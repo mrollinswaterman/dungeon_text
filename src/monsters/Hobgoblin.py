@@ -1,7 +1,6 @@
 #Hobgoblin mob file
 import random
 import mob, global_commands
-from conditions import Stat_Debuff
 
 stats = {
     "level": 1,
@@ -49,11 +48,11 @@ class Hobgoblin(mob.Mob):
 
         else:
             global_commands.type_text(f"The {self.id}'s insults distract you, making you an easier target.")
-            taunt = Stat_Debuff.Condition(self, self.target)
-            taunt.set_duration(3)
-            taunt.set_potency(2)
-            taunt.set_stat("base_evasion")
-            self.target.add_status_effect(taunt)
+            #taunt = Stat_Debuff.Condition(self, self.target)
+            #taunt.set_duration(3)
+            #taunt.set_potency(2)
+            #taunt.set_stat("base_evasion")
+            #self.target.add_status_effect(taunt)
         return None
     
     def roll_narration(self):

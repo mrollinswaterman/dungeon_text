@@ -321,7 +321,7 @@ class Player(Game_Object):
         global_commands.type_with_lines()
         print(f'{line_len * " "} Inventory: {line_len * " "} \t \t\t Equipped:\n')
         
-        self.format_inventory()
+        self.display_inventory()
         
         print("\n")
         print(f"Gold: {self.gold}g", end='')
@@ -329,23 +329,41 @@ class Player(Game_Object):
         print(f"\t Carrying Capacity: {self.carrying}/{self.carrying_capacity}\n")
         global_commands.type_with_lines()
 
-    def format_inventory(self, line_len=25):
+    def display_items(self, start, equipment:Item):
+        index = start
+        item_1 = [""]
+        item_2 = [""]
+        equip_format = [""]
+        if self.get_item(index + 1) is not None:
+            item_1 = self.get_item(index).format
+            item_1[0] = f"{index+1}. {item_1[0]}"
+
+            item_2 = self.get_item(index + 1).format
+            item_2[0] = f"{index+2}. {item_2[0]}"
+        elif self.get_item(index) is not None:
+            item_1 = self.get_item(index).format
+            item_1[0] = f"{index+1}. {item_1[0]}"
+
+        if equipment is not None:
+            equip_format = equipment.format
+            equip_format[0] = f"{index+1}. {equip_format[0]}"
+
+        global_commands.print_line_by_line([item_1, item_2, equip_format])
+
+    def display_inventory(self):
         """Formats and prints the players inventory, line-by-line"""
         item_index = 0
 
-        empty = ['', '', '', '', '', '', '']
-
-        while (item_index < len(self.inventory)+2):
-            line_index = 0
-            item1 = list(self.get_item(item_index).format.values()) if self.get_item(item_index) is not None else empty
-            item2 = list(self.get_item(item_index + 1).format.values()) if self.get_item(item_index + 1) is not None else empty
-            while (line_index < 6):
-                current_line = f"{item1[line_index]} \t {item2[line_index]} \t {self.weapon.format[line_index]}"
-                print(current_line)
-                time.sleep(0.5)
-                line_index += 1
-
+        while(item_index < len(self.inventory) + 4):#+4
+            equipment = None
+            if item_index == 0:
+                equipment = self.weapon
+            elif item_index == 2:
+                equipment = self.armor
+            self.display_items(item_index, equipment)
             item_index += 2
+            print("\n")
+        raise Exception
 
     ##MISC.
     def update(self) -> None:

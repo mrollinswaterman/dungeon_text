@@ -136,11 +136,10 @@ class Item():
     
     @property
     def format(self) -> dict[str: str]:
-        return {
-            "id": f"{self.id} ({self.rarity.string})",
-            "value": f"Value: {self.value}g",
-            "weight": f"Weight: {self.weight} lbs"
-        }
+        return [
+            f"{self.id} ({self.rarity.string})",
+            f"Price: {self.value}gp --- Weight: {self.weight} lbs."
+        ]
 
     #methods
     def initialize(self) -> None:

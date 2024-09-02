@@ -94,6 +94,38 @@ def match(text:str | list | tuple, size:int) -> str | tuple:
         
         return tuple(final)
 
+def find_max_depth(master:list[list[str] | None]) -> int:
+    mx = len(master[0])
+    for i in master:
+        if len(i) > mx:
+            mx = len(i)
+    return mx
+
+def print_line_by_line(master:list[list[str] | None]):
+    max_width = 35
+    max_depth = find_max_depth(master)
+    i = 0
+    #fill all empty list spaces with " " strings
+    for lst in master: 
+        for x in range(max_depth):
+            try:
+                error = lst[x]
+            except IndexError:
+                lst.append(" ")
+    while (i < 2):
+        current = ""
+        pieces = []
+        for lst in master:
+            pieces.append(lst[i])
+        for string in pieces:
+            while(len(string) < max_width):
+                string = string + " "
+            current = f"{current} {string}"
+
+        time.sleep(.05)
+        i += 1
+        print(current)
+
 def generate_item_rarity():
     """Generates item rarity based on player level"""
     from item import Rarity

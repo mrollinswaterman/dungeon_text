@@ -123,13 +123,11 @@ class Weapon(Equipment):
 
     @property
     def format(self) -> dict[str: str]:
-        return {
-            "id": f"{self.id} ({self.rarity.string})",
-            "price_info": f"Cost - {self.value} gp  Weight - {self.weight} lbs.",
-            "damage_info": f"Damage - {self.anvil.damage}   Critical - {self.crit_range}–20/x{self.crit}",
-            "misc_info": f"Max Dex Bonus - +{self.max_dex_bonus}     Class - {self.weight_class.string}",
-            "durability": f"Durability: {self.durability}/{self.max_durability}",
-        }
+        return super().format + [
+            f"Max Dex Bonus: +{self.max_dex_bonus} --- Class: {self.weight_class.string}",
+            f"Damage: {self.anvil.damage} --- Critical: {self.crit_range}–20/x{self.crit}",
+            f"Durability: {self.durability}/{self.max_durability}",
+        ]
     #methods
     def smelt(self) -> None:
         super().smelt()
@@ -177,14 +175,10 @@ class Armor(Equipment):
 
     @property
     def format(self) -> dict[str: str]:
-        return {
-            "id": f"{self.id} ({self.rarity.string})",
-            "weight_class": f"Class: {self.weight_class.string}",
-            "armor": f"Armor: {self.armor_value}P",
-            "max_dex_bonus": f"Max Dex Bonus: +{self.max_dex_bonus}",
-            "durability": f"Durability: {self.durability}/{self.max_durability}",
-            "value": f"Value: {self.value}g",
-            "weight": f"Weight: {self.weight}"
-        }
+        return super().format + [
+            f"Max Dex Bonus: +{self.max_dex_bonus} --- Class: {self.weight_class.string}",
+            f"Armor: {self.armor_value} --- Resistance Type: {self.damage_type.name}",
+            f"Durability: {self.durability}/{self.max_durability}",
+        ]
 
     #methods
