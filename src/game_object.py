@@ -427,9 +427,9 @@ class Game_Object():
                     item = held
                 #if you don't
                 else:
-                    self.inventory[id] = item
+                    self.inventory[item.id] = item
             case Item():
-                self.inventory[id] = item
+                self.inventory[item.id] = item
             case _:
                 raise ValueError(f"Unrecognized object {item}.")
 

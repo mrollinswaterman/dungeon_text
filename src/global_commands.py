@@ -24,6 +24,14 @@ BONUS = {
     24: 7
 }
 
+end_line = [
+    ".", "!", "?"
+]
+
+pause_chars = [
+    ",", ":", ";", "*"
+]
+
 def exit():
     global_variables.RUNNING = False
     save()
@@ -81,27 +89,14 @@ def get_cmd() -> str:
     print("")
     return cmd
 
-def match(text:str | list | tuple, size:int) -> str | tuple:
-    """Adds " " to the end of a given string until it is the desired length. Used for formatting mostly"""
-    if type(text) == str:
-        while(len(text) < size):
-            text = text + " "
-        return text
-    else:
-        final = []
-        for item in text:
-            final.append(match(item, size))
-        
-        return tuple(final)
-
-def find_max_depth(master:list[list[str] | None]) -> int:
+def find_max_depth(master:list[list[str]]) -> int:
     mx = len(master[0])
     for i in master:
         if len(i) > mx:
             mx = len(i)
     return mx
 
-def print_line_by_line(master:list[list[str] | None]):
+def print_line_by_line(master:list[list[str]]) -> None:
     max_width = 35
     max_depth = find_max_depth(master)
     i = 0
@@ -112,17 +107,17 @@ def print_line_by_line(master:list[list[str] | None]):
                 error = lst[x]
             except IndexError:
                 lst.append(" ")
-    while (i < 2):
+    while (i < max_depth):
         current = ""
         pieces = []
         for lst in master:
             pieces.append(lst[i])
-        for string in pieces:
+        for j, string in enumerate(pieces):
             while(len(string) < max_width):
                 string = string + " "
-            current = f"{current} {string}"
-
-        time.sleep(.05)
+            #Adds a tab between each item, except the first
+            current = f"{current} {string}" if j == 0 else f"{current} \t {string}"
+        time.sleep(.01)
         i += 1
         print(current)
 
@@ -142,7 +137,8 @@ def generate_item_rarity():
     return Rarity("Common")
 
 def create_item(source_dict):
-    from equipment import Anvil, Weapon, Armor
+    from item import Anvil
+    from equipment import Weapon, Armor
     cast = Anvil()
     cast.copy(source_dict)
     match cast.anvil_type:
@@ -176,7 +172,6 @@ def XdY(damage:str | list | int):
     for _ in range(num):
         final += d(dice)
     return final
-    
 
 def probability(chance):
     return random.random() < (chance / 100)
@@ -188,54 +183,36 @@ def type_with_lines(text:str=None, num:int=1, speed:float=None, newln=True) -> N
         print("="*110+"\n")
 
 def error_message(cmd:str="", text:str=None) -> None:
-
     text = f'Inavlid command "{cmd}". Please try again.' if text is None else text
     type_text(text)
 
-end_line = [
-    ".", "!", "?"
-]
-
-pause_chars = [
-    ",", ":", ";", "*"
-]
-
 def type_text(text:str=None, speed:float=None, newln=True) -> None:
-    """
-    Adds "typing" effect to text
-
-    speed: an integer denoting the delay between characters
-    """
+    """Adds a typing effect to text"""
     if text is None:
         return None
 
-    first = True#tracks if the first letter of text has been made uppercase
+    #tracks if the first letter of text has been made uppercase
+    first = True
     text = " " + text + " "
 
     #typing speed, lower = faster
     speed = 2
-
     for idx, char in enumerate(text):
 
         if first and char.isalpha():
             char = char.upper()
             first = False
-
         print(char, end='', flush=True)
-
         waitTime = speed/100
 
         #add waitTime time if char is punctuation
         waitTime += 0.3 if char in end_line else 0
-
         #add waitTime if char is a "pause character" ie ",", ":", etc
         waitTime += 0.15 if char in pause_chars else 0
-
         #add waitTime time for end of text
         waitTime += 0.4 if idx == len(text) else 0
 
         time.sleep(waitTime)
-
         if idx / 120 >= 1.0 and char in end_line:
             print("\n")
 

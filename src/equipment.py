@@ -124,8 +124,8 @@ class Weapon(Equipment):
     @property
     def format(self) -> dict[str: str]:
         return super().format + [
-            f"Max Dex Bonus: +{self.max_dex_bonus} --- Class: {self.weight_class.string}",
-            f"Damage: {self.anvil.damage} --- Critical: {self.crit_range}–20/x{self.crit}",
+            f"{self.weight_class.string}, +{self.max_dex_bonus}",
+            f"Damage: {self.anvil.damage}   Crit: {self.crit_range}–20/x{self.crit}",
             f"Durability: {self.durability}/{self.max_durability}",
         ]
     #methods
@@ -176,8 +176,8 @@ class Armor(Equipment):
     @property
     def format(self) -> dict[str: str]:
         return super().format + [
-            f"Max Dex Bonus: +{self.max_dex_bonus} --- Class: {self.weight_class.string}",
-            f"Armor: {self.armor_value} --- Resistance Type: {self.damage_type.name}",
+            f"{self.weight_class.string}, +{self.max_dex_bonus}",
+            f"Armor: {self.armor_value}/{self.damage_type.name}",
             f"Durability: {self.durability}/{self.max_durability}",
         ]
 

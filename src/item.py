@@ -138,14 +138,11 @@ class Item():
     def format(self) -> dict[str: str]:
         return [
             f"{self.id} ({self.rarity.string})",
-            f"Price: {self.value}gp --- Weight: {self.weight} lbs."
+            f"Cost: {self.value}gp   Weight: {self.weight} lbs."
         ]
 
     #methods
-    def initialize(self) -> None:
-        return None
-
-    #META functions (save/load/format, etc)
+    #META functions (save/load, etc)
     def save(self) -> None:
         self.saved = {
             "type": self.__class__.__name__,

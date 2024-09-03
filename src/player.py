@@ -23,7 +23,8 @@ class Player(Game_Object):
     #PROPERTIES
     @property
     def carrying_capacity(self) -> float:
-        return 5.5 * self.stats.str
+        return 600
+        #return 5.5 * self.stats.str
 
     @property
     def available_carrying_capacity(self) -> int:
@@ -241,13 +242,12 @@ class Player(Game_Object):
         global_commands.type_text(f"You wind up for a powerful attack...")
     
     def feint(self) -> None:
-        from conditions import Stat_Buff
 
         global_commands.type_text("You attempt a feint...")
         roll = self.roll_a_check("cha")
         self.spend_ap()
 
-        if roll >= self.target.roll_a_check("cha"):
+        """if roll >= self.target.roll_a_check("cha"):
             global_commands.type_text(f"You faked out the {self.target.id}!")
             def_bonus = Stat_Buff.Condition(self, self)
             def_bonus.set_stat("base_evasion")
@@ -255,23 +255,22 @@ class Player(Game_Object):
             def_bonus.set_potency(max(2, self.bonus("cha")))
             self.add_status_effect(def_bonus)
         else:
-            global_commands.type_text(f"The {self.target.id} spots your trick.")
+            global_commands.type_text(f"The {self.target.id} spots your trick.")"""
 
         return None
     
     def riposte(self) -> None:
-        from conditions import Stat_Buff
 
         global_commands.type_text("You ready yourself to repel any oncoming attacks...")
 
         self.spend_ap(2)
-        rip_bonus = Stat_Buff.Condition(self, self)
+        """rip_bonus = Stat_Buff.Condition(self, self)
         rip_bonus.set_id("Riposte")
         rip_bonus.set_cleanse_message("Your Riposte has ended.")
         rip_bonus.set_stat("base_evasion")
         rip_bonus.set_duration(1000000)
         rip_bonus.set_potency(2)
-        self.add_status_effect(rip_bonus)
+        self.add_status_effect(rip_bonus)""" 
 
         self.stance = Stance(1)
         self.riposting = True
@@ -316,7 +315,7 @@ class Player(Game_Object):
         if item is None: return False
         else: return self.carrying + item.weight <= self.carrying_capacity
 
-    def print_inventory(self, line_len=25) -> None:
+    def print_inventory(self) -> None:
         line_len = 25
         global_commands.type_with_lines()
         print(f'{line_len * " "} Inventory: {line_len * " "} \t \t\t Equipped:\n')
@@ -329,7 +328,9 @@ class Player(Game_Object):
         print(f"\t Carrying Capacity: {self.carrying}/{self.carrying_capacity}\n")
         global_commands.type_with_lines()
 
-    def display_items(self, start, equipment:Item):
+    def display_items(self, start:int, equipment:Item):
+        """Processes an item's format property and feeds it to global_commands.print_line_by_line
+            to be printed"""
         index = start
         item_1 = [""]
         item_2 = [""]
@@ -346,7 +347,8 @@ class Player(Game_Object):
 
         if equipment is not None:
             equip_format = equipment.format
-            equip_format[0] = f"{index+1}. {equip_format[0]}"
+            equipment_index = 1 if index == 0 else index
+            equip_format[0] = f"{equipment_index}. {equip_format[0]}"
 
         global_commands.print_line_by_line([item_1, item_2, equip_format])
 
@@ -354,7 +356,7 @@ class Player(Game_Object):
         """Formats and prints the players inventory, line-by-line"""
         item_index = 0
 
-        while(item_index < len(self.inventory) + 4):#+4
+        while(item_index < len(self.inventory) + 4):
             equipment = None
             if item_index == 0:
                 equipment = self.weapon
@@ -363,7 +365,6 @@ class Player(Game_Object):
             self.display_items(item_index, equipment)
             item_index += 2
             print("\n")
-        raise Exception
 
     ##MISC.
     def update(self) -> None:
@@ -424,6 +425,7 @@ class Player(Game_Object):
             for idx, row in enumerate(reader):
                 item = global_commands.create_item(row)
                 #item.load(row)
+                print(item.durability)
                 if idx >= size - 2:
                     self.equip(item, True)
                 else:

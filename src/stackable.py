@@ -35,6 +35,12 @@ class Stackable(Item):
     def pickup_message(self) -> str:
         return f"You picked up {self.quantity} {self.id}s" if self.quantity > 1 else f"You picked up a {self.id}"
     
+    @property
+    def format(self) -> str:
+        return super().format + [
+            f"Quantity: {self.quantity}"
+        ]
+
     #methods
     def craft(self):
         """Copies an item's anvil stats to it's own class attributes"""
@@ -42,9 +48,9 @@ class Stackable(Item):
             if entry in self.__dict__ and self.__dict__[entry] is None:
                 self.__dict__[entry] = self.anvil.__dict__[entry]
 
-        self.quantity = int(self.quantity)
-        self.unit_value = int(self.unit_value)
-        self.unit_weight = int(self.unit_weight)
+        #self.quantity = int(self.quantity)
+        #self.unit_value = int(self.unit_value)
+        #self.unit_weight = int(self.unit_weight)
 
     #META functions (ie save/load/format etc)
     def save(self) -> None:

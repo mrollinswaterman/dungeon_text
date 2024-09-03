@@ -58,11 +58,10 @@ forge_all_items()
 
 PLAYER.equip(ARMORY.get("Longsword"), True)
 PLAYER.equip(ARMORY.get("Padded Leather"), True)
-PLAYER.pick_up(ARMORY.get("Greataxe"), True)
+
 #PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
 PLAYER.gain_gold(10000)
 #PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
-PLAYER.print_inventory()
 
 def start():
     import tui
