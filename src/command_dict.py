@@ -20,7 +20,7 @@ commands = {
     "actions": {
         "a": global_variables.PLAYER.attack,
         "ct": player_commands.combat_tricks,
-        "e": player_commands.cleanse_an_effect,
+        "e": player_commands.cleanse_a_condition,
         "i": player_commands.show_inventory,
         "w": global_variables.PLAYER.spend_ap,
         "r": player_commands.flee

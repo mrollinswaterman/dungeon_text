@@ -1,6 +1,6 @@
 import random, time, os, csv, enum
 import global_commands
-from game_object import Game_Object
+from game_object import Game_Object, Conditions_Handler
 from item import Item
 from equipment import Weapon, Armor
 from stackable import Stackable
@@ -15,12 +15,17 @@ class Player(Game_Object):
 
     def __init__(self, id="Player"):
         super().__init__(id)
+        self.conditions:Conditions_Handler = Conditions_Handler(self)
         self.level = 1
         self.stats.max_ap = 1 + (self.level // 5)
         #stances
         self.stance = Stance(0)
 
     #PROPERTIES
+    @property
+    def header(self) -> str:
+        return "Your"
+
     @property
     def carrying_capacity(self) -> float:
         return 600
@@ -143,6 +148,17 @@ class Player(Game_Object):
     
     def use(self, item):
         pass
+
+    def modify_stat(self, stat:str, amount:int) -> None:
+        import global_variables
+        try:
+            self.stats[stat] += amount
+        except KeyError:
+            raise ValueError(f"Can't modify non-existent stat '{stat}'.")
+    
+        text = f"Your {global_variables.STATS[stat]} increased by {amount}."
+        if amount < 0:
+            f"Your {global_variables.STATS[stat]} decreased by {abs(amount)}."
     
     #ENCHANTMENTS
     def apply_on_attacks(self):

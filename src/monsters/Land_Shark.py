@@ -1,6 +1,5 @@
 #Land Shark mob file
 import mob, global_commands
-import status_effect
 from stackable import Stackable
 
 stats = {
@@ -39,7 +38,7 @@ class Land_Shark(mob.Mob):
 
     @property
     def applied(self) -> bool:
-        return self.status_effects.get("Vulnerable") is not None
+        return self.conditions.get("Vulnerable") is not None
 
     def trigger(self):
         if not super().trigger():

@@ -1,6 +1,5 @@
 #Smog Cloud Event class
 import event
-import status_effect
 
 success = {
     "con": ["You grit your teeth and continue forwards, making it out without a scratch.", 

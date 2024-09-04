@@ -3,10 +3,9 @@ from __future__ import annotations
 import enum, random, csv
 from typing import Any
 import global_commands
-from item import Item, Anvil
+from item import Item
 from equipment import Weapon, Armor
 from stackable import Stackable
-
 
 class Damage_Type(enum.Enum):
     TRUE = 0
@@ -73,74 +72,73 @@ class Statblock():
                     case int():self.__dict__[entry] = int(source[entry])
                     case _: self.__dict__[entry] = source[entry]
 
-
-class Status_Effects_Handler():
-
-    from status_effect import Status_Effect
+class Conditions_Handler():
+    from condition import Condition
     def __init__(self, parent):
-        from status_effect import Status_Effect
+        from condition import Condition
 
         self.parent:Game_Object = parent
-        self.dict:dict[str: Status_Effect] = {}
-        self.cleanse_pool: set[Status_Effect] = set()
-
+        self.dict:dict[str: Condition] = {}
+        self.cleanse_pool: set[Condition] = set()
+    
+    #properties
     @property
-    def effects(self) -> list[Status_Effect]:
+    def conditions(self) -> list[Condition]:
         return list(self.dict.values())
 
-    def get(self, effect:Status_Effect | str | int) -> Status_Effect | None:
-        """Returns a status effect from the status effect list's dictionary.
+    #methods
+    def get(self, condition:Condition | str | int) -> Condition | None:
+        """Returns a condition from the Conditon_Handler's dictionary.
             Can access by str(id) or int(index)"""
         try:
-            match effect:
+            match condition:
                 case str():
-                    return self.dict[effect]
+                    return self.dict[condition]
                 case int():
-                    return self.effects[effect]
+                    return self.conditions[condition]
                 case _:
-                    return self.dict[effect.id]
+                    return self.dict[condition.id]
         except IndexError | KeyError:
             return None
 
-    def add(self, effect:Status_Effect):
-        if effect.id not in self.dict:
-            self.dict[effect.id] = effect
+    def add(self, condition:Condition):
+        if condition.id not in self.dict:
+            self.dict[condition.id] = condition
+            condition.start()
         else:
-            effect = self.get(effect)
-            if effect is not None:
-                effect.additional_effect()
+            condition = self.get(condition)
+            if condition is not None:
+                condition.additional()
 
     def update(self):
-        for effect in self.effects:
-            effect.update()
-            if effect.active is False:
-                self.cleanse_pool.add(effect)
+        for condition in self.conditions:
+            condition.update()
+            if not condition.active:
+                self.cleanse_pool.add(condition)
 
-        for effect in self.cleanse_pool:
-            self.cleanse(effect)
+        for condition in self.cleanse_pool:
+            self.cleanse(condition)
         self.cleanse_pool = set()
     
-    def cleanse(self, effect:Status_Effect | str | int) -> bool:
-        effect = self.get(effect)
-        if effect is not None:
-            effect.cleanse()
-            del self.dict[effect.id]
+    def cleanse(self, condition:Condition | str | int) -> bool:
+        condition = self.get(condition)
+        if condition is not None:
+            condition.end()
+            del self.dict[condition.id]
             return True
         else: return False
 
     def cleanse_all(self):
-        for effect in self.effects:
-            self.cleanse_pool.add(effect)
+        for condition in self.conditions:
+            self.cleanse_pool.add(condition)
 
-        for effect in self.cleanse_pool:
-            self.cleanse(effect)
+        for condition in self.cleanse_pool:
+            self.cleanse(condition)
         self.cleanse_pool = set()
 
 class Game_Object():
 
     def __init__(self, id="Game Object"):
-        from item import Item
-        from equipment import Weapon, Armor
 
         #Core properties
         self.id = id
@@ -163,7 +161,7 @@ class Game_Object():
         self.armor: Armor | int | None = None
 
         #Combat tools
-        self.status_effects:Status_Effects_Handler = Status_Effects_Handler(self)
+        #self.conditions:Conditions_Handler = None
         self.damage_type:Damage_Type = Damage_Type(1)
 
         #Misc.
@@ -184,6 +182,18 @@ class Game_Object():
         return self.stats.base_evasion + self.bonus("dex")
     
     @property
+    def default_header(self) -> str:
+        return f"The {self.id}"
+
+    @property
+    def owner_header(self) -> str:
+        return f"The {self.id}'s"
+
+    @property
+    def condition_header(self) -> str:
+        return f"The {self.id} is"
+
+    @property
     def needs_healing(self) -> bool:
         return self.hp < self.stats.max_hp
     
@@ -200,7 +210,7 @@ class Game_Object():
     #METHODS
     def update(self):
         self.reset_ap()
-        self.status_effects.update() 
+        self.conditions.update() 
 
     def bonus(self, stat:str) -> int:
         return self.stats.bonus(stat)
@@ -239,8 +249,12 @@ class Game_Object():
             self.hp -= num
 
     def gain_temp_hp(self, num:int):
-        """Adds temp HP to the Object"""
-        self.stats.temp_hp += int(num)
+        """Adds temp HP to the Object. Object only gets the highest temp_hp value.
+            i.e, newly added temp_hp replaces old temp_hp if it's value is higher, else it is ignored."""
+        if self.stats.temp_hp > int(num):
+            return None 
+        else:
+            self.stats.temp_hp = int(num)
 
     def heal(self, num:int):
         """Heals the Object for num amount"""
@@ -279,9 +293,6 @@ class Game_Object():
             return True
         self.mp += num
         return True
-
-    def modify(self, stat, num:int):
-        self.stats.modify(stat, num)
 
     def gain_gold(self, num:int) -> int:
         self.gold += num
@@ -337,6 +348,17 @@ class Game_Object():
 
         self.lose_hp(final)
         self.narrate(self.take_damage_narration, (final, source))
+
+    def modify(self, stat:str, amount:int) -> None:
+        import global_variables
+        try:
+            self.stats.modify(stat, amount)
+        except KeyError:
+            raise ValueError(f"Can't modify non-existent stat '{stat}'.")
+    
+        text = f"{self.owner_header} {global_variables.STATS[stat]} increased by {amount}."
+        if amount < 0:
+            f"{self.owner_header} {global_variables.STATS[stat]} decreased by {abs(amount)}."
 
     def use(self, item:Item):
         raise NotImplementedError

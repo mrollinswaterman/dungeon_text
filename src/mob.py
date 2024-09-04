@@ -1,7 +1,6 @@
 import random
 import global_commands
-import status_effect
-from game_object import Game_Object
+from game_object import Game_Object, Conditions_Handler
 
 default = {
     "level": 1,
@@ -29,6 +28,7 @@ class Mob(Game_Object):
     def __init__(self, id:str="Anonymous_Mob", stat_dict:dict=default):
         #identification
         super().__init__(id)
+        self.conditions:Conditions_Handler = Conditions_Handler(self)
         self.stats.copy(stat_dict)
         self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])
         self.stats.level = self.level
@@ -40,31 +40,38 @@ class Mob(Game_Object):
     @property
     def caster_level(self) -> int:
         return max(1, self.level // 5)
+
     @property
     def evasion(self) -> int:
         return self.stats.base_evasion + self.bonus("dex")
+
     @property
     def can_act(self) -> bool:
         return self.ap > 0 and not self.dead
+
     @property
     def can_cast(self) -> bool:
         return self.mp > 0
+
     @property
     def can_full_round(self) -> bool:
         return self.ap == self.stats.max_ap
+
     @property
     def flee_threshold(self) -> float:
-    #Percent current HP threshold at which the enemy tries to flee (higher==more cowardly)"""
+    #Percent current %HP threshold at which the enemy tries to flee (higher==more cowardly)"""
         return 10
+
     @property
     def fleeing(self) -> bool:
         return self.flee_check() or self.retreating
+
     @property
     def target(self) -> Game_Object:
         import global_variables
         return global_variables.PLAYER
 
-    #METHODS
+    #methods
     def flee_check(self):
         """Checks if the mob's health is low enough to attempt a flee"""
         if self.hp <= self.stats.max_hp * (self.flee_threshold/100) and self.roll_a_check("cha") < 13:
@@ -194,7 +201,7 @@ class Mob(Game_Object):
     #SPECIALs + TRIGGER
     def special(self):
         """Mob's special move"""
-        if self.status_effects.get("Enraged") is not None:
+        if self.conditions.get("Enraged") is not None:
             return False
         return True
     
@@ -204,4 +211,4 @@ class Mob(Game_Object):
         runs it's parent trigger function to see if it is able to do it's special
         or if it must attack due to effects."""
 
-        return self.status_effects.get("Enraged") is not None
+        return self.conditions.get("Enraged") is not None

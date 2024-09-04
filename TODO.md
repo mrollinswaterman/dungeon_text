@@ -28,7 +28,7 @@ as necessary for formatting)
 don't stack???
 - [X] Make stablocks their own class???? (ie player.stats.dex)
 - [ ] Maybe make a stance class (riposte, total defense, defensive, offensive, all-out, etc) each with different effects.
-- [ ] Make a damage class to store info about an object damage (type, src, amount, etc), and do the same for weapon types?
+- [X] Make a damage class to store info about an object damage (type, src, amount, etc), and do the same for weapon types?
 - [ ] Split statuses and effects. Statuses are named conditions (ie On Fire, Poisoned, Slowed, etc), while effects are the mechanical things that happen
 (ie damage over time, increasing or reducing a stat for a given period, one-time damage, )
 
@@ -87,7 +87,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Armordillo: deals ⅓ (or ½ or just some flat amount) of any damage taken back to the player. Can “curl up” defensively to halve all damage he takes during the next turn (does this frequently, never chases after the player just wants to be left alone. Give him a really good drop???)
 - [ ] Flaming Skull --> chance to catch fire on attack, regens to full when killed, but max_hp decays each resurrection, to a minimum of 5-10. Dies for good if you one-shot it (from full??), ie do its max hp in one attack.
 
-## Atmoics
+## Enchantments
 
 - [X] Flaming: chance to set target on fire on hit
 - [ ] Molten/Searing/Super fucking hot: target takes a small amount of damage regardless of if the attack hits, plus a small chance to be set on fire. If the attack hits, larger chance to be set on fire, still take small unavoidable damage

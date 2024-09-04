@@ -5,9 +5,7 @@ from item import Item
 GOD_MODE = True
 
 def turn():
-    """
-    Runs the player's turn
-    """
+    """Runs the player's turn"""
     import global_variables
     import controller
     from command_dict import commands
@@ -67,9 +65,7 @@ def cancel():
     return None
 
 def turn_options():
-    """
-    Prints the player's stat info and turn options
-    """
+    """Prints the player's stat info and turn options"""
     import global_variables
 
     header = f"What would you like to do?"
@@ -123,12 +119,12 @@ def combat_tricks():
     
     return None
 
-def cleanse_an_effect():
+def cleanse_a_condition():
     """
     Attempts to cleanse a chosen status effect
     """
     import global_variables
-    import status_effect
+    import condition
     from command_dict import commands
     effects = commands["cleanse_an_effect"]
 
