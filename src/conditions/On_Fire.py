@@ -3,23 +3,23 @@ from condition import Condition
 from effects import DamageOverTime, SingleInstanceDamage
 
 class On_Fire(Condition):
-    def __init__(self, source, target):
-        super().__init__(source, target)
+    def __init__(self, source):
+        super().__init__(source)
         self.id = self.__class__.__name__
 
-        fire = SingleInstanceDamage(self.source, self.target)
+        fire = SingleInstanceDamage(self.source)
         fire.potency = "1d6"
 
-        burning = DamageOverTime(self.source, self.target)
+        burning = DamageOverTime(self.source)
         burning.duration = 3
         burning.potency = "1d6"
 
         self.active_effects = [fire, burning]
 
-        self.start_message = f"{self.target.condition_header} now {self.id}."
-        self.end_message = f"{self.target.condition_header} no longer {self.id}."
-
-        self.start()
+    def start(self):
+        self.start_message = f"{self.target.action_header} now {self.id}."
+        self.end_message = f"{self.target.action_header} no longer {self.id}."
+        super().start()
 
     def additional(self) -> None:
         burning = self.get("DamageOverTime")
@@ -34,3 +34,5 @@ class On_Fire(Condition):
         else: 
             global_commands.type_text(f"No luck. The flames rage on.")
             return False
+
+object = On_Fire

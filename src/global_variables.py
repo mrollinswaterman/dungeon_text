@@ -41,7 +41,7 @@ STATS = {
     "wis": "Wisdom",
     "cha": "Charisma",
     "base_evasion": "Evasion",
-    "damage_take_multiplier": "Vulnerability",
+    "damage_taken_multiplier": "Vulnerability",
     "damage_multiplier": "Damage",
     "armor": "Armor",
     "max_hp": "Maximum Health"

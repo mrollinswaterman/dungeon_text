@@ -24,12 +24,10 @@ actually printing, maybe the print function just tells you what lines should be 
 for weapons/armor, quantity for consumables, etc, then the print inventory function prints each line
 as necessary for formatting)
 - [X] Make a switch statement so rolls that should be paired with "an" are paired with "an" instead of "a". (ie "You rolled 'an' 18." instead of "'a' 18.")
-- [ ] Create a new fil/class called "Tag". Tags can be added to attacks or weapons or mobs, and cause the attack/weapon/mob to do something on hit. maybe make it so they
-don't stack???
 - [X] Make stablocks their own class???? (ie player.stats.dex)
 - [ ] Maybe make a stance class (riposte, total defense, defensive, offensive, all-out, etc) each with different effects.
 - [X] Make a damage class to store info about an object damage (type, src, amount, etc), and do the same for weapon types?
-- [ ] Split statuses and effects. Statuses are named conditions (ie On Fire, Poisoned, Slowed, etc), while effects are the mechanical things that happen
+- [X] Split statuses and effects. Statuses are named conditions (ie On Fire, Poisoned, Slowed, etc), while effects are the mechanical things that happen
 (ie damage over time, increasing or reducing a stat for a given period, one-time damage, )
 
 ## Mechanics
@@ -50,7 +48,7 @@ don't stack???
 - [X] Add a view equipped items menu to menu_options()
 - [ ] Add a "talk" mechanic with the Shopkeep to give player hints about how to unlock legendary weapons
 (ie, "The Shopkeep says the Blacksmith might be able to craft something special with enough Land Shark teeth)
-- [ ] Add a extended crit range to some weapons, ie 18-20, 16-20, etc
+- [X] Add a extended crit range to some weapons, ie 18-20, 16-20, etc
 - [ ] Add a menu if the player hits "n" initally that lets them enter the overworld, save, or quit the game.
 - [ ] Add a 1/round "Reaction" ability to all objects, can act on the opponents turn to do something (i.e add +5 to Evasion at the cost of -5 on all attack checks on your next turn, interurrpt a spell cast, chase a fleeing enemy, etc) 
 
@@ -133,7 +131,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
 - [ ] Flurry(All AP): Make (level//4) extra attacks at a -1 to-hit per attack (ie first attack is -1, second attack is -2. etc)
 
-## Bugs
+## Bugs / QoL
 
 - [X] check_inventory should print equipped items even if inventory is empty
 - [X] buying a consumable at the store does not reprint the shopkeep's inventory
@@ -146,4 +144,6 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Fix shopkeep items to properly display all stats (max dex bonus, crit, etc)
 - [ ] Find a better way to handle Riposte / other "states" the player can put themselves in, right now the enemy_commands file ends the player's
 riposte state, which is bad i think
+- [ ] Add a parameter that tells conditions and effects to not print their "end()" text when the game is saving.
+Alternatively, just prevent the game from printing anything at all while it's saving (maybe make type_text() function always return None??)
 

@@ -83,7 +83,7 @@ class Conditions_Handler():
     
     #properties
     @property
-    def conditions(self) -> list[Condition]:
+    def list(self) -> list[Condition]:
         return list(self.dict.values())
 
     #methods
@@ -95,15 +95,18 @@ class Conditions_Handler():
                 case str():
                     return self.dict[condition]
                 case int():
-                    return self.conditions[condition]
+                    return self.list[condition]
                 case _:
                     return self.dict[condition.id]
-        except IndexError | KeyError:
-            return None
+        except IndexError: return None
+        except KeyError: return None
 
     def add(self, condition:Condition):
         if condition.id not in self.dict:
             self.dict[condition.id] = condition
+            condition._target = self.parent
+            for effect in condition.active_effects:
+                if effect.target is None: effect.target = self.parent
             condition.start()
         else:
             condition = self.get(condition)
@@ -111,7 +114,7 @@ class Conditions_Handler():
                 condition.additional()
 
     def update(self):
-        for condition in self.conditions:
+        for condition in self.list:
             condition.update()
             if not condition.active:
                 self.cleanse_pool.add(condition)
@@ -129,7 +132,7 @@ class Conditions_Handler():
         else: return False
 
     def cleanse_all(self):
-        for condition in self.conditions:
+        for condition in self.list:
             self.cleanse_pool.add(condition)
 
         for condition in self.cleanse_pool:
@@ -161,7 +164,7 @@ class Game_Object():
         self.armor: Armor | int | None = None
 
         #Combat tools
-        #self.conditions:Conditions_Handler = None
+        self.conditions:Conditions_Handler = None
         self.damage_type:Damage_Type = Damage_Type(1)
 
         #Misc.
@@ -186,11 +189,11 @@ class Game_Object():
         return f"The {self.id}"
 
     @property
-    def owner_header(self) -> str:
+    def ownership_header(self) -> str:
         return f"The {self.id}'s"
 
     @property
-    def condition_header(self) -> str:
+    def action_header(self) -> str:
         return f"The {self.id} is"
 
     @property
@@ -276,7 +279,7 @@ class Game_Object():
         return True
 
     def reset_ap(self) -> None:
-        self._ap = self.stats.max_ap
+        self.ap = self.stats.max_ap
 
     def spend_mp(self, num:int=1) -> bool:
         if num == 0:
@@ -311,7 +314,7 @@ class Game_Object():
     #COMBAT
     def attack(self):
         import player_commands
-        roll = self.roll_to_hit() if not player_commands.GOD_MODE else 999
+        roll = self.roll_to_hit()
         self.spend_ap()
         self.narrate(self.roll_narration, roll)
         self.apply_on_attacks()
@@ -324,7 +327,7 @@ class Game_Object():
             case _:
                 if roll >= self.target.evasion:
                     self.narrate(self.hit_narration)
-                    taken = self.roll_damage() if not player_commands.GOD_MODE else 999
+                    taken = self.roll_damage()
                     self.target.take_damage(taken, self)
                     self.apply_on_hits()
                 else:
@@ -349,16 +352,18 @@ class Game_Object():
         self.lose_hp(final)
         self.narrate(self.take_damage_narration, (final, source))
 
-    def modify(self, stat:str, amount:int) -> None:
+    def modify(self, stat:str, amount:int, source) -> None:
         import global_variables
         try:
             self.stats.modify(stat, amount)
         except KeyError:
             raise ValueError(f"Can't modify non-existent stat '{stat}'.")
-    
-        text = f"{self.owner_header} {global_variables.STATS[stat]} increased by {amount}."
+
+        text = f"{self.ownership_header} {global_variables.STATS[stat]} increased by {amount}."
         if amount < 0:
-            f"{self.owner_header} {global_variables.STATS[stat]} decreased by {abs(amount)}."
+            text = f"{self.ownership_header} {global_variables.STATS[stat]} decreased by {abs(amount)}."
+
+        global_commands.type_text(text)
 
     def use(self, item:Item):
         raise NotImplementedError
@@ -431,8 +436,7 @@ class Game_Object():
 
     def take_damage_narration(self, info:tuple[int, Game_Object | Item]) -> list[str]:
         raise NotImplementedError
-    
-    
+
     def heal_narration(self, num:int) -> list[str]:
         """Handles specific narration for Object's healing"""
         raise NotImplementedError

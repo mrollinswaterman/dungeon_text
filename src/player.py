@@ -4,6 +4,7 @@ from game_object import Game_Object, Conditions_Handler
 from item import Item
 from equipment import Weapon, Armor
 from stackable import Stackable
+from event import Event
 
 class Stance(enum.Enum):
     NONE = 0
@@ -21,15 +22,22 @@ class Player(Game_Object):
         #stances
         self.stance = Stance(0)
 
-    #PROPERTIES
+    #properties
     @property
-    def header(self) -> str:
+    def ownership_header(self) -> str:
         return "Your"
 
     @property
+    def action_header(self) -> str:
+        return "You are"
+
+    @property
+    def default_header(self) -> str:
+        return "You"
+
+    @property
     def carrying_capacity(self) -> float:
-        return 600
-        #return 5.5 * self.stats.str
+        return 5.5 * self.stats.str
 
     @property
     def available_carrying_capacity(self) -> int:
@@ -56,7 +64,7 @@ class Player(Game_Object):
         import controller
         return controller.SCENE.enemy
 
-    #METHODS
+    #methods
     def bonus(self, stat:str) -> int:
         match stat:
             case "dex":
@@ -64,7 +72,7 @@ class Player(Game_Object):
                     return min(super().bonus("dex"), self.armor.max_dex_bonus)
             case _:
                 return super().bonus(stat)
-    
+
     def die(self) -> None:
         self.gold = 0
         self.inventory = []
@@ -73,8 +81,11 @@ class Player(Game_Object):
     #ROLLS
     def roll_to_hit(self) -> int:
         """Returns an attack roll (d20 + dex bonus + BAB + weapon attack bonus)"""
+        import player_commands
+        if player_commands.GOD_MODE: return 999
         if self.weapon.broken is True:
             raise ValueError("Weapon is broken")
+
         roll = global_commands.d(20)
         match roll:
             case 1:
@@ -82,10 +93,14 @@ class Player(Game_Object):
             case _:
                 #checks if the roll is a crit or not. Crits result in a return of 0
                 #attack roll formula: roll + dex bonus + BaB + weapon att bonus
-                return 0 if roll >= self.weapon.crit_range else roll + self.bonus("dex") + (self.level // 5) + self.weapon.attack_bonus
+                if roll >= self.weapon.crit_range:
+                    return 0
+                else: return roll + self.bonus("dex") + (self.level // 5) + self.weapon.attack_bonus
             
     def roll_damage(self) -> int:
         """Returns a damage roll (weapon dice + str bonus)"""
+        import player_commands
+        if player_commands.GOD_MODE: return 999
         if self.weapon.broken:
             global_commands.type_text(f"You can't use a broken {self.weapon.id}, so your hands will have to do.")
             return (global_commands.d(4) + self.bonus("str")) * self.stats.damage_multiplier
@@ -148,17 +163,6 @@ class Player(Game_Object):
     
     def use(self, item):
         pass
-
-    def modify_stat(self, stat:str, amount:int) -> None:
-        import global_variables
-        try:
-            self.stats[stat] += amount
-        except KeyError:
-            raise ValueError(f"Can't modify non-existent stat '{stat}'.")
-    
-        text = f"Your {global_variables.STATS[stat]} increased by {amount}."
-        if amount < 0:
-            f"Your {global_variables.STATS[stat]} decreased by {abs(amount)}."
     
     #ENCHANTMENTS
     def apply_on_attacks(self):
@@ -217,21 +221,26 @@ class Player(Game_Object):
         ]
         return text
     
-    def take_damage_narration(self, info:tuple[int, Game_Object]):
+    def take_damage_narration(self, info:tuple[int, Game_Object | Event]):
         taken, source = info
         if taken > 0:
             text = [
                 f"You took {taken} damage from the {source.id}.",
                 f"The {source.id} dealt {taken} damage to you.",
-                f"The {source.id} did {taken} damage.",
-                f"The {source.id} hit you for {taken} damage."
+                f"The {source.id} did {taken} damage.",  
                 ]
         else:
             text = [
                 f"You took no damage from the {source.id}!",
                 f"The {source.id} did no damage to you!",
-                f"The {source.id} hit you for no damage.",
                 ]
+        #if source isnt a GameObject, don't add "hit you for..." text to final list, else do
+        match source:
+            case Game_Object():
+                if taken > 0: text.append(f"The {source.id} hit you for {taken} damage.")
+                else: f"The {source.id} hit you for no damage."
+            case _:
+                pass
         return text
     
     def heal_narration(self, num: int) -> list[str]:
@@ -383,12 +392,8 @@ class Player(Game_Object):
             print("\n")
 
     ##MISC.
-    def update(self) -> None:
-        self.reset_ap()
-        self.status_effects.update()
-
     def save(self) -> dict:
-        self.status_effects.cleanse_all()
+        self.conditions.cleanse_all()
 
         player_tod = {
             "name": self.name,
@@ -440,8 +445,6 @@ class Player(Game_Object):
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
                 item = global_commands.create_item(row)
-                #item.load(row)
-                print(item.durability)
                 if idx >= size - 2:
                     self.equip(item, True)
                 else:

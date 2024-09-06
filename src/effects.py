@@ -3,12 +3,12 @@ import global_commands
 
 class Effect():
 
-    def __init__(self, source, target):
+    def __init__(self, source, target=None):
         from game_object import Game_Object
-        from item import Item
+        from condition import Condition
 
-        self.source:Game_Object | Item = source
-        self.target:Game_Object = target
+        self.source:Condition = source
+        self.target:Game_Object | None = target
         self.duration:int = 0
         self.potency: int | str = 0
         self.stacks:int = 0
@@ -39,7 +39,7 @@ class Effect():
 
 class SingleInstanceDamage(Effect):
 
-    def __init__(self, source, target):
+    def __init__(self, source, target=None):
         super().__init__(source, target)
         self.duration = 1
 
@@ -54,7 +54,7 @@ class SingleInstanceDamage(Effect):
  
 class DamageOverTime(Effect):
 
-    def __init__(self, source, target):
+    def __init__(self, source, target=None):
         super().__init__(source, target)
 
     def update(self) -> None:
@@ -68,7 +68,7 @@ class DamageOverTime(Effect):
 
 class RampingDamageOverTime(Effect):
 
-    def __init__(self, source, target):
+    def __init__(self, source, target=None):
         super().__init__(source, target)
         self.stacks = 1
         self.max_stacks = 10
@@ -99,19 +99,29 @@ class RampingDamageOverTime(Effect):
 
 class ModifyStat(Effect):
 
-    def __init__(self, source, target):
+    def __init__(self, source, target=None):
         super().__init__(source, target)
         self.stat:str = ""
 
     def start(self) -> None:
-        self.target.modify(self.stat, self.potency)
+        import global_variables
+        try:
+            self.target.stats.modify(self.stat, self.potency)
+        except KeyError:
+            raise ValueError(f"Can't modify non-existent stat '{self.stat}'.")
+        text = f"{self.target.ownership_header} {global_variables.STATS[self.stat]} increased by {self.potency}."
+        if self.potency < 0:
+            text = f"{self.target.ownership_header} {global_variables.STATS[self.stat]} decreased by {abs(self.potency)}."
+        global_commands.type_text(text)
 
     def end(self) -> None:
-        self.target.modify(self.stat, -(self.potency))
+        import global_variables
+        self.target.stats.modify(self.stat, -(self.potency))
+        global_commands.type_text(f"{self.target.ownership_header} {global_variables.STATS[self.stat]} returned to normal.")
 
 class GainTempHP(Effect):
 
-    def __init__(self, source, target):
+    def __init__(self, source, target=None):
         super().__init__(source, target)
 
     def start(self) -> None:
@@ -120,10 +130,10 @@ class GainTempHP(Effect):
 
 class Drain(Effect):
 
-    def __init__(self, source, target):
+    def __init__(self, source, target=None):
         super().__init__(source, target)
 
     def start(self) -> None:
         taken = self.target.take_damage(self.potency, self.source)
-        self.source.heal(taken * 0.33)
+        self.source.source.heal(taken * 0.33)
         self.end()

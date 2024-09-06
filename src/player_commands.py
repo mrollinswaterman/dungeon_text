@@ -120,25 +120,22 @@ def combat_tricks():
     return None
 
 def cleanse_a_condition():
-    """
-    Attempts to cleanse a chosen status effect
-    """
+    """Attempts to cleanse a chosen condition"""
     import global_variables
-    import condition
+    from condition import Condition
     from command_dict import commands
     effects = commands["cleanse_an_effect"]
 
     global_commands.type_text("Select an effect to cleanse -OR- Cancel - (c)")
-    for idx, entry in enumerate(global_variables.PLAYER.status_effects):
-        effect: status_effect.Status_Effect = global_variables.PLAYER.status_effects[entry]
-        string = f"{idx+1}. {effect.id}"
+    for idx, condition in enumerate(global_variables.PLAYER.conditions.list):
+        string = f"{idx+1}. {condition.id}"
         if idx % 2 == 0 and idx != 0:
             time.sleep(0.05)
             print("\n")
         
         print(string + 2*"\t", end='')
 
-    if len(global_variables.PLAYER.status_effects) > 0:
+    if len(global_variables.PLAYER.conditions.list) > 0:
         print("\n")
 
     done = False
@@ -150,15 +147,14 @@ def cleanse_a_condition():
         else:
             try:
                 num = int(code)
-                effect:status_effect.Status_Effect = global_variables.PLAYER.get_status_effect(num-1)
-                if effect is not None:
+                selected = global_variables.PLAYER.conditions.get(num-1)
+                if selected is not None:
                     global_variables.PLAYER.spend_ap()
-                    effect.attempt_cleanse(global_variables.PLAYER.roll_a_check(effect.cleanse_stat))
+                    selected.cleanse_check()
                     done = True
                     return None
             except TypeError:
-                pass
-
+                raise Exception
             global_commands.error_message(code)
 
 def show_inventory() -> None:
@@ -167,9 +163,7 @@ def show_inventory() -> None:
     item_select()
 
 def item_select() -> None:
-    """
-    Lets the player select an inventory item to use
-    """
+    """Lets the player select an inventory item to use"""
     import global_variables
     import controller
     from command_dict import commands
@@ -223,21 +217,19 @@ def use_an_item(item:Item, target=None) -> bool:
     raise ValueError("""Item passed "use_an_item" to not in player's inventory.""")
 
 def flee() -> None:
-    """
-    Attempts to run away from the current encounter
-    """
+    """Attempts to run away from the current encounter"""
     import global_variables
     import narrator
     import controller
 
-    if "Enraged" in global_variables.PLAYER.status_effects:
+    if global_variables.PLAYER.conditions.get("Enraged") is not None:
         global_commands.type_text("You cannot flee while Enraged.")
         return None
     
     global_variables.RUNNING = False
     global_commands.type_text("You attempt to flee...")
     
-    if global_commands.probability(90 - int((global_variables.PLAYER.hp / global_variables.PLAYER.max_hp) * 100)):
+    if global_commands.probability(90 - int((global_variables.PLAYER.hp / global_variables.PLAYER.stats.max_hp) * 100)):
         #higher HP == lower chase chance
         stop_flee_attempt()
         return None
@@ -265,12 +257,9 @@ def stop_flee_attempt() -> None:
     narrator.continue_run()
     return None
 
-
 #META FUNCTIONS
 def end_game():
-    """
-    End game message
-    """
+    """End game message"""
     import global_variables
     #smth else
     global_commands.type_with_lines("You have died.", 2)
@@ -279,16 +268,12 @@ def end_game():
     sys.exit()
 
 def load():
-    """
-    Loads the player.csv save file
-    """
+    """Loads the player.csv save file"""
     import global_variables
     global_variables.PLAYER.load("player.csv", "inventory.csv")
 
 def reset():
-    """
-    Wipes the player.csv and inventory.csv files
-    """
+    """Wipes the player.csv and inventory.csv files"""
     import global_variables
     with open('player.csv', "r+") as file:
         file.truncate(0)

@@ -5,23 +5,28 @@ from effects import Effect
 
 class Condition():
 
-    def __init__(self, source, target):
+    def __init__(self, source):
         from game_object import Game_Object
         from item import Item
         self.id = "Condition"
         self.source:Game_Object | Item = source
-        self.target:Game_Object = target
+        self._target:Game_Object | None = None
 
         self.active_effects:list[Effect] = []
         self.inactive_effects:list[Effect] = []
 
         self.start_message:str = ""
+        self.continue_message:str = ""
         self.end_message:str = ""
 
     #properties
     @property
+    def target(self):
+        return self._target
+
+    @property
     def active(self) -> bool:
-        return len(self.active_effects) > 0 or self.duration == 0
+        return len(self.active_effects) > 0
     
     @property
     def duration(self) -> int:
@@ -36,17 +41,17 @@ class Condition():
         match ref:
             case Effect():
                 ref = ref.__class__.__name__
+            case _:
+                pass
 
-        for effect in self.active_effects and self.inactive_effects:
+        for effect in self.active_effects:
             if effect.__class__.__name__ == ref:
                 return effect
 
     def start(self):
-        for effect in self.active_effects:
-            effect.target = self.target
-            effect.source = self.source           
-            effect.start()
         global_commands.type_text(self.start_message)
+        for effect in self.active_effects:        
+            effect.start()
         for effect in self.active_effects:
             if not effect.active:
                 self.active_effects.remove(effect)
@@ -61,12 +66,16 @@ class Condition():
                 self.inactive_effects.append(effect)
     
     def end(self) -> None:
+        global_commands.type_text(self.end_message)
+        for effect in self.active_effects:
+            effect.end()
         self.active_effects = []
         self.inactive_effects = []
-        global_commands.type_text(self.end_message)
+
     
     def cleanse_check(self) -> bool:
         return False
     
     def additional(self) -> None:
+        global_commands.type_text(self.continue_message)
         return None

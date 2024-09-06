@@ -93,15 +93,11 @@ class Event():
 
     #ADD
     def add_stat(self, stat:str, dc:int) -> None:
-        """
-        Adds a stat to the events stat list
-        """
+        """Adds a stat to the events stat list"""
         self._stats[stat] = dc
 
     def add_text(self, text:str) -> None:
-        """
-        Sets the event's text to a given string
-        """
+        """Sets the event's text to a given string"""
         self._text = text
 
     def add_message(self, type:bool, message_dict:dict[str, str]) -> None:
@@ -123,9 +119,7 @@ class Event():
                 self._messages[type][stat] = message_dict[stat]
 
     def add_end_message(self, msg) -> None:
-        """
-        Adds an end message to the event
-        """
+        """Adds an end message to the event"""
         if isinstance(msg, list):
             self._end_messages = msg
             return None
@@ -140,9 +134,7 @@ class Event():
         self._tries = tries
 
     def set_loot(self, loot:dict) -> None:
-        """
-        Adds loot to the event
-        """
+        """Adds loot to the event"""
         for idx, entry in enumerate(self._loot):
             self._loot[entry] = loot[idx]
 

@@ -1,3 +1,0 @@
-type,id,name,rarity,weight_class,max_dex_bonus,durability,damage,crit,crit_range,armor_value
-Weapon,Longsword,Longsword,Common,Light,6,10,1d8,2,20,
-Armor,Padded Leather,Padded Leather,Common,Light,5,15,,,,2

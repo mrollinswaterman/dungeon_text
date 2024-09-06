@@ -12,7 +12,7 @@ def turn():
         enemy.update()
 
         if enemy.dead:
-            controller.end_scene()
+            controller.SCENE.end()
             return None
 
         while enemy.can_act:
@@ -24,26 +24,23 @@ def turn():
                     return None
             
                 if enemy.dead:
-                    controller.end_scene()
+                    controller.SCENE.end()
                     return None
             
                 if enemy.can_act and not enemy.fleeing:
                     print("\n")
 
         if global_variables.RUNNING:
-            global_variables.PLAYER.end_riposte()
             global_commands.type_with_lines()
             controller.SCENE.turn_order.go()
-        
+            raise Exception
         return None
     
     else:
         raise ValueError("Enemy is None.")
 
 def turn_options():
-    """
-    Chooses a course of action for the enemy
-    """
+    """Chooses a course of action for the enemy"""
     enemy = controller.SCENE.enemy
 
     if enemy.fleeing:
@@ -51,17 +48,14 @@ def turn_options():
         return enemy_flee_attempt()
 
     #if trigger is active, 85% chance to try special
-    if enemy.trigger() and global_commands.probability(99):
-            return True if enemy.special() else enemy_attack()
+    if enemy.trigger() and global_commands.probability(100):
+        return True if enemy.special() else enemy_attack()
 
     #if no trigger, don't special
     return enemy_attack()
 
 def enemy_flee_attempt():
-    """
-    Runs when the enemy tries to escape. Lets the player
-    choose whether to let them go or pursue them.
-    """
+    """Runs when the enemy tries to escape."""
     import global_variables
     import narrator
     enemy = controller.SCENE.enemy
@@ -93,9 +87,7 @@ def enemy_flee_attempt():
     return None
 
 def enemy_attack():
-    """
-    Runs the enemy attack
-    """
+    """Runs the enemy attack"""
     import controller
 
     controller.SCENE.enemy.attack()

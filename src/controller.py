@@ -62,7 +62,7 @@ class Scene():
         #Player
         self.player = global_variables.PLAYER
         #Enemy
-        self.enemy:monster_manual.mob.Mob = monster_manual.spawn_random_mob()
+        self.enemy:monster_manual.mob.Mob = None#monster_manual.spawn_random_mob()
         #Event
         self.event:ev.Event = None
         #Turn Order
@@ -81,14 +81,12 @@ class Scene():
         self.turn_order.go()
 
     def select_next(self):
-        """
-        Starts a new scene with a new enemy or event
-        """
-        if global_commands.probability(85): #85% chance of an enemy spawning next
+        """Starts a new scene with a new enemy or event"""
+        if global_commands.probability(1): #85% chance of an enemy spawning next
             self.enemy = monster_manual.spawn_random_mob()
             self.begin_encounter()
         else: #remainging 15% chance of an event spawning
-            self.event: ev.Event = dm_guide.spawn_random_event()
+            self.event: ev.Event = dm_guide.spawn_event("Smog")
             self.event.set_tries(2)
             self.event.set_passed(False)
             global_variables.PLAYER.update()#update player before event text goes off
@@ -97,10 +95,7 @@ class Scene():
             run_event(self.event)
 
     def begin_encounter(self):
-        """
-        Sets the enemy for the scene if it's None,
-        and prints the encounter header
-        """
+        """Sets the enemy for the scene if it's None, and prints the encounter header"""
         if self.enemy is None:
             return self.select_next()
 

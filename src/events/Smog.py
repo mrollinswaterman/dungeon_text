@@ -1,5 +1,6 @@
 #Smog Cloud Event class
 import event
+from conditions import Poisoned
 
 success = {
     "con": ["You grit your teeth and continue forwards, making it out without a scratch.", 
@@ -21,9 +22,9 @@ failure = {
             "You scratch your head and stare at the cloud, trying to figure out if it's dangerous or not. Nothing comes to you."]
 }
 
-end = ["No way to go but straight. You make it out the other side, but not unscathed.",
-       "You push through the cloud head on, coughing and heaving all the way. You don't feel so good...",
-       "You decide to tackle this obstacle head on. Not the best idea, but you're through it now."]
+end = ["No way to go but straight. \n\n You make it out the other side, but not unscathed.",
+       "You push through the cloud head on, coughing and heaving all the way. \n\n You don't feel so good...",
+       "You decide to tackle this obstacle head on. \n\n Not the best idea... but you're through it now."]
 
 class Smog(event.Event):
     def __init__(self, id="Smog"):
@@ -46,10 +47,9 @@ class Smog(event.Event):
         self.add_end_message(end)
 
     def failure(self):
+        import global_variables
         super().failure()
-        #poison:status_effect.Status_Effect = Poisoned.Condition(self)
-        #poison.set_stacks(3)
-        #poison.set_potency(1)
-        #self._player.add_status_effect(poison)
+        poison = Poisoned.object(self)
+        global_variables.PLAYER.conditions.add(poison)
 
 object = Smog

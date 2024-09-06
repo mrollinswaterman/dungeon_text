@@ -101,12 +101,21 @@ class Mob(Game_Object):
 
     #ENCHANTMENTS
     def apply_on_attacks(self):
-        return super().apply_on_attacks()
+        return None
 
     def apply_on_hits(self):
-        return super().apply_on_hits()
+        return None
 
     #NARRATION
+    def narrate(self, func, param=None):
+        text:list[str] = func()
+        if self.prev_narration in text:
+            text.remove(self.prev_narration)
+        final = random.choice(text)
+        self.prev_narration = final
+        global_commands.type_text(final)
+        return None
+
     def roll_narration(self) -> list[str]:
         text = [
             f"The {self.id} moves to attack.",
@@ -201,9 +210,7 @@ class Mob(Game_Object):
     #SPECIALs + TRIGGER
     def special(self):
         """Mob's special move"""
-        if self.conditions.get("Enraged") is not None:
-            return False
-        return True
+        return self.conditions.get("Enraged") is None
     
     def trigger(self):
         """Trigger that determines if the mob should do their special move.
@@ -211,4 +218,4 @@ class Mob(Game_Object):
         runs it's parent trigger function to see if it is able to do it's special
         or if it must attack due to effects."""
 
-        return self.conditions.get("Enraged") is not None
+        return self.conditions.get("Enraged") is None
