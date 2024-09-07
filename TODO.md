@@ -146,4 +146,5 @@ Special move, uses half max durability for a double damage on the attack (can mi
 riposte state, which is bad i think
 - [ ] Add a parameter that tells conditions and effects to not print their "end()" text when the game is saving.
 Alternatively, just prevent the game from printing anything at all while it's saving (maybe make type_text() function always return None??)
+- [ ] There is an extra "|" character after all menu options that shouldn't be there
 

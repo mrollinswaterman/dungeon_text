@@ -2,7 +2,7 @@ import random, time, os, csv, enum
 import global_commands
 from game_object import Game_Object, Conditions_Handler
 from item import Item
-from equipment import Weapon, Armor
+from equipment import Weapon, Armor, Equipment
 from stackable import Stackable
 from event import Event
 
@@ -161,8 +161,11 @@ class Player(Game_Object):
         
         super().take_damage(taken, source)
     
-    def use(self, item):
-        pass
+    def use(self, item:Item):
+        if super().use(item) is None:
+            match item:
+                case Equipment(): return self.equip(item)
+        return None
     
     #ENCHANTMENTS
     def apply_on_attacks(self):
@@ -320,12 +323,12 @@ class Player(Game_Object):
         match item:
             case Weapon():
                 prev = self.weapon
-                self.pick_up(prev)
+                self.pick_up(prev, True)
                 self.drop(item)
                 self.weapon = item
             case Armor():
                 prev = self.armor
-                self.pick_up(prev)
+                self.pick_up(prev, True)
                 self.drop(item)
                 self.armor = item
             case _:

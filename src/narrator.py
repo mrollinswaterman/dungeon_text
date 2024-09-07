@@ -122,13 +122,17 @@ def buy_something():
         cmd = global_commands.get_cmd()
         if cmd in options:
             options[cmd]()
+            return None
         else:
             try:
                 item_index = int(cmd) - 1
-                item = global_variables.SHOPKEEP.get_item(item_index)
-                if global_variables.SHOPKEEP.sell(item):
+                item = global_variables.SHOPKEEP.get(item_index)
+                if item is not None:
+                    global_variables.SHOPKEEP.sell(item)
                     done = True
-                    buy_something()
+                    return buy_something()
+                else:
+                    global_commands.error_message(cmd)
             except ValueError:
                 global_commands.error_message(cmd)
 

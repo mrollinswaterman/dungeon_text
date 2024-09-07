@@ -4,8 +4,8 @@ import enum, random, csv
 from typing import Any
 import global_commands
 from item import Item
-from equipment import Weapon, Armor
-from stackable import Stackable
+from equipment import Weapon, Armor, Equipment
+from stackable import Stackable, Consumable
 
 class Damage_Type(enum.Enum):
     TRUE = 0
@@ -214,6 +214,7 @@ class Game_Object():
     def update(self):
         self.reset_ap()
         self.conditions.update() 
+        self.clean_inventory()
 
     def bonus(self, stat:str) -> int:
         return self.stats.bonus(stat)
@@ -366,7 +367,9 @@ class Game_Object():
         global_commands.type_text(text)
 
     def use(self, item:Item):
-        raise NotImplementedError
+        match item:
+            case Consumable(): return item.use()
+            case _: return None
 
     #ENCHANTMENTS
     def apply_on_attacks(self):
@@ -446,12 +449,12 @@ class Game_Object():
         """Adds an item to the Object's inventory"""
         match item:
             case Stackable():
-                #if you have a stack of those items already
-                held:Stackable | None = self.get_item(id)
+                #if you have a stack of those items already, just add to it
+                held:Stackable | None = self.get_item(item.id)
                 if held is not None:
-                    held.quantity += held.quantity
-                    item = held
-                #if you don't
+                    held.set_quantity(held.quantity + item.quantity)
+                    #item = held
+                #if you don't, add the object to your inventory
                 else:
                     self.inventory[item.id] = item
             case Item():
@@ -465,8 +468,18 @@ class Game_Object():
     def drop(self, item:Item):
         item = self.get_item(item)
         if item is not None:
-            del self.inventory[id]
+            del self.inventory[item.id]
             item.owner = None
+
+    def clean_inventory(self):
+        """Check all stackable items and make sure anything with quantity 0 is removed"""
+        for entry in self.inventory:
+            item:Item | Stackable = self.inventory[entry]
+            match item:
+                case Stackable(): 
+                    if item.quantity <= 0:
+                        del self.inventory[entry]
+                        item.owner = None
 
     def get_item(self, ref: Item | str | int | None):
         """
@@ -475,6 +488,7 @@ class Game_Object():
 
         ref: can be str (item id), int (item index), or an instance of the Item class
         """
+        self.clean_inventory()
         match ref:
             case str():
                 try: return self.inventory[ref]

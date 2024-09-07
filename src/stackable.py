@@ -10,7 +10,6 @@ class Stackable(Item):
         rarity = anvil.rarity if rarity is None else rarity
         super().__init__(id, rarity)
 
-        #consumable specific stats
         self.quantity: int = None
         self.unit_weight: int = None
         self.unit_value: int = None
@@ -29,16 +28,17 @@ class Stackable(Item):
 
     @property
     def name(self) -> str:
-        return f"{self.id}s" if self.quantity > 1 else self.i
+        return f"{self.id}s" if self.quantity > 1 else self.id
 
     @property
     def pickup_message(self) -> str:
-        return f"You picked up {self.quantity} {self.id}s" if self.quantity > 1 else f"You picked up a {self.id}"
+        return f"You picked up {self.quantity} {self.name}." if self.quantity > 1 else f"You picked up a {self.id}."
     
     @property
     def format(self) -> str:
         return super().format + [
-            f"Quantity: {self.quantity}"
+            f"Quantity: {self.quantity}",
+            f"Unit Cost: {self.unit_value}g/each   Unit Weight: {self.unit_weight}lbs./each"
         ]
 
     #methods
@@ -48,9 +48,14 @@ class Stackable(Item):
             if entry in self.__dict__ and self.__dict__[entry] is None:
                 self.__dict__[entry] = self.anvil.__dict__[entry]
 
-        #self.quantity = int(self.quantity)
-        #self.unit_value = int(self.unit_value)
-        #self.unit_weight = int(self.unit_weight)
+    def set_quantity(self, amount:int) -> None:
+        self.quantity = amount
+        self.anvil.quantity = amount
+
+    def remove_quantity(self, amount:int=1) -> None:
+        if self.quantity >= amount:
+            self.set_quantity(self.quantity - amount)
+        else: raise ValueError("Can't remove more than the item has.")
 
     #META functions (ie save/load/format etc)
     def save(self) -> None:
@@ -58,13 +63,12 @@ class Stackable(Item):
         for entry in self.anvil.__dict__:
             if entry in self.__dict__ and entry not in self.saved:
                 self.saved[entry] = self.__dict__[entry]
+    
+class Consumable(Stackable):
 
-    def format(self) -> list[str]:
-        forms = {
-            "id": f"{self.name} ({self.rarity.string})",
-            "quantity": f"Quantity: {self.quantity}",
-            "value": f"Value: {self.unit_value}g/each",
-            "unit_weight": f"Unit Weight: {self.unit_weight}/each",
-            "weight": f"Total Weight: {self.weight}"
-        }
-        return forms
+    def __init__(self, anvil: Anvil, id: str, rarity: str | Rarity | None = None):
+        super().__init__(anvil, id, rarity)
+
+    def use(self) -> bool:
+        self.owner.spend_ap()
+        return True

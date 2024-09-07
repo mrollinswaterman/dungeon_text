@@ -136,9 +136,10 @@ def generate_item_rarity():
     
     return Rarity("Common")
 
-def create_item(source_dict):
+def create_item(source_dict={}):
     from item import Anvil
     from equipment import Weapon, Armor
+    import item_compendium
     cast = Anvil()
     cast.copy(source_dict)
     match cast.anvil_type:
@@ -146,6 +147,9 @@ def create_item(source_dict):
             return Weapon(cast)
         case "Armor":
             return Armor(cast)
+    
+    if cast.anvil_type in item_compendium.dict:
+        return item_compendium.dict[cast.anvil_type](cast.rarity)
 
 def d(num):
     """Rolls a dX where X is some number (ie d6, d20, etc)"""

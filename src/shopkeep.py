@@ -64,18 +64,23 @@ class Shopkeep():
         return len(self.inventory)
 
     #methods
-    def get_item(self, ref:str|int) -> Item | Stackable | None:
+    def get(self, ref:str|int|Item) -> Item | Stackable | None:
         match ref:
             case str():
                 for item in self.inventory:
                     if item.id == ref:
                         return item
-                return None
             case int():
                 try:
                     return self.inventory[ref]
                 except IndexError:
                     return None
+            case _:
+                for item in self.inventory:
+                    if item == ref: return item
+
+        global_commands.type_text(f"The Shopkeep doesn't have any {item.name} right now. Come back later.")
+        return None
 
     #BUY/SELL
     def sell(self, item:Item) -> bool:
@@ -83,61 +88,42 @@ class Shopkeep():
         Sells an item to a player if the item is in the Shopkeep's inventory and the player has sufficient gold
         Returns True if the sale goes through, False otherwise
         """
+        import narrator
+
         if item is None:
             return False
 
+        item = self.get(item)
         match item:
             case Stackable():
-                return self.sell_stackable(item)
+                num = narrator.ask_quantity()
+                if num > item.quantity:
+                    global_commands.type_text(f"The Shopkeep does not have {num} {item.name}. He'll sell you all that he has.")
+                    num = item.quantity
+                    self.inventory.remove(item)
+                item.remove_quantity(num)
+                #at this point, item is re-assigned to a new stackable object which is then 
+                #added to the shopkeep's inventory and sold to the player
+                item:Stackable = global_commands.create_item(item.anvil.__dict__)
+                item.set_quantity(num)
+                self.inventory.append(item)
             case _:
-                if item in self.inventory:
-                    if self.player.can_carry(item) is True:
-                        if self.player.spend_gold(item.value):
-                            self.gold += item.value
-                            self.inventory.remove(item)
-                            item.owner = None
-                            global_commands.type_text(self.generate_successful_sale_message(item))
-                            self.player.pick_up(item) 
-                            return True
-                        else:
-                            global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.id}'s price. You don't have the coin.")
-                            return False
-                    else:
-                        global_commands.type_text(f"You can't carry the {item.id}.")
-                        return False
-                else:
-                    global_commands.type_text(f"The Shopkeep doesn't have any {item.id}s right now. Come back another time.")
-                    return False
-        
-    def sell_stackable(self, item:Stackable) -> bool:
-        import narrator
+                pass
 
-        num = narrator.ask_quantity()
-        held = self.get_item(item)
-        selling:Stackable = copy.deepcopy(item)
-        if held is not None and held.quantity > 0:
-            if num > held.quantity:
-                global_commands.type_text(f"The Shopkeep does not have {num} {item.id}s. He'll sell you all that he has.")
-                num = held.quantity
-            selling.set_quantity(num)
-            if self.player.can_carry(selling) is True:
-                if self.player.spend_gold(selling.value) is True:
-                    self.gold += selling.value
-                    held.decrease_quantity(num)
-                    if held.quantity <= 0:
-                        self.inventory.remove(held)
-                        held.owner = None
-                    global_commands.type_text(self.generate_successful_sale_message(selling))
-                    self.player.pick_up(selling)
-                    return True
-                else:
-                    global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.name}' price. You don't have the coin.")
-                    return False
+        if self.player.can_carry(item) is True:
+            if self.player.spend_gold(item.value):
+                self.gold += item.value
+                self.inventory.remove(item)
+                item.owner = None
+                global_commands.type_text(self.generate_successful_sale_message(item))
+                self.player.pick_up(item) 
+                #self.check_stock()
+                return True
             else:
-                global_commands.type_text(f"You can't carry {num} {item.name}.")
+                global_commands.type_text(f"The Shopkeep grunts and gestures to the {item.id}'s price. You don't have the coin.")
                 return False
         else:
-            global_commands.type_text(f"The Shopkeep doesn't have any {item.name} right now. Come back another time.")
+            global_commands.type_text(f"You can't carry the {item.name}.")
             return False
         
     def buy(self, item:Item, num:int=1) -> bool:
@@ -160,6 +146,16 @@ class Shopkeep():
             return True
         return False
 
+    def check_stock(self):
+        """Cleans the shopkeeps inventory of any items that should no longer be displayed."""
+        for item in self.inventory:
+            match item:
+                case Stackable():
+                    if item.quantity <= 0:
+                        self.inventory.remove(item)
+                case _:
+                    pass
+
     def print_inventory(self):
         if len(self.inventory) == 0:
             print("Shop's empty!")
@@ -171,8 +167,9 @@ class Shopkeep():
                 print("\n\n")
 
             # change rarity.string to some item specific stat block
-            string = f" {i+1}. {item.name} ({item.rarity.string}): {item.value}g, {item.weight} lbs"
-            string = global_commands.match(string, 55)
+            string = f" {i+1}. {item.name} ({item.rarity.string}): {item.value}g, {item.weight} lbs."
+            while(len(string) < 55):
+                string = string + " "
             
             print(string + 2*"\t", end='')
             
@@ -188,8 +185,10 @@ class Shopkeep():
         #global_commands.type_text(footer, 0.012)
 
     def restock(self) -> None:
-        #add HP + repair kit stocking here
         from global_variables import ARMORY
+        from item_compendium import Health_Potion
+        from item import Rarity
+        from stackable import Stackable
         w_count = random.randrange(3, 6)
         a_count = random.randrange(3, 6)
 
@@ -198,6 +197,11 @@ class Shopkeep():
 
         for _ in range(a_count):
             self.stock(random.choice(list(ARMORY.armor)))
+
+        hp_pots:Stackable = Health_Potion.object(Rarity(max(1, global_variables.PLAYER.level // 4)))
+        hp_pots.set_quantity(5)
+
+        self.stock(hp_pots)
             
     #NARRATION
     def generate_successful_sale_message(self, item:Item) -> str:

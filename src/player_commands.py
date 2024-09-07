@@ -1,6 +1,7 @@
 import time, sys
 import global_commands
 from item import Item
+from stackable import Consumable
 
 GOD_MODE = True
 
@@ -34,7 +35,7 @@ def turn():
                 try: 
                     code = int(code)
                     item = global_variables.PLAYER.get_item(code-1)
-                    use_an_item(item, controller.SCENE.enemy)
+                    use_an_item(item)
                     done = True
                 except ValueError:
                     #check if code is combat trick hotkey
@@ -183,38 +184,29 @@ def item_select() -> None:
                 item = global_variables.PLAYER.get_item(num-1)
                 if item is not None:
                     done = True
-                    return use_an_item(item, controller.SCENE.enemy)
+                    return use_an_item(item)
                 else:
                     global_commands.error_message(None, f"Invalid item number '{code}'. Please try again.")
             except ValueError:
                 global_commands.error_message(code)
 
-def use_an_item(item:Item, target=None) -> bool:
-    """
-    Uses an item if the player has the item in their inventory.
-    Returns False if item is None, else True
-    """
+def use_an_item(item:Item | Consumable) -> bool:
+    """Uses an item if the player has the item in their inventory."""
     import global_variables
 
     if item is None:
         global_commands.error_message(None, "Invalid item selected. Please try again.")
         return False
 
-    if global_variables.PLAYER.has_item(item):#check the player has the item
-        if item.is_consumable:
-            held_item:item.Consumable = global_variables.PLAYER.get_item(item.id)
-            if held_item.quantity == 0: #if the items quantity is 0, remove it
-                global_variables.PLAYER.drop(held_item)
-                global_commands.type_text(f"No {item.name} avaliable!")
-                return False
-            if held_item.use(target):
-                global_variables.PLAYER.spend_ap()
-            return True
-        else:
-            global_commands.error_message(None, f"Your {item.id} is not consumable. Please try again.")
-            return False
+    item = global_variables.PLAYER.get_item(item.id)
 
-    raise ValueError("""Item passed "use_an_item" to not in player's inventory.""")
+    if global_variables.PLAYER.use(item):
+        match item:
+            case Consumable(): item.remove_quantity()
+        return True
+    else: 
+        global_commands.error_message(None, f"You can't use that {item.id}. Please try again.")
+        return False
 
 def flee() -> None:
     """Attempts to run away from the current encounter"""

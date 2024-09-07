@@ -5,7 +5,7 @@ import global_commands
 
 class Rarity():
 
-    def __init__(self, rarity):
+    def __init__(self, rarity:Rarity|str|int):
         
         codex = {
             "Common": 1,
@@ -16,14 +16,18 @@ class Rarity():
             "Unique": 6 
         }
 
-        if rarity in list(codex.keys()):
-            self.value = codex[rarity]
-            self.string = rarity
-        elif rarity in list(codex.values()):
-            self.value = rarity
-            self.string = list(codex.keys())[self.value-1]
-        else:
-            raise ValueError(f"Rarity '{rarity}' not found in codex.")
+        match rarity:
+            case Rarity():
+                self.string = rarity.string
+                self.value = rarity.value
+            case str():
+                self.string = rarity
+                self.value = codex[self.string]
+            case int():
+                self.value = rarity
+                self.string = list(codex.keys())[self.value-1]
+            case _:
+                raise ValueError(f"Rarity '{rarity}' not found in codex.")
 
 class Weight_Class():
 
@@ -49,10 +53,10 @@ class Weight_Class():
 class Anvil():
     id:str
     anvil_type:str
+    rarity:Rarity
 
     #EQUIPMENT attributes
     weight_class:Weight_Class
-    rarity:Rarity
     max_dex_bonus:int
     durability:int
 
@@ -63,15 +67,19 @@ class Anvil():
 
     #Armor attributes
     armor_value:int
-    
+
+    #Stackable attributes
+    quantity:int
+    unit_weight:int
+    unit_value:int
 
     def __init__(self):
         self.id = None
         self.anvil_type = None
+        self.rarity:Rarity = None
 
         #EQUIPMENT attributes
         self.weight_class:Weight_Class = None
-        self.rarity:Rarity = None
         self.max_dex_bonus:int = 6
         self.durability:int = None
 
@@ -82,6 +90,11 @@ class Anvil():
 
         #Armor attributes
         self.armor_value:int = None
+
+        #Stackable attributes
+        self.quantity:int = None
+        self.unit_weight:int = None
+        self.unit_value:int = None
 
     def copy(self, source:dict):
         """
@@ -95,8 +108,9 @@ class Anvil():
                     entry_type = get_type_hints(Anvil)[entry]
                     self.__dict__[entry] = entry_type(source[entry])
                 else: self.__dict__[entry] = source[entry]
-
-        self.anvil_type = source["type"] 
+        
+        if self.anvil_type is None:
+            self.anvil_type = source["type"] 
 
 class Item():
 
