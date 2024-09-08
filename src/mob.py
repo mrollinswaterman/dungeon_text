@@ -108,7 +108,7 @@ class Mob(Game_Object):
 
     #NARRATION
     def narrate(self, func, param=None):
-        text:list[str] = func()
+        text:list[str] = func() if param is None else func(param)
         if self.prev_narration in text:
             text.remove(self.prev_narration)
         final = random.choice(text)

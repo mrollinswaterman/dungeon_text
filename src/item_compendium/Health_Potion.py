@@ -4,7 +4,7 @@ from item import Anvil, Rarity
 
 INFO = Anvil()
 
-INFO.anvil_type = "Health Potion"
+INFO.anvil_type = "Health_Potion"
 
 INFO.unit_value = 8
 
@@ -17,7 +17,6 @@ class Health_Potion(Consumable):
     def __init__(self, rarity:str | Rarity | None = None):
         super().__init__(INFO, "Health Potion", rarity)
         self.anvil.rarity = self.rarity
-
         self.quantity = 1
 
     def use(self):

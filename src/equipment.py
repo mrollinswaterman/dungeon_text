@@ -42,6 +42,16 @@ class Equipment(Item):
     def destroyed(self) -> bool:
         return self.durability < -(self.max_durability // 2)
 
+    @property
+    def display(self) -> str:
+        return [f"{self.id}, {self.weight_class.string} ({self.rarity.string}): {self.value}g, {self.weight} lbs.",]
+        #return f"{super().display}, {self.weight_class.string}, +{self.max_dex_bonus}"
+        #return super().display + [f"Class: {self.weight_class.string}, Dex Cap: +{self.max_dex_bonus}"]
+    
+    @property
+    def format(self) -> list[str]:
+        return super().format + [f"{' '*3}Class: {self.weight_class.string}, Dex Cap: +{self.max_dex_bonus}"]
+
     #methods
     def smelt(self):
         """Copies an item's anvil stats to it's own class attributes"""
@@ -118,15 +128,15 @@ class Weapon(Equipment):
         return self.rarity.value
 
     @property
-    def stats(self) -> str:
-        return f"{self.num_damage_dice}d{self.damage_die}, x{self.crit}"
+    def display(self) -> list[str]:
+        #return f"({super().display}, {self.damage}, {self.crit_range}–20/x{self.crit}): {self.value}g, {self.weight} lbs."
+        return super().display + [f"{' '*5}Damage: {self.anvil.damage}, {self.crit_range}–20/x{self.crit}, Dex Cap: +{self.max_dex_bonus}"]
 
     @property
-    def format(self) -> dict[str: str]:
+    def format(self) -> list[str]:
         return super().format + [
-            f"{self.weight_class.string}, +{self.max_dex_bonus}",
-            f"Damage: {self.anvil.damage}   Crit: {self.crit_range}–20/x{self.crit}",
-            f"Durability: {self.durability}/{self.max_durability}",
+            f"{' '*3}Damage: {self.anvil.damage}{' '*3}Crit: {self.crit_range}–20/x{self.crit}",
+            f"{' '*3}Durability: {self.durability}/{self.max_durability}",
         ]
     #methods
     def smelt(self) -> None:
@@ -163,22 +173,22 @@ class Armor(Equipment):
 
     @property
     def value(self) -> dict:
-        return (15 * self.rarity.value) + (15 * self.weight_class.value) + random.randrange(self.armor_value, 5*self.armor_value)
+        return 15 * (self.rarity.value + self.weight_class.value) + random.randrange(self.armor_value, 5*self.armor_value)
 
     @property
     def max_durability(self) -> int:
         return 15 * self.rarity.value
-
+    
     @property
-    def stats(self) -> str:
-        return f"{self.weight_class.string}, {self.armor_value}P"
-
+    def display(self) -> list[str]:
+        #return f"({super().display}, {self.armor_value}/{list(self.damage_type.name)[0]}): {self.value}g, {self.weight} lbs."
+        #return super().display + [f"Armor: {self.armor_value}/{self.damage_type.name}"]
+        return super().display + [f"{' '*5}Armor: {self.armor_value} {list(self.damage_type.name)[0]}, Dex Cap: +{self.max_dex_bonus}"]
     @property
-    def format(self) -> dict[str: str]:
+    def format(self) -> list[str]:
         return super().format + [
-            f"{self.weight_class.string}, +{self.max_dex_bonus}",
-            f"Armor: {self.armor_value}/{self.damage_type.name}",
-            f"Durability: {self.durability}/{self.max_durability}",
+            f"{' '*3}Armor: {self.armor_value}/{self.damage_type.name}",
+            f"{' '*3}Durability: {self.durability}/{self.max_durability}",
         ]
 
     #methods

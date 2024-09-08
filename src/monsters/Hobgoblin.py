@@ -25,11 +25,11 @@ stats = {
 
 class Taunt(Condition):
 
-    def __init__(self, source, target):
-        super().__init__(source, target)
+    def __init__(self, source):
+        super().__init__(source)
         self.id = f"{self.source.id}'s Taunt"
 
-        reduce_evasion = ModifyStat(self, self.target)
+        reduce_evasion = ModifyStat(self)
         reduce_evasion.stat = "base_evasion"
         reduce_evasion.duration = 3
         reduce_evasion.potency = -2
@@ -64,7 +64,7 @@ class Hobgoblin(mob.Mob):
             return False
         return self.target.evasion >= 10 and self.target.conditions.get(f"{self.id}'s Taunt") is None
 
-    def special(self) -> bool:
+    def special(self) -> None:
         """Taunt: Reduces the player's evasion by 2 points for 2 turns if they fail a charisma check"""
         self.spend_ap(0)
         global_commands.type_text(f"The {self.id} hurls enraging insults at you.")
@@ -72,9 +72,9 @@ class Hobgoblin(mob.Mob):
         if self.target.roll_a_check("cha") >= 1200:#self.stats.dc:
             global_commands.type_text(f"Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
         else:
-            taunt = Taunt(self, self.target)
+            taunt = Taunt(self)
             self.target.conditions.add(taunt)
-        return True
+        return None
     
     def roll_narration(self):
         base = super().roll_narration()        

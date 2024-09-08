@@ -317,7 +317,10 @@ class Game_Object():
         import player_commands
         roll = self.roll_to_hit()
         self.spend_ap()
-        self.narrate(self.roll_narration, roll)
+        #probably a prettier way to do this
+        if self.id == "Player":
+            self.narrate(self.roll_narration, roll)
+        else: self.narrate(self.roll_narration)
         self.apply_on_attacks()
 
         match roll:

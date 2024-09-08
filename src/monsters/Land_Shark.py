@@ -26,18 +26,18 @@ stats = {
 
 class Burrowed(Condition):
 
-    def __init__(self, source, target):
-        super().__init__(source, target)
+    def __init__(self, source):
+        super().__init__(source)
         self.id = "Burrow"
 
-        increase_evasion = ModifyStat(self, self.target)
+        increase_evasion = ModifyStat(self)
         increase_evasion.stat = "base_evasion"
         increase_evasion.potency = 3
         increase_evasion.duration = 10000
 
         self.active_effects.append(increase_evasion)
 
-        increase_armor = ModifyStat(self, self.target)
+        increase_armor = ModifyStat(self)
         increase_armor.stat = "armor"
         increase_armor.potency = 2
         increase_armor.duration = 10000
@@ -55,16 +55,16 @@ class Burrowed(Condition):
 
 class Erupt(Condition):
 
-    def __init__(self, source, target):
-        super().__init__(source, target)
+    def __init__(self, source):
+        super().__init__(source)
         self.id = "Erupt"
 
-        temp_hp = GainTempHP(self, self.target)
+        temp_hp = GainTempHP(self)
         temp_hp.potency = 2 * self.source.bonus("con")
 
         self.active_effects.append(temp_hp)
 
-        vulnerable = ModifyStat(self, self.target)
+        vulnerable = ModifyStat(self)
         vulnerable.stat = "damage_taken_multiplier"
         vulnerable.potency = 1#makes the land shark take x2 damage
         vulnerable.duration = 3
@@ -104,19 +104,18 @@ class Land_Shark(mob.Mob):
 
         return True#global_commands.probability(100 - ((self.hp * 100) / self.stats.max_hp))
 
-    def special(self) -> bool:
+    def special(self) -> None:
         if not self.burrowed:
             self.spend_ap(0) #indicates a full round action
-            burrow = Burrowed(self, self)
+            burrow = Burrowed(self)
             self.conditions.add(burrow)
-            return True
         else:
             self.spend_ap()
             self.conditions.cleanse("Burrow")
             self.rounds_burrowed = 0
-            erupt = Erupt(self, self)
+            erupt = Erupt(self)
             self.conditions.add(erupt)
-            return True
+        return None
    
     def roll_narration(self):
         base = super().roll_narration()        

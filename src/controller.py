@@ -105,7 +105,7 @@ class Scene():
 
     def end(self):
         global_commands.type_text(f"You killed the {self.enemy.id}!")
-        global_variables.PLAYER.recieve_reward(self.enemy)
+        global_variables.PLAYER.receive_loot()
         self.enemy = None
         self.turn_order.clear()
 

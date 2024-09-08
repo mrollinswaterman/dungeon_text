@@ -1,5 +1,5 @@
-type,id,name,rarity,weight_class,max_dex_bonus,durability,damage,crit,crit_range,armor_value
-Weapon,Longsword,Longsword,Common,Light,6,10,1d8,2,20,
-Armor,Padded Leather,Padded Leather,Common,Light,5,15,,,,2
-Weapon,Glaive,Glaive,Uncommon,Medium,4,20,1d10,3,20,
-Armor,Haramaki,Haramaki,Common,None,12,15,,,,1
+type,id,name,rarity,weight_class,max_dex_bonus,durability,damage,crit,crit_range,armor_value,quantity,unit_weight,unit_value
+Health_Potion,Health Potion,Health Potions,Common,,,,,,,,5,1,8
+Armor,Studded Leather,Studded Leather,Uncommon,Light,5,30,,,,3,,,
+Weapon,Longsword,Longsword,Common,Light,6,10,1d8,2,20,,,,
+Armor,Padded Leather,Padded Leather,Common,Light,5,15,,,,2,,,

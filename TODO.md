@@ -14,21 +14,15 @@ This file contains a list of tasks and ideas
 - [ ] Legendary / unique weapons
 - [ ] Shopkeep “mood” meter → different narration lines depending on how much he likes you (impacted by how much you buy+sell, and charisma) 
 - [ ] Templates → demonic, hellish, angelic, divine → templates that can be applied to mobs that give them stat bonus + special abilities?
-- [X] Fix status effects
 - [ ] ~~Player special moves (power attack, feint, etc)~~ now WIP
 - [X] Add mob specific attack narration (ie the ___ swings it’s dagger at you, the dragon breathes a gout of flame in your direction, etc)
 - [X] Give status effect their own file like item compendium where each individual effect is made its own subclass of status effect
 - [ ] Add a companion, Gears the friendly Clockwork Hound. If you have a Clockwork Heart and some scrap, you have a chance to encounter him, can repair him with an int check, he joins you. Increases loot chances???
-- [X] Overhaul how player inventory is displayed, and how items are printed to the console (instead of 
-actually printing, maybe the print function just tells you what lines should be printed, ie durability
-for weapons/armor, quantity for consumables, etc, then the print inventory function prints each line
-as necessary for formatting)
 - [X] Make a switch statement so rolls that should be paired with "an" are paired with "an" instead of "a". (ie "You rolled 'an' 18." instead of "'a' 18.")
 - [X] Make stablocks their own class???? (ie player.stats.dex)
 - [ ] Maybe make a stance class (riposte, total defense, defensive, offensive, all-out, etc) each with different effects.
 - [X] Make a damage class to store info about an object damage (type, src, amount, etc), and do the same for weapon types?
-- [X] Split statuses and effects. Statuses are named conditions (ie On Fire, Poisoned, Slowed, etc), while effects are the mechanical things that happen
-(ie damage over time, increasing or reducing a stat for a given period, one-time damage, )
+- [X] Split statuses and effects. Statuses are named conditions (ie On Fire, Poisoned, Slowed, etc), while effects are the mechanical things that happen(ie damage over time, increasing or reducing a stat for a given period, one-time damage, etc)
 
 ## Mechanics
 
@@ -137,7 +131,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [X] buying a consumable at the store does not reprint the shopkeep's inventory
 - [X] Extra line printed after re-entering dungeon
 - [ ] Add specific text for when a mob damages itself on a crit fail
-- [ ] Make 'y/n' prompts look more natural
+- [X] Make 'y/n' prompts look more natural
 - [X] Can't tell if Riposte works properly or not
 - [X] Shopkeep Inventory bugged
 - [X] Entering the shop and viewing the for sale items, then attempting to return to the dungeon causes the shopkeep's inventory to print again
@@ -147,4 +141,7 @@ riposte state, which is bad i think
 - [ ] Add a parameter that tells conditions and effects to not print their "end()" text when the game is saving.
 Alternatively, just prevent the game from printing anything at all while it's saving (maybe make type_text() function always return None??)
 - [ ] There is an extra "|" character after all menu options that shouldn't be there
+- [ ] Find a prettier way to handle not passing a roll check to the mob's narration function (line 320 in game_object)
+- [ ] Have shopkeep automatically sort it's inventory by something (rarity, price, whatever)
+- [ ] Make Shopkeep successful sale message print before player spend_gold() message print (maybe add a silent gold check, then print successful sale, then print spent gold?)
 

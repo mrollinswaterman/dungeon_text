@@ -4,7 +4,7 @@ import global_commands, global_variables
 SCENE_CHANGE = [
     "You press towards your goal...\n",
     "Your resolve steeled, you continue on...\n",
-    "Your weary legs carry you ever fruther...\n",
+    "Your weary legs carry you ever further...\n",
     "You venture deeper into the dungeon...\n",
     "May your limbs never tire, may your heart never waiver, and may you never look back...",
     "There is no way but onward, no path but forward, no place but here...",
@@ -31,7 +31,9 @@ ENTER_THE_SHOP = [
     "The Shopkeep seems to look right through you.",
     "The Shopkeep eyes you eagerly.",
     "The Shopkeep grunts at your approach.",
-    "The Shopkeep eyes you wearily."
+    "The Shopkeep eyes you wearily.",
+    "The Shopkeep shakes off his slumber",
+    "The Shopkeep gives you a nod."
 ]
 
 EXIT_THE_SHOP = [
@@ -133,7 +135,7 @@ def buy_something():
                     return buy_something()
                 else:
                     global_commands.error_message(cmd)
-            except ValueError:
+            except IndexError:#ValueError:
                 global_commands.error_message(cmd)
 
 def leave_the_shop():
@@ -148,7 +150,7 @@ def shopkeep_options():
     PREV_MENU = shopkeep_options
     global_commands.type_with_lines(random.choice(ENTER_THE_SHOP))
     global_commands.type_with_lines("What would you like to do?")
-    print("\t Purcahse Items - (p) | Leave - (l) | Sell something - (s) | Inventory - (i)\n")
+    print("\t Purcahse Items - (p) | Sell something - (s) | Inventory - (i) | Leave - (l)\n")
     done = False
     while not done:
         cmd = global_commands.get_cmd()
@@ -196,7 +198,7 @@ def menu_options():
     global PREV_MENU
     PREV_MENU = menu_options
     global_commands.type_with_lines("What would you like to do?")
-    print("\t Enter the Dungeon - (e) | Rest - (r) | Visit the Shop - (v) | Inventory - (i) \n")
+    print("\t Enter the Dungeon - (e) | Visit the Shop - (v) | Inventory - (i) | Rest - (r)\n")
     
     done = False
     while not done:

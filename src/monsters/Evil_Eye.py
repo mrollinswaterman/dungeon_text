@@ -107,16 +107,11 @@ class Evil_Eye(mob.Mob):
                     player_commands.end_game()
         return None
 
-    def special(self) -> bool:
-        """
-        Picks which magic attack the Evil Eye uses
-        """
-        if self.execute_trigger and self.can_full_round:
-            self.death_ray()
-        else:
-            self.spell()
-        
-        return True
+    def special(self) -> None:
+        """Picks which magic attack the Evil Eye uses"""
+        if self.execute_trigger and self.can_full_round: return self.death_ray()
+        elif self.can_cast: return self.spell()
+        else: return self.attack()
 
     def roll_narration(self):
         base = super().roll_narration()        

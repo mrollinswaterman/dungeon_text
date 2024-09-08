@@ -58,7 +58,6 @@ class Goblin(mob.Mob):
                 global_commands.type_text(f"The {self.id} stole {actual} gold from you!")
                 self.gold += actual
                 self.stolen = actual > 0
-            return None
         else:
             self.flee_threshold = 100
         return None

@@ -16,6 +16,15 @@ class Rarity():
             "Unique": 6 
         }
 
+        abbrev = {
+            "Common": "Com.",
+            "Uncommon": "Uncom.",
+            "Rare": "Ra.",
+            "Epic": "Ep.",
+            "Legendary": "Leg.",
+            "Unique": 6  
+        }
+
         match rarity:
             case Rarity():
                 self.string = rarity.string
@@ -28,6 +37,8 @@ class Rarity():
                 self.string = list(codex.keys())[self.value-1]
             case _:
                 raise ValueError(f"Rarity '{rarity}' not found in codex.")
+
+        self.abbrev = abbrev[self.string]
 
 class Weight_Class():
 
@@ -142,17 +153,24 @@ class Item():
 
     @property
     def pickup_message(self) -> str:
-        return f"You picked up a {self.id}."
+        first_letter = list(self.id)[0]
+        if first_letter in ["a","e","i","o","u"]:
+            return f"You picked up an {self.id}."
+        else: return f"You picked up a {self.id}."
 
     @property
     def name(self) -> str:
         return self._name
-    
+
+    @property
+    def display(self) -> str:
+        return f"{self.rarity.string}"
+
     @property
     def format(self) -> dict[str: str]:
         return [
             f"{self.id} ({self.rarity.string})",
-            f"Cost: {self.value}gp   Weight: {self.weight} lbs."
+            f"{' '*3}Cost: {self.value}gp{' '*3}Weight: {self.weight} lbs."
         ]
 
     #methods

@@ -5,7 +5,9 @@ commands = {
     "tui": {
         "y": tui.etd,
         "n": tui.ltd,
-        "test": tui.test
+        "test": tui.test,
+        "t":tui.test,
+        "i":global_variables.PLAYER.print_inventory,
     },
 
     "stats": {

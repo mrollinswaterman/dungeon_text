@@ -19,14 +19,15 @@ class Armory():
         self.weapons:set[Weapon] = set()
         self.armor:set[Armor] = set()
 
-    
     @property
     def master(self) -> set[Armor, Weapon]:
         """Returns a set containing all weapons and armor in the armory"""
-        all = self.weapons
+        all = set()
+        for i in self.weapons:
+            all.add(i)
         for i in self.armor:
             all.add(i)
-        return all
+        return all 
 
     def get(self, id:str) -> Weapon | Armor:
         """Finds an item in the Armory"""
@@ -138,13 +139,33 @@ class Shopkeep():
             global_commands.type_text("The Shopkeep throws you a questioning glance as you try to sell him thin air.")
             return False
         
-    #INVENTORY/STOCK
+    #stock
     def stock(self, item: Item) -> bool:
         if self.stock_size < self.max_stock_size:
             self.inventory.append(item)
             item.owner = self
             return True
         return False
+
+    def restock(self) -> None:
+        """Restocks the shop, adding default items (hp_pots and repair kits), plus an
+            assortment of weapons+armor"""
+        from global_variables import ARMORY
+        from item_compendium import Health_Potion
+        from item import Rarity
+        from stackable import Stackable
+        w_count = random.randrange(3, 6)
+        a_count = random.randrange(3, 6)
+
+        hp_pots:Stackable = Health_Potion.object(Rarity(max(1, global_variables.PLAYER.level // 4)))
+        hp_pots.set_quantity(5)
+        self.stock(hp_pots)
+
+        for _ in range(w_count):
+            self.stock(random.choice(list(ARMORY.weapons)))
+
+        for _ in range(a_count):
+            self.stock(random.choice(list(ARMORY.armor)))
 
     def check_stock(self):
         """Cleans the shopkeeps inventory of any items that should no longer be displayed."""
@@ -155,24 +176,25 @@ class Shopkeep():
                         self.inventory.remove(item)
                 case _:
                     pass
-
+    #inventory
     def print_inventory(self):
         if len(self.inventory) == 0:
             print("Shop's empty!")
         global_commands.type_with_lines("For Sale:")
-        for i in range(self.stock_size):
-            item:Item = self.inventory[i]
+        print("")
+        i = 0
+        while (i < self.stock_size-1):
             if i % 2 == 0 and i != 0:
                 time.sleep(.05)
-                print("\n\n")
+                print("\n")
+            item_1:list = self.inventory[i].display
+            item_2:list = self.inventory[i+1].display
 
-            # change rarity.string to some item specific stat block
-            string = f" {i+1}. {item.name} ({item.rarity.string}): {item.value}g, {item.weight} lbs."
-            while(len(string) < 55):
-                string = string + " "
-            
-            print(string + 2*"\t", end='')
-            
+            item_1[0] = f"{i+1}. {item_1[0]}"
+            item_2[0] = f"{i+2}. {item_2[0]}"
+            global_commands.print_line_by_line([item_1, item_2], 55)
+            i += 2
+
         print("\n")#double newline after last item
         p = global_variables.PLAYER
         gold = f"Your Gold: {p.gold} \t"
@@ -182,26 +204,6 @@ class Shopkeep():
         global_commands.type_with_lines()
         print(footer)
         print("")
-        #global_commands.type_text(footer, 0.012)
-
-    def restock(self) -> None:
-        from global_variables import ARMORY
-        from item_compendium import Health_Potion
-        from item import Rarity
-        from stackable import Stackable
-        w_count = random.randrange(3, 6)
-        a_count = random.randrange(3, 6)
-
-        for _ in range(w_count):
-            self.stock(random.choice(list(ARMORY.weapons)))
-
-        for _ in range(a_count):
-            self.stock(random.choice(list(ARMORY.armor)))
-
-        hp_pots:Stackable = Health_Potion.object(Rarity(max(1, global_variables.PLAYER.level // 4)))
-        hp_pots.set_quantity(5)
-
-        self.stock(hp_pots)
             
     #NARRATION
     def generate_successful_sale_message(self, item:Item) -> str:

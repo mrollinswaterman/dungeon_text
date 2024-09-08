@@ -1,7 +1,8 @@
-#globals variables
+#global variables
 from player import Player
-#import item_compendium
 from shopkeep import Armory, Shopkeep, forge_all_items
+from stackable import Stackable
+from item_compendium import Health_Potion
 
 PLAYER:Player = Player()
 
@@ -58,8 +59,9 @@ forge_all_items()
 
 PLAYER.equip(ARMORY.get("Longsword"), True)
 PLAYER.equip(ARMORY.get("Padded Leather"), True)
-
-#PLAYER.pick_up(item_compendium.Health_Potion.craft("Common", 5), True)
+hp_pots:Stackable = Health_Potion.object(max(1, PLAYER.level // 4))
+hp_pots.set_quantity(5)
+PLAYER.pick_up(hp_pots, True)
 PLAYER.gain_gold(10000)
 #PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 

@@ -40,6 +40,7 @@ def exit():
 
 def save():
     from item import Item
+    from item_compendium import Health_Potion
     player_dict = global_variables.PLAYER.save()
     with open('player.csv', "w", newline='') as file:
         file.truncate(0)
@@ -48,38 +49,41 @@ def save():
         w.writerow(player_dict)
         file.close()
 
-    item_dict_list = []
+    item_saved_list = []
 
     #append all inventory item_to_dicts to list
     for entry in global_variables.PLAYER.inventory:
         item:Item = global_variables.PLAYER.inventory[entry]
         item.save()
-        item_dict_list.append(item.saved)
+        item_saved_list.append(item.saved)
 
     #append equipped weapon and armor as dicts to the list
     global_variables.PLAYER.weapon.save()
     global_variables.PLAYER.armor.save()
-    item_dict_list.append(global_variables.PLAYER.weapon.saved)
-    item_dict_list.append(global_variables.PLAYER.armor.saved)
+    item_saved_list.append(global_variables.PLAYER.weapon.saved)
+    item_saved_list.append(global_variables.PLAYER.armor.saved)
 
+    temp_item = Health_Potion.object("Common")
+    temp_item.save()
     #create fieldnames list from item_to_dict keys
     header1 = list(global_variables.PLAYER.weapon.saved.keys())
     header2 = list(global_variables.PLAYER.armor.saved.keys())
+    header3 = list(temp_item.saved.keys())
 
-    fields = merge_minus_dups(header1, header2)
+    fields = []
+    for i in header1: 
+        if i not in fields: fields.append(i)
+    for i in header2: 
+        if i not in fields: fields.append(i)
+    for i in header3: 
+        if i not in fields: fields.append(i)
+
     with open("inventory.csv", "w", newline='') as file:
             file.truncate(0)
-            w = csv.DictWriter(file, fieldnames=fields)
+            w = csv.DictWriter(file, fieldnames=list(fields))
             w.writeheader()
-            w.writerows(item_dict_list)
+            w.writerows(item_saved_list)
             file.close()
-
-def merge_minus_dups(list1:list, list2:list) -> list:
-    final = list1
-    for i in list2:
-        if i not in final:
-            final.append(i)
-    return final
 
 def bonus(num:int) -> int:
     return BONUS[num]
@@ -96,8 +100,7 @@ def find_max_depth(master:list[list[str]]) -> int:
             mx = len(i)
     return mx
 
-def print_line_by_line(master:list[list[str]]) -> None:
-    max_width = 35
+def print_line_by_line(master:list[list[str]], max_width:int=35) -> None:
     max_depth = find_max_depth(master)
     i = 0
     #fill all empty list spaces with " " strings
@@ -116,7 +119,7 @@ def print_line_by_line(master:list[list[str]]) -> None:
             while(len(string) < max_width):
                 string = string + " "
             #Adds a tab between each item, except the first
-            current = f"{current} {string}" if j == 0 else f"{current} \t {string}"
+            current = f"{current} {string}" if j == 0 else f"{current}{" " * 5}{string}"
         time.sleep(.01)
         i += 1
         print(current)
@@ -139,6 +142,7 @@ def generate_item_rarity():
 def create_item(source_dict={}):
     from item import Anvil
     from equipment import Weapon, Armor
+    from stackable import Stackable
     import item_compendium
     cast = Anvil()
     cast.copy(source_dict)
@@ -147,9 +151,15 @@ def create_item(source_dict={}):
             return Weapon(cast)
         case "Armor":
             return Armor(cast)
-    
+        case _:
+            pass
+
     if cast.anvil_type in item_compendium.dict:
-        return item_compendium.dict[cast.anvil_type](cast.rarity)
+        final:Stackable = item_compendium.dict[cast.anvil_type](cast.rarity)
+    else: final = Stackable(cast)
+
+    final.set_quantity(cast.quantity)
+    return final
 
 def d(num):
     """Rolls a dX where X is some number (ie d6, d20, etc)"""
@@ -200,23 +210,22 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
     text = " " + text + " "
 
     #typing speed, lower = faster
-    speed = 2
+    speed = 3
     for idx, char in enumerate(text):
-
         if first and char.isalpha():
             char = char.upper()
             first = False
         print(char, end='', flush=True)
-        waitTime = speed/100
+        waitTime = speed
 
         #add waitTime time if char is punctuation
-        waitTime += 0.3 if char in end_line else 0
+        waitTime += 30 if char in end_line else 0
         #add waitTime if char is a "pause character" ie ",", ":", etc
-        waitTime += 0.15 if char in pause_chars else 0
+        waitTime += 20 if char in pause_chars else 0
         #add waitTime time for end of text
-        waitTime += 0.4 if idx == len(text) else 0
+        waitTime += 50 if idx == len(text) else 0
 
-        time.sleep(waitTime)
+        time.sleep(waitTime/100)
         if idx / 120 >= 1.0 and char in end_line:
             print("\n")
 

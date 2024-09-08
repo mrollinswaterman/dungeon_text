@@ -14,8 +14,8 @@ class Stance(enum.Enum):
 
 class Player(Game_Object):
 
-    def __init__(self, id="Player"):
-        super().__init__(id)
+    def __init__(self):
+        super().__init__("Player")
         self.conditions:Conditions_Handler = Conditions_Handler(self)
         self.level = 1
         self.stats.max_ap = 1 + (self.level // 5)
@@ -118,7 +118,7 @@ class Player(Game_Object):
 
     def level_up(self, stat: str) -> None:
         """Levels up a given stat"""
-        self.stats.dict[stat] += 1
+        self.stats.modify(stat, 1)
         self.xp -= 15 * self.level
         self.level += 1
         prev_max = self.stats.max_hp
@@ -344,13 +344,10 @@ class Player(Game_Object):
         else: return self.carrying + item.weight <= self.carrying_capacity
 
     def print_inventory(self) -> None:
-        line_len = 25
+        line_len = 30
         global_commands.type_with_lines()
-        print(f'{line_len * " "} Inventory: {line_len * " "} \t \t\t Equipped:\n')
-        
+        print(f'{line_len * " "}Inventory:{line_len * " "}\t\t\tEquipped:\n')
         self.display_inventory()
-        
-        print("\n")
         print(f"Gold: {self.gold}g", end='')
         time.sleep(0.05)
         print(f"\t Carrying Capacity: {self.carrying}/{self.carrying_capacity}\n")
@@ -393,6 +390,12 @@ class Player(Game_Object):
             self.display_items(item_index, equipment)
             item_index += 2
             print("\n")
+
+    def receive_loot(self):
+        self.gain_xp(self.target.xp)
+        self.gain_gold(self.target.gold)
+        for entry in self.target.inventory:
+            self.pick_up(self.target.inventory[entry])
 
     ##MISC.
     def save(self) -> dict:

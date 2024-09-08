@@ -14,8 +14,8 @@ def etd():
     controller.SCENE.begin_encounter()
 
 def test():
-    player_commands.load()
-    global_variables.PLAYER.print_inventory()
+    global_variables.SHOPKEEP.restock()
+    global_variables.SHOPKEEP.print_inventory()
 
 def ltd():
     """

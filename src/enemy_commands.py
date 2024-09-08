@@ -48,8 +48,8 @@ def turn_options():
         return enemy_flee_attempt()
 
     #if trigger is active, 85% chance to try special
-    if enemy.trigger() and global_commands.probability(100):
-        return True if enemy.special() else enemy_attack()
+    if enemy.trigger() and global_commands.probability(85):
+        return enemy.special()
 
     #if no trigger, don't special
     return enemy_attack()

@@ -4,7 +4,7 @@ from equipment import Anvil
 
 class Stackable(Item):
 
-    def __init__(self, anvil:Anvil, id:str, rarity:str | Rarity | None=None):
+    def __init__(self, anvil:Anvil, id:str="stackable", rarity:str | Rarity | None=None):
         #check for custom rarity, and set it if it's there
         id = anvil.id if id is None else id
         rarity = anvil.rarity if rarity is None else rarity
@@ -32,13 +32,22 @@ class Stackable(Item):
 
     @property
     def pickup_message(self) -> str:
-        return f"You picked up {self.quantity} {self.name}." if self.quantity > 1 else f"You picked up a {self.id}."
+        return f"You picked up x{self.quantity} {self.name}." if self.quantity > 1 else f"You picked up a {self.id}."
     
     @property
-    def format(self) -> str:
-        return super().format + [
-            f"Quantity: {self.quantity}",
-            f"Unit Cost: {self.unit_value}g/each   Unit Weight: {self.unit_weight}lbs./each"
+    def display(self) -> list[str]:
+        return [f"{self.name} ({self.rarity.string}): {self.unit_value}g/each, {self.unit_weight} lbs./each",
+                f"{' '*5}x{self.quantity} Available"
+                ]
+
+    @property
+    def format(self) -> list[str]:
+        return [
+            f"{self.name} ({self.rarity.string})",
+            f"{' '*3}Quantity: {self.quantity}",
+            f"{' '*3}Cost: {self.unit_value}g/each",
+            f"{' '*3}Weight: {self.unit_weight} lbs./each",
+            f"{' '*3}Total: {self.value}g, {self.weight} lbs.",
         ]
 
     #methods
