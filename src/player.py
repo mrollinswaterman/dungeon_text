@@ -5,6 +5,8 @@ from item import Item
 from equipment import Weapon, Armor, Equipment
 from stackable import Stackable
 from event import Event
+from trick import Combat_Trick
+import combat_tricks
 
 class Stance(enum.Enum):
     NONE = 0
@@ -20,7 +22,7 @@ class Player(Game_Object):
         self.level = 1
         self.stats.max_ap = 1 + (self.level // 5)
         #stances
-        self.stance = Stance(0)
+        self.combat_trick:Combat_Trick = None
 
     #properties
     @property
@@ -95,7 +97,7 @@ class Player(Game_Object):
                 #attack roll formula: roll + dex bonus + BaB + weapon att bonus
                 if roll >= self.weapon.crit_range:
                     return 0
-                else: return roll + self.bonus("dex") + (self.level // 5) + self.weapon.attack_bonus
+                else: return roll + self.bonus("dex") + self.base_attack_bonus + self.weapon.attack_bonus
             
     def roll_damage(self) -> int:
         """Returns a damage roll (weapon dice + str bonus)"""
@@ -153,7 +155,10 @@ class Player(Game_Object):
 
     #COMBAT
     def attack(self) -> None:
-        return super().attack()
+        super().attack()
+        if self.combat_trick is not None:
+            self.combat_trick.deactivate()
+        return None
 
     def take_damage(self, taken: int, source) -> int:
         if self.armor is None:
@@ -247,7 +252,7 @@ class Player(Game_Object):
         return text
     
     def heal_narration(self, num: int) -> list[str]:
-        return super().heal_narration(num)
+        global_commands.type_text(f"You healed {num} HP.")
 
     def process_roll(self, roll) -> str:
         vowel = f"rolling an {roll}."
@@ -267,49 +272,17 @@ class Player(Game_Object):
 
     #TRICKS
     def power_attack(self) -> int:
-        global_commands.type_text(f"You wind up for a powerful attack...")
-    
+        self.combat_trick:Combat_Trick = combat_tricks.dict["Power_Attack"](self)
+        self.combat_trick.activate()
+
     def feint(self) -> None:
-
-        global_commands.type_text("You attempt a feint...")
-        roll = self.roll_a_check("cha")
-        self.spend_ap()
-
-        """if roll >= self.target.roll_a_check("cha"):
-            global_commands.type_text(f"You faked out the {self.target.id}!")
-            def_bonus = Stat_Buff.Condition(self, self)
-            def_bonus.set_stat("base_evasion")
-            def_bonus.set_duration(2)
-            def_bonus.set_potency(max(2, self.bonus("cha")))
-            self.add_status_effect(def_bonus)
-        else:
-            global_commands.type_text(f"The {self.target.id} spots your trick.")"""
-
-        return None
+        if self.combat_trick is not None:
+            self.combat_trick.deactivate()
+        self.combat_trick:Combat_Trick = combat_tricks.dict["Feint"](self)
+        self.combat_trick.activate()
     
     def riposte(self) -> None:
-
-        global_commands.type_text("You ready yourself to repel any oncoming attacks...")
-
-        self.spend_ap(2)
-        """rip_bonus = Stat_Buff.Condition(self, self)
-        rip_bonus.set_id("Riposte")
-        rip_bonus.set_cleanse_message("Your Riposte has ended.")
-        rip_bonus.set_stat("base_evasion")
-        rip_bonus.set_duration(1000000)
-        rip_bonus.set_potency(2)
-        self.add_status_effect(rip_bonus)""" 
-
-        self.stance = Stance(1)
-        self.riposting = True
-
-    def end_riposte(self) -> None:
-        self.riposting = False
-
-        if self.get_status_effect("Riposte") is not None:
-            self.remove_status_effect(self.get_status_effect("Riposte"))
-
-        return None
+        pass
 
     #INVENTORY STUFF
     def pick_up(self, item: Item | Stackable, silent:bool=False) -> bool:

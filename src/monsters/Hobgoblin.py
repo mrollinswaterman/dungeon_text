@@ -62,7 +62,7 @@ class Hobgoblin(mob.Mob):
         player is not currently suffering from a Hobgoblin's taunt"""
         if not super().trigger():
             return False
-        return self.target.evasion >= 10 and self.target.conditions.get(f"{self.id}'s Taunt") is None
+        return self.target.evasion() >= 10 and self.target.conditions.get(f"{self.id}'s Taunt") is None
 
     def special(self) -> None:
         """Taunt: Reduces the player's evasion by 2 points for 2 turns if they fail a charisma check"""

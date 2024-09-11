@@ -70,7 +70,7 @@ def enemy_flee_attempt():
             case "exit":
                 global_commands.exit()
             case "y":
-                if global_variables.PLAYER.roll_to_hit() >= enemy.evasion:
+                if global_variables.PLAYER.roll_to_hit() >= enemy.evasion():
                     global_commands.type_text(f"You cut off the {enemy.id}'s escape. It turns to fight...")
                     global_commands.type_with_lines()
                     controller.SCENE.turn_order.go()

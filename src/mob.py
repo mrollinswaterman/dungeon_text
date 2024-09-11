@@ -42,10 +42,6 @@ class Mob(Game_Object):
         return max(1, self.level // 5)
 
     @property
-    def evasion(self) -> int:
-        return self.stats.base_evasion + self.bonus("dex")
-
-    @property
     def can_act(self) -> bool:
         return self.ap > 0 and not self.dead
 
@@ -95,7 +91,7 @@ class Mob(Game_Object):
         
     def attack_of_oppurtunity(self) -> bool:
         """Rolls an attack of opportuity against the player"""
-        if self.roll_to_hit() - 2 >= self.target.evasion:
+        if self.roll_to_hit() - 2 >= self.target.evasion():
             return True
         return False
 
@@ -105,6 +101,9 @@ class Mob(Game_Object):
 
     def apply_on_hits(self):
         return None
+    
+    def apply_on_misses(self):
+        pass
 
     #NARRATION
     def narrate(self, func, param=None):

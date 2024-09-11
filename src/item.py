@@ -16,15 +16,6 @@ class Rarity():
             "Unique": 6 
         }
 
-        abbrev = {
-            "Common": "Com.",
-            "Uncommon": "Uncom.",
-            "Rare": "Ra.",
-            "Epic": "Ep.",
-            "Legendary": "Leg.",
-            "Unique": 6  
-        }
-
         match rarity:
             case Rarity():
                 self.string = rarity.string
@@ -37,8 +28,6 @@ class Rarity():
                 self.string = list(codex.keys())[self.value-1]
             case _:
                 raise ValueError(f"Rarity '{rarity}' not found in codex.")
-
-        self.abbrev = abbrev[self.string]
 
 class Weight_Class():
 

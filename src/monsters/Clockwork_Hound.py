@@ -53,7 +53,7 @@ class Clockwork_Hound(mob.Mob):
             meal = self.target.armor
         
         global_commands.type_text(f"The {self.id} lunges for your {meal.id}.")
-        if self.roll_to_hit() > self.target.evasion:
+        if self.roll_to_hit() >= self.target.evasion():
             global_commands.type_text(f"It tears off a chunk before darting back to gulp it down.")
             meal.remove_durability(self.bonus("str"))
             self.heal(self.bonus("str"))

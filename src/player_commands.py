@@ -3,7 +3,7 @@ import global_commands
 from item import Item
 from stackable import Consumable
 
-GOD_MODE = True
+GOD_MODE = False
 
 def turn():
     """Runs the player's turn"""

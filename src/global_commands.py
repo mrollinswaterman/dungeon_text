@@ -202,7 +202,7 @@ def error_message(cmd:str="", text:str=None) -> None:
 
 def type_text(text:str=None, speed:float=None, newln=True) -> None:
     """Adds a typing effect to text"""
-    if text is None:
+    if text is None or text == "":
         return None
 
     #tracks if the first letter of text has been made uppercase

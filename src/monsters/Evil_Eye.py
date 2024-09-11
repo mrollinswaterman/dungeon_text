@@ -84,7 +84,7 @@ class Evil_Eye(mob.Mob):
             case 1:
                 return self.critical_fail()
             case _:
-                if roll > self.target.evasion:
+                if roll >= self.target.evasion():
                     global_commands.type_text("The magic beam hit you.")
                     dmg = global_commands.XdY(self.death_ray_damage)
                     dmg = (dmg + (self.bonus("int") // 2)) * self.stats.damage_multiplier

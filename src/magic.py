@@ -80,7 +80,7 @@ class Evocation(Spell):
 
         roll = self.caster.roll_attack()
         self.caster.stats["damage_multiplier"] += 1 if roll == 0 else 0
-        if roll >= target.evasion - target.bonus("dex") or roll == 0:
+        if roll >= target.evasion() - target.bonus("dex") or roll == 0:
             if self.player:
                 global_commands.type_text(f"Your spell hit the {target.id}")
             else:

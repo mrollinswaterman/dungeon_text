@@ -166,6 +166,7 @@ class Game_Object():
         #Combat tools
         self.conditions:Conditions_Handler = None
         self.damage_type:Damage_Type = Damage_Type(1)
+        self.combat_trick = None
 
         #Misc.
         self.prev_narration = ""
@@ -181,9 +182,9 @@ class Game_Object():
         return 1 + (self.level // 5)
 
     @property
-    def evasion(self) -> int:
-        return self.stats.base_evasion + self.bonus("dex")
-    
+    def base_attack_bonus(self) -> int:
+        return max(1, self.level // 5)
+
     @property
     def default_header(self) -> str:
         return f"The {self.id}"
@@ -218,6 +219,9 @@ class Game_Object():
 
     def bonus(self, stat:str) -> int:
         return self.stats.bonus(stat)
+    
+    def evasion(self) -> int:
+        return self.stats.base_evasion + self.bonus("dex")
 
     #ROLLS
     def roll_a_check(self, stat:str) -> int:
@@ -264,6 +268,7 @@ class Game_Object():
         """Heals the Object for num amount"""
         self.hp += num
         if self.hp > self.stats.max_hp:
+            num = num - (self.hp - self.stats.max_hp)
             self.hp = self.stats.max_hp
         self.heal_narration(num)
 
@@ -314,9 +319,8 @@ class Game_Object():
 
     #COMBAT
     def attack(self):
-        import player_commands
-        roll = self.roll_to_hit()
         self.spend_ap()
+        roll = self.roll_to_hit()
         #probably a prettier way to do this
         if self.id == "Player":
             self.narrate(self.roll_narration, roll)
@@ -329,13 +333,14 @@ class Game_Object():
             case 1: return self.critical_fail()
 
             case _:
-                if roll >= self.target.evasion:
+                if roll >= self.target.evasion():
                     self.narrate(self.hit_narration)
                     taken = self.roll_damage()
                     self.target.take_damage(taken, self)
                     self.apply_on_hits()
                 else:
                     self.narrate(self.miss_narration)
+                    self.apply_on_misses()
         return None
 
     def take_damage(self, taken:int, source:Game_Object | Item | str):
@@ -379,6 +384,9 @@ class Game_Object():
         raise NotImplementedError
     
     def apply_on_hits(self):
+        raise NotImplementedError
+    
+    def apply_on_misses(self):
         raise NotImplementedError
 
     #CRITS

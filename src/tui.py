@@ -5,10 +5,7 @@ import narrator
 import controller
 
 def etd():
-    """
-    Short for "Enter the Dungeon", runs when the player hits
-    "y" initially
-    """
+    """Short for "Enter the Dungeon", runs when the player hits "y" initially"""
     player_commands.load()
     global_variables.RUNNING = True
     controller.SCENE.begin_encounter()
@@ -18,10 +15,7 @@ def test():
     global_variables.SHOPKEEP.print_inventory()
 
 def ltd():
-    """
-    Short for "Leave the Dungeon", runs when
-    the player hits "n" initally.
-    """
+    """Short for "Leave the Dungeon", runs when the player hits "n" initally."""
     player_commands.load()
     narrator.exit_the_dungeon()
 

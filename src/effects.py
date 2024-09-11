@@ -21,7 +21,7 @@ class Effect():
     #methods
     def set(self, attr:str, num:int) -> None:
         try:
-            self.__dict__[attr] = num
+            self.__setattr__(attr, num)
         except KeyError:
             raise ValueError(f"Cannot set non-existent value '{attr}")
 
