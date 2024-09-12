@@ -102,6 +102,7 @@ class ModifyStat(Effect):
     def __init__(self, source, target=None):
         super().__init__(source, target)
         self.stat:str = ""
+        self.duration = 100000
 
     def start(self) -> None:
         import global_variables

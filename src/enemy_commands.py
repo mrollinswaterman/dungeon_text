@@ -33,7 +33,6 @@ def turn():
         if global_variables.RUNNING:
             global_commands.type_with_lines()
             controller.SCENE.turn_order.go()
-            raise Exception
         return None
     
     else:

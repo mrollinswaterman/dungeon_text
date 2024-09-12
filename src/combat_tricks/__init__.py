@@ -1,8 +1,7 @@
 import os
 import importlib
-#import controller
 
-dict = {}
+dict:dict= {}
 
 for module in os.listdir(os.path.dirname(__file__)):
     if module == '__init__.py' or module[-len(".py"):] != '.py':

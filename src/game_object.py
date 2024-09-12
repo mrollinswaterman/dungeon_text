@@ -166,7 +166,10 @@ class Game_Object():
         #Combat tools
         self.conditions:Conditions_Handler = None
         self.damage_type:Damage_Type = Damage_Type(1)
+
+        #Player Exclusive
         self.combat_trick = None
+        self._bonus_crit_range = None
 
         #Misc.
         self.prev_narration = ""
@@ -387,6 +390,7 @@ class Game_Object():
         raise NotImplementedError
     
     def apply_on_misses(self):
+        return None
         raise NotImplementedError
 
     #CRITS

@@ -32,6 +32,9 @@ commands = {
         "p": global_variables.PLAYER.power_attack,
         "f":global_variables.PLAYER.feint,
         "ri":global_variables.PLAYER.riposte,
+        "t":global_variables.PLAYER.total_defense,
+        "all":global_variables.PLAYER.all_out,
+        "s":global_variables.PLAYER.study_weakness,
     },
 
     "overworld_menu": {

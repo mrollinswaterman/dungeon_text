@@ -119,10 +119,10 @@ Special move, uses half max durability for a double damage on the attack (can mi
 ## Combat Tricks
 
 - [X] Power Attack(1AP): no dex bonus to attack roll, but roll damage twice (take highest) and add x1.5 str to attack
-- [X] Feint(1AP): If you beat the enemy in a Cha check, add +2 or +Cha whichever is higher to next attack.
+- [X] Feint(1AP): If you beat the enemy in a Cha check, they don't get their dex bonus to AC until your next turn
 - [ ] Riposte(2AP): Gain +2 to base-evasion, if enemy misses next att by (your dex bonus - 5) or more, deal 1/2 of the attack's potential damage back to them instead. ends at the end of the enemy's turn regardless of outcome.
-- [ ] Total Defense(All AP): add 5+(level//5) to base-evasion for enemy's next turn, but on your next turn, no dex bonus to attacks (potenitally more penalties like roll twice and take lowest on attacks)
-- [ ] All-out(All AP): no dex bonus to evasion (and enemies get to roll twice take highest vs you??) for next turn, but attack rolls now add str+dex or dex+dex, whichever is highest
+- [X] Total Defense(All AP): add 5+(level//5) to base-evasion for enemy's next turn, but on your next turn, no dex bonus to attacks (potenitally more penalties like roll twice and take lowest on attacks)
+- [X] All-out(All AP): no dex bonus to evasion (and enemies get to roll twice take highest vs you??) for next turn, but attack rolls now add str+dex or dex+dex, whichever is highest
 - [ ] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
 - [ ] Flurry(All AP): Make (level//4) extra attacks at a -1 to-hit per attack (ie first attack is -1, second attack is -2. etc)
 
@@ -145,4 +145,5 @@ Alternatively, just prevent the game from printing anything at all while it's sa
 - [ ] Find a prettier way to handle not passing a roll check to the mob's narration function (line 320 in game_object)
 - [ ] Have shopkeep automatically sort it's inventory by something (rarity, price, whatever)
 - [ ] Make Shopkeep successful sale message print before player spend_gold() message print (maybe add a silent gold check, then print successful sale, then print spent gold?)
+- [ ] If you try to load a fresh game without having saved, items don't load right (durability is set to "None" instead of a value)
 

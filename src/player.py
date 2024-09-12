@@ -21,8 +21,9 @@ class Player(Game_Object):
         self.conditions:Conditions_Handler = Conditions_Handler(self)
         self.level = 1
         self.stats.max_ap = 1 + (self.level // 5)
-        #stances
-        self.combat_trick:Combat_Trick = None
+        
+        self._bonus_crit_range = 0
+        self.combat_trick:Combat_Trick | None = None
 
     #properties
     @property
@@ -40,6 +41,10 @@ class Player(Game_Object):
     @property
     def carrying_capacity(self) -> float:
         return 5.5 * self.stats.str
+    
+    @property
+    def bonus_crit_range(self) -> int:
+        return min(4, self._bonus_crit_range)
 
     @property
     def available_carrying_capacity(self) -> int:
@@ -67,6 +72,10 @@ class Player(Game_Object):
         return controller.SCENE.enemy
 
     #methods
+    def update(self) -> None:
+        super().update()
+        if self.combat_trick is not None: self.combat_trick.update()
+
     def bonus(self, stat:str) -> int:
         match stat:
             case "dex":
@@ -95,7 +104,7 @@ class Player(Game_Object):
             case _:
                 #checks if the roll is a crit or not. Crits result in a return of 0
                 #attack roll formula: roll + dex bonus + BaB + weapon att bonus
-                if roll >= self.weapon.crit_range:
+                if roll >= self.weapon.crit_range - self.bonus_crit_range:
                     return 0
                 else: return roll + self.bonus("dex") + self.base_attack_bonus + self.weapon.attack_bonus
             
@@ -156,9 +165,7 @@ class Player(Game_Object):
     #COMBAT
     def attack(self) -> None:
         super().attack()
-        if self.combat_trick is not None:
-            self.combat_trick.deactivate()
-        return None
+        self._bonus_crit_range = 0
 
     def take_damage(self, taken: int, source) -> int:
         if self.armor is None:
@@ -276,13 +283,23 @@ class Player(Game_Object):
         self.combat_trick.activate()
 
     def feint(self) -> None:
-        if self.combat_trick is not None:
-            self.combat_trick.deactivate()
         self.combat_trick:Combat_Trick = combat_tricks.dict["Feint"](self)
         self.combat_trick.activate()
     
     def riposte(self) -> None:
         pass
+
+    def total_defense(self):
+        self.combat_trick:Combat_Trick = combat_tricks.dict["Total_Defense"](self)
+        self.combat_trick.activate()
+
+    def all_out(self):
+        self.combat_trick:Combat_Trick = combat_tricks.dict["All_Out"](self)
+        self.combat_trick.activate()
+
+    def study_weakness(self):
+        self.combat_trick:Combat_Trick = combat_tricks.dict["Study_Weakness"](self)
+        self.combat_trick.activate()
 
     #INVENTORY STUFF
     def pick_up(self, item: Item | Stackable, silent:bool=False) -> bool:

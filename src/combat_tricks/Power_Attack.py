@@ -19,6 +19,7 @@ class Power_Attack(Combat_Trick):
     def activate(self):
         super().activate()
         self.parent.attack()
+        self.deactivate()
 
     def roll_to_hit(self):
         return self.default_roll_to_hit() - self.penalty 
