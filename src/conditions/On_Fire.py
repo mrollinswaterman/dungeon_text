@@ -5,7 +5,6 @@ from effects import DamageOverTime, SingleInstanceDamage
 class On_Fire(Condition):
     def __init__(self, source):
         super().__init__(source)
-        self.id = self.__class__.__name__
 
         fire = SingleInstanceDamage(self.source)
         fire.potency = "1d6"
@@ -15,11 +14,6 @@ class On_Fire(Condition):
         burning.potency = "1d6"
 
         self.active_effects = [fire, burning]
-
-    def start(self):
-        self.start_message = f"{self.target.action_header} now {self.id}."
-        self.end_message = f"{self.target.action_header} no longer {self.id}."
-        super().start()
 
     def additional(self) -> None:
         burning = self.get("DamageOverTime")

@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 import global_commands
 from item import Item, Weight_Class, Rarity, Anvil
+#from enchantments import Weapon_Enchantment
 
 
 class Equipment(Item):
@@ -17,6 +18,8 @@ class Equipment(Item):
         self.max_dex_bonus:int = None
         self.damage_type:Damage_Type = Damage_Type(1)
         self.durability:int = None
+
+        #self.enchantments:list[Weapon_Enchantment] = []
 
         self.anvil = anvil
         self.smelt()
@@ -33,6 +36,13 @@ class Equipment(Item):
     @property
     def max_durability(self) -> int:
         return 10 * self.rarity.value
+    
+    @property
+    def enchantments_cost(self) -> int:
+        total = 0
+        for i in self.enchantments:
+            total += i.cost
+        return self.rarity.value - total
 
     @property
     def broken(self) -> bool:
@@ -58,6 +68,19 @@ class Equipment(Item):
         for entry in self.anvil.__dict__:
             if entry in self.__dict__ and self.__dict__[entry] is None:
                 self.__dict__[entry] = self.anvil.__dict__[entry]
+
+        if self.durability is None:
+            self.durability = self.max_durability
+
+    def apply(self, effect_type:str):
+        for enchantment in self.enchantments:
+            enchantment.apply(effect_type)
+
+    """def enchant(self, enchantment:Weapon_Enchantment) -> bool:
+        if enchantment.cost <= self.enchantments_cost and enchantment not in self.enchantments:
+            self.enchantments.append(enchantment)
+            enchantment.parent = self"""
+            
 
     #durability
     def lose_durability(self) -> None:

@@ -1,4 +1,5 @@
 #Power attack combat trick file
+import global_commands
 from trick import Combat_Trick
 from effects import ModifyStat
 from condition import Condition
@@ -6,16 +7,16 @@ from condition import Condition
 class Total_Defense(Combat_Trick):
 
     def __init__(self, parent):
-        super().__init__(parent)
-        self.activation_text = f"You shift your focus to defending yourself."
+        super().__init__(parent, parent)
+        self.start_message = f"You shift your focus to defending yourself."
+        self.end_message = f"You are no longer fighting defensively."
 
-        self._target = self.parent
         self.default_roll_to_hit = self.parent.roll_to_hit
-        self.targets = ["roll_to_hit"]
+        self.replace_effect.target_list = ["roll_to_hit"]
 
-    def activate(self):
+    def start(self):
         self.parent.spend_ap(0)#indicates full-round action
-        super().activate()
+        super().start()
         increase_evasion = ModifyStat(self)
         increase_evasion.stat = "base_evasion"
         increase_evasion.potency = 5 + (self.parent.level // 5)
@@ -29,8 +30,9 @@ class Total_Defense(Combat_Trick):
     def roll_to_hit(self):
         return self.default_roll_to_hit() - self.parent.bonus("dex")
     
-    def deactivate(self):
-        super().deactivate()
+    def end(self):
+        super().end()
+        global_commands.type_text(self.end_message)
         self.parent.conditions.cleanse("Total Defense")
 
 object = Total_Defense

@@ -5,7 +5,6 @@ from effects import RampingDamageOverTime
 class Bleeding(Condition):
     def __init__(self, source):
         super().__init__(source)
-        self.id = self.__class__.__name__
 
         bleed = RampingDamageOverTime(self.source)
         bleed.stacks = 3
@@ -15,8 +14,6 @@ class Bleeding(Condition):
         self.active_effects = [bleed]
 
     def start(self):
-        self.start_message = f"{self.target.action_header} now {self.id}."
-        self.end_message = f"{self.target.action_header} no longer {self.id}."
         super().start()
 
     def additional(self) -> None:

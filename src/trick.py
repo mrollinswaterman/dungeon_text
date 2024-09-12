@@ -3,37 +3,27 @@ from game_object import Game_Object
 
 class Combat_Trick():
 
-    def __init__(self, parent:Game_Object):
+    def __init__(self, parent:Game_Object, target:Game_Object=None):
+        from effects import MethodReplacement
+        self.id = self.__class__.__name__
         self.parent = parent
-        self.id:str = self.__class__.__name__
-        self.duration = 2#every 2 duration is equivalent to 1 round(1 player turn + 1 mob turn = 2)
+        self.target = target
 
-        self._target = self.parent
-        self.activation_text:str = None
-        self.deactivation_text:str = None
+        self.start_message:str = ""
+        self.end_message:str = ""
 
-        self.targets = []
+        self.replace_effect = MethodReplacement(self, target)
 
-    @property
-    def active(self) -> bool:
-        return self.duration > 0
-    
-    def update(self):
-        self.duration -= 1
-        if not self.active:
-            self.deactivate()
+    def update(self) -> None:
+        self.replace_effect.update()
+        if not self.replace_effect.active:
+            self.end()
 
-    def activate(self):
-        global_commands.type_text(self.activation_text)
-        self.run_replacement()
+    def start(self) -> None:
+        global_commands.type_text(self.start_message)
+        self.replace_effect.start()
 
-    def run_replacement(self):
-        for entry in self.targets:
-            self._target.__setattr__(entry, self.__getattribute__(entry))
-
-    def deactivate(self):
-        self.duration = 0
-        global_commands.type_text(self.deactivation_text)
-        for entry in self.targets:
-            self._target.__setattr__(entry, self.__getattribute__(f"default_{entry}"))
+    def end(self) -> None:
+        global_commands.type_text(self.end_message)
+        self.replace_effect.end()
         self.parent.combat_trick = None

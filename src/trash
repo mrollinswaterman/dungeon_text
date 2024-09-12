@@ -1,30 +1,33 @@
-    def print_inventory(self):
-        if len(self.inventory) == 0:
-            print("Shop's empty!")
+        self.parent = parent
+        self.id:str = self.__class__.__name__
+        self.duration = 2#every 2 duration is equivalent to 1 round(1 player turn + 1 mob turn = 2)
 
-        self.print_inventory_list()
-        raise Exception
-        global_commands.type_with_lines("For Sale:")
-        i = 0
-        while (i < self.stock_size):
-        # change rarity.string to some item specific stat block
-            if i % 2 == 0 and i != 0:
-                time.sleep(.05)
-                print("\n\n")
-            string = f" {i+1}. {self.inventory[i].name} {self.inventory[i].display}"
-            while(len(string) < 55):
-                string = string + " "
-            print(string + 2*"\t", end='')
-            i += 1
-        #global_commands.print_line_by_line([item_1, item_2])
-        #i += 2
-        print("\n")#double newline after last item
-        p = global_variables.PLAYER
-        gold = f"Your Gold: {p.gold} \t"
-        available = f" Available Capacity: {p.available_carrying_capacity} \t"
-        maximum = f" Maximum Capacity {p.carrying}/{p.carrying_capacity}"
-        footer = gold + available + maximum
-        global_commands.type_with_lines()
-        print(footer)
-        print("")
-        #global_commands.type_text(footer, 0.012)
+        self._target = self.parent
+        self.activation_text:str = None
+        self.deactivation_text:str = None
+
+        self.targets = []
+
+    @property
+    def active(self) -> bool:
+        return self.duration > 0
+    
+    def update(self):
+        self.duration -= 1
+        if not self.active:
+            self.deactivate()
+
+    def activate(self):
+        global_commands.type_text(self.activation_text)
+        self.run_replacement()
+
+    def run_replacement(self):
+        for entry in self.targets:
+            self._target.__setattr__(entry, self.__getattribute__(entry))
+
+    def deactivate(self):
+        self.duration = 0
+        global_commands.type_text(self.deactivation_text)
+        for entry in self.targets:
+            self._target.__setattr__(entry, self.__getattribute__(f"default_{entry}"))
+        self.parent.combat_trick = None

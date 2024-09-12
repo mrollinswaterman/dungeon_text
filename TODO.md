@@ -79,10 +79,11 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Decaying clockwork golem: Heals for half its max hp every round, but its max hp “decays” by a certain amount each round as well.
 - [ ] Armordillo: deals ⅓ (or ½ or just some flat amount) of any damage taken back to the player. Can “curl up” defensively to halve all damage he takes during the next turn (does this frequently, never chases after the player just wants to be left alone. Give him a really good drop???)
 - [ ] Flaming Skull --> chance to catch fire on attack, regens to full when killed, but max_hp decays each resurrection, to a minimum of 5-10. Dies for good if you one-shot it (from full??), ie do its max hp in one attack.
+- [ ] Wraith / Ice Wraith --> Ghost that drains with each basic attack, ganing overheal as temp HP. if no Ghost Touch on weapon / armor 50-75% miss chance before attack roll.
 
 ## Enchantments
 
-- [X] Flaming: chance to set target on fire on hit
+- [ ] Flaming: chance to set target on fire on hit
 - [ ] Molten/Searing/Super fucking hot: target takes a small amount of damage regardless of if the attack hits, plus a small chance to be set on fire. If the attack hits, larger chance to be set on fire, still take small unavoidable damage
 - [ ] AP: ignores armor
 - [ ] Freezing: reduces Action Points by 1 for 2 turns on hit
@@ -123,7 +124,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Riposte(2AP): Gain +2 to base-evasion, if enemy misses next att by (your dex bonus - 5) or more, deal 1/2 of the attack's potential damage back to them instead. ends at the end of the enemy's turn regardless of outcome.
 - [X] Total Defense(All AP): add 5+(level//5) to base-evasion for enemy's next turn, but on your next turn, no dex bonus to attacks (potenitally more penalties like roll twice and take lowest on attacks)
 - [X] All-out(All AP): no dex bonus to evasion (and enemies get to roll twice take highest vs you??) for next turn, but attack rolls now add str+dex or dex+dex, whichever is highest
-- [ ] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
+- [X] Study Weakness(1AP): Spend some time studying the enemy for potential weakspots. Next attack has +2 crit range (ie 20-->18, 18-->16, etc)(does stack)
 - [ ] Flurry(All AP): Make (level//4) extra attacks at a -1 to-hit per attack (ie first attack is -1, second attack is -2. etc)
 
 ## Bugs / QoL
@@ -133,11 +134,8 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [X] Extra line printed after re-entering dungeon
 - [ ] Add specific text for when a mob damages itself on a crit fail
 - [X] Make 'y/n' prompts look more natural
-- [X] Can't tell if Riposte works properly or not
-- [X] Shopkeep Inventory bugged
 - [X] Entering the shop and viewing the for sale items, then attempting to return to the dungeon causes the shopkeep's inventory to print again
-- [ ] Fix shopkeep items to properly display all stats (max dex bonus, crit, etc)
-- [ ] Find a better way to handle Riposte / other "states" the player can put themselves in, right now the enemy_commands file ends the player's
+- [X] Fix shopkeep items to properly display all stats (max dex bonus, crit, etc)
 riposte state, which is bad i think
 - [ ] Add a parameter that tells conditions and effects to not print their "end()" text when the game is saving.
 Alternatively, just prevent the game from printing anything at all while it's saving (maybe make type_text() function always return None??)
@@ -145,5 +143,5 @@ Alternatively, just prevent the game from printing anything at all while it's sa
 - [ ] Find a prettier way to handle not passing a roll check to the mob's narration function (line 320 in game_object)
 - [ ] Have shopkeep automatically sort it's inventory by something (rarity, price, whatever)
 - [ ] Make Shopkeep successful sale message print before player spend_gold() message print (maybe add a silent gold check, then print successful sale, then print spent gold?)
-- [ ] If you try to load a fresh game without having saved, items don't load right (durability is set to "None" instead of a value)
+- [X] If you try to load a fresh game without having saved, items don't load right (durability is set to "None" instead of a value)
 

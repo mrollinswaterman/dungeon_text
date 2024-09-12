@@ -280,26 +280,26 @@ class Player(Game_Object):
     #TRICKS
     def power_attack(self) -> int:
         self.combat_trick:Combat_Trick = combat_tricks.dict["Power_Attack"](self)
-        self.combat_trick.activate()
+        self.combat_trick.start()
 
     def feint(self) -> None:
         self.combat_trick:Combat_Trick = combat_tricks.dict["Feint"](self)
-        self.combat_trick.activate()
+        self.combat_trick.start()
     
     def riposte(self) -> None:
         pass
 
     def total_defense(self):
         self.combat_trick:Combat_Trick = combat_tricks.dict["Total_Defense"](self)
-        self.combat_trick.activate()
+        self.combat_trick.start()
 
     def all_out(self):
         self.combat_trick:Combat_Trick = combat_tricks.dict["All_Out"](self)
-        self.combat_trick.activate()
+        self.combat_trick.start()
 
     def study_weakness(self):
         self.combat_trick:Combat_Trick = combat_tricks.dict["Study_Weakness"](self)
-        self.combat_trick.activate()
+        self.combat_trick.start()
 
     #INVENTORY STUFF
     def pick_up(self, item: Item | Stackable, silent:bool=False) -> bool:

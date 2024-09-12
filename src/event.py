@@ -51,7 +51,7 @@ class Event():
         self._stats:dict[str, int] = {}
         self._tries = 0
         self._text = ""
-        self._messages = {True: {}, False: {}}
+        self._messages:dict[bool: dict[str:list]] = {True: {}, False: {}}
         self._passed = False
         self._end_messages:list[str] = []
         self._damage_header = ""
@@ -155,35 +155,25 @@ class Event():
 
     #EVENT INFO
     def has_stat(self, stat:str) -> bool:
-        """
-        Checks to see if the event has a stat in its stat list.
-
-        Return True if it does, False if it does not
-        """
+        """Checks to see if the event has a stat in its stat list."""
         for key in self._stats:
             if key == stat:
                 return True
         return False
     
     def stat_dc(self, stat:str) -> int:
-        """
-        Returns the DC associated with a given stat
-        """
+        """Returns the DC associated with a given stat"""
         if stat not in self._stats:
             return 0
         return self._stats[stat]
 
     #RUN
     def start(self) -> None:
-        """
-        Prints the start text and associated formatting of the event
-        """
+        """Prints the start text and associated formatting of the event"""
         global_commands.type_text(self._text)
 
     def success(self, code:str) -> None:
-        """
-        Runs if the player has passed the event
-        """
+        """Runs if the player has passed the event"""
         self._passed = True
         self._tries = -1#set self.tries to False by setting _tries to -1
         if self._loot["xp"] <= 0:#set xp if it hasnt been
@@ -192,22 +182,15 @@ class Event():
         return None
     
     def try_again(self, code) -> None:
-        """
-        Runs if the player fails the event
-        """
+        """Runs if the player fails the event"""
         global_commands.type_text(random.choice(self._messages[False][code]))#print failure line
 
     def not_that_stat(self, code:str):
-        """
-        Runs if the player tries the event with the wrong stat
-        """
+        """Runs if the player tries the event with the wrong stat """
         global_commands.type_text(random.choice(FAILURE_LINES[code]))#print failure line
     
     def run(self, code:str, roll: int):
-        """
-        Runs the event for a given stat code and roll
-        Returns the number of tries left on the event
-        """
+        """Runs the event for a given stat code and roll. Returns the number of tries left on the event"""
         if self.tries is False:
             raise ValueError("No more tries")
         self._tries -= 1#1
@@ -221,8 +204,6 @@ class Event():
         return self.tries
 
     def failure(self):
-        """
-        Runs if the event has been failed twice (ie its over)
-        """
+        """Runs if the event has been failed twice (ie its over)"""
         self._tries = -1
         global_commands.type_text(random.choice(self._end_messages))

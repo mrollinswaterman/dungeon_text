@@ -8,7 +8,7 @@ class Condition():
     def __init__(self, source):
         from game_object import Game_Object
         from item import Item
-        self.id = "Condition"
+        self.id = self.__class__.__name__
         self.source:Game_Object | Item = source
         self._target:Game_Object | None = None
 
@@ -49,6 +49,8 @@ class Condition():
                 return effect
 
     def start(self):
+        self.start_message = f"{self.target.action_header} now {self.id}."
+        self.end_message = f"{self.target.action_header} no longer {self.id}."
         global_commands.type_text(self.start_message)
         for effect in self.active_effects:        
             effect.start()

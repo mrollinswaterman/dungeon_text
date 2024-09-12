@@ -5,21 +5,21 @@ from trick import Combat_Trick
 class Power_Attack(Combat_Trick):
 
     def __init__(self, parent):
-        super().__init__(parent)
+        super().__init__(parent, parent)
         self.penalty = self.parent.bonus("dex")
-        self.activation_text = f"You wind up for a powerful attack..."
+        self.start_message = f"You wind up for a powerful attack..."
 
         #defaults
         self.default_roll_to_hit = self.parent.roll_to_hit
         self.default_roll_damage = self.parent.roll_damage
         self.default_roll_narration = self.parent.roll_narration
 
-        self.targets = ["roll_to_hit", "roll_damage", "roll_narration"]
+        self.replace_effect.target_list = ["roll_to_hit", "roll_damage", "roll_narration"]
 
-    def activate(self):
-        super().activate()
+    def start(self):
+        super().start()
         self.parent.attack()
-        self.deactivate()
+        self.end()
 
     def roll_to_hit(self):
         return self.default_roll_to_hit() - self.penalty 

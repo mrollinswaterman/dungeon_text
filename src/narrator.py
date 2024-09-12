@@ -63,7 +63,7 @@ def level_up_options():
     print(STATS)
 
 def event_options():
-    global_commands.type_text("Which stat would you like to roll?")
+    global_commands.type_header("Which stat would you like to roll?")
     print(STATS)
 
 def continue_run():
@@ -149,7 +149,7 @@ def shopkeep_options():
     global PREV_MENU
     PREV_MENU = shopkeep_options
     global_commands.type_with_lines(random.choice(ENTER_THE_SHOP))
-    global_commands.type_with_lines("What would you like to do?")
+    global_commands.type_header_with_lines("What would you like to do?")
     print("\t Purcahse Items - (p) | Sell something - (s) | Inventory - (i) | Leave - (l)\n")
     done = False
     while not done:
@@ -168,7 +168,7 @@ def select_item():
     from command_dict import commands
     options = commands["_"]
 
-    global_commands.type_text("Enter an item's number to use it -OR- Go Back - (b)")
+    global_commands.type_header("Enter an item's number to use it -OR- Go Back - (b)")
     done = False
     while not done:
         cmd = global_commands.get_cmd()
@@ -197,7 +197,7 @@ def menu_options():
 
     global PREV_MENU
     PREV_MENU = menu_options
-    global_commands.type_with_lines("What would you like to do?")
+    global_commands.type_header_with_lines("What would you like to do?")
     print("\t Enter the Dungeon - (e) | Visit the Shop - (v) | Inventory - (i) | Rest - (r)\n")
     
     done = False

@@ -200,6 +200,12 @@ def error_message(cmd:str="", text:str=None) -> None:
     text = f'Inavlid command "{cmd}". Please try again.' if text is None else text
     type_text(text)
 
+def type_header(text:str=None, speed:float=None, newln:bool=True) -> None:
+    type_text(text, 1, newln)
+
+def type_header_with_lines(text=None, num=1, speed=None, newln=True) -> None:
+    type_with_lines(text, num, 1, newln)
+
 def type_text(text:str=None, speed:float=None, newln=True) -> None:
     """Adds a typing effect to text"""
     if text is None or text == "":
@@ -210,7 +216,7 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
     text = " " + text + " "
 
     #typing speed, lower = faster
-    speed = 3
+    if speed is None: speed = 3
     for idx, char in enumerate(text):
         if first and char.isalpha():
             char = char.upper()

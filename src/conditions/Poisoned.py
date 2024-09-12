@@ -5,7 +5,6 @@ from effects import RampingDamageOverTime
 class Poisoned(Condition):
     def __init__(self, source):
         super().__init__(source)
-        self.id = self.__class__.__name__
 
         poison = RampingDamageOverTime(self.source)
         poison.stacks = 2
@@ -13,11 +12,6 @@ class Poisoned(Condition):
         poison.potency = "1d4"
 
         self.active_effects = [poison]
-
-    def start(self):
-        self.start_message = f"{self.target.action_header} now {self.id}."
-        self.end_message = f"{self.target.action_header} no longer {self.id}."
-        super().start()
 
     def additional(self) -> None:
         global_commands.type_text(f"The poison spreads further.")

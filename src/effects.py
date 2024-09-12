@@ -23,7 +23,7 @@ class Effect():
         try:
             self.__setattr__(attr, num)
         except KeyError:
-            raise ValueError(f"Cannot set non-existent value '{attr}")
+            raise ValueError(f"Cannot set non-existent value '{attr}'.")
 
     def start(self) -> None:
         return None
@@ -113,12 +113,12 @@ class ModifyStat(Effect):
         text = f"{self.target.ownership_header} {global_variables.STATS[self.stat]} increased by {self.potency}."
         if self.potency < 0:
             text = f"{self.target.ownership_header} {global_variables.STATS[self.stat]} decreased by {abs(self.potency)}."
-        global_commands.type_text(text)
+        global_commands.type_header(text)
 
     def end(self) -> None:
         import global_variables
         self.target.stats.modify(self.stat, -(self.potency))
-        global_commands.type_text(f"{self.target.ownership_header} {global_variables.STATS[self.stat]} returned to normal.")
+        global_commands.type_header(f"{self.target.ownership_header} {global_variables.STATS[self.stat]} returned to normal.")
 
 class GainTempHP(Effect):
 
@@ -138,3 +138,20 @@ class Drain(Effect):
         taken = self.target.take_damage(self.potency, self.source)
         self.source.source.heal(taken * 0.33)
         self.end()
+
+class MethodReplacement(Effect):
+    
+    def __init__(self, source, target=None):
+        super().__init__(source, target)
+        self.duration = 2
+
+        self.target_list = []
+
+    def start(self) -> None:
+        for entry in self.target_list:
+            self.target.__setattr__(entry, self.source.__getattribute__(entry))
+
+    def end(self) -> None:
+        super().end()
+        for entry in self.target_list:
+            self.target.__setattr__(entry, self.source.__getattribute__(f"default_{entry}"))

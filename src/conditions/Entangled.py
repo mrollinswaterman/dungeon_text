@@ -5,7 +5,6 @@ from effects import ModifyStat
 class Entangled(Condition):
     def __init__(self, source):
         super().__init__(source)
-        self.id = self.__class__.__name__
 
     def start(self):
         slow = ModifyStat(self.source)
@@ -15,8 +14,6 @@ class Entangled(Condition):
 
         self.active_effects = [slow]
 
-        self.start_message = f"{self.target.action_header} now {self.id}."
-        self.end_message = f"{self.target.action_header} no longer {self.id}."
         super().start()
 
     def additional(self) -> None:
