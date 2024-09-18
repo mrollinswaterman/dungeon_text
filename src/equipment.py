@@ -3,13 +3,14 @@ from __future__ import annotations
 import random
 import global_commands
 from item import Item, Weight_Class, Rarity, Anvil
-#from enchantments import Weapon_Enchantment
+
 
 
 class Equipment(Item):
 
     def __init__(self, anvil:Anvil, id:str=None, rarity: Rarity | str | int=None):
         from game_object import Damage_Type
+        from enchantments import Weapon_Enchantment
         #check for custom rarity, and set it if it's there
         id = anvil.id if id is None else id
         rarity = anvil.rarity if rarity is None else rarity
@@ -19,7 +20,7 @@ class Equipment(Item):
         self.damage_type:Damage_Type = Damage_Type(1)
         self.durability:int = None
 
-        #self.enchantments:list[Weapon_Enchantment] = []
+        self.enchantments:list[Weapon_Enchantment] = []
 
         self.anvil = anvil
         self.smelt()
@@ -38,7 +39,7 @@ class Equipment(Item):
         return 10 * self.rarity.value
     
     @property
-    def enchantments_cost(self) -> int:
+    def enchantment_space_remaining(self) -> int:
         total = 0
         for i in self.enchantments:
             total += i.cost
@@ -55,8 +56,6 @@ class Equipment(Item):
     @property
     def display(self) -> str:
         return [f"{self.id}, {self.weight_class.string} ({self.rarity.string}): {self.value}g, {self.weight} lbs.",]
-        #return f"{super().display}, {self.weight_class.string}, +{self.max_dex_bonus}"
-        #return super().display + [f"Class: {self.weight_class.string}, Dex Cap: +{self.max_dex_bonus}"]
     
     @property
     def format(self) -> list[str]:
@@ -76,11 +75,13 @@ class Equipment(Item):
         for enchantment in self.enchantments:
             enchantment.apply(effect_type)
 
-    """def enchant(self, enchantment:Weapon_Enchantment) -> bool:
-        if enchantment.cost <= self.enchantments_cost and enchantment not in self.enchantments:
+    def enchant(self, enchantment) -> bool:
+        from enchantments import Weapon_Enchantment
+        enchantment:Weapon_Enchantment = enchantment
+        print(f"{self.id} is now enchanted with {enchantment.id}\n")
+        if enchantment.cost <= self.enchantment_space_remaining and enchantment not in self.enchantments:
             self.enchantments.append(enchantment)
-            enchantment.parent = self"""
-            
+            enchantment.initialize(self)
 
     #durability
     def lose_durability(self) -> None:

@@ -5,6 +5,7 @@ from effects import DamageOverTime, SingleInstanceDamage
 class On_Fire(Condition):
     def __init__(self, source):
         super().__init__(source)
+        self.id = "On Fire"
 
         fire = SingleInstanceDamage(self.source)
         fire.potency = "1d6"

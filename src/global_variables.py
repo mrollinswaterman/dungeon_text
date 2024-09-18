@@ -65,6 +65,13 @@ PLAYER.pick_up(hp_pots, True)
 PLAYER.gain_gold(10000)
 #PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
+def test():
+    import enchantments
+    PLAYER.weapon.enchant(enchantments.TOME["Flaming"])
+    #print(PLAYER.weapon.enchantments)
+
+test()
+
 def start():
     import tui
     global START_CMD

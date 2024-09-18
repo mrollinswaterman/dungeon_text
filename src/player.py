@@ -111,7 +111,7 @@ class Player(Game_Object):
     def roll_damage(self) -> int:
         """Returns a damage roll (weapon dice + str bonus)"""
         import player_commands
-        if player_commands.GOD_MODE: return 999
+        if player_commands.GOD_MODE: return 2#999
         if self.weapon.broken:
             global_commands.type_text(f"You can't use a broken {self.weapon.id}, so your hands will have to do.")
             return (global_commands.d(4) + self.bonus("str")) * self.stats.damage_multiplier
@@ -184,7 +184,8 @@ class Player(Game_Object):
         pass
 
     def apply_on_hits(self):
-        pass
+        for enchantment in self.weapon.enchantments:
+            enchantment.apply("on_hit")
     
     #CRITS
     def critical_hit(self) -> None:
@@ -324,6 +325,7 @@ class Player(Game_Object):
             case _:
                 return False
         if not silent: global_commands.type_text(f"{item.id} equipped.")
+        item.owner = self
         return True
 
     #Add an unequip function

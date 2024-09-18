@@ -149,6 +149,7 @@ class Mob(Game_Object):
         return text
 
     def take_damage_narration(self, info) -> list[str]:
+        print(info)
         from player import Player
         from item import Item
         taken, source = info
