@@ -78,7 +78,7 @@ class Conditions_Handler():
         from condition import Condition
 
         self.parent:Game_Object = parent
-        self.dict:dict[str: Condition] = {}
+        self.dict:dict[str, Condition] = {}
         self.cleanse_pool: set[Condition] = set()
     
     #properties

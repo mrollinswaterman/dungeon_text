@@ -106,14 +106,6 @@ class Mob(Game_Object):
         pass
 
     #NARRATION
-    def narrate(self, func, param=None):
-        text:list[str] = func() if param is None else func(param)
-        if self.prev_narration in text:
-            text.remove(self.prev_narration)
-        final = random.choice(text)
-        self.prev_narration = final
-        global_commands.type_text(final)
-        return None
 
     def roll_narration(self) -> list[str]:
         text = [
@@ -149,23 +141,27 @@ class Mob(Game_Object):
         return text
 
     def take_damage_narration(self, info) -> list[str]:
-        print(info)
         from player import Player
-        from item import Item
         taken, source = info
         if taken > 0:
+            taken = f"{taken} damage"
             match source:
                 case Player():
                     text = [
-                        f"You did {taken} damage to the {self.id}.",
-                        f"The {self.id} took {taken} damage.",
-                        f"You hit the {self.id} for {taken} damage.",
-                        ]    
-                case Item():
+                        f"You did {taken} to the {self.id}.",
+                        f"The {self.id} took {taken}.",
+                        f"You hit the {self.id} for {taken}.",
+                        ]   
+                case str():
                     text = [
-                        f"Your {source.id} did {taken} damage.",
-                        f"The {source.id} dealt {taken} damage to the {self.id}.",
-                        f"The {self.id} took {taken} damage from your {source.id}."
+                        f"The {self.id} took {taken} from {source}.",
+                        f"{source} dealt {taken} to the {self.id}.",
+                    ] 
+                case _:
+                    text = [
+                        f"Your {source.id} did {taken}.",
+                        f"The {source.id} dealt {taken} to the {self.id}.",
+                        f"The {self.id} took {taken} from your {source.id}."
                     ]
         else: text = [f"The {self.id} took no damage!"] 
         return text

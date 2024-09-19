@@ -6,7 +6,7 @@ class Blinded(Condition):
     def __init__(self, source):
         super().__init__(source)
         self.id = self.__class__.__name__
-        self.miss_chance = 100#50
+        self.miss_chance = 50
 
     def start(self):
         self.default_attack = self.target.attack

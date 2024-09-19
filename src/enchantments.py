@@ -15,7 +15,7 @@ class Weapon_Enchantment():
         self.target:Game_Object = None
         self.cost = 1
 
-        self.active_effects:dict[str:list[Condition]] = {
+        self.active_effects:dict[str, list[Condition]] = {
             "on_hit":[],
             "on_attack":[],
             "on_miss":[]
@@ -31,7 +31,6 @@ class Weapon_Enchantment():
                 effect.source = self.parent
 
     def apply(self, effect_type:str):
-        print(f"Applying {effect_type}s\n")
         for condition in self.active_effects[effect_type]:
             self.target.conditions.add(condition)
 
@@ -49,6 +48,4 @@ def generate_premades():
         file.close()
 
 generate_premades()
-
-#print(TOME)
     

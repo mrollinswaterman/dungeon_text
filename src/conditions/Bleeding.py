@@ -6,7 +6,7 @@ class Bleeding(Condition):
     def __init__(self, source):
         super().__init__(source)
 
-        bleed = RampingDamageOverTime(self.source)
+        bleed = RampingDamageOverTime("the bleeding")
         bleed.stacks = 3
         bleed.duration = 2
         bleed.potency = "1d6"

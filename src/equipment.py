@@ -20,7 +20,7 @@ class Equipment(Item):
         self.damage_type:Damage_Type = Damage_Type(1)
         self.durability:int = None
 
-        self.enchantments:list[Weapon_Enchantment] = []
+        self.enchantments:dict[str,Weapon_Enchantment] = {}
 
         self.anvil = anvil
         self.smelt()
@@ -40,9 +40,11 @@ class Equipment(Item):
     
     @property
     def enchantment_space_remaining(self) -> int:
+        from enchantments import Weapon_Enchantment
         total = 0
-        for i in self.enchantments:
-            total += i.cost
+        for entry in self.enchantments:
+            obj:Weapon_Enchantment = self.enchantments[entry]
+            total += obj.cost
         return self.rarity.value - total
 
     @property
@@ -72,16 +74,32 @@ class Equipment(Item):
             self.durability = self.max_durability
 
     def apply(self, effect_type:str):
-        for enchantment in self.enchantments:
-            enchantment.apply(effect_type)
+        for entry in self.enchantments:
+            self.enchantments[entry].apply(effect_type)
 
     def enchant(self, enchantment) -> bool:
         from enchantments import Weapon_Enchantment
         enchantment:Weapon_Enchantment = enchantment
-        print(f"{self.id} is now enchanted with {enchantment.id}\n")
-        if enchantment.cost <= self.enchantment_space_remaining and enchantment not in self.enchantments:
-            self.enchantments.append(enchantment)
+
+        if enchantment.cost <= self.enchantment_space_remaining and enchantment.id not in self.enchantments:
+            print(f"{self.id} is now enchanted with {enchantment.id}\n")
+            self.enchantments[enchantment.id] = enchantment
             enchantment.initialize(self)
+            self.id = f"{enchantment.id} {self.id}"
+    
+    def disenchant(self, ref) -> bool:
+        from enchantments import Weapon_Enchantment
+        ref:str | Weapon_Enchantment = ref
+        match ref:
+            case str():
+                if ref in self.enchantments:
+                    del self.enchantments[ref]
+            case Weapon_Enchantment():
+                if ref in list(self.enchantments.values()):
+                    del self.enchantments[ref.id]
+        self.id = self.anvil.id
+        for entry in self.enchantments:
+            self.id = f"{self.enchantments[entry].id} {self.id}"
 
     #durability
     def lose_durability(self) -> None:

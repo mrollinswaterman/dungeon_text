@@ -184,8 +184,8 @@ class Player(Game_Object):
         pass
 
     def apply_on_hits(self):
-        for enchantment in self.weapon.enchantments:
-            enchantment.apply("on_hit")
+        for entry in self.weapon.enchantments:
+            self.weapon.enchantments[entry].apply("on_hit")
     
     #CRITS
     def critical_hit(self) -> None:

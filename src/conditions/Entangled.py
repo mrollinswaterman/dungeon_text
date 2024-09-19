@@ -7,7 +7,7 @@ class Entangled(Condition):
         super().__init__(source)
 
     def start(self):
-        slow = ModifyStat(self.source)
+        slow = ModifyStat("the entanglement")
         slow.stat = "max_ap"
         slow.potency = -(self.target.stats.max_ap)
         slow.duration = 2

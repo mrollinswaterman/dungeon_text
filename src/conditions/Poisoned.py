@@ -6,7 +6,7 @@ class Poisoned(Condition):
     def __init__(self, source):
         super().__init__(source)
 
-        poison = RampingDamageOverTime(self.source)
+        poison = RampingDamageOverTime("the poison")
         poison.stacks = 2
         poison.duration = 5
         poison.potency = "1d4"

@@ -156,7 +156,7 @@ class Item():
         return f"{self.rarity.string}"
 
     @property
-    def format(self) -> dict[str: str]:
+    def format(self) -> list[str]:
         return [
             f"{self.id} ({self.rarity.string})",
             f"{' '*3}Cost: {self.value}gp{' '*3}Weight: {self.weight} lbs."
@@ -180,8 +180,7 @@ class Item():
         self.rarity = Rarity(self.rarity)
 
     def __str__(self) -> str:
-        me = ""
-        forms = self.format()
-        for entry in forms:
-            me = me + forms[entry] +"\n"
-        return me
+        final = ""
+        for i in self.format:
+            final = final + i
+        return final

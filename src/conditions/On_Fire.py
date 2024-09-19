@@ -7,14 +7,14 @@ class On_Fire(Condition):
         super().__init__(source)
         self.id = "On Fire"
 
-        fire = SingleInstanceDamage(self.source)
-        fire.potency = "1d6"
+        #fire = SingleInstanceDamage(self.source)
+        #fire.potency = "1d6"
 
-        burning = DamageOverTime(self.source)
+        burning = DamageOverTime("the fire")
         burning.duration = 3
         burning.potency = "1d6"
 
-        self.active_effects = [fire, burning]
+        self.active_effects = [burning]
 
     def additional(self) -> None:
         burning = self.get("DamageOverTime")

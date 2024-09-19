@@ -51,7 +51,7 @@ class Event():
         self._stats:dict[str, int] = {}
         self._tries = 0
         self._text = ""
-        self._messages:dict[bool: dict[str:list]] = {True: {}, False: {}}
+        self._messages:dict[bool, dict[str,list]] = {True: {}, False: {}}
         self._passed = False
         self._end_messages:list[str] = []
         self._damage_header = ""
