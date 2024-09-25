@@ -5,6 +5,10 @@ but I'm going to keep working on it as long as I have the spare time and energy,
 
 You're welcome to download the game files and check it out, although I feel obligated to warn you its nowhere near finished. The "playable" version of the game is
 everything in the 'stable' folder, while 'src' contains the current, but potentially unstable version. 
+
+**UPDATE AS OF 9/25/2024**
+stable is currently not actually stable, I'm working on a fix to make it playable, but for now it has game breaking bugs
+
 The file you're going to want to run is stable/tui.py. I run it from WSL using the command: "python3 stable/tui.py" from inside the dungeon_text
 folder, but as long as you run it from the Terminal/Command Line the program should work fine. 
 
