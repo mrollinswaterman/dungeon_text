@@ -443,6 +443,7 @@ class Player(Game_Object):
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
                 item = global_commands.create_item(row)
+                item.load()
                 if idx >= size - 2:
                     self.equip(item, True)
                 else:

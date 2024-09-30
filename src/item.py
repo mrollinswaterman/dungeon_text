@@ -48,7 +48,7 @@ class Weight_Class():
             self.value = class_ref
             self.string = codex.keys(self.value-1)
         else:
-            raise ValueError("Weight class not found in codex.")
+            raise ValueError(f"Weight class '{class_ref}' not found in codex.")
 
 class Anvil():
     id:str
@@ -125,7 +125,7 @@ class Item():
             case _: self.rarity = global_commands.generate_item_rarity()
         self.description = ""
         self.owner:Game_Object = None
-        self.saved:dict[str, Any] = {}
+        self.saved:dict[str, str | int] = {}
 
     #properties
     @property

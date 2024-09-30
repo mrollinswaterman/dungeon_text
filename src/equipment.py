@@ -72,6 +72,8 @@ class Equipment(Item):
 
         if self.durability is None:
             self.durability = self.max_durability
+        
+        self.load(self.anvil.__dict__)
 
     def apply(self, effect_type:str):
         for entry in self.enchantments:
@@ -84,6 +86,8 @@ class Equipment(Item):
         if enchantment.cost <= self.enchantment_space_remaining and enchantment.id not in self.enchantments:
             print(f"{self.id} is now enchanted with {enchantment.id}\n")
             self.enchantments[enchantment.id] = enchantment
+            if enchantment.proc_chance == 1.0: 
+                enchantment.proc_chance = (random.randrange(25, 75) / 100) + (self.rarity.value/15)
             enchantment.initialize(self)
             self.id = f"{enchantment.id} {self.id}"
     
@@ -142,9 +146,23 @@ class Equipment(Item):
         self.saved["durability"] = self.durability if self.durability is not None else self.max_durability
         self.saved["weight_class"] = self.weight_class.string
 
+        saved_enchantments = ""
+        saved_proc_chances = ""
+        for entry in self.enchantments:
+            current = self.enchantments[entry]
+            saved_enchantments = f"{saved_enchantments}/{current.id}"
+            saved_proc_chances = f"{saved_proc_chances}/{current.proc_chance}"
+            
+        self.saved["enchantments"] = saved_enchantments[1:len(saved_enchantments)]
+        self.saved["proc_chances"] = saved_proc_chances[1:len(saved_proc_chances)]
+
     def load(self, save_file):
+        from enchantments import TOME
         super().load(save_file)
-        self.weight_class = Weight_Class(self.weight_class)
+
+        load_enchantments = self.saved["enchantments"].split("/")
+        print(load_enchantments)
+        raise Exception
 
 class Weapon(Equipment):
 

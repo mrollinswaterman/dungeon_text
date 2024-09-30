@@ -1,5 +1,6 @@
 #Weapon+Armor enchantments file
-import csv
+import csv, random
+import global_commands
 from game_object import Game_Object
 from equipment import Equipment
 from condition import Condition
@@ -14,6 +15,7 @@ class Weapon_Enchantment():
         self.id = "Weapon Enchatment"
         self.target:Game_Object = None
         self.cost = 1
+        self.proc_chance = 1.0
 
         self.active_effects:dict[str, list[Condition]] = {
             "on_hit":[],
@@ -32,7 +34,8 @@ class Weapon_Enchantment():
 
     def apply(self, effect_type:str):
         for condition in self.active_effects[effect_type]:
-            self.target.conditions.add(condition)
+            if global_commands.probability(self.proc_chance*100):
+                self.target.conditions.add(condition)
 
 def generate_premades():
     with open("weapon_enchantments.csv", "r") as file:
@@ -40,6 +43,7 @@ def generate_premades():
         for row in reader:
             current = Weapon_Enchantment()
             current.id = row["enchantment_id"]
+            if row["proc_chance"] is not None and row["proc_chance"] != "": current.proc_chance = row["proc_chance"]
             for effect_type in current.active_effects:
                 if row[effect_type] is not None and row[effect_type] != '':
                     new:Condition = conditions.dict[row[effect_type]](current)

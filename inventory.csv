@@ -1,4 +1,4 @@
-type,id,name,rarity,weight_class,max_dex_bonus,durability,damage,crit,crit_range,armor_value,quantity,unit_weight,unit_value
-Health_Potion,Health Potion,Health Potions,Common,,,,,,,,5,1,8
-Weapon,Flaming Longsword,Longsword,Common,Light,6,10,1d8,2,20,,,,
-Armor,Padded Leather,Padded Leather,Common,Light,5,15,,,,2,,,
+type,id,name,rarity,weight_class,max_dex_bonus,durability,damage,crit,crit_range,enchantments,proc_chances,armor_value,quantity,unit_weight,unit_value
+Health_Potion,Health Potion,Health Potions,Common,,,,,,,,,,5,1,8
+Weapon,Flaming Longsword,Flaming Longsword,Common,Light,6,10,1d8,2,20,,,,,,
+Armor,Padded Leather,Padded Leather,Common,Light,5,15,,,,,,2,,,
