@@ -59,6 +59,8 @@ class Anvil():
     weight_class:Weight_Class
     max_dex_bonus:int
     durability:int
+    enchantments:str
+    proc_chances:str
 
     #Weapon attributes
     damage:str
@@ -76,25 +78,27 @@ class Anvil():
     def __init__(self):
         self.id = None
         self.anvil_type = None
-        self.rarity:Rarity = None
+        self.rarity = None
 
         #EQUIPMENT attributes
-        self.weight_class:Weight_Class = None
-        self.max_dex_bonus:int = 6
-        self.durability:int = None
+        self.weight_class = None
+        self.max_dex_bonus = 6
+        self.durability = None
+        self.enchantments = None
+        self.proc_chances = None
 
         #Weapon attributes
-        self.damage:str = None
-        self.crit:int = None
-        self.crit_range:int = None
+        self.damage= None
+        self.crit = None
+        self.crit_range = None
 
         #Armor attributes
-        self.armor_value:int = None
+        self.armor_value = None
 
         #Stackable attributes
-        self.quantity:int = None
-        self.unit_weight:int = None
-        self.unit_value:int = None
+        self.quantity= None
+        self.unit_weight = None
+        self.unit_value = None
 
     def copy(self, source:dict):
         """
@@ -111,6 +115,10 @@ class Anvil():
         
         if self.anvil_type is None:
             self.anvil_type = source["type"] 
+
+    @property
+    def enchanted(self):
+        return self.enchantments is not None and self.enchantments != ""
 
 class Item():
 

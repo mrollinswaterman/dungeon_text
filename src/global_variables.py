@@ -68,6 +68,7 @@ PLAYER.gain_gold(10000)
 def test():
     import enchantments
     PLAYER.weapon.enchant(enchantments.TOME["Flaming"])
+    PLAYER.weapon.enchant(enchantments.TOME["Serrated"])
     #print(PLAYER.weapon.enchantments)
 
 test()

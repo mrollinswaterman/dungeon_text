@@ -72,35 +72,55 @@ class Equipment(Item):
 
         if self.durability is None:
             self.durability = self.max_durability
-        
-        self.load(self.anvil.__dict__)
+
+        self.enchantments = {}
+        if self.anvil.enchanted:
+            process_enchants:str = self.anvil.__dict__["enchantments"]
+            process_procs:str = self.anvil.__dict__["proc_chances"]
+            process_enchants = process_enchants.split("/")
+            process_procs = process_procs.split("/")
+
+            for idx, entry in enumerate(process_enchants):
+                self.enchant(entry, True)
+                self.get_enchantment(entry).proc_chance = process_procs[idx]
+                print(self.get_enchantment(entry).proc_chance)
+
 
     def apply(self, effect_type:str):
         for entry in self.enchantments:
             self.enchantments[entry].apply(effect_type)
 
-    def enchant(self, enchantment) -> bool:
+    def get_enchantment(self, ref):
         from enchantments import Weapon_Enchantment
-        enchantment:Weapon_Enchantment = enchantment
+        match ref:
+            case str(): return self.enchantments[ref]
+            case Weapon_Enchantment(): return self.enchantments[ref.id]
+            case int(): return list(self.enchantments.values())[ref]
+            case _: raise ValueError(f"This item is does not have and enchantment matching '{ref}'")
 
-        if enchantment.cost <= self.enchantment_space_remaining and enchantment.id not in self.enchantments:
-            print(f"{self.id} is now enchanted with {enchantment.id}\n")
+    def enchant(self, enchantment, silent=False) -> bool:
+        from enchantments import Weapon_Enchantment, TOME
+        match enchantment:
+            case Weapon_Enchantment():
+                enchantment:Weapon_Enchantment = enchantment
+            case _:
+                enchantment = TOME[enchantment]
+
+        if True:#enchantment.cost <= self.enchantment_space_remaining and enchantment.id not in self.enchantments:
             self.enchantments[enchantment.id] = enchantment
             if enchantment.proc_chance == 1.0: 
                 enchantment.proc_chance = (random.randrange(25, 75) / 100) + (self.rarity.value/15)
             enchantment.initialize(self)
+            if not silent: print(f"{self.id} is now enchanted with {enchantment.id}\n")
             self.id = f"{enchantment.id} {self.id}"
+
+
+        else: print(f"This item has no room for a {enchantment.id} enchantment.\n")
     
-    def disenchant(self, ref) -> bool:
+    def disenchant(self, enchantment) -> bool:
         from enchantments import Weapon_Enchantment
-        ref:str | Weapon_Enchantment = ref
-        match ref:
-            case str():
-                if ref in self.enchantments:
-                    del self.enchantments[ref]
-            case Weapon_Enchantment():
-                if ref in list(self.enchantments.values()):
-                    del self.enchantments[ref.id]
+        enchantment:Weapon_Enchantment = self.get_enchantment(enchantment)
+        del self.enchantments[enchantment.id]
         self.id = self.anvil.id
         for entry in self.enchantments:
             self.id = f"{self.enchantments[entry].id} {self.id}"
@@ -139,6 +159,8 @@ class Equipment(Item):
 
     #META functions (save/load/format, etc)
     def save(self):
+        #reset ID before saving it
+        self.id = self.anvil.id
         super().save()
         for entry in self.anvil.__dict__:
             if entry in self.__dict__ and entry not in self.saved:
@@ -146,23 +168,17 @@ class Equipment(Item):
         self.saved["durability"] = self.durability if self.durability is not None else self.max_durability
         self.saved["weight_class"] = self.weight_class.string
 
+        #save enchantments and their respective proc chances into a string seperated by "/"s
+        #i.e "Flaming/Serrated"
         saved_enchantments = ""
         saved_proc_chances = ""
         for entry in self.enchantments:
-            current = self.enchantments[entry]
-            saved_enchantments = f"{saved_enchantments}/{current.id}"
-            saved_proc_chances = f"{saved_proc_chances}/{current.proc_chance}"
-            
+            saved_enchantments = f"{saved_enchantments}/{entry}"
+            saved_proc_chances = f"{saved_proc_chances}/{entry}"
+
+        #cut the first char of the strings to eliminate the leading "\"
         self.saved["enchantments"] = saved_enchantments[1:len(saved_enchantments)]
         self.saved["proc_chances"] = saved_proc_chances[1:len(saved_proc_chances)]
-
-    def load(self, save_file):
-        from enchantments import TOME
-        super().load(save_file)
-
-        load_enchantments = self.saved["enchantments"].split("/")
-        print(load_enchantments)
-        raise Exception
 
 class Weapon(Equipment):
 

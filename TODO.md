@@ -6,6 +6,7 @@ This file contains a list of tasks and ideas
 
 - [X] Player save file
 - [ ] Add a start menu where the user can choose a name for their character and maybe choose starting stats as well?? (give them 8 points, all stats start at 10, some sort of diminishing returns on pumping stats?)
+- [ ] Use Tkinter or some GUI framework to take the game off the Command Line
 
 ## Internal Logic
 

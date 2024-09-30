@@ -13,7 +13,6 @@ class Weapon_Enchantment():
     def __init__(self, parent:Game_Object | Equipment=None) -> None:
         self.parent = parent
         self.id = "Weapon Enchatment"
-        self.target:Game_Object = None
         self.cost = 1
         self.proc_chance = 1.0
 
@@ -23,11 +22,14 @@ class Weapon_Enchantment():
             "on_miss":[]
         }
 
+    @property
+    def target(self) -> Game_Object | None:
+        match self.parent:
+            case Game_Object(): return self.parent.target
+            case Equipment(): return self.parent.owner.target
+
     def initialize(self, object:Game_Object | Equipment):
         self.parent = object
-        match self.parent:
-            case Game_Object(): self.target = self.parent.target
-            case Equipment(): self.target = self.parent.owner.target
         for typ in self.active_effects:
             for effect in self.active_effects[typ]:
                 effect.source = self.parent
