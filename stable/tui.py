@@ -4,43 +4,27 @@ import player_commands
 import narrator
 import scene_controller
 
-def link_start() -> None:
-    scene_controller.begin_encounter()
-    global_variables.RUNNING = True
-    player_commands.turn()
-
 def etd():
-    """
-    Short for "Enter the Dungeon", runs when the player hits
-    "y" initially
-    """
+    """Short for "Enter the Dungeon", runs when the player hits "y" initially"""
     player_commands.load()
     global_variables.RUNNING = True
-    link_start()
+    scene_controller.SCENE.begin_encounter()
 
 def test():
-    player_commands.load()
-    global_variables.PLAYER.print_inventory()
+    global_variables.SHOPKEEP.restock()
+    global_variables.SHOPKEEP.print_inventory()
 
 def ltd():
-    """
-    Short for "Leave the Dungeon", runs when
-    the player hits "n" initally.
-    """
+    """Short for "Leave the Dungeon", runs when the player hits "n" initally."""
     player_commands.load()
     narrator.exit_the_dungeon()
 
 def begin():
-    from command_dict import all
+    from command_dict import commands
 
-    tui = all["tui"]
+    tui = commands["tui"]
 
-    global_commands.type_text("Would you like to enter the dungeon? y/n")
-
-    if not scene_controller.TEST:
-        scene_controller.SCENE.enemy = monster_manual.spawn_random_mob()  
-    else:
-        scene_controller.SCENE.enemy = monster_manual.spawn_mob("Clockwork Hound")
+    global_commands.type_text("would you like to enter the dungeon? y/n")
 
     done = False
     while not done:
@@ -50,7 +34,7 @@ def begin():
             done = True
             tui[cmd]()
         else:
-            global_commands.error_message()
+            global_commands.error_message(cmd)
 
 print("")
 while global_variables.START_CMD is True:

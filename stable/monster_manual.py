@@ -13,17 +13,20 @@ def spawn_mob(name:str):
 
 def spawn_random_mob():
     """
-    Spawns a random mob.
-
-    If the given level is not within the mob's level range, it picks a different random mob
+    Spawns a random mob, appropriate for the player's level
     """
     if global_variables.PLAYER.level >= LEVELCAP:
         raise ValueError("Player level too high!")
 
     enemy:mob.Mob = random.choice(list(monsters.dict.values()))()
 
-    if global_variables.PLAYER.level in range(enemy.range[0],enemy.range[1]):
-        return enemy
-    else:
+    lower_bound = max(global_variables.PLAYER.level - 2, 1)
+    upper_bound = min(global_variables.PLAYER.level + 5, 20)
+
+    base_level = enemy.stats.level_range[0]
+    max_level = enemy.stats.level_range[1]
+
+    if max_level > upper_bound or base_level < lower_bound:
         return spawn_random_mob()
-    #might be a more efficient way to do all this, but it's fine for now
+    else: return enemy
+

@@ -1,11 +1,13 @@
 import global_variables, global_commands
 import player_commands, tui, narrator
 
-all = {
+commands = {
     "tui": {
         "y": tui.etd,
         "n": tui.ltd,
-        "test": tui.test
+        "test": tui.test,
+        "t":tui.test,
+        "i":global_variables.PLAYER.print_inventory,
     },
 
     "stats": {
@@ -20,7 +22,7 @@ all = {
     "actions": {
         "a": global_variables.PLAYER.attack,
         "ct": player_commands.combat_tricks,
-        "e": player_commands.cleanse_an_effect,
+        "e": player_commands.cleanse_a_condition,
         "i": player_commands.show_inventory,
         "w": global_variables.PLAYER.spend_ap,
         "r": player_commands.flee
@@ -29,6 +31,10 @@ all = {
     "combat_tricks": {
         "p": global_variables.PLAYER.power_attack,
         "f":global_variables.PLAYER.feint,
+        "ri":global_variables.PLAYER.riposte,
+        "t":global_variables.PLAYER.total_defense,
+        "all":global_variables.PLAYER.all_out,
+        "s":global_variables.PLAYER.study_weakness,
     },
 
     "overworld_menu": {
@@ -55,8 +61,8 @@ all = {
     },
 }
 
-for entry in all:
-    all[entry]["exit"] = global_commands.exit
-    all[entry]["reset"] = player_commands.reset
-    all[entry]["c"] = player_commands.cancel
-    all[entry]["b"] = narrator.back
+for entry in commands:
+    commands[entry]["exit"] = global_commands.exit
+    commands[entry]["reset"] = player_commands.reset
+    commands[entry]["c"] = player_commands.cancel
+    commands[entry]["b"] = narrator.back

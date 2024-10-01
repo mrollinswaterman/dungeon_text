@@ -1,31 +1,33 @@
-#On Fire condition
-import status_effect, global_commands
+import global_commands
+from condition import Condition
+from effects import DamageOverTime, SingleInstanceDamage
 
-class On_Fire(status_effect.Status_Effect): 
-    def __init__(self, src, target=None, id="On Fire"):
-        super().__init__(src, target, id)
-        import global_variables
-        self._target = global_variables.PLAYER if target is None else self._target
-        self._target_header = "You are"
-        if self._target != global_variables.PLAYER:
-            self._target_header = f"The {self._target.id} is"
-        self._message = f"{self._target_header} now {id}."
-        self._cleanse_message = f"{self._target_header} not longer {id}."
+class On_Fire(Condition):
+    def __init__(self, source):
+        super().__init__(source)
+        self.id = "On Fire"
 
-    @property
-    def damage_header(self) -> str:
-        return "Fire"
-    @property
-    def damage_type(self) -> str:
-        return "True"
+        #fire = SingleInstanceDamage(self.source)
+        #fire.potency = "1d6"
 
-    def update(self):
-        if self._active:
-            self._duration -= 1
-            taken = self._target.take_damage(self._potency, self, True)
+        burning = DamageOverTime("the fire")
+        burning.duration = 3
+        burning.potency = "1d6"
 
-            if self._duration <= 0:
-                self._active = False
-    
-    def additional_effect(self, effect: status_effect.Status_Effect):
-        global_commands.type_text("More fire has no effect.")
+        self.active_effects = [burning]
+
+    def additional(self) -> None:
+        burning = self.get("DamageOverTime")
+        burning.duration += 2
+
+    def cleanse_check(self) -> bool:
+        global_commands.type_text(f"{self.target.header.action} attempting to put out the fire...")
+        if self.target.roll_a_check("dex") >= 15:
+            global_commands.type_text("It worked. The fire sputters out.")
+            self.end()
+            return True
+        else: 
+            global_commands.type_text(f"No luck. The flames rage on.")
+            return False
+
+object = On_Fire

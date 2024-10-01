@@ -1,51 +1,33 @@
-#Entangled condition
-import status_effect, global_commands
+import global_commands
+from condition import Condition
+from effects import ModifyStat
 
-class Entangled(status_effect.Status_Effect):
+class Entangled(Condition):
+    def __init__(self, source):
+        super().__init__(source)
 
-    def __init__(self, src, target=None, id="Entangled"):
-        """
-        Init function for Entangled status effect
+    def start(self):
+        slow = ModifyStat("the entanglement")
+        slow.stat = "max_ap"
+        slow.potency = -(self.target.stats.max_ap)
+        slow.duration = 2
 
-        target_header and cleanse_header change based on the target of the effect,
-        either the global_variables.PLAYER or a mob, and head the self._message and cleanse function text ouput.
-        """
-        super().__init__(src, target, id)
-        import global_variables
-        self._target = global_variables.PLAYER if target is None else self._target
-        self._stat = "ap"
-        self._target_header = "You are"
-        self._cleanse_header = "You try"
-        if self._target != global_variables.PLAYER:
-            self._target_header = f"The {self._target.id} is"
-            self._cleanse_header = f"The {self._target.id} tries"
+        self.active_effects = [slow]
 
-        self._message = f"{self._target_header} now {id}."
-        self._cleanse_message = f"{self._target_header} no longer {id}."
-        self._cleanse_stat = "str"
+        super().start()
 
-    def update(self) -> None:
-        super().update()
-        if self._active:
-            self.attempt_cleanse()
+    def additional(self) -> None:
+        slow = self.get("ModifyStat")
+        slow.duration += 1
 
-    def apply(self):
-        super().apply()
-        self._target.stats[self._stat] -= self._potency
+    def cleanse_check(self) -> bool:
+        global_commands.type_text(f"{self.target.header.action} attempting to break the entanglement...")
+        if self.target.roll_a_check("str") >= 15:
+            global_commands.type_text(f"It worked. {self.target.header.action} now free.")
+            self.end()
+            return True
+        else: 
+            global_commands.type_text(f"{self.target.header.default} failed. {self.target.header.action} not going anywhere.")
+            return False
 
-    def cleanse(self):
-        self._target.stats[self._stat] += self._potency
-        super().cleanse()
-
-    def attempt_cleanse(self, roll: int = 0) -> bool:
-        global_commands.type_text(f"{self._cleanse_header} to break free of the entanglement...")
-        if roll >= self._src.dc - 2:
-            global_commands.type_text("Success!")
-            return self._target.remove_status_effect(self)
-        global_commands.type_text("No luck.")
-        return False
-    
-    def additional_effect(self, effect: status_effect.Status_Effect):
-        global_commands.type_text("The entanglment's duration grows...")
-        self._duration += 1
-        return None
+object = Entangled

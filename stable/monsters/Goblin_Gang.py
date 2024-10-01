@@ -2,7 +2,9 @@
 import mob
 
 stats = {
-    "base_level": 2,
+    "level": 1,
+    "level_range": (2, 6),
+    "hit_dice": 8,
     "str": 14,
     "dex": 10,
     "con": 14,
@@ -17,21 +19,18 @@ stats = {
     "armor": 0,
     "damage": "3d4",
     "dc": 10,
-    "hit_dice": 10,
-    "loot": {
-        "gold": 20,
-        "xp": 10,
-        "drops": []
-    }
 }
 
 class Goblin_Gang(mob.Mob):
-    def __init__(self, id="Goblin Gang", level = (2,6), statblock=stats):
-        super().__init__(id, level, statblock)
+    def __init__(self, id="Goblin Gang", stat_dict=stats):
+        super().__init__(id, stat_dict)
         
         #goblin_gang gets x1.5 HP
-        self._stats["max_hp"] *= 1.5
-        self._hp = self.max_hp
+        self.stats.max_hp *= 1.5
+        self.hp = self.stats.max_hp
+        
+        self.gold += 20
+        self.xp += 10
 
     def special(self) -> bool:
         return False

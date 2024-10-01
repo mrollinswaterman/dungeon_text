@@ -1,9 +1,13 @@
 #Clockwork Hound mob file
 import random
-import mob, global_commands, items
+import mob, global_commands
+from stackable import Stackable
+from equipment import Equipment
 
 stats = {
-    "base_level": 6,
+    "level": 1,
+    "level_range": (6, 13),
+    "hit_dice": 10,
     "str": 16,
     "dex": 14,
     "con": 14,
@@ -18,49 +22,38 @@ stats = {
     "armor": 3,
     "damage": "2d8",
     "dc": 10,
-    "hit_dice": 10,
-    "loot": {
-        "gold": 30,
-        "xp": 15,
-        "drops": []
-    }
 }
 
 class Clockwork_Hound(mob.Mob):
-    def __init__(self, id="Clockwork Hound", level = (6,13), statblock=stats):
-        super().__init__(id, level, statblock)
+    def __init__(self, id="Clockwork Hound", stat_dict=stats):
+        super().__init__(id, stat_dict)
+        #base gold & xp
+        self.gold += 30
+        self.xp += 15
 
-        if global_commands.probability(50):
-            scrap:items.Resource = items.Resource("Clockwork Scrap", "Uncommon", random.randrange(1, (self.level // 2)))
-            scrap.set_weight(1.5)
-            self._loot["drops"].append(scrap)
+        """if global_commands.probability(50):
+            scrap:Stackable = Stackable("Clockwork Scrap", "Uncommon", random.randrange(1, (self.level // 2)))
+            scrap.unit_weight = 1.5
+            self.pick_up(scrap, True)
 
         if global_commands.probability(3):
-            heart = items.Resource("Clockwork Heart", "Epic")
-            heart.set_weight(2)
-            self._loot["drops"].append(heart)
+            heart = Stackable("Clockwork Heart", "Epic")
+            heart.unit_weight = 2
+            self.pick_up(heart, True)"""
             
     def trigger(self) -> bool:
         if not super().trigger():
             return False
-        return self._hp < self.max_hp // 3
+        return self.hp < self.stats.max_hp // 3
 
     def special(self) -> None:
-        
         self.spend_ap()
-
-        if self._player is None:
-            raise ValueError("No Target.")
-        
-        weapon:items.Weapon = self._player.equipped["Weapon"]
-        armor:items.Armor = self._player.equipped["Armor"]
-
-        meal:items.Item = weapon
-        if weapon.durability < armor.durability:
-            meal = armor
+        meal:Equipment = self.target.weapon
+        if self.target.weapon.durability < self.target.armor.durability:
+            meal = self.target.armor
         
         global_commands.type_text(f"The {self.id} lunges for your {meal.id}.")
-        if self.roll_to_hit() > self._player.evasion:
+        if self.roll_to_hit() >= self.target.evasion():
             global_commands.type_text(f"It tears off a chunk before darting back to gulp it down.")
             meal.remove_durability(self.bonus("str"))
             self.heal(self.bonus("str"))
@@ -69,8 +62,8 @@ class Clockwork_Hound(mob.Mob):
 
         return True
     
-    def roll_text(self):
-        base = super().roll_text()        
+    def roll_narration(self):
+        base = super().roll_narration()        
         me = [
             f"The {self.id} snarls and dashes towards you.",
             f"The {self.id}'s gears screech and grind as it prepares to tear into you.",
@@ -81,8 +74,8 @@ class Clockwork_Hound(mob.Mob):
         ]
         return base + me
 
-    def hit_text(self):
-        base = super().hit_text()
+    def hit_narration(self):
+        base = super().hit_narration()
         me = [
             f"The {self.id}'s fluid movements are far from mechanical. It catches you.",
             f"It's metal teeth tear through your defenses.",
@@ -91,8 +84,8 @@ class Clockwork_Hound(mob.Mob):
         ]
         return base + me
 
-    def miss_text(self):
-        base = super().miss_text()
+    def miss_narration(self):
+        base = super().miss_narration()
         me = [
             f"Just as the {self.id} would have struck you, it's internal machines sputter causing it to fall short.",
             f"The {self.id}'s jerky, robotic motions are easy enough to dodge this time.",
