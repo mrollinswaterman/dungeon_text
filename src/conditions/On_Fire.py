@@ -21,7 +21,7 @@ class On_Fire(Condition):
         burning.duration += 2
 
     def cleanse_check(self) -> bool:
-        global_commands.type_text(f"{self.target.default_header} attempting to put out the fire...")
+        global_commands.type_text(f"{self.target.header.action} attempting to put out the fire...")
         if self.target.roll_a_check("dex") >= 15:
             global_commands.type_text("It worked. The fire sputters out.")
             self.end()

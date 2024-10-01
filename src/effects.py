@@ -44,11 +44,7 @@ class SingleInstanceDamage(Effect):
         self.duration = 1
 
     def start(self) -> None:
-        match self.potency:
-            case str():
-                damage = global_commands.XdY(self.potency)
-            case _:
-                damage = self.potency
+        damage = global_commands.XdY(self.potency)
         self.target.take_damage(damage, self.source)
         self.end()
  
@@ -59,11 +55,7 @@ class DamageOverTime(Effect):
 
     def update(self) -> None:
         super().update()
-        match self.potency:
-            case str():
-                damage = global_commands.XdY(self.potency)
-            case _:
-                damage = self.potency
+        damage = global_commands.XdY(self.potency)
         self.target.take_damage(damage, self.source)
 
 class RampingDamageOverTime(Effect):
@@ -74,21 +66,15 @@ class RampingDamageOverTime(Effect):
         self.max_stacks = 10
     
     def update(self) -> None:
-        match self.potency:
-            case str():
-                damage = global_commands.XdY(self.potency)
-            case _:
-                damage = self.potency
+        damage = global_commands.XdY(self.potency)
 
         if self.stacks >= self.max_stacks:
             self.stacks = self.max_stacks
             self.target.take_damage((damage * self.stacks) + self.stacks, self.source)
+            self.end()
         else:
             self.target.take_damage(damage * self.stacks, self.source)
-            self.stacks -= 1
-
-        if self.stacks <= 0:
-            self.end()
+            self.stacks += 1
 
         super().update()
     
@@ -110,15 +96,15 @@ class ModifyStat(Effect):
             self.target.stats.modify(self.stat, self.potency)
         except KeyError:
             raise ValueError(f"Can't modify non-existent stat '{self.stat}'.")
-        text = f"{self.target.ownership_header} {global_variables.STATS[self.stat]} increased by {self.potency}."
+        text = f"{self.target.header.ownership} {global_variables.STATS[self.stat]} increased by {self.potency}."
         if self.potency < 0:
-            text = f"{self.target.ownership_header} {global_variables.STATS[self.stat]} decreased by {abs(self.potency)}."
+            text = f"{self.target.header.ownership} {global_variables.STATS[self.stat]} decreased by {abs(self.potency)}."
         global_commands.type_header(text)
 
     def end(self) -> None:
         import global_variables
         self.target.stats.modify(self.stat, -(self.potency))
-        global_commands.type_header(f"{self.target.ownership_header} {global_variables.STATS[self.stat]} returned to normal.")
+        global_commands.type_header(f"{self.target.header.ownership} {global_variables.STATS[self.stat]} returned to normal.")
 
 class GainTempHP(Effect):
 

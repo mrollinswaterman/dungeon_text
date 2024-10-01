@@ -73,18 +73,20 @@ class Equipment(Item):
         if self.durability is None:
             self.durability = self.max_durability
 
+        #set enchants to empty dictionary to avoid any confusion
         self.enchantments = {}
+        #if my anvil has enchantments, procces the enchantments and proc chances strings
         if self.anvil.enchanted:
             process_enchants:str = self.anvil.__dict__["enchantments"]
             process_procs:str = self.anvil.__dict__["proc_chances"]
             process_enchants = process_enchants.split("/")
             process_procs = process_procs.split("/")
-
+            #enchant self with every enchantment from saved enchantments, then set that enchantment's proc chance
+            #to the corresponding value
             for idx, entry in enumerate(process_enchants):
                 self.enchant(entry, True)
-                self.get_enchantment(entry).proc_chance = process_procs[idx]
-                print(self.get_enchantment(entry).proc_chance)
-
+                obj = self.get_enchantment(entry)
+                obj.proc_chance = float(process_procs[idx])
 
     def apply(self, effect_type:str):
         for entry in self.enchantments:
@@ -174,7 +176,7 @@ class Equipment(Item):
         saved_proc_chances = ""
         for entry in self.enchantments:
             saved_enchantments = f"{saved_enchantments}/{entry}"
-            saved_proc_chances = f"{saved_proc_chances}/{entry}"
+            saved_proc_chances = f"{saved_proc_chances}/{self.enchantments[entry].proc_chance}"
 
         #cut the first char of the strings to eliminate the leading "\"
         self.saved["enchantments"] = saved_enchantments[1:len(saved_enchantments)]

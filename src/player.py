@@ -1,6 +1,6 @@
-import random, time, os, csv, enum
+import time, os, csv, enum
 import global_commands
-from game_object import Game_Object, Conditions_Handler
+from game_object import Game_Object, Conditions_Handler, Header
 from item import Item
 from equipment import Weapon, Armor, Equipment
 from stackable import Stackable
@@ -14,6 +14,14 @@ class Stance(enum.Enum):
     TOTAL_DEFENSE = 2
     ALL_OUT = 3
 
+class Player_Header(Header):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.default = "You"
+        self.action = "You're"
+        self.ownership = "Your"
+
 class Player(Game_Object):
 
     def __init__(self):
@@ -26,18 +34,6 @@ class Player(Game_Object):
         self.combat_trick:Combat_Trick | None = None
 
     #properties
-    @property
-    def ownership_header(self) -> str:
-        return "Your"
-
-    @property
-    def action_header(self) -> str:
-        return "You are"
-
-    @property
-    def default_header(self) -> str:
-        return "You"
-
     @property
     def carrying_capacity(self) -> float:
         return 5.5 * self.stats.str

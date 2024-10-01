@@ -165,8 +165,9 @@ def d(num):
     """Rolls a dX where X is some number (ie d6, d20, etc)"""
     return random.randrange(1, num+1)
 
-def XdY(damage:str | list | int):
-    """Rolls X dYs and returns the total (ie 2d4, 3d6, etc)"""
+def XdY(damage:str | list | tuple | int):
+    """Rolls X dYs and returns the total (ie 2d4, 3d6, etc)
+        If passed a single integer, just returns the integer"""
     final = 0
     num = None
     dice = None
@@ -177,9 +178,7 @@ def XdY(damage:str | list | int):
             dice = int(damage.split("d")[1])
         case list() | tuple():
             num, dice = damage
-        case int():
-            num = 1
-            dice = damage
+        case int(): return damage
         case _:
             raise ValueError(f"Invalid type '{type(damage)}' for XdY.")
 

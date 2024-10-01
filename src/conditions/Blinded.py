@@ -19,7 +19,7 @@ class Blinded(Condition):
         super().start()
 
     def additional(self) -> None:
-        global_commands.type_text(f"{self.target.action_header} already {self.id}.")
+        global_commands.type_text(f"{self.target.header.action} already {self.id}.")
         return None
     
     def attack(self) -> None:
@@ -27,6 +27,6 @@ class Blinded(Condition):
             return self.default_attack()
         else: 
             self.target.spend_ap()
-            global_commands.type_text(f"{self.target.ownership_header} attack missed!")
+            global_commands.type_text(f"{self.target.header.ownership} attack missed!")
 
 object = Blinded

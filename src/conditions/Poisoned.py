@@ -19,13 +19,13 @@ class Poisoned(Condition):
         poison.stacks += 2
 
     def cleanse_check(self) -> bool:
-        global_commands.type_text(f"{self.target.default_header} attempting to cleanse the poison...")
+        global_commands.type_text(f"{self.target.header.action} attempting to cleanse the poison...")
         if self.target.roll_a_check("con") >= 15:
             global_commands.type_text("Success! The poison is no longer effective.")
             self.end()
             return True
         else:
-            global_commands.type_text(f"{self.target.default_header} failed. {self.target.action_header} still poisoned.")
+            global_commands.type_text(f"{self.target.header.default} failed. {self.target.header.action} still poisoned.")
             return False
 
 object = Poisoned

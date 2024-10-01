@@ -49,8 +49,8 @@ class Condition():
                 return effect
 
     def start(self):
-        self.start_message = f"{self.target.action_header} now {self.id}."
-        self.end_message = f"{self.target.action_header} no longer {self.id}."
+        self.start_message = f"{self.target.header.action} now {self.id}." if self.start_message == "" else self.start_message
+        self.end_message = f"{self.target.header.action} no longer {self.id}." if self.end_message == "" else self.end_message
         global_commands.type_text(self.start_message)
         for effect in self.active_effects:        
             effect.start()

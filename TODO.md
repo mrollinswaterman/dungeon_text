@@ -84,12 +84,13 @@ Special move, uses half max durability for a double damage on the attack (can mi
 
 ## Enchantments
 
-- [ ] Flaming: chance to set target on fire on hit
+- [X] Flaming: chance to set target on fire on hit
 - [ ] Molten/Searing/Super fucking hot: target takes a small amount of damage regardless of if the attack hits, plus a small chance to be set on fire. If the attack hits, larger chance to be set on fire, still take small unavoidable damage
 - [ ] AP: ignores armor
 - [ ] Freezing: reduces Action Points by 1 for 2 turns on hit
 - [ ] Poisoned: chance to apply poison on-hit
 - [ ] Draining: heals attacker for some % of pre-mitigation damage done on-hit
+- [X] Serrated: chance to apply Bleed on-hit
 
 ## Spells:
 

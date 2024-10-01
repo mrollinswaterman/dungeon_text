@@ -139,6 +139,23 @@ class Conditions_Handler():
             self.cleanse(condition)
         self.cleanse_pool = set()
 
+class Header():
+    """Header class, controls which text is used to describe a GameObject
+        3 types: default, action, ownership"""
+
+    parent:Game_Object
+    default:str
+    action:str
+    ownership:str
+    damage: str
+
+    def __init__(self, parent):
+        self.parent = parent
+        self.default = f"The {self.parent.id}"
+        self.action = f"The {self.parent.id} is"
+        self.ownership = f"The {self.parent.id}'s"
+        self.damage = self.default
+
 class Game_Object():
 
     def __init__(self, id="Game Object"):
@@ -148,6 +165,7 @@ class Game_Object():
         self.name = self.id
         self.level = 1
         self.stats:Statblock = Statblock(self)
+        self.header = Header(self)
 
         #Derived stats
         self.stats.max_hp = 10 + self.bonus("con")
@@ -187,18 +205,6 @@ class Game_Object():
     @property
     def base_attack_bonus(self) -> int:
         return max(1, self.level // 5)
-
-    @property
-    def default_header(self) -> str:
-        return f"The {self.id}"
-
-    @property
-    def ownership_header(self) -> str:
-        return f"The {self.id}'s"
-
-    @property
-    def action_header(self) -> str:
-        return f"The {self.id} is"
 
     @property
     def needs_healing(self) -> bool:
