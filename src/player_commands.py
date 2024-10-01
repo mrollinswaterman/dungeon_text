@@ -8,7 +8,7 @@ GOD_MODE = True
 def turn():
     """Runs the player's turn"""
     import global_variables
-    import controller
+    import scene_controller
     from command_dict import commands
 
     actions = commands["actions"]
@@ -46,10 +46,10 @@ def turn():
             #if none of the above, throw an error
             response = global_commands.error_message(code) if not done else None
         
-        if controller.SCENE.enemy.dead:
+        if scene_controller.SCENE.enemy.dead:
             global_variables.PLAYER.reset_ap()
             global_variables.RUNNING = False
-            controller.SCENE.end()
+            scene_controller.SCENE.end()
             return None
         
         if global_variables.PLAYER.can_act:
@@ -57,7 +57,7 @@ def turn():
     
     if global_variables.RUNNING:
         global_commands.type_with_lines()#shorthand, just prints the '=' signs
-        controller.SCENE.turn_order.go()
+        scene_controller.SCENE.turn_order.go()
         return None
 
     return None
@@ -169,7 +169,7 @@ def show_inventory() -> None:
 def item_select() -> None:
     """Lets the player select an inventory item to use"""
     import global_variables
-    import controller
+    import scene_controller
     from command_dict import commands
     item_selection = commands["item_select"]
 
@@ -215,7 +215,7 @@ def flee() -> None:
     """Attempts to run away from the current encounter"""
     import global_variables
     import narrator
-    import controller
+    import scene_controller
 
     if global_variables.PLAYER.conditions.get("Enraged") is not None:
         global_commands.type_text("You cannot flee while Enraged.")
@@ -229,7 +229,7 @@ def flee() -> None:
         stop_flee_attempt()
         return None
     else:
-        global_commands.type_text(f"The {controller.SCENE.enemy.id} lets you go.")
+        global_commands.type_text(f"The {scene_controller.SCENE.enemy.id} lets you go.")
         global_variables.PLAYER.spend_ap(0)
         narrator.continue_run()
         return None
@@ -240,10 +240,10 @@ def stop_flee_attempt() -> None:
     a player's attempt to flee
     """
     import narrator
-    import controller
+    import scene_controller
 
-    global_commands.type_text(f"The {controller.SCENE.enemy.id} attempts to stop you!")
-    if controller.SCENE.enemy.attack_of_oppurtunity() is True:
+    global_commands.type_text(f"The {scene_controller.SCENE.enemy.id} attempts to stop you!")
+    if scene_controller.SCENE.enemy.attack_of_oppurtunity() is True:
         global_commands.type_text("It caught up with you! You escape but not unscathed.")
         #global_variables.PLAYER.lose_some_items
     else:

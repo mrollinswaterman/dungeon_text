@@ -1,18 +1,18 @@
 #enemy commands file
 import global_commands
 import player_commands
-import controller
+import scene_controller
 
 def turn():
     import global_variables
-    import controller
-    enemy = controller.SCENE.enemy
+    import scene_controller
+    enemy = scene_controller.SCENE.enemy
 
     if enemy is not None:
         enemy.update()
 
         if enemy.dead:
-            controller.end_scene()
+            scene_controller.end_scene()
             return None
 
         while enemy.can_act:
@@ -24,7 +24,7 @@ def turn():
                     return None
             
                 if enemy.dead:
-                    controller.end_scene()
+                    scene_controller.end_scene()
                     return None
             
                 if enemy.can_act and not enemy.fleeing:
@@ -43,7 +43,7 @@ def turn_options():
     """
     Chooses a course of action for the enemy
     """
-    enemy = controller.SCENE.enemy
+    enemy = scene_controller.SCENE.enemy
 
     if enemy.fleeing:
         enemy.spend_ap(0)
@@ -64,7 +64,7 @@ def enemy_flee_attempt():
     import global_variables
     import player_commands
     import narrator
-    enemy = controller.SCENE.enemy
+    enemy = scene_controller.SCENE.enemy
 
     global_commands.type_text(f"The {enemy.id} attempts to flee...")
     global_commands.type_text("Try to stop them? y/n")
@@ -96,8 +96,8 @@ def enemy_attack():
     """
     Runs the enemy attack
     """
-    import controller
+    import scene_controller
 
-    controller.SCENE.enemy.attack()
+    scene_controller.SCENE.enemy.attack()
     return None
 

@@ -178,8 +178,8 @@ class Player():
 
     #ACTIONS
     def attack(self) -> None:
-        import player_commands, controller
-        enemy = controller.SCENE.enemy
+        import player_commands, scene_controller
+        enemy = scene_controller.SCENE.enemy
 
         roll = 10000 if player_commands.GOD_MODE else self.roll_to_hit()
         self.spend_ap()
@@ -194,7 +194,7 @@ class Player():
             case _:
                 pass
 
-        if roll >= controller.SCENE.enemy.evasion:
+        if roll >= scene_controller.SCENE.enemy.evasion:
             self.hit_narration()
             dmg = 10000 if player_commands.GOD_MODE else self.roll_damage()
             taken = enemy.take_damage(dmg, self)
@@ -220,8 +220,8 @@ class Player():
                 return f"rolling a {roll}."
 
     def crit(self) -> None:
-        import controller
-        enemy = controller.SCENE.enemy
+        import scene_controller
+        enemy = scene_controller.SCENE.enemy
 
         #global_commands.type_text("A critical hit!")
         no_weapon = True if self.weapon.broken else False
@@ -263,7 +263,7 @@ class Player():
     
     #NARRATION --> prints statements based on given situation
     def roll_narration(self, roll_text):
-        import controller as c
+        import scene_controller as c
         enemy = c.SCENE.enemy
         text = [
             f"You heft your {self.weapon.id} and attack the {enemy.id}, ",
@@ -275,7 +275,7 @@ class Player():
         return None
 
     def hit_narration(self) -> None:
-        import controller as c
+        import scene_controller as c
         enemy = c.SCENE.enemy
         text = [
             f"A hit.",
@@ -290,7 +290,7 @@ class Player():
         return None
 
     def miss_narration(self) -> None:
-        import controller as c
+        import scene_controller as c
         enemy = c.SCENE.enemy
         text = [
             f"You missed.",
@@ -308,8 +308,8 @@ class Player():
 
     #COMBAT TRICKS
     def power_attack(self) -> int:
-        import controller
-        enemy = controller.SCENE.enemy
+        import scene_controller
+        enemy = scene_controller.SCENE.enemy
 
         global_commands.type_text(f"You wind up for a powerful attack...")
         roll = self.roll_to_hit()
@@ -332,9 +332,9 @@ class Player():
             global_commands.type_text("No luck.")
     
     def feint(self) -> None:
-        import controller
+        import scene_controller
         from conditions import Stat_Buff_Debuff
-        enemy = controller.SCENE.enemy
+        enemy = scene_controller.SCENE.enemy
 
         global_commands.type_text("You attempt a feint...")
         roll = self.roll_a_check("cha")

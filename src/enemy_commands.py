@@ -1,18 +1,18 @@
 #enemy commands file
 import global_commands
 import player_commands
-import controller
+import scene_controller
 
 def turn():
     import global_variables
-    import controller
-    enemy = controller.SCENE.enemy
+    import scene_controller
+    enemy = scene_controller.SCENE.enemy
 
     if enemy is not None:
         enemy.update()
 
         if enemy.dead:
-            controller.SCENE.end()
+            scene_controller.SCENE.end()
             return None
 
         while enemy.can_act:
@@ -24,7 +24,7 @@ def turn():
                     return None
             
                 if enemy.dead:
-                    controller.SCENE.end()
+                    scene_controller.SCENE.end()
                     return None
             
                 if enemy.can_act and not enemy.fleeing:
@@ -32,7 +32,7 @@ def turn():
 
         if global_variables.RUNNING:
             global_commands.type_with_lines()
-            controller.SCENE.turn_order.go()
+            scene_controller.SCENE.turn_order.go()
         return None
     
     else:
@@ -40,7 +40,7 @@ def turn():
 
 def turn_options():
     """Chooses a course of action for the enemy"""
-    enemy = controller.SCENE.enemy
+    enemy = scene_controller.SCENE.enemy
 
     if enemy.fleeing:
         enemy.spend_ap(0)
@@ -57,7 +57,7 @@ def enemy_flee_attempt():
     """Runs when the enemy tries to escape."""
     import global_variables
     import narrator
-    enemy = controller.SCENE.enemy
+    enemy = scene_controller.SCENE.enemy
 
     global_commands.type_text(f"The {enemy.id} attempts to flee...")
     global_commands.type_text("Try to stop them? y/n")
@@ -72,7 +72,7 @@ def enemy_flee_attempt():
                 if global_variables.PLAYER.roll_to_hit() >= enemy.evasion():
                     global_commands.type_text(f"You cut off the {enemy.id}'s escape. It turns to fight...")
                     global_commands.type_with_lines()
-                    controller.SCENE.turn_order.go()
+                    scene_controller.SCENE.turn_order.go()
                 else:
                     global_commands.type_text(f"You try catching the {enemy.id} to no avail. It got away.")
                     narrator.continue_run()
@@ -87,7 +87,7 @@ def enemy_flee_attempt():
 
 def enemy_attack():
     """Runs the enemy attack"""
-    import controller
+    import scene_controller
 
-    controller.SCENE.enemy.attack()
+    scene_controller.SCENE.enemy.attack()
     return None

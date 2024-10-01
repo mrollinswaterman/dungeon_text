@@ -2,13 +2,13 @@ import global_variables, global_commands
 import monster_manual
 import player_commands
 import narrator
-import controller
+import scene_controller
 
 def etd():
     """Short for "Enter the Dungeon", runs when the player hits "y" initially"""
     player_commands.load()
     global_variables.RUNNING = True
-    controller.SCENE.begin_encounter()
+    scene_controller.SCENE.begin_encounter()
 
 def test():
     global_variables.SHOPKEEP.restock()

@@ -67,7 +67,7 @@ def event_options():
     print(STATS)
 
 def continue_run():
-    import controller
+    import scene_controller
 
     global_commands.type_with_lines("Continue? y/n")
     done = False
@@ -80,7 +80,7 @@ def continue_run():
             case "y":
                 done = True
                 next_scene_options()
-                controller.SCENE.select_next()
+                scene_controller.SCENE.select_next()
             case "n":
                 done = True
                 print("")

@@ -10,7 +10,7 @@ def turn():
     """
     import global_variables
     import enemy_commands
-    import controller
+    import scene_controller
     from command_dict import all
 
     actions = all["actions"]
@@ -37,7 +37,7 @@ def turn():
                 try: 
                     code = int(code)
                     item = global_variables.PLAYER.get_item_by_index(code-1)
-                    use_an_item(item, controller.SCENE.enemy)
+                    use_an_item(item, scene_controller.SCENE.enemy)
                     done = True
                 except ValueError:
                     #check if code is combat trick hotkey
@@ -48,10 +48,10 @@ def turn():
             #if none of the above, throw an error
             response = global_commands.error_message(code) if not done else None
         
-        if controller.SCENE.enemy.dead:
+        if scene_controller.SCENE.enemy.dead:
             global_variables.PLAYER.reset_ap()
             global_variables.RUNNING = False
-            controller.end_scene()
+            scene_controller.end_scene()
             return None
         
         if global_variables.PLAYER.can_act:
@@ -173,7 +173,7 @@ def item_select() -> None:
     Lets the player select an inventory item to use
     """
     import global_variables
-    import controller
+    import scene_controller
     from command_dict import all
     item_selection = all["item_select"]
 
@@ -191,7 +191,7 @@ def item_select() -> None:
                 item = global_variables.PLAYER.get_item_by_index(num-1)
                 if item is not None:
                     done = True
-                    return use_an_item(item, controller.SCENE.enemy)
+                    return use_an_item(item, scene_controller.SCENE.enemy)
                 else:
                     global_commands.error_message(None, f"Invalid item number '{code}'. Please try again.")
             except ValueError:
@@ -230,7 +230,7 @@ def flee() -> None:
     """
     import global_variables
     import narrator
-    import controller
+    import scene_controller
 
     if "Enraged" in global_variables.PLAYER.status_effects:
         global_commands.type_text("You cannot flee while Enraged.")
@@ -244,7 +244,7 @@ def flee() -> None:
         stop_flee_attempt()
         return None
     else:
-        global_commands.type_text(f"The {controller.SCENE.enemy.id} lets you go.")
+        global_commands.type_text(f"The {scene_controller.SCENE.enemy.id} lets you go.")
         global_variables.PLAYER.spend_ap(0)
         narrator.continue_run()
         return None
@@ -255,10 +255,10 @@ def stop_flee_attempt() -> None:
     a player's attempt to flee
     """
     import narrator
-    import controller
+    import scene_controller
 
-    global_commands.type_text(f"The {controller.SCENE.enemy.id} attempts to stop you!")
-    if controller.SCENE.enemy.attack_of_oppurtunity() is True:
+    global_commands.type_text(f"The {scene_controller.SCENE.enemy.id} attempts to stop you!")
+    if scene_controller.SCENE.enemy.attack_of_oppurtunity() is True:
         global_commands.type_text("It caught up with you! You escape but not unscathed.")
         #global_variables.PLAYER.lose_some_items
     else:

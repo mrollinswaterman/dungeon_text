@@ -64,8 +64,8 @@ class Player(Game_Object):
 
     @property
     def target(self):
-        import controller
-        return controller.SCENE.enemy
+        import scene_controller
+        return scene_controller.SCENE.enemy
 
     #methods
     def update(self) -> None:

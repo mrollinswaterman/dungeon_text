@@ -2,10 +2,10 @@ import global_variables, global_commands
 import monster_manual
 import player_commands
 import narrator
-import controller
+import scene_controller
 
 def link_start() -> None:
-    controller.begin_encounter()
+    scene_controller.begin_encounter()
     global_variables.RUNNING = True
     player_commands.turn()
 
@@ -37,10 +37,10 @@ def begin():
 
     global_commands.type_text("Would you like to enter the dungeon? y/n")
 
-    if not controller.TEST:
-        controller.SCENE.enemy = monster_manual.spawn_random_mob()  
+    if not scene_controller.TEST:
+        scene_controller.SCENE.enemy = monster_manual.spawn_random_mob()  
     else:
-        controller.SCENE.enemy = monster_manual.spawn_mob("Clockwork Hound")
+        scene_controller.SCENE.enemy = monster_manual.spawn_mob("Clockwork Hound")
 
     done = False
     while not done:

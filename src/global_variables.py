@@ -66,10 +66,7 @@ PLAYER.gain_gold(10000)
 #PLAYER.pick_up(item_compendium.Firebomb.craft(5), True)
 
 def test():
-    import enchantments
-    PLAYER.weapon.enchant(enchantments.TOME["Flaming"])
-    PLAYER.weapon.enchant(enchantments.TOME["Serrated"])
-    #print(PLAYER.weapon.enchantments)
+    pass
 
 test()
 
