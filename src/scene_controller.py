@@ -4,6 +4,7 @@ import monster_manual
 import event as ev
 import dm_guide
 import narrator
+import gui_commands
 
 class Turn_Order():
 
@@ -71,14 +72,19 @@ class Scene():
         self.turn_order.add(self.player, player_commands.turn)
         self.turn_order.add(self.enemy, enemy_commands.turn)
 
+    @property
+    def narrator(self):
+        return gui_commands.NARRATION_LABEL
+
     def start_combat(self):
         import player_commands
         import enemy_commands
     
-        self.turn_order.add(self.player, player_commands.turn)
-        self.turn_order.add(self.enemy, enemy_commands.turn)
+        #self.turn_order.add(self.player, player_commands.turn)
+        #self.turn_order.add(self.enemy, enemy_commands.turn)
 
-        self.turn_order.go()
+        #self.turn_order.go()
+        pass
 
     def select_next(self):
         """Starts a new scene with a new enemy or event"""
@@ -99,8 +105,8 @@ class Scene():
         if self.enemy is None:
             return self.select_next()
 
-        global_commands.type_text(f"You encounter a Level {self.enemy.level} {self.enemy.id}!")
-        global_commands.type_with_lines()
+        text = f"You encounter a Level {self.enemy.level} {self.enemy.id}!"
+        gui_commands.type_text(self.narrator, text)
         self.start_combat()
 
     def end(self):
