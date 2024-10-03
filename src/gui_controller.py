@@ -4,16 +4,14 @@ from tkinter.font import Font
 import gui_commands
 import scene_controller
 
-winWidth = 1475
-winHeight = 800
 root = tk.Tk()
-root.minsize(winWidth, winHeight)
+root.minsize(gui_commands.winWidth, gui_commands.winHeight)
 
 headerFont = Font(
     family="Times New Roman",
     size=42,
     weight="bold",
-    slant="italic",
+    slant="italic"
 )
 
 narrationFont = Font(
@@ -28,11 +26,11 @@ def enter_the_dungeon():
     gui_commands.clear(root)
     if gui_commands.createGameUI(root) is True:
         scene_controller.SCENE.begin_encounter()
-    
 
 #create start menu
-headerFrame = ttk.Frame(root, width=winWidth-5, height=winHeight-5, relief="raised")
+headerFrame = ttk.Frame(root, width=gui_commands.winWidth-5, height=gui_commands.winHeight-5, relief="raised")
 headerFrame.place(relx=.5, rely=.5, anchor=tk.CENTER)
+
 headerText = ttk.Label(headerFrame, text="lorem ipsum", font=headerFont)
 headerText.place(relx=0.5, rely=0.25, anchor=tk.CENTER)
 

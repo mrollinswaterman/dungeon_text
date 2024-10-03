@@ -7,92 +7,18 @@ GOD_MODE = True
 
 def turn():
     """Runs the player's turn"""
-    import global_variables
-    import scene_controller
-    from command_dict import commands
-
-    actions = commands["actions"]
-    combat_tricks = commands["combat_tricks"]
-
-    global_variables.PLAYER.update()
-
-    if global_variables.PLAYER.dead:
-        end_game()
-        return None
-
-    while global_variables.PLAYER.can_act:
-        turn_options()
-        done = False
-        while not done:
-            code = global_commands.get_cmd()
-
-            #check if code is an action
-            if code in actions:
-                actions[code]()
-                done = True
-            else:
-                #check if code is item hotkey
-                try: 
-                    code = int(code)
-                    item = global_variables.PLAYER.get_item(code-1)
-                    use_an_item(item)
-                    done = True
-                except ValueError:
-                    #check if code is combat trick hotkey
-                    if code in combat_tricks:
-                        combat_tricks[code]()
-                        done = True
-            
-            #if none of the above, throw an error
-            response = global_commands.error_message(code) if not done else None
-        
-        if scene_controller.SCENE.enemy.dead:
-            global_variables.PLAYER.reset_ap()
-            global_variables.RUNNING = False
-            scene_controller.SCENE.end()
-            return None
-        
-        if global_variables.PLAYER.can_act:
-            global_commands.type_with_lines()
-    
-    if global_variables.RUNNING:
-        global_commands.type_with_lines()#shorthand, just prints the '=' signs
-        scene_controller.SCENE.turn_order.go()
-        return None
-
-    return None
+    turn_options()
 
 def cancel():
     return None
 
 def turn_options():
+    import gui_commands
     """Prints the player's stat info and turn options"""
-    import global_variables
-
+    #print("PLAYER TURN")
     header = f"What would you like to do?"
-    global_commands.type_header(header, None, False)
-    stats = {
-        "lvl": f"Lvl: {global_variables.PLAYER.level}",
-        "hp": f'HP: {"[" + "/"*global_variables.PLAYER.hp+" "*(global_variables.PLAYER.stats.max_hp-global_variables.PLAYER.hp) + "]"}',
-        "ap": f"AP: {global_variables.PLAYER.ap}/{global_variables.PLAYER.stats.max_ap}",
-        "gold": f"Gold: {global_variables.PLAYER.gold}g",
-        "xp": f"XP: {global_variables.PLAYER.xp}/{15 * global_variables.PLAYER.level}",
-        "evasion": f"AC: {global_variables.PLAYER.evasion()}"
-    }
-    print("\t", end="")
-    for stat in stats:
-        print(f"{stats[stat]} \t", end="")
-    print("\n")
-
-    options = [
-        "Attack - (a)", "Combat Tricks - (ct)",
-        "Status Effects - (e)", "Inventory - (i)",
-        "Wait - (w)", "Retreat - (r)"
-    ]
-    print("\t", end="")
-    for item in options:
-        print(item + " | ", end="")
-    print("\n")
+    gui_commands.type_text(widget=gui_commands.NARRATOR, text=header)
+    gui_commands.NARRATOR.after(global_commands.findWaitTime(header), gui_commands.createPlayerTurnOptions)
 
 def combat_tricks():
     from command_dict import commands
