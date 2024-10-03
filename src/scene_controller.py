@@ -107,8 +107,8 @@ class Scene():
             return self.select_next()
 
         encounterText = f"You encounter a Level {self.enemy.level} {self.enemy.id}!"
-        gui_commands.type_text(widget=self.narrator, text=encounterText, clear=True)
-        self.narrator.after(global_commands.findWaitTime(encounterText), self.start_combat)
+        #gui_commands.type_text(widget=self.narrator, text=encounterText, clear=True)
+        #self.narrator.after(global_commands.findWaitTime(encounterText), self.start_combat)
 
     def end(self):
         global_commands.type_text(f"You killed the {self.enemy.id}!")

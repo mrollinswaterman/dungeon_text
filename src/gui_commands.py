@@ -5,14 +5,15 @@ from tkinter.font import Font
 winWidth = 1475
 winHeight = 800
 
-mainFrameW = winWidth * 0.75
-mainFrameH = winHeight * 0.6666
+mainFrameW = int(winWidth / 2)
+mainFrameH = int(winHeight / 4)
 
-sidebarW = winWidth - mainFrameW
+sidebarW = winWidth * 0.25
 sidebarH = winHeight * 0.95
+sidebarColor = "#A8422D"
 
 narratorFrameW = mainFrameW
-narratorFrameH = winHeight * 0.28
+narratorFrameH = int(winHeight / 4)
 narratorFrameColor = "#ffe2a0"
 
 MAINFRAME = None
@@ -61,15 +62,15 @@ def createGameUI(window:tk.Widget):
     global NARRATOR, SIDEBAR, MAINFRAME
 
     mainScreenStyle = ttk.Style()
-    mainScreenStyle.configure("main.TFrame", background="black", relief="raised", borderwidth=15)
+    mainScreenStyle.configure("main.TFrame", background="black", relief="groove", borderwidth=15)
 
     sideBarStyle = ttk.Style()
-    sideBarStyle.configure("sideBar.TFrame", background="#808080", relief="raised", borderwidth=15)
+    sideBarStyle.configure("sideBar.TFrame", background=sidebarColor, relief="groove", borderwidth=15)
 
     narratorFrameStyle = ttk.Style()
-    narratorFrameStyle.configure("narrator.TFrame", background=narratorFrameColor, relief="raised", borderwidth=15)
+    narratorFrameStyle.configure("narrator.TFrame", background=narratorFrameColor, relief="groove", borderwidth=15)
 
-    mainScreenFrame = ttk.Frame(window, width=mainFrameW, height=mainFrameH, style = "main.TFrame")
+    mainScreenFrame = ttk.Frame(window, width=mainFrameW, height=mainFrameH, style="main.TFrame")
     sideBarFrame = ttk.Frame(window, width=sidebarW, height=sidebarH, style="sideBar.TFrame")
     narratorFrame = ttk.Frame(window, width=narratorFrameW, height=narratorFrameH, style="narrator.TFrame")
     narrator = ttk.Label(
@@ -85,16 +86,23 @@ def createGameUI(window:tk.Widget):
     SIDEBAR = sideBarFrame
     NARRATOR = narrator
 
-    mainScreenFrame.grid(row=0, column=0, columnspan=3, pady=(0, winHeight * 0.258))
-    sideBarFrame.grid(row=0, column=4, pady=(winHeight * 0.025, 0))
-    narratorFrame.grid(row=0, column=0, sticky="nsew", columnspan=3, pady=(winHeight * 0.695, 0))
-    narrator.grid(row=0, column=0, pady=(15,0), padx=(15,0))
+    mainScreenFrame.grid(row=0, column=0, columnspan=3, rowspan=1, sticky="nsew")#, pady=(0, winHeight * 0.258)
+    sideBarFrame.grid(row=0, column=4, rowspan=1, columnspan= 1, sticky="nsew")#, pady=(winHeight * 0.025, 0)
+    narratorFrame.grid(row=1, column=0,columnspan=3, rowspan=1, sticky="nsew")#, pady=(winHeight * 0.695, 0)
+    #narrator.grid(row=0, column=0, pady=(15,0), padx=(15,0))
 
     return True
 
 def createPlayerTurnOptions():
-    header = ttk.Label(SIDEBAR, text="Your Actions")
-    header.grid(row=0, column=0)
+    header = ttk.Label(
+        SIDEBAR, 
+        text="Your Actions",
+        font=("Times New Roman", 25), 
+        background=sidebarColor, 
+        foreground="black",
+        padding=5
+    )
+    header.grid(row=0, column=0, pady=(15,0), padx=(15,0))
 
 
 def clear(window:tk.Widget):
