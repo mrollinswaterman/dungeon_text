@@ -102,7 +102,7 @@ def find_max_depth(master:list[list[str]]) -> int:
 
 def findWaitTime(text:str):
     import gui_commands
-    return (len(text) * gui_commands.DEFAULT_SPEED) + 800
+    return (len(text) * gui_commands.DEFAULT_SPEED) + 1000
 
 def print_line_by_line(master:list[list[str]], max_width:int=35) -> None:
     max_depth = find_max_depth(master)

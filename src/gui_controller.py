@@ -6,6 +6,10 @@ import scene_controller
 
 root = tk.Tk()
 root.minsize(gui_commands.winWidth, gui_commands.winHeight)
+root.maxsize(gui_commands.winWidth, gui_commands.winHeight)
+
+root.tk.call('source', 'forest-dark.tcl')
+ttk.Style(root).theme_use('forest-dark')
 
 headerFont = Font(
     family="Times New Roman",
@@ -18,9 +22,6 @@ narrationFont = Font(
     family="Times New Roman",
     size=20,
 )
-
-root.tk.call('source', 'forest-dark.tcl')
-ttk.Style(root).theme_use('forest-dark')
 
 def enter_the_dungeon():
     gui_commands.clear(root)

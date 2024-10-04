@@ -15,10 +15,9 @@ def cancel():
 def turn_options():
     import gui_commands
     """Prints the player's stat info and turn options"""
-    #print("PLAYER TURN")
     header = f"What would you like to do?"
-    gui_commands.type_text(widget=gui_commands.NARRATOR, text=header)
-    gui_commands.NARRATOR.after(global_commands.findWaitTime(header), gui_commands.createPlayerTurnOptions)
+    gui_commands.type_text(text=header)
+    gui_commands.NARRATOR.frame.after(global_commands.findWaitTime(header), gui_commands.SIDEBAR.createHeader())
 
 def combat_tricks():
     from command_dict import commands
