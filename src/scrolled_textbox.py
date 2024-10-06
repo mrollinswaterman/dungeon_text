@@ -31,12 +31,12 @@ def narrate(widget:st.ScrolledText, text, speed=45, charIndex=0):
     if charIndex < len(text):
         widget.after(speed, narrate, widget, text, speed, charIndex+1)
         # update the text of the label
-        print(text[charIndex],end="")
         widget.insert(tk.END, text[charIndex])
-    
-    else: widget.configure(state="disabled")
+        widget.see("end")
+    else: 
+        widget.configure(state="disabled")
 
-win.after(100, narrate, text_area, "Hello World \n Goodbye World")
+win.after(100, narrate, text_area, f"{"Hello World\nGoodbye World\n"*25}")
 win.mainloop()
 
 

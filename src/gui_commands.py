@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.font import Font
+import tkinter.scrolledtext as st 
 
 winWidth = 1500
 winHeight = 900
@@ -108,50 +109,31 @@ class narrator(screenObject):
             height=int(winHeight * (1/3) - (bezelWidth/2)), 
             color="#ffe2a0"
         )
-        self.textBox:tk.Widget = None
+        self.textBox:st.ScrolledText = None
         self.currentText = ""
 
-    def narrate(self, text:str, speed=DEFAULT_SPEED, clear:bool=False):
-        if self.currentText != "":
-            self.clear()
-        self.textBox.after(len(self.currentText) * 10, type_text, self.textBox, text, speed, clear)
-        #type_text(self.textBox, text, speed=speed, clear=clear)
-        if not clear:
-            self.currentText = text
-        else: self.currentText = ""
-
-    def clear(self):
-        clear_text(self.textBox, self.currentText)
+    def narrate(self, text:str, speed=DEFAULT_SPEED, charIndex=0):
+        self.textBox.configure(state="enabled")
+        char = text[charIndex]
+        if charIndex == 0: 
+            text = text + " "
+            text = list(text)
+            text[0] = text[0].upper()
+            text = ''.join(text)
+            text = text + "\n\n"
+        if charIndex < len(text) - 1:
+            waitTime = speed
+            #add waitTime time if char is punctuation
+            waitTime += 250 if char in end_line else 0
+            #add waitTime if char is a "pause char" ie ",", ":", etc
+            waitTime += 150 if char in pause_chars else 0
+            self.textBox.after(waitTime, self.narrate, self.textBox, text, speed, charIndex+1)
+            # update the text of the label
+            self.textBox.insert(tk.END, text[charIndex])
+            self.textBox.see('end')
+        else: self.textBox.configure(state="disabled")
 
 NARRATOR = narrator()
-
-def type_text(widget:tk.Widget=None, text:str="",speed:int=DEFAULT_SPEED, charIndex=0, clear:bool=False):
-    char = text[charIndex]
-    if charIndex == 0: 
-        text = text + " "
-        text = list(text)
-        text[0] = text[0].upper()
-        text = ''.join(text)
-    if charIndex < len(text) - 1:
-        waitTime = speed
-        #add waitTime time if char is punctuation
-        waitTime += 250 if char in end_line else 0
-        #add waitTime if char is a "pause char" ie ",", ":", etc
-        waitTime += 150 if char in pause_chars else 0
-        widget.after(waitTime, type_text, widget, text, speed, charIndex+1, clear)
-        # update the text of the label
-        widget['text'] = text[:charIndex+1]
-
-    if charIndex == len(text) - 1 and clear:
-        widget.after(speed, clear_text, widget, text)
-
-def clear_text(widget:tk.Label, text:str, speed:int=int(DEFAULT_SPEED/2)):
-    #print("clearing...\n")
-    if len(text) > 0:
-        text = text[:-1]
-        #print(text)
-        widget["text"] = text
-        widget.after(speed, clear_text, widget, text, speed)
 
 def createGameUI(window:tk.Widget):
     global NARRATOR, SIDEBAR, MAIN
@@ -180,9 +162,8 @@ def createGameUI(window:tk.Widget):
     mainScreenFrame = ttk.Frame(window, width=MAIN.width, height=MAIN.height, style="main.TFrame")
     sideBarFrame = ttk.Frame(window, width=SIDEBAR.width, height=SIDEBAR.height, style="sideBar.TFrame")
     narratorFrame = ttk.Frame(window, width=NARRATOR.width, height=NARRATOR.height, style="narrator.TFrame")
-    narrator = ttk.Label(
+    narrator = st.ScrolledText(
         narratorFrame,
-        text="textBox", 
         font=("Times New Roman", 25), 
         background=NARRATOR.color, 
         foreground="black",
