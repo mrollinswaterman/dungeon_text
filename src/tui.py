@@ -19,24 +19,6 @@ def ltd():
     player_commands.load()
     narrator.exit_the_dungeon()
 
-def begin():
-    from command_dict import commands
-
-    tui = commands["tui"]
-
-    global_commands.type_text("would you like to enter the dungeon? y/n")
-
-    done = False
-    while not done:
-        cmd = global_commands.get_cmd()
-
-        if cmd in tui:
-            done = True
-            tui[cmd]()
-        else:
-            global_commands.error_message(cmd)
-
 print("")
 while global_variables.START_CMD is True:
     global_variables.START_CMD = False
-    begin()

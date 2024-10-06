@@ -105,9 +105,8 @@ class Scene():
         """Sets the enemy for the scene if it's None, and prints the encounter header"""
         if self.enemy is None:
             return self.select_next()
-
         encounterText = f"You encounter a Level {self.enemy.level} {self.enemy.id}!"
-        gui_commands.type_text(text=encounterText, clear=True)
+        self.narrator.narrate(text=encounterText, clear=True)
         self.narrator.frame.after(global_commands.findWaitTime(encounterText), self.start_combat)
 
     def end(self):

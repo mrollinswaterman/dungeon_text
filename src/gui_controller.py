@@ -27,6 +27,7 @@ def enter_the_dungeon():
     gui_commands.clear(root)
     if gui_commands.createGameUI(root) is True:
         scene_controller.SCENE.begin_encounter()
+        #gui_commands.SIDEBAR.createHeader()
 
 #create start menu
 headerFrame = ttk.Frame(root, width=gui_commands.winWidth-5, height=gui_commands.winHeight-5, relief="raised")

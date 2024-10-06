@@ -13,11 +13,19 @@ def cancel():
     return None
 
 def turn_options():
-    import gui_commands
+    from gui_commands import NARRATOR, SIDEBAR
+    print("player turn!")
     """Prints the player's stat info and turn options"""
     header = f"What would you like to do?"
-    gui_commands.type_text(text=header)
-    gui_commands.NARRATOR.frame.after(global_commands.findWaitTime(header), gui_commands.SIDEBAR.createHeader())
+    NARRATOR.textBox.after(global_commands.findWaitTime(header), NARRATOR.narrate, header)
+    SIDEBAR.frame.after(global_commands.findWaitTime(header)*2, SIDEBAR.createHeader)
+    def makeButtons():
+        #return None
+        from command_dict import commands
+        actions = commands["actions"]
+        for option in actions:
+            SIDEBAR.addButton(option, actions[option])
+    SIDEBAR.frame.after(global_commands.findWaitTime(header)*2, makeButtons)
 
 def combat_tricks():
     from command_dict import commands

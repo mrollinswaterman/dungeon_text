@@ -20,12 +20,12 @@ commands = {
     },
 
     "actions": {
-        "a": global_variables.PLAYER.attack,
-        "ct": player_commands.combat_tricks,
-        "e": player_commands.cleanse_a_condition,
-        "i": player_commands.show_inventory,
-        "w": global_variables.PLAYER.spend_ap,
-        "r": player_commands.flee
+        "Attack": global_variables.PLAYER.attack,
+        "Combat Tricks": player_commands.combat_tricks,
+        "Cleanse an Effect": player_commands.cleanse_a_condition,
+        "Inventory": player_commands.show_inventory,
+        "Wait": global_variables.PLAYER.spend_ap,
+        "Retreat": player_commands.flee
     },
 
     "combat_tricks": {
@@ -61,8 +61,8 @@ commands = {
     },
 }
 
-for entry in commands:
+"""for entry in commands:
     commands[entry]["exit"] = global_commands.exit
     commands[entry]["reset"] = player_commands.reset
     commands[entry]["c"] = player_commands.cancel
-    commands[entry]["b"] = narrator.back
+    commands[entry]["b"] = narrator.back"""

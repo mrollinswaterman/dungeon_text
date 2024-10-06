@@ -328,6 +328,7 @@ class Game_Object():
 
     #COMBAT
     def attack(self):
+        #actual mechanics
         self.spend_ap()
         roll = self.roll_to_hit()
         #probably a prettier way to do this
@@ -335,7 +336,6 @@ class Game_Object():
             self.narrate(self.roll_narration, roll)
         else: self.narrate(self.roll_narration)
         self.apply_on_attacks()
-
         match roll:
             case 0: return self.critical_hit()
 
@@ -417,6 +417,9 @@ class Game_Object():
 
     #NARRATION
     def narrate(self, func, param=None) -> None:
+        import gui_commands
+        narrator = gui_commands.NARRATOR
+
         text:list[str] = func() if param is None else func(param)
         if self.prev_narration in text:
             text.remove(self.prev_narration)
