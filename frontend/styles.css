@@ -1,0 +1,13 @@
+.main{
+    text-align: center;
+    justify-content: center;
+}
+
+.start_header{
+    color: white;
+    font-size: 42;
+    background-color: red;
+    width: fit-content;
+    margin: auto;
+    margin-top: 25%;
+}
