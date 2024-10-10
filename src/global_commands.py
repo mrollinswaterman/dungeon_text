@@ -24,13 +24,7 @@ BONUS = {
     24: 7
 }
 
-end_line = [
-    ".", "!", "?"
-]
-
-pause_chars = [
-    ",", ":", ";", "*"
-]
+NARRATTION_QUEUE_TIME = 1
 
 def exit():
     global_variables.RUNNING = False
@@ -101,8 +95,18 @@ def find_max_depth(master:list[list[str]]) -> int:
     return mx
 
 def findWaitTime(text:str):
-    import gui_commands
-    return (len(text) * gui_commands.DEFAULT_SPEED) + 500
+    from gui_commands import DEFAULT_SPEED, end_line, pause_chars
+    total = 0
+    for char in text:
+        total += DEFAULT_SPEED
+        #add time time if char is punctuation
+        total += 250 if char in end_line else 0
+        #add time if char is a "pause char" ie ",", ":", etc
+        total += 150 if char in pause_chars else 0
+    return total
+
+def type_text(str:str):
+    pass
 
 def print_line_by_line(master:list[list[str]], max_width:int=35) -> None:
     max_depth = find_max_depth(master)
@@ -193,51 +197,15 @@ def XdY(damage:str | list | tuple | int):
 def probability(chance):
     return random.random() < (chance / 100)
 
-def type_with_lines(text:str=None, num:int=1, speed:float=None, newln=True) -> None:
-    print("="*110+"\n")
-    type_text(text, speed, newln)
-    if num > 1:
-        print("="*110+"\n")
+def sendToNarrator(text:str):
+    global NARRATTION_QUEUE_TIME
+    from gui_commands import NARRATOR
+    prev = NARRATTION_QUEUE_TIME
+    print(f"Prev Queue time: {NARRATTION_QUEUE_TIME}\n")
+    NARRATOR.textBox.after(NARRATTION_QUEUE_TIME, NARRATOR.narrate, text)
+    NARRATTION_QUEUE_TIME += int(findWaitTime(text)*1.25)
+    print(f"Post Queue Time: {NARRATTION_QUEUE_TIME}; Diff: +{NARRATTION_QUEUE_TIME-prev}\n")
 
-def error_message(cmd:str="", text:str=None) -> None:
-    text = f'Inavlid command "{cmd}". Please try again.' if text is None else text
-    type_text(text)
-
-def type_header(text:str=None, speed:float=None, newln:bool=True) -> None:
-    type_text(text, 1, newln)
-
-def type_header_with_lines(text=None, num=1, speed=None, newln=True) -> None:
-    type_with_lines(text, num, 1, newln)
-
-def type_text(text:str=None, speed:float=None, newln=True) -> None:
-    """Adds a typing effect to text"""
-    if text is None or text == "":
-        return None
-
-    #tracks if the first letter of text has been made uppercase
-    first = True
-    text = " " + text + " "
-
-    #typing speed, lower = faster
-    if speed is None: speed = 3
-    for idx, char in enumerate(text):
-        if first and char.isalpha():
-            char = char.upper()
-            first = False
-        print(char, end='', flush=True)
-        waitTime = speed
-
-        #add waitTime time if char is punctuation
-        waitTime += 30 if char in end_line else 0
-        #add waitTime if char is a "pause character" ie ",", ":", etc
-        waitTime += 20 if char in pause_chars else 0
-        #add waitTime time for end of text
-        waitTime += 50 if idx == len(text) else 0
-
-        time.sleep(waitTime/100)
-        if idx / 120 >= 1.0 and char in end_line:
-            print("\n")
-
-    #newline after typing text
-    if newln:
-        print("\n")
+def resetNarrationQueue():
+    global NARRATTION_QUEUE_TIME
+    NARRATTION_QUEUE_TIME = 1

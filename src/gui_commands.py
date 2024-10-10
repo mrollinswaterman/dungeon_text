@@ -110,28 +110,26 @@ class narrator(screenObject):
             color="#ffe2a0"
         )
         self.textBox:st.ScrolledText = None
-        self.currentText = ""
+        self.queue:set[str] = set()
 
     def narrate(self, text:str, speed=DEFAULT_SPEED, charIndex=0):
-        self.textBox.configure(state="enabled")
+        from global_commands import findWaitTime
+        self.currentText = text
+        self.textBox.configure(state="normal")
         char = text[charIndex]
         if charIndex == 0: 
             text = text + " "
             text = list(text)
             text[0] = text[0].upper()
             text = ''.join(text)
-            text = text + "\n\n"
         if charIndex < len(text) - 1:
-            waitTime = speed
-            #add waitTime time if char is punctuation
-            waitTime += 250 if char in end_line else 0
-            #add waitTime if char is a "pause char" ie ",", ":", etc
-            waitTime += 150 if char in pause_chars else 0
-            self.textBox.after(waitTime, self.narrate, self.textBox, text, speed, charIndex+1)
+            self.textBox.after(findWaitTime(char), self.narrate, text, speed, charIndex+1)
             # update the text of the label
             self.textBox.insert(tk.END, text[charIndex])
             self.textBox.see('end')
-        else: self.textBox.configure(state="disabled")
+        else: 
+            self.textBox.insert(tk.END, "\n\n")
+            self.textBox.configure(state="disabled")
 
 NARRATOR = narrator()
 
@@ -156,7 +154,7 @@ def createGameUI(window:tk.Widget):
     narratorFrameStyle.configure(
         "narrator.TFrame", 
         background=NARRATOR.color, 
-        relief=NARRATOR.borderType, 
+        relief="ridge", 
         borderwidth=NARRATOR.borderWidth)
 
     mainScreenFrame = ttk.Frame(window, width=MAIN.width, height=MAIN.height, style="main.TFrame")
@@ -165,10 +163,14 @@ def createGameUI(window:tk.Widget):
     narrator = st.ScrolledText(
         narratorFrame,
         font=("Times New Roman", 25), 
-        background=NARRATOR.color, 
+        background=NARRATOR.color,
         foreground="black",
-        padding=5
+        width=83,
+        height=8,
+        highlightthickness=0,
     )
+
+    narrator.vbar.configure(width=1)
 
     MAIN.frame = mainScreenFrame
     SIDEBAR.frame = sideBarFrame
@@ -181,15 +183,24 @@ def createGameUI(window:tk.Widget):
     narratorFrame.grid_propagate(0)
     sideBarFrame.grid(row=0, column=1, rowspan=2, pady=(bezelWidth/2,0))
     sideBarFrame.grid_propagate(0)
-    narrator.place(x=15, y=15)
+    narrator.grid(row=0, column=0, padx=(NARRATOR.borderWidth+5,0), pady=(NARRATOR.borderWidth+5, 0))
 
     NARRATOR.widgets["textBox"] = narrator
+    narrator.configure(state="disabled")
 
     return True
 
 def clear(window:tk.Widget):
     for widget in window.winfo_children():
         widget.destroy()
+
+def type_text(widget:tk.Widget, text:str, speed:int=DEFAULT_SPEED, charIndex:int=0):
+    from global_commands import findWaitTime
+    char = text[charIndex]
+    if charIndex < len(text):
+        widget.after(findWaitTime(char), type_text, widget, text, speed, charIndex+1)
+        # update the text of the label
+        widget['text'] = text[:charIndex+1]
 
 def quit(window:tk.Widget):
     window.destroy()

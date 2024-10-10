@@ -6,7 +6,7 @@ This file contains a list of tasks and ideas
 
 - [X] Player save file
 - [ ] Add a start menu where the user can choose a name for their character and maybe choose starting stats as well?? (give them 8 points, all stats start at 10, some sort of diminishing returns on pumping stats?)
-- [ ] Use Tkinter or some GUI framework to take the game off the Command Line
+- [ ] Use ~~Tkinter~~ HTML/JS/CSS or some GUI framework to take the game off the Command Line
 
 ## Internal Logic
 
@@ -81,6 +81,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Armordillo: deals ⅓ (or ½ or just some flat amount) of any damage taken back to the player. Can “curl up” defensively to halve all damage he takes during the next turn (does this frequently, never chases after the player just wants to be left alone. Give him a really good drop???)
 - [ ] Flaming Skull --> chance to catch fire on attack, regens to full when killed, but max_hp decays each resurrection, to a minimum of 5-10. Dies for good if you one-shot it (from full??), ie do its max hp in one attack.
 - [ ] Wraith / Ice Wraith --> Ghost that drains with each basic attack, ganing overheal as temp HP. if no Ghost Touch on weapon / armor 50-75% miss chance before attack roll.
+- [ ] Hellhound --> Fiery doggo that breathes flames at you for 6d6 damage, dex save for half (recharge mechanic here???)
 
 ## Enchantments
 

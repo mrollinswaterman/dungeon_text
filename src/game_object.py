@@ -328,6 +328,7 @@ class Game_Object():
 
     #COMBAT
     def attack(self):
+        global_commands.resetNarrationQueue()
         #actual mechanics
         self.spend_ap()
         roll = self.roll_to_hit()
@@ -377,9 +378,9 @@ class Game_Object():
         except KeyError:
             raise ValueError(f"Can't modify non-existent stat '{stat}'.")
 
-        text = f"{self.ownership_header} {global_variables.STATS[stat]} increased by {amount}."
+        text = f"{self.header.ownership} {global_variables.STATS[stat]} increased by {amount}."
         if amount < 0:
-            text = f"{self.ownership_header} {global_variables.STATS[stat]} decreased by {abs(amount)}."
+            text = f"{self.header.ownership} {global_variables.STATS[stat]} decreased by {abs(amount)}."
 
         global_commands.type_text(text)
 
@@ -416,16 +417,15 @@ class Game_Object():
         raise NotImplementedError
 
     #NARRATION
-    def narrate(self, func, param=None) -> None:
+    def narrate(self, func, param=None, waitTime = 0) -> None:
         import gui_commands
         narrator = gui_commands.NARRATOR
-
         text:list[str] = func() if param is None else func(param)
         if self.prev_narration in text:
             text.remove(self.prev_narration)
         final = random.choice(text)
         self.prev_narration = final
-        global_commands.type_text(final)
+        global_commands.sendToNarrator(final)
         return None
 
     def roll_narration(self) -> list[str]:

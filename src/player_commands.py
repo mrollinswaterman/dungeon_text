@@ -17,15 +17,17 @@ def turn_options():
     print("player turn!")
     """Prints the player's stat info and turn options"""
     header = f"What would you like to do?"
-    NARRATOR.textBox.after(global_commands.findWaitTime(header), NARRATOR.narrate, header)
-    SIDEBAR.frame.after(global_commands.findWaitTime(header)*2, SIDEBAR.createHeader)
+    global_commands.sendToNarrator(header)
+    sidedarDelay = int(global_commands.findWaitTime(header)*1.5)
+    SIDEBAR.frame.after(sidedarDelay, SIDEBAR.createHeader)
     def makeButtons():
         #return None
         from command_dict import commands
         actions = commands["actions"]
-        for option in actions:
-            SIDEBAR.addButton(option, actions[option])
-    SIDEBAR.frame.after(global_commands.findWaitTime(header)*2, makeButtons)
+        for time,option in enumerate(actions):
+            SIDEBAR.frame.after((time+10)*100, SIDEBAR.addButton, option, actions[option])
+            #SIDEBAR.addButton(option, actions[option])
+    SIDEBAR.frame.after(sidedarDelay, makeButtons)
 
 def combat_tricks():
     from command_dict import commands
