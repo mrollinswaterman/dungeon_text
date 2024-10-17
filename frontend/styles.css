@@ -38,7 +38,6 @@
 
 .main{
     align-items: flex-end;
-    /*border: 2px solid red;*/
     width: 100%;
     height: 100%;
 }
@@ -47,13 +46,15 @@
     border:1px solid aqua;
     margin-bottom: 1%;
     margin-left: 1%;
-    gap: 2px;
+    overflow: scroll;
 }
 
 #narrator{
     font-size: 30;
     font-family: 'Times New Roman';
     color: white;
+    display: inline-block;
+    margin-top: 2%;
     margin-left: 2%;
 }
 
@@ -62,14 +63,112 @@
     width: 10px;
     height:30px;
     background: white;
-    display: inline-block;
-    margin-left: 5px;
     margin-bottom: -5px;
     opacity: 0;
+    display: inline-block;
 }
 
 .side-bar{
-    border: 1px solid red;
+    border: 10px solid red;
     margin-bottom: 1%;
     margin-left: 1%;
+    background: lightblue;
 }
+
+#sidebar-button-holder{
+    margin-top: 25%;
+    width: 400px;
+    display: flex;
+    gap: 60px;
+    flex-wrap: wrap;
+}
+
+.sidebar-button{
+    cursor:pointer;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    width: 150;
+    height: 150;
+    text-align: center;
+}
+
+.sidebar-button-img-bottom{
+    width: 150px;
+    height: 150px;
+    filter: brightness(25%);
+}
+
+.sidebar-button-img {
+    width: 150px;
+    height: 150px;
+    position: relative;
+    bottom: 156px;
+    transition: 600ms cubic-bezier(.3, .7, .4, 1);
+}
+
+.sidebar-button-text {
+    position: relative;
+    bottom: 255px;
+    font-size: 40;
+    color: white;
+    transition: 600ms cubic-bezier(.3, .7, .4, 1);
+}
+
+.sidebar-button:hover .sidebar-button-text{
+    transform: translateY(-4px);
+    transition: 250ms cubic-bezier(.3, .7, .4, 1.5);
+}
+
+.sidebar-button:active .sidebar-button-text{
+    transform: translateY(4px);
+    transition: 34ms;
+}
+
+.sidebar-button:hover .sidebar-button-img{
+    transform: translateY(-4px);
+    transition: 250ms cubic-bezier(.3, .7, .4, 1.5);
+}
+
+.sidebar-button:active .sidebar-button-img{
+    transform: translateY(4px);
+    transition: 34ms;
+}
+
+#combat-tricks-img {
+    filter: invert(35%) sepia(97%) saturate(505%) hue-rotate(74deg) brightness(96%) contrast(86%);
+}
+
+#status-effects-img {
+    filter: invert(60%) sepia(63%) saturate(1691%) hue-rotate(1deg) brightness(106%) contrast(105%);
+}
+/*.pushable {
+    background: hsl(340deg 100% 32%);
+    border-radius: 16px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-top: 10%;
+}
+
+.pushable:hover .front {
+    transform: translateY(-8px);
+    transition: 250ms cubic-bezier(.3, .7, .4, 1.5);
+}
+
+.front {
+    display: block;
+    padding: 12px 42px;
+    border-radius: 16px;
+    font-size: 1.25rem;
+    background: blue;
+    background: hsl(345deg 100% 47%)
+    color: white;
+    transform: translateY(-6px);
+    transition: 600ms cubic-bezier(.3, .7, .4, 1);
+}
+
+.pushable:active .front {
+    transform: translateY(-2px);
+    transition: 34ms;
+}*/

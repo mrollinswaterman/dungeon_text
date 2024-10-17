@@ -8,6 +8,13 @@ This file contains a list of tasks and ideas
 - [ ] Add a start menu where the user can choose a name for their character and maybe choose starting stats as well?? (give them 8 points, all stats start at 10, some sort of diminishing returns on pumping stats?)
 - [ ] Use ~~Tkinter~~ HTML/JS/CSS or some GUI framework to take the game off the Command Line
 
+## GUI
+
+- [ ] Have the backdrop start off grayish instead of black, and each time the player choose to
+continue deeper into the dungeon, the backdrop gets a little darker (1%???)
+- [ ] Have a sky/midnight blue backdrop for when the player enters the overworld, chooses randomly
+between day and night?
+
 ## Internal Logic
 
 - [ ] ~~Magic system??~~ Now WIP
