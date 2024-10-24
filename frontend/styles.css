@@ -1,3 +1,7 @@
+.body{
+    user-select: none;
+}
+
 #start{
     text-align: center;
     justify-content: center;
@@ -40,13 +44,15 @@
     align-items: flex-end;
     width: 100%;
     height: 100%;
+    display: none;
 }
 
-.text-box{
-    border:1px solid aqua;
+.textbox{
+    border:10px double #a69d6f;
     margin-bottom: 1%;
     margin-left: 1%;
     overflow: scroll;
+    background-color:#63492b;
 }
 
 #narrator{
@@ -68,107 +74,209 @@
     display: inline-block;
 }
 
-.side-bar{
-    border: 10px solid red;
+.sidebar{
+    border: 8px double blue;
     margin-bottom: 1%;
     margin-left: 1%;
-    background: lightblue;
+    background: whitesmoke;
+    border-radius: 0px;
+    transition: 1s;
+}
+
+@keyframes flip-in-Y {
+    0% {
+        opacity: 0;
+        transform: rotateY(-180deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.header {
+    font-size: 40pt;
+    text-align: center;
+    width: fit-content;
+    text-transform: uppercase;
+    margin: auto;
+    margin-top: 5%;
+    padding: 5px;
+    background-color: inherit;
 }
 
 #sidebar-button-holder{
-    margin-top: 25%;
+    margin-top: 10%;
     width: 400px;
     display: flex;
-    gap: 60px;
+    gap: 45px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
-.sidebar-button{
+.sidebar-icon-button{
     cursor:pointer;
     margin: auto;
     display: flex;
     flex-direction: column;
-    width: 150;
-    height: 150;
+    width: 150px;
+    height: 150px;
     text-align: center;
 }
 
-.sidebar-button-img-bottom{
+.sidebar-icon-button-shadow {
+    position: absolute;
     width: 150px;
     height: 150px;
-    filter: brightness(25%);
+    filter: brightness(0%);
+    transform: translateY(2px);
 }
 
-.sidebar-button-img {
+.sidebar-icon-button-img-bottom{
+    width: 150px;
+    height: 150px;
+    filter: brightness(50%);
+}
+
+.sidebar-icon-button-img {
     width: 150px;
     height: 150px;
     position: relative;
-    bottom: 156px;
+    bottom: 154px;
     transition: 600ms cubic-bezier(.3, .7, .4, 1);
 }
 
-.sidebar-button-text {
+.sidebar-icon-button-text {
     position: relative;
-    bottom: 255px;
+    bottom: 260px;
     font-size: 40;
     color: white;
     transition: 600ms cubic-bezier(.3, .7, .4, 1);
 }
 
-.sidebar-button:hover .sidebar-button-text{
-    transform: translateY(-4px);
+.sidebar-icon-button:hover .sidebar-icon-button-text {
+    transform: translateY(-2px);
     transition: 250ms cubic-bezier(.3, .7, .4, 1.5);
 }
 
-.sidebar-button:active .sidebar-button-text{
-    transform: translateY(4px);
-    transition: 34ms;
-}
-
-.sidebar-button:hover .sidebar-button-img{
-    transform: translateY(-4px);
+.sidebar-icon-button:hover .sidebar-icon-button-img {
+    transform: translateY(-2px);
     transition: 250ms cubic-bezier(.3, .7, .4, 1.5);
 }
 
-.sidebar-button:active .sidebar-button-img{
-    transform: translateY(4px);
+.sidebar-icon-button:hover .sidebar-icon-button-shadow {
+    transform: translateY(1px);
+    transition: 250ms cubic-bezier(.3, .7, .4, 1.5);
+}
+
+.sidebar-icon-button:active .sidebar-icon-button-img {
+    transform: translateY(3px);
     transition: 34ms;
+}
+
+.sidebar-icon-button:active .sidebar-icon-button-text {
+    transform: translateY(3px);
+    transition: 34ms;
+}
+
+.sidebar-icon-button:active .sidebar-icon-button-shadow {
+    transform: translateY(-1px);
+    transition: 34ms
 }
 
 #combat-tricks-img {
     filter: invert(35%) sepia(97%) saturate(505%) hue-rotate(74deg) brightness(96%) contrast(86%);
 }
 
+#combat-tricks-img-bottom {
+    filter: invert(35%) sepia(97%) saturate(505%) hue-rotate(74deg) brightness(33%) contrast(86%);
+}
+
 #status-effects-img {
     filter: invert(60%) sepia(63%) saturate(1691%) hue-rotate(1deg) brightness(106%) contrast(105%);
 }
-/*.pushable {
-    background: hsl(340deg 100% 32%);
-    border-radius: 16px;
-    border: none;
-    padding: 0;
+
+#status-effects-img-bottom {
+    filter: invert(60%) sepia(63%) saturate(1691%) hue-rotate(1deg) brightness(33%) contrast(105%);
+}
+
+.sidebar-button-back {
+    background-color: rgb(93, 92, 92);
+    transition: 0.3s;
+    clip-path: polygon(0% 0%, 91% 0, 100% 51%, 91% 100%, 0% 100%);    
+    width: 200px;
+    height: 60px;
+}
+
+.sidebar-button {
+    width:inherit;
+    height:inherit;
+    clip-path: polygon(0% 0%, 91% 0, 100% 51%, 91% 100%, 0% 100%);
+}   
+
+.sidebar-button-front {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+    width:inherit;
+    height:inherit;
+    font-size: 20px;
+    transition: 0.3s;
+    background-color: grey;
     cursor: pointer;
-    margin-top: 10%;
+    clip-path: polygon(0% 0%, 91% 0, 100% 51%, 91% 100%, 0% 100%);
+}
+  
+.sidebar-button-back:hover {
+    transform: skew(-15deg);
+    background-color: rgb(97, 220, 97, 1.0);
+    width: 250px;
+    /*animation: pulse-back 1s infinite;*/
 }
 
-.pushable:hover .front {
-    transform: translateY(-8px);
-    transition: 250ms cubic-bezier(.3, .7, .4, 1.5);
+@keyframes pulse-back{
+    from{
+        background-color: rgb(97, 220, 97, 1.0);
+    }
+    to{
+        background-color: rgb(97, 220, 97, 0.0);
+    }
 }
 
-.front {
-    display: block;
-    padding: 12px 42px;
-    border-radius: 16px;
-    font-size: 1.25rem;
-    background: blue;
-    background: hsl(345deg 100% 47%)
-    color: white;
-    transform: translateY(-6px);
-    transition: 600ms cubic-bezier(.3, .7, .4, 1);
+.sidebar-button-back:hover .sidebar-button {
+    background-color: rgb(53, 183, 53, 1.0);
+    width: 220px;
+    /*animation: pulse-button 1s infinite;*/
 }
 
-.pushable:active .front {
-    transform: translateY(-2px);
-    transition: 34ms;
-}*/
+@keyframes pulse-button{
+    from{
+        background-color: rgb(53, 183, 53, 0.0);
+    }
+    to{
+        background-color: rgb(53, 183, 53, 1.0);
+    }
+}
+
+.sidebar-button-back:hover .sidebar-button-front{
+    background-color: rgb(28, 160, 28);
+    width: 190px;
+    letter-spacing: 3px;
+}
+
+.sidebar-button-back:active .sidebar-button-front{
+    background-color: green;
+    width: 300px;
+}
+
+.sidebar-button-back:active{
+    width:190px;
+}
+.paused{
+    pointer-events: none;
+}   
