@@ -1,5 +1,25 @@
 /*JS file for TD main screen*/
 
+$(".hud")[0].style.width = window.innerWidth * 0.73;
+$(".hud")[0].style.height = window.innerHeight * 0.65;
+
+$(".textbox")[0].style.width = window.innerWidth * 0.73;
+$(".textbox")[0].style.height = window.innerHeight * 0.33;
+
+$(".sidebar")[0].style.width = window.innerWidth * 0.25;
+$(".sidebar")[0].style.height = window.innerHeight * 0.97;
+
+document.getElementById("Yes").onclick = function(){
+    console.log("Entering...");
+    $("#start").css("display", "none");
+    $(".main").css("display", "grid");
+    setTimeout(enterTheDungeon, 1000)
+};
+ 
+document.getElementById("No").onclick = function(){
+    enterTheOverWorld();
+};
+
 var playerSelection = false;
 
 class GameState {
@@ -16,8 +36,6 @@ class GameState {
         this.currentMenu = null;
 
         this.typingQueue = new Set();
-
-        /*setInterval(this.update.bind(this), 100);*/
 
         /*blink the cursor*/
         setInterval(() => {
@@ -56,15 +74,9 @@ class GameState {
             this.typing = false;
         }, 900);
     }
-
-    update() {
-        if(this.paused && !document.getElementById("sidebar").classList.contains("paused")){
-            pauseSidebar();
-        }
-    }
 }
 
-const CurrentState = new GameState();
+const gameState = new GameState();
 
 class Menu {
     constructor(title, addFunction){
@@ -88,100 +100,48 @@ class Option {
 
 const actions = new Menu("Your Actions", addSidebarButton);
 actions.options = {
-    "a": new Option("attack", dummyAttack, nothingLeftToType),
-    "ct": new Option(
+    "attack": new Option("attack", dummyAttack, nothingLeftToType),
+    "combat tricks": new Option(
         "combat tricks", 
         function() { loadSidebarMenu(combatTricks); },
-        function() { return CurrentState.currentMenu==combatTricks; }),
-    "se": null
-}
-/*
-    "status effects": {
-        "function":null, 
-        "flag":null
-},
-    "inventory": {
-        "function":null, 
-        "flag":null
-},
-    "wait": {
-        "function":null, 
-        "flag":null
-},
-    "flee": {
-        "function":null, 
-        "flag":null
-},
-}
-*/
-
-function nothingLeftToType(){
-    console.log(CurrentState.typingQueue.size);
-    return CurrentState.typingQueue.size == 0;
+        function() { return gameState.currentMenu == combatTricks; }),
+    "status effects": null,
+    "inventory": null,
+    "wait": null,
+    "flee": null,
 }
 
 function dummyAttack(){
     playerSelection = true;
     type("You attack nothing, with your sword!", nothingLeftToType);
     type("You missed.", nothingLeftToType);
-    /*type("Who could have guessed...");*/
+    type("Who could have guessed...", nothingLeftToType);
 }
 
 const combatTricks = new Menu("Combat Tricks", addSidebarButton);
 combatTricks.options = {
     "power attack": null,
-    "Feint": null,
-    "Riposte": null,
-    "Total Defense": null,
-    "All-out": null,
-    "Study Weakness": null,
+    "feint": null,
+    "riposte": null,
+    "total defense": null,
+    "all-out": null,
+    "study weakness": null,
     "back": new Option(
         "back", 
         function(){ loadSidebarMenu(actions); },
-        function() { return CurrentState.currentMenu = actions; }
+        function() { return gameState.currentMenu = actions; }
     ),
 }
 
-$(".textbox")[0].style.width = window.innerWidth * 0.70;
-$(".textbox")[0].style.height = window.innerHeight * 0.30;
-
-$(".sidebar")[0].style.width = window.innerWidth * 0.25;
-$(".sidebar")[0].style.height = window.innerHeight * 0.95;
-
-document.getElementById("Yes").onclick = function(){
-    console.log("Entering...");
-    $("#start").css("display", "none");
-    $(".main").css("display", "flex");
-    setTimeout(enterTheDungeon, 1000)
-};
- 
-document.getElementById("No").onclick = function(){
-    enterTheOverWorld();
-};
-
 function enterTheDungeon(){
     type("This is a test, I repeat, this is a test.", playerSelectionMade);
-    CurrentState.pause(nothingLeftToType);
+    gameState.pause(nothingLeftToType);
     loadSidebarMenu(actions);
 };
 
 function enterTheOverWorld(){
     console.log("Exiting....");
 };
-
-function loadSidebarMenu(menu){
-    $("#sidebar").css("animation", "");
-    $("#sidebar").css("animation", "flip-in-Y 1s");
-    setSidebarHeader(menu.title);
-    const buffer = 150;
-    options = Object.keys(menu.options);
-    for (let i = 0; i < options.length; i++){
-        setTimeout(menu.addFunction, i*buffer, menu, options[i]);
-    }
-    setTimeout(() => {
-        CurrentState.currentMenu = menu;
-    }, buffer * options.length);
-}
 
 function addSidebarButton(menu, button_name){
     const back = document.createElement("div");
@@ -198,7 +158,7 @@ function addSidebarButton(menu, button_name){
 
     back.addEventListener("click", () => {
         menu.options[button_name].run();
-        CurrentState.pause(menu.options[button_name].flag);
+        gameState.pause(menu.options[button_name].flag);
     });
 
     back.appendChild(button)

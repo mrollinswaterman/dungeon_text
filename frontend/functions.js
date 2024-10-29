@@ -2,21 +2,34 @@
 const endChars = [".", "!", "?"]
 const pauseChars = [",", ":", ";", "*"]
 
-function getStyle(el,styleProp)
-{
-    if (el.currentStyle)
-        return el.currentStyle[styleProp];
-    return document.defaultView.getComputedStyle(el,null)[styleProp];
+function autoScrollNarrator(){
+    var narrator = $("#narrator");
+    narrator.get(0).scrollIntoView(false, {behavior: 'smooth'});
 }
 
 function capitalize(s){
     return s && s[0].toUpperCase() + s.slice(1);
 }
 
-function setSidebarHeader(header_title){
-    $("#sidebar-header").html(header_title)
-    $("#sidebar-button-holder").html("");
-}
+function erase(speed=gameState.defaultSpeed / 2.5, charIndex=gameState.currentTextboxHTML.length-1){
+    if (gameState.blinking) { gameState.blinking = false; }
+    var speed = speed;
+    var charIndex = charIndex;
+    if (gameState.currentTextboxHTML.charAt(charIndex-1) == "<"){
+        console.log("skipping...");
+    } else{ 
+        $("#narrator").html(
+            gameState.currentTextboxHTML.substring(0, charIndex) + gameState.cursorHTML
+        );
+    }
+
+    if (charIndex > 0){
+        setTimeout(erase, speed, speed, charIndex-1);
+    } else {
+        gameState.currentTextboxHTML = "";
+        gameState.stopTyping();
+    };
+};
 
 function getNameAsInnerHTML(name){
     const words = name.split(" ");
@@ -27,12 +40,39 @@ function getNameAsInnerHTML(name){
     return final.substring(0, final.length-"<br>".length)
 }
 
-function waitFor(conditionFunction) {
-    const poll = resolve => {
-      if(conditionFunction()) resolve();
-      else setTimeout(_ => poll(resolve), 900);
+function getStyle(el,styleProp)
+{
+    if (el.currentStyle)
+        return el.currentStyle[styleProp];
+    return document.defaultView.getComputedStyle(el,null)[styleProp];
+}
+
+function loadSidebarMenu(menu){
+    $("#sidebar").css("animation", "");
+    $("#sidebar").css("animation", "flip-in-Y 1s");
+    setSidebarHeader(menu.title);
+    const buffer = 150;
+    options = Object.keys(menu.options);
+    for (let i = 0; i < options.length; i++){
+        setTimeout(menu.addFunction, i*buffer, menu, options[i]);
     }
-    return new Promise(poll);
+    setTimeout(() => {
+        gameState.currentMenu = menu;
+    }, buffer * options.length);
+}
+
+function nothingLeftToType(){
+    console.log(gameState.typingQueue.size);
+    return gameState.typingQueue.size == 0;
+}
+
+function notTyping(){
+    return !gameState.typing;
+}
+
+function setSidebarHeader(header_title){
+    $("#sidebar-header").html(header_title)
+    $("#sidebar-button-holder").html("");
 }
 
 function wait(seconds) {
@@ -41,13 +81,17 @@ function wait(seconds) {
     });
 } 
 
-function notTyping(){
-    return !CurrentState.typing;
+function waitFor(conditionFunction) {
+    const poll = resolve => {
+      if(conditionFunction()) resolve();
+      else setTimeout(_ => poll(resolve), 900);
+    }
+    return new Promise(poll);
 }
 
-function type(text, waitFunction="nowait", speed=CurrentState.defaultSpeed, charIndex=0){
-    CurrentState.typingQueue.add(text);
-    if (CurrentState.typing && CurrentState.currentText != text){
+function type(text, waitFunction="nowait", speed=gameState.defaultSpeed, charIndex=0){
+    gameState.typingQueue.add(text);
+    if (gameState.typing && gameState.currentText != text){
         waitFor(notTyping)
             .then(_ =>
                 type(text, waitFunction, speed, charIndex));
@@ -55,17 +99,17 @@ function type(text, waitFunction="nowait", speed=CurrentState.defaultSpeed, char
         var text = text;
         var speed = speed;
         var charIndex = charIndex;
-        CurrentState.currentText = text;
+        gameState.currentText = text;
         /*if there's text and we're about to start typing, add newlines*/
-        if ($("#narrator").text() != "" && !CurrentState.typing){
-            $("#narrator").html(CurrentState.currentTextboxHTML + "<br /><br />");
-            CurrentState.currentTextboxHTML = $("#narrator").html();
+        if ($("#narrator").text() != "" && !gameState.typing){
+            $("#narrator").html(gameState.currentTextboxHTML + "<br /><br />");
+            gameState.currentTextboxHTML = $("#narrator").html();
         }
-        if (!CurrentState.typing) { CurrentState.typing = true; }
-        if (CurrentState.blinking) { CurrentState.blinking = false; }
+        if (!gameState.typing) { gameState.typing = true; }
+        if (gameState.blinking) { gameState.blinking = false; }
         /*set the element's text*/
         $("#narrator").html(
-            CurrentState.currentTextboxHTML + text.substring(0, charIndex+1) + CurrentState.cursorHTML
+            gameState.currentTextboxHTML + text.substring(0, charIndex+1) + gameState.cursorHTML
         );
         var waitTime = speed;
         /*increases the wait time between specific chars*/
@@ -76,16 +120,15 @@ function type(text, waitFunction="nowait", speed=CurrentState.defaultSpeed, char
             setTimeout(type, waitTime, text, waitFunction, speed, charIndex+1);
         }else {
             console.log(waitFunction);
-            CurrentState.typingQueue.delete(text);
-            CurrentState.blinking = true;
-            CurrentState.currentTextboxHTML = $("#narrator").html().substring(
+            gameState.typingQueue.delete(text);
+            gameState.blinking = true;
+            gameState.currentTextboxHTML = $("#narrator").html().substring(
                 0, 
-                $("#narrator").html().length-CurrentState.cursorHTML.length
+                $("#narrator").html().length-gameState.cursorHTML.length
             );
 
             /* if there's nothing behind me, decide what to do */
-            if (CurrentState.typingQueue.size == 0){
-                alert("END");
+            if (gameState.typingQueue.size == 0){
                 /*if no wait function, just clear, else wait*/
                 if (waitFunction == "nowait"){
                     console.log("not waiting")
@@ -97,34 +140,9 @@ function type(text, waitFunction="nowait", speed=CurrentState.defaultSpeed, char
                             setTimeout(erase, 900));
                 }
             } else{
-                CurrentState.stopTyping();
+                gameState.stopTyping();
             }
         };
     }; 
 };
 
-function erase(speed=CurrentState.defaultSpeed / 2.5, charIndex=CurrentState.currentTextboxHTML.length-1){
-    if (CurrentState.blinking) { CurrentState.blinking = false; }
-    var speed = speed;
-    var charIndex = charIndex;
-    if (CurrentState.currentTextboxHTML.charAt(charIndex-1) == "<"){
-        console.log("skipping...");
-    } else{ 
-        $("#narrator").html(
-            CurrentState.currentTextboxHTML.substring(0, charIndex) + CurrentState.cursorHTML
-        );
-    }
-
-    if (charIndex > 0){
-        setTimeout(erase, speed, speed, charIndex-1);
-    } else {
-        CurrentState.currentTextboxHTML = "";
-        /*if nothing after me*/
-        CurrentState.stopTyping();
-    };
-};
-
-function autoScrollNarrator(){
-    var narrator = $("#narrator");
-    narrator.get(0).scrollIntoView(false, {behavior: 'smooth'});
-}

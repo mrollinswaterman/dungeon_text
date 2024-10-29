@@ -1,5 +1,5 @@
-.body{
-    user-select: none;
+body{
+    background:rgb(0, 0, 0);
 }
 
 #start{
@@ -41,18 +41,110 @@
 }
 
 .main{
-    align-items: flex-end;
     width: 100%;
     height: 100%;
     display: none;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+}
+
+.hud {
+    border: 1px solid red;
+    grid-row-start: 1;
+    grid-row-end: span 2;
+    grid-column-start: 1;
+    grid-column-end: span 3;
+}
+
+.level-holder{
+    display: flex;
+    justify-content: center;
+    width: fit-content;
+    position: absolute;
+    left: 45px;
+    top: 25px;
+}
+
+.level-ui{
+    color: white;
+    font-size: 20pt;
+}
+
+.healthbar-holder {
+    color: white;
+    display: flex;
+    transition: width 2s ease-out;
+    position: absolute;
+    left: 50px;
+    top: 50px;
+    transition: all .5s;
+}
+
+.healthbar-holder::before{
+    content:"[";
+    font-size: 60px;
+}
+
+.healthbar {
+    height: 30px;
+    display: grid;
+    grid-column-gap: 5px;
+    text-align: center;
+    color: white;
+    margin-top: 17px;
+    width: fit-content;
+    transition: all .3s;
+    border-radius: 2px;
+}
+
+.healthbar-holder::after{
+    content: "]";
+    font-size: 60px;
+}
+
+.healthbar-segment {
+    background-color: rgba(255,0,0,.7);
+    height: inherit;
+    width: inherit;
+    transition: opacity 1s;
+}
+
+.low-hp{
+    animation: .9s low-hp infinite;
+}
+
+@keyframes low-hp {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes grow-in {
+    0% { scale: 0.01; }
+    25% { scale: 0.65; }
+    60% {scale: 1.5};
+    100% { scale: 1.0; }
+}
+
+@keyframes tilt-shaking {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(30deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-30deg); }
+    100% { transform: rotate(0deg); }
 }
 
 .textbox{
-    border:10px double #a69d6f;
-    margin-bottom: 1%;
-    margin-left: 1%;
+    border:1 double #a69d6f;
     overflow: scroll;
     background-color:#63492b;
+    grid-row-start: 3;
+    grid-row-end: span 1;
+    grid-column-start: 1;
+    grid-column-end: span 3;
+
 }
 
 #narrator{
@@ -81,6 +173,10 @@
     background: whitesmoke;
     border-radius: 0px;
     transition: 1s;
+    grid-row-start: 1;
+    grid-row-end: span 3;
+    grid-column-start: 4;
+    grid-column-end: span 1;
 }
 
 @keyframes flip-in-Y {
@@ -204,7 +300,6 @@
 .sidebar-button-back {
     background-color: rgb(93, 92, 92);
     transition: 0.3s;
-    clip-path: polygon(0% 0%, 91% 0, 100% 51%, 91% 100%, 0% 100%);    
     width: 200px;
     height: 60px;
 }
@@ -212,7 +307,6 @@
 .sidebar-button {
     width:inherit;
     height:inherit;
-    clip-path: polygon(0% 0%, 91% 0, 100% 51%, 91% 100%, 0% 100%);
 }   
 
 .sidebar-button-front {
@@ -229,7 +323,6 @@
     transition: 0.3s;
     background-color: grey;
     cursor: pointer;
-    clip-path: polygon(0% 0%, 91% 0, 100% 51%, 91% 100%, 0% 100%);
 }
   
 .sidebar-button-back:hover {
