@@ -9,20 +9,23 @@ $(".textbox")[0].style.height = window.innerHeight * 0.33;
 $(".sidebar")[0].style.width = window.innerWidth * 0.25;
 $(".sidebar")[0].style.height = window.innerHeight * 0.97;
 
-document.getElementById("Yes").onclick = function(){
+document.getElementById("Yes").onclick = function()
+{
     console.log("Entering...");
     $("#start").css("display", "none");
     $(".main").css("display", "grid");
     setTimeout(enterTheDungeon, 1000)
 };
  
-document.getElementById("No").onclick = function(){
+document.getElementById("No").onclick = function()
+{
     enterTheOverWorld();
 };
 
 var playerSelection = false;
 
-class GameState {
+class GameState 
+{
     constructor(){
         this.typing = false;
         this.blinking = true;
@@ -54,14 +57,12 @@ class GameState {
         }, 600);
     }
 
-    pause(waitFunction=playerSelectionMade){
+    pauseUntil(waitFunction=playerSelectionMade){
         if (!this.paused){
-            console.log("pausing!")
             pauseSidebar();
             this.paused = true;
             waitFor(waitFunction)
                 .then(_ => {
-                    console.log("unpausing!")
                     unpauseSidebar();
                     this.paused = false;
                 });
@@ -78,7 +79,8 @@ class GameState {
 
 const gameState = new GameState();
 
-class Menu {
+class Menu
+{
     constructor(title, addFunction){
         this.title = title;
         this.addFunction = addFunction
@@ -90,17 +92,25 @@ class Menu {
     }
 }
 
-class Option {
-    constructor(name, run, flag){
+class Option 
+{
+    constructor(name, onClick, flag){
         this.name = name;
-        this.run = run;
-        this.flag = flag;
+        this.onClick = () => 
+        {
+            setTimeout(() => // function to run
+            {
+                onClick();
+                gameState.pauseUntil(flag);
+            }, 300); 
+        } 
+        this.flag = flag;  // flag to check if the function has completed
     }
 }
 
 const actions = new Menu("Your Actions", addSidebarButton);
 actions.options = {
-    "attack": new Option("attack", dummyAttack, nothingLeftToType),
+    "attack": new Option("attack", dummyAttack, doneTyping),
     "combat tricks": new Option(
         "combat tricks", 
         function() { loadSidebarMenu(combatTricks); },
@@ -109,13 +119,6 @@ actions.options = {
     "inventory": null,
     "wait": null,
     "flee": null,
-}
-
-function dummyAttack(){
-    playerSelection = true;
-    type("You attack nothing, with your sword!", nothingLeftToType);
-    type("You missed.", nothingLeftToType);
-    type("Who could have guessed...", nothingLeftToType);
 }
 
 const combatTricks = new Menu("Combat Tricks", addSidebarButton);
@@ -133,96 +136,24 @@ combatTricks.options = {
     ),
 }
 
-function enterTheDungeon(){
-    type("This is a test, I repeat, this is a test.", playerSelectionMade);
-    gameState.pause(nothingLeftToType);
+function enterTheDungeon()
+{
+    type(`test`, playerSelectionMade);
     loadSidebarMenu(actions);
+    //gameState.pauseUntil(nothingLeftToType);
+
 };
 
-function enterTheOverWorld(){
+function enterTheOverWorld()
+{
     console.log("Exiting....");
 };
 
-function addSidebarButton(menu, button_name){
-    const back = document.createElement("div");
-    back.className = "sidebar-button-back";
-    back.id = button_name + "-back";
-
-    const div = document.createElement("div");
-    div.className = "sidebar-button-front";
-    div.id = button_name;
-    div.innerHTML = getNameAsInnerHTML(button_name);
-
-    const button = document.createElement("div");
-    button.className = "sidebar-button";
-
-    back.addEventListener("click", () => {
-        menu.options[button_name].run();
-        gameState.pause(menu.options[button_name].flag);
-    });
-
-    back.appendChild(button)
-    button.appendChild(div)
-    document.getElementById("sidebar-button-holder").appendChild(back);
-}
-
-function playerSelectionMade(){
+function playerSelectionMade()
+{
     if (playerSelection){
         playerSelection = false;
         return true
     }
     return false;
-}
-
-function pauseSidebar(){
-    document.getElementById("sidebar").classList.add("paused");
-}
-
-function unpauseSidebar(){
-    document.getElementById("sidebar").classList.remove("paused");
-}
-
-function addSideBarIconButton(menu, icon_name){
-    const words = icon_name.split(" ");
-    var id_str = "";
-    var inner_text = "";
-    for (let i = 0; i < words.length; i++){
-        id_str = id_str + words[i] + "-";
-        inner_text = inner_text + capitalize(words[i]) + "<br>";
-    }
-    id_str = id_str.substring(0, id_str.length-1);
-    inner_text = inner_text.substring(0, inner_text.length-"<br>".length);
-    const icon_image = id_str + ".png";
-
-    const div = document.createElement("div");
-    div.className = "sidebar-icon-button";
-    div.id = icon_name;
-
-    const shadow = document.createElement("img");
-    shadow.className = "sidebar-icon-button-shadow";
-    shadow.src = icon_image;
-    shadow.id = id_str + "-shadow";
-
-    const icon_bottom = document.createElement("img");
-    icon_bottom.className = "sidebar-icon-button-img-bottom";
-    icon_bottom.src = icon_image;
-    icon_bottom.id = id_str + "-img-bottom";
-
-    const icon = document.createElement("img");
-    icon.className = "sidebar-icon-button-img";
-    icon.src = icon_image;
-    icon.id = id_str +"-img";
-
-    const text = document.createElement("span");
-    text.className = "sidebar-icon-button-text";
-    text.innerHTML = inner_text;
-
-    div.onclick = menu.options[icon_name];
-
-    div.appendChild(shadow);
-    div.appendChild(icon_bottom);
-    div.appendChild(icon);
-    div.appendChild(text);
-
-    document.getElementById("sidebar-button-holder").appendChild(div);
 }
