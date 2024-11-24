@@ -14,6 +14,10 @@ This file contains a list of tasks and ideas
 continue deeper into the dungeon, the backdrop gets a little darker (1%???)
 - [ ] Have a sky/midnight blue backdrop for when the player enters the overworld, chooses randomly
 between day and night?
+- [ ] Have ">>" between levels during level up screen blink
+- [ ] Fix the bug that breaks the control flow of the GUI if you try to type something that's
+identical to something that's still on the screen (hint: line 2 of the type function!!)
+
 
 ## Internal Logic
 

@@ -19,7 +19,10 @@ document.getElementById("Yes").onclick = function()
  
 document.getElementById("No").onclick = function()
 {
-    enterTheOverWorld();
+    console.log("Entering...");
+    $("#start").css("display", "none");
+    $(".main").css("display", "grid");
+    setTimeout(enterTheOverworld, 1000)
 };
 
 var playerSelection = false;
@@ -58,6 +61,9 @@ class GameState
     }
 
     pauseUntil(waitFunction=playerSelectionMade){
+        if (waitFunction == "nowait"){
+            waitFunction = nothingLeftToType;
+        }
         if (!this.paused){
             pauseSidebar();
             this.paused = true;
@@ -81,7 +87,7 @@ const gameState = new GameState();
 
 class Menu
 {
-    constructor(title, addFunction){
+    constructor(title, addFunction=addSidebarButton){
         this.title = title;
         this.addFunction = addFunction
         this.options = {};
@@ -98,30 +104,55 @@ class Option
         this.name = name;
         this.onClick = () => 
         {
-            setTimeout(() => // function to run
+            const front = document.getElementById(`${name}-front`);
+            if (front.classList.contains("active-button"))
             {
-                onClick();
-                gameState.pauseUntil(flag);
-            }, 300); 
+                setTimeout(() => // function to run
+                {
+                    onClick();
+                    gameState.pauseUntil(flag);
+                }, 300); 
+            }
+
         } 
         this.flag = flag;  // flag to check if the function has completed
     }
 }
 
-const actions = new Menu("Your Actions", addSidebarButton);
+const overworldMenu = new Menu("Your Actions");
+overworldMenu.options = {
+    "enter the dungeon": new Option("enter the dungeon", enterTheDungeon,
+        function () {return gameState.currentMenu == actions; }
+    ),
+    "visit the shopkeeper": new Option("visit the shopkeeper", enterTheShop,
+        function() { return gameState.currentMenu == shopMenu; }
+    ),
+    "inventory": null,
+    "rest":null
+}
+
+const shopMenu = new Menu("Your Actions");
+shopMenu.options = {
+    "buy":null,
+    "sell":null,
+    "invetory":null,
+    "leave":null,
+}
+
+const actions = new Menu("Your Actions");
 actions.options = {
     "attack": new Option("attack", dummyAttack, doneTyping),
     "combat tricks": new Option(
         "combat tricks", 
         function() { loadSidebarMenu(combatTricks); },
         function() { return gameState.currentMenu == combatTricks; }),
-    "status effects": null,
     "inventory": null,
+    "status effects": null,
     "wait": null,
     "flee": null,
 }
 
-const combatTricks = new Menu("Combat Tricks", addSidebarButton);
+const combatTricks = new Menu("Combat Tricks");
 combatTricks.options = {
     "power attack": null,
     "feint": null,
@@ -132,28 +163,29 @@ combatTricks.options = {
     "back": new Option(
         "back", 
         function(){ loadSidebarMenu(actions); },
-        function() { return gameState.currentMenu = actions; }
+        function() { 
+            console.log(gameState.currentMenu.title);
+            return gameState.currentMenu == actions; 
+        }
     ),
 }
 
 function enterTheDungeon()
 {
-    type(`test`, playerSelectionMade);
+    type(`This is a test! I repeat, this is a test!`, playerSelectionMade);
     loadSidebarMenu(actions);
-    //gameState.pauseUntil(nothingLeftToType);
-
 };
 
-function enterTheOverWorld()
+function enterTheOverworld()
 {
-    console.log("Exiting....");
+    type("You clamber out of the darkness...");
+    type("Where to now?", playerSelectionMade);
+    loadSidebarMenu(overworldMenu);
 };
 
-function playerSelectionMade()
+function enterTheShop()
 {
-    if (playerSelection){
-        playerSelection = false;
-        return true
-    }
-    return false;
-}
+    type("The Shopkeep glances at you...");
+    type("What would you like to do?", playerSelectionMade);
+    loadSidebarMenu(shopMenu);
+};

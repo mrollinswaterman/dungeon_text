@@ -27,7 +27,7 @@ function addSidebarButton(menu, button_name)
 
     const front = document.createElement("div");
     front.className = "sidebar-button-front";
-    front.classList.add("active-button");
+    //front.classList.add("active-button");
     front.id = button_name + "-front";
     front.innerHTML = getNameAsInnerHTML(button_name);
 
@@ -40,6 +40,15 @@ function addSidebarButton(menu, button_name)
         button.addEventListener("mouseup", menu.options[button_name].onClick);
     }
 
+    button.addEventListener("mousedown", () => {
+        if (front.classList.contains("active-button")){
+            playerSelection = true;
+            setTimeout(() =>{
+                playerSelection = false;
+            },20);
+        }
+    });
+
     back.appendChild(front)
     button.appendChild(back)
     document.getElementById("sidebar-button-holder").appendChild(button);
@@ -51,7 +60,7 @@ function loadSidebarMenu(menu)
     $("#sidebar").css("animation", "");
     $("#sidebar").css("animation", "flip-in-Y 1s");
     setSidebarHeader(menu.title);
-    if (menu.title != "Your Actions")
+    if (menu != actions)
     {
         document.getElementById('sidebar').animate(sidebarScrollDown, sidebarScrollTiming);
     }
@@ -62,7 +71,7 @@ function loadSidebarMenu(menu)
 
     setTimeout(() =>
     {
-        const buffer = 50;
+        const buffer = 100;
         options = Object.keys(menu.options);
         for (let i = 0; i < options.length; i++)
         {
@@ -70,22 +79,24 @@ function loadSidebarMenu(menu)
         }
         setTimeout(() => 
         {
-            gameState.currentMenu = menu;
+
             $("#sidebar").removeClass("paused");
+            gameState.currentMenu = menu;
+
         }, buffer * options.length);
-    }, sidebarScrollTiming.duration+100);
+    }, sidebarScrollTiming.duration);
 }
 
 function pauseSidebar()
 {
     console.log("Pausing...");
-    var fronts = document.getElementsByClassName("sidebar-button-front");
+    const fronts = document.getElementsByClassName("sidebar-button-front");
     for (let front of fronts)
     {
         front.classList.remove("active-button");
     }
 
-    var buttons = document.getElementsByClassName("sidebar-button");
+    const buttons = document.getElementsByClassName("sidebar-button");
     for (let button of buttons)
     {
         if (gameState.currentMenu.options[button.id] != null)
@@ -99,13 +110,13 @@ function pauseSidebar()
 function unpauseSidebar()
 {
     console.log("Unpausing...");
-    var buttons = document.getElementsByClassName("sidebar-button-front");
-    for (let button of buttons)
+    const fronts = document.getElementsByClassName("sidebar-button-front");
+    for (let front of fronts)
     {
-        button.classList.add("active-button");
+        front.classList.add("active-button");
     }
 
-    var buttons = document.getElementsByClassName("sidebar-button");
+    const buttons = document.getElementsByClassName("sidebar-button");
     for (let button of buttons)
     {
         if (gameState.currentMenu.options[button.id] != null)

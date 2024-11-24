@@ -3,7 +3,6 @@ const pauseChars = [",", ":", ";", "*"]
 
 function dummyAttack()
 {
-    playerSelection = true;
     type("You attack nothing, with your sword!", nothingLeftToType);
     type("You missed.", nothingLeftToType);
     type("Who could have guessed...", nothingLeftToType);
@@ -74,16 +73,55 @@ function notTyping()
     return !gameState.typing;
 }
 
-function setSidebarHeader(header_title){
-    $("#sidebar-header").html(header_title)
-    $("#sidebar-button-holder").html("");
+function playerSelectionMade()
+{
+    if (playerSelection){
+        playerSelection = false;
+        return true
+    }
+    return false;
+}
+
+function levelUp(prev, next)
+{
+    $(".hud").css("display", "none");
+    $(".level-up-ui").css("display", "flex");
+    $(".level-up-notif").text(`Level ${prev} >> Level ${next}`);
+
+    function increaseAbilityScore(entryDiv){
+        const valueDiv = entryDiv.target.lastChild;
+        var score = parseInt(valueDiv.innerText);
+        valueDiv.innerText = score + 1;
+        var ability = entryDiv.target.innerText;
+        console.log(`Increasing ${ability} by 1!\n`);
+
+        setTimeout(() => 
+        {
+            entryDiv.target.removeEventListener("mouseup", increaseAbilityScore);
+            setTimeout(() =>
+            {
+                entryDiv.target.classList.add("paused");
+            }, 500);
+        }, 10);
+    }
+
+    var list = document.getElementsByClassName("ability-score-entry");
+    for (let entry of list)
+    {
+        const val = document.createElement("span");
+        val.classList = "ability-score-value";
+        val.innerText = 10;
+
+        entry.addEventListener("mouseup", increaseAbilityScore, entry);
+        entry.appendChild(val);
+    }
 }
 
 function waitFor(conditionFunction)
 {
     const poll = resolve => {
       if(conditionFunction()) resolve();
-      else setTimeout(_ => poll(resolve), 900);
+      else setTimeout(_ => poll(resolve), 10);
     }
     return new Promise(poll);
 }
@@ -91,6 +129,7 @@ function waitFor(conditionFunction)
 function type(text, waitFunction="nowait", speed=gameState.defaultSpeed, charIndex=0)
 {
     gameState.typingQueue.add(text);
+    gameState.pauseUntil(nothingLeftToType);
     if (gameState.typing && gameState.currentText != text)
     {
         waitFor(notTyping)
@@ -119,12 +158,13 @@ function type(text, waitFunction="nowait", speed=gameState.defaultSpeed, charInd
         if (endChars.includes(text.charAt(charIndex))){waitTime += 400};
         autoScrollNarrator();
 
-        if (charIndex < text.length)
+        if (charIndex < text.length) // while text
         {
             setTimeout(type, waitTime, text, waitFunction, speed, charIndex+1);
         }
         else // no more text left
         {
+            // remove my text from the queue, and turn the cursor back on
             console.log(waitFunction);
             gameState.typingQueue.delete(text);
             gameState.blinking = true;

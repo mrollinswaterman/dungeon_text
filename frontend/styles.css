@@ -1,6 +1,6 @@
 @font-face {
     font-family: "Pixel-Font";
-    src: url("Pixeled.ttf");
+    src: url("Retro\ Gaming.ttf");
 }
 
 body{
@@ -16,7 +16,7 @@ body{
 
 .start_header{
     color: white;
-    font-size: 80;
+    font-size: 121px;
     width: fit-content;
     margin: auto;
     margin-top: 15%;
@@ -36,14 +36,14 @@ body{
     background: none;
     border: none;
     padding: 0;
-    font-size: 45px;
+    font-size: 99px;
     margin: auto;
     cursor: pointer;
     font-family: "Pixel-Font";
 }
 
 .menu-button:hover{
-    font-size: 100px;
+    font-size: 198px;
 }
 
 .main{
@@ -54,6 +54,73 @@ body{
     grid-template-rows: repeat(3, 1fr);
     grid-column-gap: 10px;
     grid-row-gap: 10px;
+}
+
+.level-up-ui{
+    grid-row-start: 1;
+    grid-row-end: span 2;
+    grid-column-start: 1;
+    grid-column-end: span 3;
+}
+
+.level-up-notif{
+    font-size: 44px;
+    text-transform: uppercase;
+    color:white;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+}
+
+.stats-table{
+    color:white;
+    margin-top: 2%;
+    margin-left: 1%;
+}
+
+.ability-score-entry{
+    padding: 7px 1px;
+    padding-left: 40px;
+    padding-right: 10px;
+    margin-top: 4%;
+    border-radius: 10px;
+    transition: all .3s;
+    text-transform: uppercase;
+    font-size: 33px;
+    background-color: rgb(76, 75, 75);
+    width: 450px;
+    white-space: nowrap;
+}
+
+.ability-score-title{
+
+}
+
+.ability-score-value{
+    position: relative;
+    float:right;
+}
+
+.ability-score-value:after{
+    display: inline-block;
+}
+
+.ability-score-entry:hover {
+    cursor: pointer;
+    padding-right: 20px;
+}
+
+.ability-score-entry:hover .ability-score-value:after{
+    color: rgb(8, 185, 8);
+    content:" +1";
+}
+
+.ability-score-entry:active {
+    background-color: rgb(35, 35, 35);
+}
+
+.ability-score-entry:active .ability-score-value:after {
+    opacity: 0;
 }
 
 .hud {
@@ -75,7 +142,7 @@ body{
 
 .level-ui{
     color: white;
-    font-size: 20px;
+    font-size: 33px;
 }
 
 .hp-add{
@@ -106,7 +173,7 @@ body{
 
 .healthbar-text{
     text-transform: uppercase;
-    font-size: 21px;
+    font-size: 33px;
     color: white;
 }
 
@@ -118,7 +185,7 @@ body{
     text-align: center;
     color: white;
     transition: width .6s ease-in;
-    margin-top: 16px;
+    margin-top: 4px;
     margin-left: 20px;
 }
 
@@ -128,10 +195,10 @@ body{
 }
 
 .low-hp{
-    animation: .9s low-hp infinite;
+    animation: .9s blink infinite;
 }
 
-@keyframes low-hp {
+@keyframes blink {
     0% { opacity: 1; }
     50% { opacity: 0; }
     100% { opacity: 1; }
@@ -183,27 +250,18 @@ body{
     75% { transform: translateX(40deg); }
     100% { transform: translateX(0deg); }
 }
-@keyframes tilt-shaking {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(8deg); }
-    50% { transform: rotate(0deg); }
-    75% { transform: rotate(-8deg); }
-    100% { transform: rotate(0deg); }
-}
 
 .textbox{
-    border:1 double #a69d6f;
     overflow: scroll;
     background-color:#63492b;
     grid-row-start: 3;
     grid-row-end: span 1;
     grid-column-start: 1;
     grid-column-end: span 3;
-    text-transform: uppercase;
 }
 
 #narrator{
-    font-size: 14pt;
+    font-size: 33px;
     color: white;
     display: inline-block;
     margin-top: 2%;
@@ -215,9 +273,10 @@ body{
     width: 10px;
     height:30px;
     background: white;
-    margin-bottom: -5px;
+    margin-bottom: -3px;
     opacity: 0;
     display: inline-block;
+    margin-left: 3px;
 }
 
 .sidebar{
@@ -233,7 +292,7 @@ body{
 }
 
 .header {
-    font-size: 30px;
+    font-size: 55px;
     text-align: center;
     width: fit-content;
     text-transform: uppercase;
@@ -265,13 +324,11 @@ body{
     display: block;
     padding: 12px 24px;
     border-radius: 6px;
-    font-size: 1.25rem;
+    font-size: 33px;
     background: hsl(345deg 100% 47%);
     color: white;
     transform: translateY(-10px);
 }
-
-.active-button{}
 
 .sidebar-button-back:hover .sidebar-button-front{
     transform: translateY(-15px);
@@ -283,4 +340,5 @@ body{
 
 .paused{
     pointer-events: none;
+    background-color: aquamarine;
 }
