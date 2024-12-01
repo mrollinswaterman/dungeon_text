@@ -10,13 +10,13 @@ interface), but right now, following the below commands will not do you any good
 
 
 ~~You're welcome to download the game files and check it out, although I feel obligated to warn you its nowhere near finished. The "playable" version of the game is
-everything in the 'stable' folder, while 'src' contains the current, but potentially unstable version. 
+everything in the 'stable' folder, while 'src' contains the current, but potentially unstable version.~~
 
-**UPDATE AS OF 9/25/2024**
-stable is currently not actually stable, I'm working on a fix to make it playable, but for now it has game breaking bugs
+~~**UPDATE AS OF 9/25/2024**
+stable is currently not actually stable, I'm working on a fix to make it playable, but for now it has game breaking bugs~~
 
-The file you're going to want to run is stable/tui.py. I run it from WSL using the command: "python3 stable/tui.py" from inside the dungeon_text
-folder, but as long as you run it from the Terminal/Command Line the program should work fine. 
+~~The file you're going to want to run is stable/tui.py. I run it from WSL using the command: "python3 stable/tui.py" from inside the dungeon_text
+folder, but as long as you run it from the Terminal/Command Line the program should work fine.~~
 
-From there, I believe the gameplay is fairly self-explanitory, but if you have any questions feel free to email me at 
+~~From there, I believe the gameplay is fairly self-explanitory, but if you have any questions feel free to email me at 
 mrollinswaterman@uchicago.edu or miles.r.waterman@gmail.com~~
