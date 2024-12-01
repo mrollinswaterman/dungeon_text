@@ -5,8 +5,8 @@ but I'm going to keep working on it as long as I have the spare time and energy,
 
 **UPDATE AS OF 12/1/2024: Pardon my Dust!**
 The project is currently not in a stable, playable state. I've been focusing all my energies on testing and building the GUI implementation, and as such
-neither src nor stable are currently working. I hope to soon fix stable so that it a playable version of the game (albiet on the old Command-Line
-interface), but right now, following the below commands will not do you any good. 
+neither src nor stable are currently working. I hope to soon fix stable so that it a playable version of the game (albeit on the old Command-Line
+interface), but right now, following the below instructions will not do you any good. 
 
 
 ~~You're welcome to download the game files and check it out, although I feel obligated to warn you its nowhere near finished. The "playable" version of the game is
