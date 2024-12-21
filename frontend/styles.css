@@ -312,7 +312,7 @@ body{
 }
 
 .sidebar-button-back {
-    background: hsl(340deg 100% 32%);
+    background: hsl(340, 100%, 22%);
     border: none;
     border-radius: 6px;
     padding: 0;
@@ -325,9 +325,10 @@ body{
     padding: 12px 24px;
     border-radius: 6px;
     font-size: 33px;
-    background: hsl(345deg 100% 47%);
+    background: hsl(0, 68%, 42%);
     color: white;
     transform: translateY(-10px);
+    text-align: center
 }
 
 .sidebar-button-back:hover .sidebar-button-front{
@@ -340,5 +341,6 @@ body{
 
 .paused{
     pointer-events: none;
-    background-color: aquamarine;
+    /*background-color: aquamarine;*/
+    filter: brightness(50%);
 }

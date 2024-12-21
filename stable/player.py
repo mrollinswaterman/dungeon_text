@@ -7,6 +7,7 @@ from stackable import Stackable
 from event import Event
 from trick import Combat_Trick
 import combat_tricks
+from typing import cast
 
 class Stance(enum.Enum):
     NONE = 0
@@ -43,11 +44,11 @@ class Player(Game_Object):
         return min(4, self._bonus_crit_range)
 
     @property
-    def available_carrying_capacity(self) -> int:
+    def available_carrying_capacity(self) -> float:
         return self.carrying_capacity - self.carrying
 
     @property
-    def carrying(self) -> int:
+    def carrying(self) -> float:
         total_weight = 0
         for entry in self.inventory:
             if self.inventory[entry] is not None:#check to make sure the entry is valid
@@ -82,7 +83,7 @@ class Player(Game_Object):
 
     def die(self) -> None:
         self.gold = 0
-        self.inventory = []
+        self.inventory = {}
         #other stuff to be added
 
     #ROLLS
@@ -276,26 +277,26 @@ class Player(Game_Object):
 
     #TRICKS
     def power_attack(self) -> int:
-        self.combat_trick:Combat_Trick = combat_tricks.dict["Power_Attack"](self)
+        self.combat_trick = combat_tricks.dict["Power_Attack"](self)
         self.combat_trick.start()
 
     def feint(self) -> None:
-        self.combat_trick:Combat_Trick = combat_tricks.dict["Feint"](self)
+        self.combat_trick = combat_tricks.dict["Feint"](self)
         self.combat_trick.start()
     
     def riposte(self) -> None:
         pass
 
     def total_defense(self):
-        self.combat_trick:Combat_Trick = combat_tricks.dict["Total_Defense"](self)
+        self.combat_trick = combat_tricks.dict["Total_Defense"](self)
         self.combat_trick.start()
 
     def all_out(self):
-        self.combat_trick:Combat_Trick = combat_tricks.dict["All_Out"](self)
+        self.combat_trick = combat_tricks.dict["All_Out"](self)
         self.combat_trick.start()
 
     def study_weakness(self):
-        self.combat_trick:Combat_Trick = combat_tricks.dict["Study_Weakness"](self)
+        self.combat_trick = combat_tricks.dict["Study_Weakness"](self)
         self.combat_trick.start()
 
     #INVENTORY STUFF

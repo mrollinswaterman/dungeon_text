@@ -94,7 +94,7 @@ class Menu
     }
 
     addOption(newOption){
-        this.options[newOption[0]] = newOption[1];
+        this.options[newOption.name] = newOption;
     }
 }
 
@@ -124,7 +124,7 @@ overworldMenu.options = {
     "enter the dungeon": new Option("enter the dungeon", enterTheDungeon,
         function () {return gameState.currentMenu == actions; }
     ),
-    "visit the shopkeeper": new Option("visit the shopkeeper", enterTheShop,
+    "visit the shop": new Option("visit the shop", enterTheShop,
         function() { return gameState.currentMenu == shopMenu; }
     ),
     "inventory": null,
@@ -133,10 +133,16 @@ overworldMenu.options = {
 
 const shopMenu = new Menu("Your Actions");
 shopMenu.options = {
-    "buy":null,
-    "sell":null,
-    "invetory":null,
-    "leave":null,
+    "buy items":null,
+    "sell items":null,
+    "inventory":null,
+    "leave": new Option("leave",
+        function() { 
+            type("Where to now?", playerSelectionMade);
+            loadSidebarMenu(overworldMenu); 
+        },
+        function() { return gameState.currentMenu == overworldMenu; }
+    ),
 }
 
 const actions = new Menu("Your Actions");

@@ -41,6 +41,10 @@ def exit():
 def save():
     from item import Item
     from item_compendium import Health_Potion
+
+    assert global_variables.PLAYER.weapon is not None
+    assert global_variables.PLAYER.armor is not None
+
     player_dict = global_variables.PLAYER.save()
     with open('player.csv', "w", newline='') as file:
         file.truncate(0)

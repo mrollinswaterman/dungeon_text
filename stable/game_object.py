@@ -165,7 +165,7 @@ class Game_Object():
         self.name = self.id
         self.level = 1
         self.stats:Statblock = Statblock(self)
-        self.header = Header(self)
+        self.header:Header = Header(self)
 
         #Derived stats
         self.stats.max_hp = 10 + self.bonus("con")
@@ -182,7 +182,7 @@ class Game_Object():
         self.armor: Armor | int | None = None
 
         #Combat tools
-        self.conditions:Conditions_Handler = None
+        self.conditions:Conditions_Handler | None = None
         self.damage_type:Damage_Type = Damage_Type(1)
 
         #Player Exclusive
@@ -352,7 +352,7 @@ class Game_Object():
                     self.apply_on_misses()
         return None
 
-    def take_damage(self, taken:int, source:Game_Object | Item | str):
+    def take_damage(self, taken:int, source:Game_Object | Item | str) -> int:
         taken *= self.stats.damage_taken_multiplier
         taken = int(taken)
         if self.armor is None: self.armor = 0
@@ -369,6 +369,8 @@ class Game_Object():
 
         self.lose_hp(final)
         self.narrate(self.take_damage_narration, (final, source))
+
+        return final
 
     def modify(self, stat:str, amount:int, source) -> None:
         import global_variables

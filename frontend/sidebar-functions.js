@@ -41,7 +41,7 @@ function addSidebarButton(menu, button_name)
     }
 
     button.addEventListener("mousedown", () => {
-        if (front.classList.contains("active-button")){
+        if (front.classList.contains("active-button") && gameState.currentMenu.options[button.id].onClick != null){
             playerSelection = true;
             setTimeout(() =>{
                 playerSelection = false;

@@ -37,7 +37,7 @@ class Condition():
         return max_dur
 
     #methods
-    def get(self, ref:str | Effect) -> Effect:
+    def get(self, ref:str | Effect) -> Effect | None:
         match ref:
             case Effect():
                 ref = ref.__class__.__name__
@@ -49,8 +49,9 @@ class Condition():
                 return effect
 
     def start(self):
-        self.start_message = f"{self.target.header.action} now {self.id}." if self.start_message == "" else self.start_message
-        self.end_message = f"{self.target.header.action} no longer {self.id}." if self.end_message == "" else self.end_message
+        assert self._target is not None
+        self.start_message = f"{self._target.header.action} now {self.id}." if self.start_message == "" else self.start_message
+        self.end_message = f"{self._target.header.action} no longer {self.id}." if self.end_message == "" else self.end_message
         global_commands.type_text(self.start_message)
         for effect in self.active_effects:        
             effect.start()
