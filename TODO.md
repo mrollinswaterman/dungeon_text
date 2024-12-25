@@ -36,6 +36,7 @@ identical to something that's still on the screen (hint: line 2 of the type func
 - [X] Make a damage class to store info about an object damage (type, src, amount, etc), and do the same for weapon types?
 - [X] Split statuses and effects. Statuses are named conditions (ie On Fire, Poisoned, Slowed, etc), while effects are the mechanical things that happen(ie damage over time, increasing or reducing a stat for a given period, one-time damage, etc)
 - [ ] Figure out how to implment advantage and disadvantage
+- [ ] Make Inventory its own class
 
 ## Mechanics
 
@@ -75,6 +76,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Volcanic Breastplate --> legendary heavy breastplate forged in an erupting volcano, every enemy in combat with you takes 2+con damage on each of your(their??) turns, with a chance to be set on fire.
 - [ ] Spectre's Cowl --> legendary light armor, every non-magical attack against you has a chance to miss, any attack that would kill you misses automatically, but this item loses 1/2(or 1/3) durability, any attack that would break this item misses, but the item still breaks
 - [ ] Ghostcrawler's Cape --> legendary light armor, once per encounter can try and force an enemy to flee, if successful gain 1/2 gold and XP from encounter. enemies can't stop your flee attempts, unless this item is below 1/3 durability or you are below 25% HP. 
+- [ ] Cloak of the Stormcaller --> legendary light armor, every time an enemy attacks you, they are reatviely struck by 2d6 lightning damage 
 
 ## Mobs
 
@@ -97,12 +99,12 @@ Special move, uses half max durability for a double damage on the attack (can mi
 ## Enchantments
 
 - [X] Flaming: chance to set target on fire on hit
-- [ ] Molten/Searing/Super fucking hot: target takes a small amount of damage regardless of if the attack hits, plus a small chance to be set on fire. If the attack hits, larger chance to be set on fire, still take small unavoidable damage
+- [ ] Molten/Searing/Super fucking hot: target takes a small amount of damage regardless of if the attack hits, plus a small chance to be set on fire. If the attack hits, target is set on fire, still take small unavoidable damage
 - [ ] AP: ignores armor
 - [ ] Freezing: reduces Action Points by 1 for 2 turns on hit
-- [ ] Poisoned: chance to apply poison on-hit
+- [ ] Poisoned: applies poison on-hit
 - [ ] Draining: heals attacker for some % of pre-mitigation damage done on-hit
-- [X] Serrated: chance to apply Bleed on-hit
+- [X] Serrated: applies Bleed on-hit
 
 ## Spells:
 
@@ -158,5 +160,5 @@ Alternatively, just prevent the game from printing anything at all while it's sa
 - [ ] Have shopkeep automatically sort it's inventory by something (rarity, price, whatever)
 - [ ] Make Shopkeep successful sale message print before player spend_gold() message print (maybe add a silent gold check, then print successful sale, then print spent gold?)
 - [X] If you try to load a fresh game without having saved, items don't load right (durability is set to "None" instead of a value)
- - [ ] Total Defense messages are bugged, maybe just Combat Tricks in general
+- [ ] Total Defense messages are bugged, maybe just Combat Tricks in general
 

@@ -1,4 +1,0 @@
-enchantment_id,on_attack,on_hit,on_miss,proc_chance
-Flaming,,On_Fire,,.999
-Serrated,,Bleeding,,.999
-Poisoned,,Poisoned,,,

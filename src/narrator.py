@@ -1,5 +1,11 @@
+##Required Modules: globals, commands, controllers
+
 import time, random
-import global_commands, global_variables
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    import globals
+    import commands
+    import controllers
 
 SCENE_CHANGE = [
     "You press towards your goal...\n",
@@ -51,7 +57,7 @@ def back():
     PREV_MENU()
 
 def next_scene_options():
-    global_commands.type_text("\n" + " " + random.choice(SCENE_CHANGE))
+    globals.type_text("\n" + " " + random.choice(SCENE_CHANGE))
     ominous = f'    ...\n'
     for i in range(4):
         time.sleep(.4)
@@ -59,49 +65,46 @@ def next_scene_options():
     print("\n")
 
 def level_up_options():
-    global_commands.type_with_lines("You have gained enough XP to level up! Which stat would you like to level up?", 0.01)
+    globals.type_with_lines("You have gained enough XP to level up! Which stat would you like to level up?", 0.01)
     print(STATS)
 
 def event_options():
-    global_commands.type_header("Which stat would you like to roll?")
+    globals.type_header("Which stat would you like to roll?")
     print(STATS)
 
 def continue_run():
-    import scene_controller
-
-    global_commands.type_with_lines("Continue? y/n")
+    globals.type_with_lines("Continue? y/n")
     done = False
     while not done:
         cmd = input(">> ").lower()
         match cmd:
             case "exit":
                 done = True
-                global_commands.exit()
+                globals.exit()
             case "y":
                 done = True
                 next_scene_options()
-                scene_controller.SCENE.select_next()
+                globals.SCENE.select_next()
             case "n":
                 done = True
                 print("")
                 exit_the_dungeon()
             case _:
-                global_commands.error_message(cmd)
+                globals.error_message(cmd)
 
 def exit_the_dungeon():
-    global_variables.RUNNING = False
-    global_commands.type_with_lines(random.choice(EXIT_DUNGEON))
-    global_variables.SHOPKEEP.restock()
+    globals.RUNNING = False
+    globals.type_with_lines(random.choice(EXIT_DUNGEON))
+    globals.SHOPKEEP.restock()
     menu_options()
 
 def ask_quantity() -> int | bool:
-    from command_dict import commands
-    default = commands["_"]
+    default = commands.commands["_"]
 
-    global_commands.type_text(f"Please enter desired quantity:")
+    globals.type_text(f"Please enter desired quantity:")
     done = False
     while not done:
-        cmd = global_commands.get_cmd()
+        cmd = globals.get_cmd()
 
         if cmd in default:
             done = True
@@ -114,100 +117,95 @@ def ask_quantity() -> int | bool:
                 print(f"Invalid quantity '{cmd}'. Please enter a valid quantity.", 0.01)
 
 def buy_something():
-    from command_dict import commands
-    options = commands["_"]
+    options = commands.commands["_"]
     done = False
     while not done:
-        global_variables.SHOPKEEP.print_inventory()
-        global_commands.type_with_lines()
+        globals.SHOPKEEP.print_inventory()
+        globals.type_with_lines()
         print("Enter an item's number to purchase it -OR- Go Back - (b)\n")
-        cmd = global_commands.get_cmd()
+        cmd = globals.get_cmd()
         if cmd in options:
             options[cmd]()
             return None
         else:
             try:
                 item_index = int(cmd) - 1
-                item = global_variables.SHOPKEEP.get(item_index)
+                item = globals.SHOPKEEP.get(item_index)
                 if item is not None:
-                    global_variables.SHOPKEEP.sell(item)
+                    globals.SHOPKEEP.sell(item)
                     done = True
                     return buy_something()
                 else:
-                    global_commands.error_message(cmd)
+                    globals.error_message(cmd)
             except IndexError:#ValueError:
-                global_commands.error_message(cmd)
+                globals.error_message(cmd)
 
 def leave_the_shop():
-    global_commands.type_with_lines(random.choice(EXIT_THE_SHOP))
+    globals.type_with_lines(random.choice(EXIT_THE_SHOP))
     menu_options()
 
 def shopkeep_options():
-    from command_dict import commands
-    options = commands["shopkeep_options"]
+    options = commands.commands["shopkeep_options"]
 
     global PREV_MENU
     PREV_MENU = shopkeep_options
-    global_commands.type_with_lines(random.choice(ENTER_THE_SHOP))
-    global_commands.type_header_with_lines("What would you like to do?")
+    globals.type_with_lines(random.choice(ENTER_THE_SHOP))
+    globals.type_header_with_lines("What would you like to do?")
     print("\t Purcahse Items - (p) | Sell something - (s) | Inventory - (i) | Leave - (l)\n")
     done = False
     while not done:
-        cmd = global_commands.get_cmd()
+        cmd = globals.get_cmd()
         if cmd in options:
             done = True
             options[cmd]()
         else:
-            global_commands.error_message(cmd)
+            globals.error_message(cmd)
 
 def rest():
-    global_commands.type_with_lines("Plenty of time to rest when you're dead.")
+    globals.type_with_lines("Plenty of time to rest when you're dead.")
     back()
 
 def select_item():
-    from command_dict import commands
-    options = commands["_"]
+    options = commands.commands["_"]
 
-    global_commands.type_header("Enter an item's number to use it -OR- Go Back - (b)")
+    globals.type_header("Enter an item's number to use it -OR- Go Back - (b)")
     done = False
     while not done:
-        cmd = global_commands.get_cmd()
+        cmd = globals.get_cmd()
 
         if cmd in options:
             done = True
             options[cmd]()
         else:
             try:
-                item = global_variables.PLAYER.get_item(int(cmd) - 1)
-                if global_variables.PLAYER.use(item):
+                item = globals.PLAYER.get_item(int(cmd) - 1)
+                if globals.PLAYER.use(item):
                     done = True
                     show_inventory()
                 else:
-                    global_commands.error_message(None, "You can't use that, please try again.")
+                    globals.error_message(None, "You can't use that, please try again.")
             except ValueError:
-                global_commands.error_message(cmd)
+                globals.error_message(cmd)
 
 def show_inventory():
-    global_variables.PLAYER.print_inventory()
+    globals.PLAYER.print_inventory()
     select_item()
 
 def menu_options():
-    from command_dict import commands
-    options = commands["overworld_menu"]
+    options = commands.commands["overworld_menu"]
 
     global PREV_MENU
     PREV_MENU = menu_options
-    global_commands.type_header_with_lines("What would you like to do?")
+    globals.type_header_with_lines("What would you like to do?")
     print("\t Enter the Dungeon - (e) | Visit the Shop - (v) | Inventory - (i) | Rest - (r)\n")
     
     done = False
     while not done:
-        cmd = global_commands.get_cmd()
+        cmd = globals.get_cmd()
 
         if cmd in options:
             done = True
             options[cmd]()
 
         else:
-            global_commands.error_message(cmd)
-
+            globals.error_message(cmd)

@@ -1,42 +1,42 @@
-import global_variables, global_commands
-import monster_manual
-import player_commands
+##Required Modules: globals, commands, narrator
+
+import game
+import controllers.player_turn as player_turn
 import narrator
-import scene_controller
 
 def etd():
     """Short for "Enter the Dungeon", runs when the player hits "y" initially"""
-    player_commands.load()
-    global_variables.RUNNING = True
-    scene_controller.SCENE.begin_encounter()
+    player_turn.load()
+    game.RUNNING = True
+    game.SCENE.begin_encounter()
 
 def test():
-    global_variables.SHOPKEEP.restock()
-    global_variables.SHOPKEEP.print_inventory()
+    game.SHOPKEEP.restock()
+    game.SHOPKEEP.print_inventory()
 
 def ltd():
-    """Short for "Leave the Dungeon", runs when the player hits "n" initally."""
-    player_commands.load()
+    """Short for "Leave the Dungeon", runs when the player hits "n" initially."""
+    player_turn.load()
     narrator.exit_the_dungeon()
 
 def begin():
-    from command_dict import commands
+    import globals
+    if game.initialize():
+        tui = game.COMMANDS["tui"]
 
-    tui = commands["tui"]
+        globals.type_text("would you like to enter the dungeon? y/n")
 
-    global_commands.type_text("would you like to enter the dungeon? y/n")
+        done = False
+        while not done:
+            cmd = globals.get_cmd()
 
-    done = False
-    while not done:
-        cmd = global_commands.get_cmd()
-
-        if cmd in tui:
-            done = True
-            tui[cmd]()
-        else:
-            global_commands.error_message(cmd)
+            if cmd in tui:
+                done = True
+                tui[cmd]()
+            else:
+                globals.error_message(cmd)
 
 print("")
-while global_variables.START_CMD is True:
-    global_variables.START_CMD = False
+while game.START_CMD is True:
+    game.START_CMD = False
     begin()
