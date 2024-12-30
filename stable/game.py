@@ -21,7 +21,7 @@ RUNNING = False
 
 def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
-    import game_objects, controllers, mechanics
+    import globals, game_objects, controllers, mechanics
 
     PLAYER = game_objects.Player()
 
@@ -43,12 +43,6 @@ def initialize():
     #PLAYER.pick_up(hp_pots, True)
 
     create_commands_dict()
-
-    test = mechanics.Enchantment(PLAYER.weapon)
-
-    test.acquire("Flaming")
-
-    print(test.active_conditions["on_hit"][0].__dict__)
 
     return True
 

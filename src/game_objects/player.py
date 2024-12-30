@@ -1,6 +1,4 @@
-##Required Modules: globals, game_objects, items, commands
-
-import time, os, csv, enum
+import time, os, csv
 import controllers.player_turn
 import globals
 import game_objects
@@ -10,25 +8,34 @@ import game
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import mechanics
-    import combat_trick_compendium
+    #import combat_trick_compendium
 
-class Stance(enum.Enum):
-    NONE = 0
-    RIPOSTE = 1
-    TOTAL_DEFENSE = 2
-    ALL_OUT = 3
+class playerHeader(game_objects.Header):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+    @property
+    def default(self):
+        return "You"
+    
+    @property
+    def action(self):
+        return "You are"
+    
+    @property
+    def ownership(self):
+        return "Your"
 
 class Player(game_objects.Game_Object):
 
     def __init__(self):
         super().__init__("Player")
-        self.conditions:"game_objects.Conditions_Handler" = game_objects.Conditions_Handler(self)
+        #self.conditions:"game_objects.Conditions_Handler" = game_objects.Conditions_Handler(self)
         self.level = 1
         self.stats.max_ap = 1 + (self.level // 5)
 
-        self.header.default = "You"
-        self.header.action = "You're"
-        self.header.ownership = "Your"
+        self.header = playerHeader(self)
         
         self._bonus_crit_range = 0
         self.combat_trick:"mechanics.Combat_Trick" | None = None

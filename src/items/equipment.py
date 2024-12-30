@@ -96,37 +96,6 @@ class Equipment(items.Item):
         for entry in self.enchantments:
             self.enchantments[entry].apply(effect_type)
 
-    def get_enchantment(self, ref) -> "mechanics.Enchantment":
-        match ref:
-            case str(): return self.enchantments[ref]
-            case mechanics.Enchantment(): return self.enchantments[ref.id]
-            case int(): return list(self.enchantments.values())[ref]
-            case _: raise ValueError(f"This item is does not have and enchantment matching '{ref}'")
-
-    def enchant(self, enchantment, silent=False) -> bool:
-        match enchantment:
-            case mechanics.Enchantment():
-                enchantment:"mechanics.Enchantment" = enchantment
-            case _:
-                enchantment = mechanics.TOME[enchantment]
-
-        if enchantment.cost <= self.enchantment_space_remaining and enchantment.id not in self.enchantments:
-            self.enchantments[enchantment.id] = enchantment
-            if enchantment.proc_chance == 1.0: 
-                enchantment.proc_chance = (random.randrange(25, 75) / 100) + (self.rarity.value/15)
-            enchantment.initialize(self)
-            if not silent: print(f"{self.id} is now enchanted with {enchantment.id}\n")
-            self.id = f"{enchantment.id} {self.id}"
-
-        else: print(f"This item has no room for a {enchantment.id} enchantment.\n")
-    
-    def disenchant(self, enchantment) -> bool:
-        enchantment:"mechanics.Weapon_Enchantment" = self.get_enchantment(enchantment)
-        del self.enchantments[enchantment.id]
-        self.id = self.anvil.id
-        for entry in self.enchantments:
-            self.id = f"{self.enchantments[entry].id} {self.id}"
-
     #durability
     def lose_durability(self) -> None:
         """Checks to see if the item loses durability on this use"""

@@ -1,10 +1,7 @@
-##Required Modules: game_objects, globals
-
 import random
-#from typing import TYPE_CHECKING
-#if TYPE_CHECKING:
 import globals
 import game_objects
+import game
 
 default = {
     "level": 1,
@@ -32,7 +29,6 @@ class Mob(game_objects.Game_Object):
         def __init__(self, id:str="Anonymous_Mob", stat_dict:dict=default):
             #identification
             super().__init__(id)
-            self.conditions:"game_objects.Conditions_Handler" = game_objects.Conditions_Handler(self)
             self.stats.copy(stat_dict)
             self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])
             self.stats.level = self.level
@@ -68,7 +64,7 @@ class Mob(game_objects.Game_Object):
 
         @property
         def target(self) -> "game_objects.Game_Object":
-            return globals.PLAYER
+            return game.PLAYER
 
         #methods
         def flee_check(self):

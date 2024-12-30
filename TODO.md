@@ -33,7 +33,7 @@ identical to something that's still on the screen (hint: line 2 of the type func
 - [X] Make a switch statement so rolls that should be paired with "an" are paired with "an" instead of "a". (ie "You rolled 'an' 18." instead of "'a' 18.")
 - [X] Make stablocks their own class???? (ie player.stats.dex)
 - [ ] Maybe make a stance class (riposte, total defense, defensive, offensive, all-out, etc) each with different effects.
-- [X] Make a damage class to store info about an object damage (type, src, amount, etc), and do the same for weapon types?
+- [X] Make a damage class to store info about an object's damage (type, src, amount, etc), and do the same for weapon types?
 - [X] Split statuses and effects. Statuses are named conditions (ie On Fire, Poisoned, Slowed, etc), while effects are the mechanical things that happen(ie damage over time, increasing or reducing a stat for a given period, one-time damage, etc)
 - [ ] Figure out how to implment advantage and disadvantage
 - [ ] Make Inventory its own class
@@ -76,7 +76,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Volcanic Breastplate --> legendary heavy breastplate forged in an erupting volcano, every enemy in combat with you takes 2+con damage on each of your(their??) turns, with a chance to be set on fire.
 - [ ] Spectre's Cowl --> legendary light armor, every non-magical attack against you has a chance to miss, any attack that would kill you misses automatically, but this item loses 1/2(or 1/3) durability, any attack that would break this item misses, but the item still breaks
 - [ ] Ghostcrawler's Cape --> legendary light armor, once per encounter can try and force an enemy to flee, if successful gain 1/2 gold and XP from encounter. enemies can't stop your flee attempts, unless this item is below 1/3 durability or you are below 25% HP. 
-- [ ] Cloak of the Stormcaller --> legendary light armor, every time an enemy attacks you, they are reatviely struck by 2d6 lightning damage 
+- [ ] Cloak of the Stormcaller --> legendary light armor, every time an enemy attacks you, they are reactively struck by 2d6 lightning damage 
 
 ## Mobs
 

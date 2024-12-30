@@ -14,40 +14,59 @@ class Enchantment(mechanics.Mechanic):
         super().__init__(source)
         self.id = "Enchatment"
         self.cost = 1
-        self.actives:dict[str, list[tuple[mechanics.Condition | mechanics.Effect, float]]] = {
+        self._effects:dict[str, list[tuple[mechanics.Mechanic, float]]] = {
             "on_hit":[],
             "on_attack":[],
             "on_miss":[]
         }
+    
+    @property
+    def on_hits(self) -> list[mechanics.Mechanic]:
+        ret = []
+        for tup in self._effects["on_hit"]:
+            ret.append(tup[0])
+
+        return ret
+    
+    @property
+    def on_attacks(self) -> list[mechanics.Mechanic]:
+        ret = []
+        for tup in self._effects["on_attack"]:
+            ret.append(tup[0])
+
+        return ret
+    
+    @property
+    def on_misses(self) -> list[mechanics.Mechanic]:
+        ret = []
+        for tup in self._effects["on_miss"]:
+            ret.append(tup[0])
+
+        return ret
 
     @property
     def target(self) -> "game_objects.Game_Object | None":
-        base = globals.get_object_type(self.source)
+        base = globals.get_base_type(self.source)
         match base:
-            case "game_object": return self.source.target
-            case "item": return self.source.owner.target
+            case "Game_Object": return self.source.target
+            case "Item": return self.source.owner.target
             case _: raise ValueError("Invalid source for Enchantment class")
 
-    def start(self, effect_type:str):
-        for entry in self.actives[effect_type]:
-            current = entry[0]
+    def apply(self, effect_type:str):
+        for entry in self._effects[effect_type]:
+            effect:mechanics.Mechanic = entry[0]
             proc_chance = entry[1]
             proc_chance = 1.0 if proc_chance is None else proc_chance
             if globals.probability(proc_chance*100):
-                base = globals.get_object_type(current)
-                match base:
-                    case "condition": self.target.conditions.add(current)
-                    case "effect": current.start()
+                self.target.apply(effect)
             else:
                 pass
 
-    def add_active(self, active_type:str, obj: mechanics.Condition | mechanics.Effect, proc:float=None) -> bool:
+    def add_active(self, active_type:str, obj: mechanics.Mechanic, proc:float=1.0) -> bool:
 
-        active = tuple()
-        active[0] = obj
-        active[1] = proc
+        active = (obj, proc)
 
-        self.actives[active_type].append(active)
+        self._effects[active_type].append(active)
         return True
 
     def acquire(self, source:dict[str, str] | str) -> bool:
@@ -63,9 +82,9 @@ class Enchantment(mechanics.Mechanic):
         match source:
             case str(): source = self.load_from_csv(source)
 
-        return self.copy(source)
+        return self.copy_from(source)
     
-    def copy(self, source:dict[str, str] | None) -> bool:
+    def copy_from(self, source:dict[str, str] | None) -> bool:
         """
         Reads a source dictionary and copies the respective attributes to this instance's
         __dict__ property or active, whichever is appropriate
@@ -75,8 +94,9 @@ class Enchantment(mechanics.Mechanic):
             if attr in self.__dict__:
                 self.__dict__[attr] = source[attr]
 
-            if attr in self.actives and source[attr] != '':
-                self.actives[attr] = globals.create_condition(source[attr])(self.source)
+            if attr in self._effects and source[attr] != '':
+                my_effect = globals.create_status(source[attr], self.source)
+                self.add_active(attr, my_effect)
 
         self.id = self.id + " Enchantment"
         return True

@@ -14,10 +14,10 @@ class Mechanic():
     #properties
     @property
     def target(self) -> "game_objects.Game_Object":
-        src_type = globals.get_object_type(self.source)
+        src_type = globals.get_base_type(self.source)
         match src_type:
-            case "game_object": return self.source.target
-            case "item": return self.source.owner.target
+            case "Game_Object": return self.source.target
+            case "Item": return self.source.owner.target
 
     @property
     def active(self):
@@ -31,3 +31,9 @@ class Mechanic():
     
     def end(self):
         return None
+    
+    def __eq__(self, value:Mechanic):
+        for entry in self.__dict__:
+            if self.__dict__[entry] != value.__dict__[entry]:
+                return False
+        return True

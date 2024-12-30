@@ -21,7 +21,7 @@ RUNNING = False
 
 def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
-    import game_objects, controllers, mechanics
+    import items, globals, game_objects, controllers, mechanics
 
     PLAYER = game_objects.Player()
 
@@ -48,7 +48,7 @@ def initialize():
 
     test.acquire("Flaming")
 
-    print(test.active_conditions["on_hit"][0].__dict__)
+    print(test.on_hits[0].__dict__)
 
     return True
 

@@ -7,6 +7,8 @@ import enum, random, csv
 import globals
 from typing import Any
 from typing import TYPE_CHECKING
+
+from mechanics.mechanic import Mechanic
 if TYPE_CHECKING:
     import items
     import mechanics
@@ -75,66 +77,52 @@ class Statblock():
                     case int():self.__dict__[entry] = int(source[entry])
                     case _: self.__dict__[entry] = source[entry]
 
-class Status_Handler():
+class Condition_Monitor():
     def __init__(self, parent):
         self.parent:Game_Object = parent
-        self.dict:dict[str, mechanics.Condition | mechanics.Effect] = {}
-        self.cleanse_pool: set[mechanics.Condition | mechanics.Effect] = set()
-    
-    #properties
+        self._effects:dict[str, mechanics.Mechanic] = {}
+        self._cleanse_pool:set[mechanics.Mechanic] = set()
+
     @property
-    def list(self) -> list["mechanics.Condition"]:
-        return list(self.dict.values())
+    def active(self) -> list[mechanics.Mechanic]:
+        return list(self._effects.values())
+    
+    @property
+    def active_ids(self) -> list[str]:
+        return list(self._effects.keys())
 
-    #methods
-    def get(self, status:mechanics.Condition | mechanics.Effect | str | int) -> mechanics.Condition | mechanics.Effect| None:
-        """Returns a condition from the Conditon_Handler's dictionary.
-            Can access by str(id) or int(index)"""
-        try:
-            match status:
-                case str():
-                    return self.dict[status]
-                case int():
-                    return self.list[status]
-                case _:
-                    return self.dict[status.id]
-        except IndexError: return None
-        except KeyError: return None
-
-    def add(self, condition:mechanics.Condition):
-        if condition.id not in self.dict:
-            self.dict[condition.id] = condition
-            condition.start()
+    def add(self, effect:mechanics.Mechanic):
+        assert effect is Mechanic()
+        if effect in self.active:
+            effect = self._effects[effect.id]
+            effect.refresh()
         else:
-            condition = self.get(condition)
-            if condition is not None:
-                condition.refresh()
+            self._effects[effect.id] = effect
+            effect.start()
 
     def update(self):
-        for condition in self.list:
-            condition.update()
-            if not condition.active:
-                self.cleanse_pool.add(condition)
+        for element in self.active:
+            if element.active:
+                element.update()
+            if not element.active:
+                self._cleanse_pool.add(element)
 
-        for condition in self.cleanse_pool:
-            self.cleanse(condition)
-        self.cleanse_pool = set()
+        self.cleanse()
     
-    def cleanse(self, condition:mechanics.Condition | mechanics.Effect | str | int) -> bool:
-        condition = self.get(condition)
-        if condition is not None:
-            condition.end()
-            del self.dict[condition.id]
-            return True
-        else: return False
+    def cleanse(self):
+        """Removes all effects in the cleanse pool from effects list,
+            ending them if they are active"""
+        for element in self._cleanse_pool:
+            if element.active:
+                element.end()
+            del self._effects[element.id]
+
+        self._cleanse_pool = set()
 
     def cleanse_all(self):
-        for condition in self.list:
-            self.cleanse_pool.add(condition)
-
-        for condition in self.cleanse_pool:
-            self.cleanse(condition)
-        self.cleanse_pool = set()
+        """Adds all active effects to the cleanse pool, then cleases"""
+        self._cleanse_pool.update(self.active)
+        self.cleanse()
 
 class Header():
     """Header class, controls which text is used to describe a GameObject
@@ -148,10 +136,39 @@ class Header():
 
     def __init__(self, parent:Game_Object):
         self.parent = parent
-        self.default = f"The {self.parent.id}"
-        self.action = f"The {self.parent.id} is"
-        self.ownership = f"The {self.parent.id}'s"
-        self.damage = self.default
+        self._default = f"The {self.parent.id}"
+        self._action = f"The {self.parent.id} is"
+        self._ownership = f"The {self.parent.id}'s"
+        self.damage = self._default
+
+        self.prev = ""
+
+    @property
+    def default(self):
+        if self.prev != self._default:
+            self.prev = self._default
+            return self._default
+        else:
+            self.prev = "It"
+            return self.prev
+        
+    @property
+    def action(self):
+        if self.prev != self._action:
+            self.prev = self._action
+            return self._action
+        else:
+            self.prev = "It's"
+            return self.prev
+
+    @property
+    def default(self):
+        if self.prev != self._ownership:
+            self.prev = self._ownership
+            return self._ownership
+        else:
+            self.prev = "Its"
+            return self.prev
 
 class Game_Object():
 
@@ -179,7 +196,7 @@ class Game_Object():
         self.armor: "items.Armor" | int | None = None
 
         #Combat tools
-        self.status:Status_Handler | None = None
+        self.condition_monitor:Condition_Monitor = Condition_Monitor(self)
         self.damage_type:Damage_Type = Damage_Type(1)
 
         #Player Exclusive
@@ -220,8 +237,11 @@ class Game_Object():
     #METHODS
     def update(self):
         self.reset_ap()
-        self.conditions.update() 
+        self.condition_monitor.update() 
         self.clean_inventory()
+
+    def apply(self, effect:mechanics.Mechanic):
+        self.condition_monitor.add(effect)
 
     def bonus(self, stat:str) -> int:
         return self.stats.bonus(stat)
@@ -429,9 +449,9 @@ class Game_Object():
 
     def roll_narration(self) -> list[str]:
         text = [
-            f"The {self.id} moves to attack, ",
-            f"The {self.id} lunges at you, ",
-            f"The {self.id} prepares to strike... "
+            f"{self.header.default} moves to attack, ",
+            f"{self.header.default} lunges at you, ",
+            f"{self.header.default} prepares to strike... "
         ]
         return text
 
@@ -439,11 +459,11 @@ class Game_Object():
         text = [
             f"You fail to move before the attack hits you.",
             f"A hit.",
-            f"The {self.id} hits you.",
+            f"{self.header.default} hits you.",
             f"It's attack lands.",
             f"You can't dodge this one.",
             f"You take a hit.",
-            f"The {self.id} manages to break your guard."
+            f"{self.header.default} manages to break your guard."
         ]
         return text
     
@@ -451,11 +471,11 @@ class Game_Object():
         text = [
             f"It's attack goes wide.",
             f"Luck is on your side this time.",
-            f"The {self.id} fails.",
+            f"{self.header.default} fails.",
             f"You stave off the attack.",
             f"The attack flies right by you.",
             f"You are unscathed.",
-            f"The {self.id} doesn't manage to hit you.",
+            f"{self.header.default} doesn't manage to hit you.",
             f"You leap out of harm's way."
         ]
         return text
@@ -470,9 +490,9 @@ class Game_Object():
     #INVENTORY
     def pick_up(self, item:"items.Item", silent=False):
         """Adds an item to the Object's inventory"""
-        base = globals.get_item_type(item)
+        base = globals.get_subtype(item)
         match base:
-            case "stackable":
+            case "Stackable":
                 #if you have a stack of those items already, just add to it
                 held:"items.Stackable" | None = self.get_item(item.id)
                 if held is not None:
@@ -481,7 +501,7 @@ class Game_Object():
                 #if you don't, add the object to your inventory
                 else:
                     self.inventory[item.id] = item
-            case "item" | "equipment":
+            case "Item" | "Equipment":
                 self.inventory[item.id] = item
             case _:
                 raise ValueError(f"Unrecognized object {item}.")
@@ -499,9 +519,9 @@ class Game_Object():
         """Check all stackable items and make sure anything with quantity 0 is removed"""
         for entry in self.inventory:
             item:"items.Item | items.Stackable" = self.inventory[entry]
-            base = globals.get_item_type(item)
+            base = globals.get_subtype(item)
             match base:
-                case "stackable": 
+                case "Stackable": 
                     if item.quantity <= 0:
                         del self.inventory[entry]
                         item.owner = None
@@ -513,7 +533,7 @@ class Game_Object():
 
         ref: can be str (item id), int (item index), or an instance of the Item class
         """
-        base = globals.get_object_type(ref)
+        base = globals.get_base_type(ref)
         match base:
             case "str":
                 try: return self.inventory[ref]
@@ -523,7 +543,7 @@ class Game_Object():
                 try: return list(self.inventory.values())[ref]
                 except IndexError: return None
 
-            case "item":
+            case "Item":
                 try: return self.inventory[ref.id]
                 except KeyError: return None
 

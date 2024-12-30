@@ -24,20 +24,19 @@ class Effect(mechanics.Mechanic):
         return self.duration > 0
     
     #methods
-    def set(self, attr:str, num:int) -> None:
+    def set(self, attr:str, num:int):
         try:
             self.__setattr__(attr, num)
         except KeyError:
             raise ValueError(f"Cannot set non-existent value '{attr}'.")
 
-    def update(self) -> None:
+    def update(self):
         self.duration -= 1
         if not self.active:
             self.end()
 
-    def end(self) -> None:
+    def end(self):
         self.duration = 0
-        return None
 
 class SingleInstanceDamage(Effect):
 
@@ -56,7 +55,7 @@ class DamageOverTime(Effect):
     def __init__(self, source):
         super().__init__(source)
 
-    def update(self) -> None:
+    def update(self):
         super().update()
         damage = globals.XdY(self.potency)
         self.target.take_damage(damage, self.source)
@@ -68,7 +67,7 @@ class RampingDoT(Effect):
         self.stacks = 1
         self.max_stacks = 10
     
-    def update(self) -> None:
+    def update(self):
         damage = globals.XdY(self.potency)
 
         if self.stacks >= self.max_stacks: # at max stacks, deal large amount of damage and cleanse
@@ -96,26 +95,28 @@ class DecreasingDoT(Effect):
         self.potency = max(1, self.potency)  #minimum of 1 damage
         self.target.take_damage(self.potency, self.source)  #damage target
 
+        super().update()
+
 class ModifyStat(Effect):
 
     def __init__(self, source):
         super().__init__(source)
         self.stat:str = ""
-        self.duration = 100000
+        self.duration = float('inf')
 
-    def start(self) -> None:
-        assert self.potency is int()
+    def start(self):
+        self.potency = globals.XdY(self.potency)
         try:
             self.target.stats.modify(self.stat, self.potency)
         except KeyError:
             raise ValueError(f"Can't modify non-existent stat '{self.stat}'.")
 
         polarity = "increased" if self.potency > 0 else "decreased"
-        text = f"{self.target.header.ownership} {globals.STATS[self.stat]} {polarity} by {self.potency}."
+        text = f"{self.target.header.ownership} {globals.STATS[self.stat]} {polarity} by {abs(self.potency)}."
 
         globals.type_header(text)
 
-    def end(self) -> None:
+    def end(self):
         self.target.stats.modify(self.stat, -(self.potency))
         globals.type_header(f"{self.target.header.ownership} {globals.STATS[self.stat]} returned to normal.")
 
@@ -124,7 +125,7 @@ class GainTempHP(Effect):
     def __init__(self, source, target=None):
         super().__init__(source, target)
 
-    def start(self) -> None:
+    def start(self):
         self.target.gain_temp_hp(self.potency)
         self.end()
 
@@ -133,14 +134,14 @@ class Drain(SingleInstanceDamage):
     def __init__(self, source):
         super().__init__(source)
 
-    def start(self) -> None:
+    def start(self):
         dmg = super().start()
         healing = dmg * 0.33
-        src_type = globals.get_object_type(self.source)
+        src_type = globals.get_base_type(self.source)
         match src_type:
-            case "game_object": self.source.heal(healing)
-            case "item": self.source.owner.heal(healing)
-            case "enchantment": self.source.source.heal(healing)
+            case "Game_Object": self.source.heal(healing)
+            case "Item": self.source.owner.heal(healing)
+            case "Mechanic": self.source.source.heal(healing)
 
         return None
 
@@ -150,17 +151,19 @@ class MethodReplacement(Effect):
         super().__init__(source)
         self._target = target
         self.duration = 2
-        self.target_list = []
+        self.default:function = None
+        self.replacement_target = ""
 
     @property
     def target(self):
         return self._target
 
-    def start(self) -> None:
-        for entry in self.target_list:
-            self.target.__setattr__(entry, self.source.__getattribute__(entry))
+    def start(self):
+        self.target.__setattr__(self.replacement_target, self.source.__getattribute__("replacement_method"))
 
-    def end(self) -> None:
+    def replacement_method(self):
+        raise NotImplementedError
+
+    def end(self):
+        self.target.__setattr__(self.replacement_target, self.source.__getattribute__("default"))
         super().end()
-        for entry in self.target_list:
-            self.target.__setattr__(entry, self.source.__getattribute__(f"default_{entry}"))
