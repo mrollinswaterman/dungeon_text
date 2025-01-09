@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import csv
+from time import sleep
 import globals
 import mechanics
 from typing import TYPE_CHECKING
@@ -12,8 +13,7 @@ class Enchantment(mechanics.Mechanic):
 
     def __init__(self, source):
         super().__init__(source)
-        self.id = "Enchatment"
-        self.cost = 1
+        self.id = self.__class__.__name__
         self._effects:dict[str, list[tuple[mechanics.Mechanic, float]]] = {
             "on_hit":[],
             "on_attack":[],
@@ -25,7 +25,6 @@ class Enchantment(mechanics.Mechanic):
         ret = []
         for tup in self._effects["on_hit"]:
             ret.append(tup[0])
-
         return ret
     
     @property
@@ -80,7 +79,13 @@ class Enchantment(mechanics.Mechanic):
         """
 
         match source:
-            case str(): source = self.load_from_csv(source)
+            case str(): 
+                temp = self.load_from_csv(source)
+                if temp is None:
+                    temp = globals.create_enchantment(source, self.source)
+                    if temp is not None:
+                        temp = temp.__dict__
+                source = temp
 
         return self.copy_from(source)
     
@@ -98,7 +103,7 @@ class Enchantment(mechanics.Mechanic):
                 my_effect = globals.create_status(source[attr], self.source)
                 self.add_active(attr, my_effect)
 
-        self.id = self.id + " Enchantment"
+        self.id = self.id
         return True
 
     def load_from_csv(self, id:str) -> dict[str, str] | None:

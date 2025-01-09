@@ -2,11 +2,13 @@ import mechanics
 
 class Molten(mechanics.Enchantment):
 
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self, source):
+        super().__init__(source)
 
-        self.molten:mechanics.Effect = mechanics.SingleInstanceDamage(self)
-        self.molten.potency = 4
+        heat = mechanics.SingleInstanceDamage(self.source)
+        heat.potency = "1d6"
 
-        self.heat:mechanics.Effect = mechanics.DamageOverTime(self)
-        self.heat
+        self.add_active("on_attack", heat)
+
+object = Molten
+

@@ -4,12 +4,12 @@
 from __future__ import annotations
 import random
 import items
+import globals
+import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    import globals
     import items
     import mechanics
-    import game_objects
 
 class Equipment(items.Item):
 
@@ -21,10 +21,10 @@ class Equipment(items.Item):
         super().__init__(id, rarity)
         self.weight_class:"items.Weight_Class" | str | int = None
         self.max_dex_bonus:int = None
-        self.damage_type:"game_objects.Damage_Type" = game_objects.Damage_Type(1)
+        self.damage_types:str | list[str] = ""
         self.durability:int = None
 
-        self.enchantments:dict[str, "mechanics.Weapon_Enchantment"] = {}
+        self.enchantments:list["mechanics.Enchantment"] = list
 
         self.anvil = anvil
         self.smelt()
@@ -46,8 +46,7 @@ class Equipment(items.Item):
     def enchantment_space_remaining(self) -> int:
         total = 0
         for entry in self.enchantments:
-            obj:"mechanics.Weapon_Enchantment" = self.enchantments[entry]
-            total += obj.cost
+            total += entry.cost
         return self.rarity.value - total
 
     @property
@@ -77,24 +76,45 @@ class Equipment(items.Item):
             self.durability = self.max_durability
 
         #set enchants to empty dictionary to avoid any confusion
-        self.enchantments = {}
+        self.enchantments = set()
 
         #if my anvil has enchantments, procces the enchantments and proc chances strings
-        if self.anvil.enchanted:
-            process_enchants:str = self.anvil.__dict__["enchantments"]
-            process_procs:str = self.anvil.__dict__["proc_chances"]
-            process_enchants = process_enchants.split("/")
-            process_procs = process_procs.split("/")
-            #enchant self with every enchantment from saved enchantments, then set that enchantment's proc chance
-            #to the corresponding value
-            for idx, entry in enumerate(process_enchants):
-                self.enchant(entry, True)
-                obj = self.get_enchantment(entry)
-                obj.proc_chance = float(process_procs[idx])
 
-    def apply(self, effect_type:str):
+    def enchant(self, effect:mechanics.Enchantment | str):
+        repeat = self.get(effect)
+        if repeat is not None:
+            globals.type_text(f"Your {self.id} is already enchanted with {repeat.id}!")
+            return False
+
+        match effect:
+            case str():
+                temp = mechanics.Enchantment(self)
+                temp.acquire(effect)
+                effect = temp
+            case mechanics.Enchantment():
+                effect.source = self
+
+        self.enchantments.append(effect)
+        
+    def get(self, effect:mechanics.Enchantment | str) -> mechanics.Enchantment | None:
+        base = globals.get_base_type(effect)
+        id = None
+        match base:
+            case "str":
+                id = effect
+            case "Mechanic":
+                id = effect.id
+            case _: raise ValueError(f"Can't enchant an item with a(n) '{base}'\n")
+
         for entry in self.enchantments:
-            self.enchantments[entry].apply(effect_type)
+            if entry.id == id:
+                return entry
+        return None
+    
+    def apply(self, effect_type:str):
+        """Applies an effect type"""
+        for entry in self.enchantments:
+            entry.apply(effect_type)
 
     #durability
     def lose_durability(self) -> None:
@@ -138,18 +158,12 @@ class Equipment(items.Item):
                 self.saved[entry] = self.__dict__[entry]
         self.saved["durability"] = self.durability if self.durability is not None else self.max_durability
         self.saved["weight_class"] = self.weight_class.string
+        self.saved["enchantments"] = ""
+        for effect in self.enchantments:
+            self.saved["enchantments"] = self.saved["enchantments"] + effect.id + "/"
 
         #save enchantments and their respective proc chances into a string seperated by "/"s
         #i.e "Flaming/Serrated"
-        saved_enchantments = ""
-        saved_proc_chances = ""
-        for entry in self.enchantments:
-            saved_enchantments = f"{saved_enchantments}/{entry}"
-            saved_proc_chances = f"{saved_proc_chances}/{self.enchantments[entry].proc_chance}"
-
-        #cut the first char of the strings to eliminate the leading "\"
-        self.saved["enchantments"] = saved_enchantments[1:len(saved_enchantments)]
-        self.saved["proc_chances"] = saved_proc_chances[1:len(saved_proc_chances)]
 
 class Weapon(Equipment):
 
@@ -177,7 +191,7 @@ class Weapon(Equipment):
     @property
     def display(self) -> list[str]:
         #return f"({super().display}, {self.damage}, {self.crit_range}–20/x{self.crit}): {self.value}g, {self.weight} lbs."
-        return super().display + [f"{' '*5}Damage: {self.anvil.damage}, {self.crit_range}–20/x{self.crit}, Dex Cap: +{self.max_dex_bonus}"]
+        return super().display + [f"{' '*5}Damage: {self.anvil.damage} {self.damage_type}, {self.crit_range}–20/x{self.crit}, Dex Cap: +{self.max_dex_bonus}"]
 
     @property
     def format(self) -> list[str]:
@@ -195,6 +209,10 @@ class Weapon(Equipment):
 
         #set crit range to 20 if it's null
         self.crit_range = 20 if self.crit_range is None or self.crit_range == "" else self.crit_range
+
+        #if anvil had multiple damage types, split them at the '/'
+        self.damage_types = self.damage_types.split("/")
+        self.damage_types.append("Physical")
 
     #weapon methods
     def roll_damage(self) -> int:
@@ -228,13 +246,12 @@ class Armor(Equipment):
     
     @property
     def display(self) -> list[str]:
-        #return f"({super().display}, {self.armor_value}/{list(self.damage_type.name)[0]}): {self.value}g, {self.weight} lbs."
-        #return super().display + [f"Armor: {self.armor_value}/{self.damage_type.name}"]
-        return super().display + [f"{' '*5}Armor: {self.armor_value} {list(self.damage_type.name)[0]}, Dex Cap: +{self.max_dex_bonus}"]
+        return super().display + [f"{' '*5}Armor: {self.armor_value}, Dex Cap: +{self.max_dex_bonus}"]
+
     @property
     def format(self) -> list[str]:
         return super().format + [
-            f"{' '*3}Armor: {self.armor_value}/{self.damage_type.name}",
+            f"{' '*3}Armor: {self.armor_value}",
             f"{' '*3}Durability: {self.durability}/{self.max_durability}",
         ]
 

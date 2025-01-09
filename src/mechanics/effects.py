@@ -7,7 +7,6 @@ import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import game_objects
-    import items
 
 class Effect(mechanics.Mechanic):
 
@@ -30,6 +29,11 @@ class Effect(mechanics.Mechanic):
         except KeyError:
             raise ValueError(f"Cannot set non-existent value '{attr}'.")
 
+    def deal_damage(self, amount:int):
+        dealt = mechanics.DamageInstance(self.source, amount)
+        return self.target.take_damage(dealt)
+
+
     def update(self):
         self.duration -= 1
         if not self.active:
@@ -45,10 +49,9 @@ class SingleInstanceDamage(Effect):
         self.duration = 1
 
     def start(self) -> int:
-        damage = globals.XdY(self.potency)
-        ret = self.target.take_damage(damage, self.source)
+        dmg = self.deal_damage(globals.XdY(self.potency))
         self.end()
-        return ret
+        return dmg
  
 class DamageOverTime(Effect):
 
@@ -57,10 +60,9 @@ class DamageOverTime(Effect):
 
     def update(self):
         super().update()
-        damage = globals.XdY(self.potency)
-        self.target.take_damage(damage, self.source)
+        self.deal_damage(globals.XdY(self.potency))
 
-class RampingDoT(Effect):
+class StackingDoT(Effect):
 
     def __init__(self, source):
         super().__init__(source)
@@ -71,11 +73,11 @@ class RampingDoT(Effect):
         damage = globals.XdY(self.potency)
 
         if self.stacks >= self.max_stacks: # at max stacks, deal large amount of damage and cleanse
-            self.stacks = self.max_stacks  
-            self.target.take_damage((damage * self.stacks) + self.stacks, self.source)
+            self.stacks = self.max_stacks
+            self.deal_damage((damage * self.stacks) + self.stacks)  
             return self.end()
         else: # damage target, scaling with stacks
-            self.target.take_damage(damage * self.stacks, self.source)  
+            self.deal_damage(damage * self.stacks)
             self.stacks -= 1
 
         super().update()
@@ -93,8 +95,7 @@ class DecreasingDoT(Effect):
     def update(self):
         self.potency = self.potency // 2  #halve potency each tick
         self.potency = max(1, self.potency)  #minimum of 1 damage
-        self.target.take_damage(self.potency, self.source)  #damage target
-
+        self.deal_damage(self.potency) #damage target
         super().update()
 
 class ModifyStat(Effect):

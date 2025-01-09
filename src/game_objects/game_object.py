@@ -2,21 +2,14 @@
 
 ##Required Modules: globals, items
 from __future__ import annotations
-import enum, random, csv
+from multiprocessing import Value
+import random, csv
 
 import globals
-from typing import Any
+import mechanics
 from typing import TYPE_CHECKING
-
-from mechanics.mechanic import Mechanic
 if TYPE_CHECKING:
     import items
-    import mechanics
-
-class Damage_Type(enum.Enum):
-    TRUE = 0
-    PHYSICAL = 1
-    MAGIC = 2
 
 class Statblock():
 
@@ -92,7 +85,7 @@ class Condition_Monitor():
         return list(self._effects.keys())
 
     def add(self, effect:mechanics.Mechanic):
-        assert effect is Mechanic()
+        assert effect is mechanics.Mechanic()
         if effect in self.active:
             effect = self._effects[effect.id]
             effect.refresh()
@@ -197,7 +190,9 @@ class Game_Object():
 
         #Combat tools
         self.condition_monitor:Condition_Monitor = Condition_Monitor(self)
-        self.damage_type:Damage_Type = Damage_Type(1)
+        self.damage_types:list[str] = ["Physical", "Slashing"]
+        self.immunities:list[str] = [None]
+        self.resistances: list[str] = [None]
 
         #Player Exclusive
         self.combat_trick = None
@@ -269,7 +264,7 @@ class Game_Object():
             return 0
         return roll + self.bonus("dex") + (self.level // 5)
     
-    def roll_damage(self):
+    def roll_damage(self) -> "mechanics.DamageInstance":
         raise NotImplementedError
 
     #MODIFY RESOURCES
@@ -361,33 +356,49 @@ class Game_Object():
             case _:
                 if roll >= self.target.evasion():
                     self.narrate(self.hit_narration)
-                    taken = self.roll_damage()
-                    self.target.take_damage(taken, self)
+                    dealt = self.roll_damage()
+                    print(f"DEALT: {dealt}")
+                    self.target.take_damage(dealt)
                     self.apply_on_hits()
                 else:
                     self.narrate(self.miss_narration)
                     self.apply_on_misses()
         return None
+    
+    def check_immunities(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
+        for immunity in self.immunities:
+            if immunity in damage.types:
+                damage.amount = 0
+                return damage
+            
+    def check_resistances(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
+        for resist in self.resistances:
+            if resist in damage.types:
+                damage.amount //= 2
+                return damage
 
-    def take_damage(self, taken:int, source:Game_Object | "items.Item" | str) -> int:
-        taken *= self.stats.damage_taken_multiplier
-        taken = int(taken)
-        if self.armor is None: self.armor = 0
-        match source:
-            case Game_Object() | items.Item():
-                if source.damage_type.name == "PHYSICAL":
-                    final = taken
-                    #Reduce damage taken by self.armor, adjusted depending on if self.armor is an item object or an int
-                    match self.armor:
-                        case items.Armor(): final -= self.armor.armor_value
-                        case _: final -= self.armor
-            case _:
-                final = taken
+    def take_damage(self, damage:"mechanics.DamageInstance") -> int:
+        damage = self.check_immunities(damage)
+        damage = self.check_resistances(damage)
 
-        self.lose_hp(final)
-        self.narrate(self.take_damage_narration, (final, source))
+        my_armor = 0
+        match self.armor:
+            case items.Armor(): my_armor = self.armor.value
+            case int(): my_armor = self.armor
+            case _: raise ValueError(f"unrecogized armor type '{self.armor}'\n")
 
-        return final
+        taken = int(damage.amount * self.stats.damage_taken_multiplier)
+
+        taken -= my_armor
+
+        if taken < 0: taken = 0
+
+        damage.amount = taken
+
+        self.lose_hp(taken)
+        self.narrate(self.take_damage_narration, damage)
+
+        return damage.amount
 
     def modify(self, stat:str, amount:int, source) -> None:
         try:
@@ -402,9 +413,9 @@ class Game_Object():
         globals.type_text(text)
 
     def use(self, item:"items.Item"):
-        base = globals.get_item_subtype(item)
+        base = globals.get_type(item)
         match base:
-            case "consumable":
+            case "Consumable":
                 item.use()
                 return True
             case _: 
@@ -418,14 +429,13 @@ class Game_Object():
         raise NotImplementedError
     
     def apply_on_misses(self):
-        return None
         raise NotImplementedError
 
     #CRITS
     def critical_hit(self):
         globals.type_text("A critical hit! Uh oh...")
         self.stats.damage_multiplier = 2
-        taken = self.target.take_damage(self.roll_damage(), self)
+        taken = self.target.take_damage(self.roll_damage())
         self.apply_on_hits()
         self.stats.damage_multiplier = 1
         return None
@@ -480,7 +490,7 @@ class Game_Object():
         ]
         return text
 
-    def take_damage_narration(self, info:tuple[int, Game_Object | "items.Item"]) -> list[str]:
+    def take_damage_narration(self, damage:"mechanics.DamageInstance") -> list[str]:
         raise NotImplementedError
 
     def heal_narration(self, num:int) -> list[str]:

@@ -30,6 +30,13 @@ def create_status(name:str, source:"game_objects.Game_Object") -> "mechanics.Sta
 
     return statuses.dict[name](source)
 
+def create_enchantment(name:str, source:"game_objects.Game_Object | items.Item") -> "mechanics.Enchantment":
+    import compendiums.enchantment_compendium as enchants
+
+    if name in enchants.dict:
+        return enchants.dict[name](source)
+    return None
+
 def create_item(source_dict={}):
     import compendiums.item_compendium as item_compendium
 

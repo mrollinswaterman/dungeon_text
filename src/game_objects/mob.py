@@ -2,6 +2,11 @@ import random
 import globals
 import game_objects
 import game
+import mechanics
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    pass
 
 default = {
     "level": 1,
@@ -75,10 +80,11 @@ class Mob(game_objects.Game_Object):
             return False
 
         #ROLLS
-        def roll_damage(self) -> int:
+        def roll_damage(self) -> mechanics.DamageInstance:
             """Rolls damage (damage dice)"""
             dmg = globals.XdY(self.stats.damage)
-            return (dmg + self.bonus("str")) * self.stats.damage_multiplier
+
+            return mechanics.DamageInstance(self, dmg)
 
         #COMBAT
         def attack(self) -> None:
@@ -139,8 +145,9 @@ class Mob(game_objects.Game_Object):
             ]
             return text
 
-        def take_damage_narration(self, info) -> list[str]:
-            taken, source = info
+        def take_damage_narration(self, damage:"mechanics.DamageInstance") -> list[str]:
+            taken = damage.amount
+            source = damage.source
             if taken > 0:
                 taken = f"{taken} damage"
                 match source:

@@ -24,7 +24,7 @@ class Equipment(items.Item):
         self.damage_type:"game_objects.Damage_Type" = game_objects.Damage_Type(1)
         self.durability:int = None
 
-        self.enchantments:dict[str, "mechanics.Weapon_Enchantment"] = {}
+        self.enchantments:dict[str, "mechanics.Enchantment"] = {}
 
         self.anvil = anvil
         self.smelt()

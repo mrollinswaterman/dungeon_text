@@ -161,4 +161,5 @@ Alternatively, just prevent the game from printing anything at all while it's sa
 - [ ] Make Shopkeep successful sale message print before player spend_gold() message print (maybe add a silent gold check, then print successful sale, then print spent gold?)
 - [X] If you try to load a fresh game without having saved, items don't load right (durability is set to "None" instead of a value)
 - [ ] Total Defense messages are bugged, maybe just Combat Tricks in general
+- [ ] Add resists + immunities to game_objects's save dictionary
 

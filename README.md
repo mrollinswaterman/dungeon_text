@@ -1,22 +1,39 @@
-Hi guys! Welcome to Text Dungeon (or Dungeon Text, I haven't decided yet), a text-based dungeon crawler adventure game heavily inspired by D&D and Pathfinder, that is still in development. 
+## Text Dungeon
 
-I am solo-developing this project, and I'm not 100% sure where it's going yet, so I don't have an end date in mind, 
-but I'm going to keep working on it as long as I have the spare time and energy, so check back later for updates and stuff.
+A text-based (for now!) adventure game that draws heavy inspiration from D&D and Pathfinder that is still in development
 
-**UPDATE AS OF 12/1/2024: Pardon my Dust!**
-The project is currently not in a stable, playable state. I've been focusing all my energies on testing and building the GUI implementation, and as such
-neither src nor stable are currently working. I hope to soon fix stable so that it a playable version of the game (albeit on the old Command-Line
-interface), but right now, following the below instructions will not do you any good. 
+## Usage
 
+Once you run the game's start file, you can interact with it via the Terminal/Command Line. The game will print prompts and information to the Terminal, which you as the player can then react to by inputting specifc commands.Every prompt comes with a list of available actions, and their respective hotkeys/codes. These are not case sensitive. 
 
-~~You're welcome to download the game files and check it out, although I feel obligated to warn you its nowhere near finished. The "playable" version of the game is
-everything in the 'stable' folder, while 'src' contains the current, but potentially unstable version.~~
+Typing "exit" at any menu will save the current game state and quit the game. Upon re-running the start file, your last saved game state will automatically be loaded. Please note, while *YOUR* state will save and reload, the rest of the game will be randomly generated anew. Any items in your inventory will remain, but the Shopkeep's inventory will reset. You will also have to re-enter the Dungeon again, which means if you quit in the middle of a fight or event, you will not be returned to the same situation.
 
-~~**UPDATE AS OF 9/25/2024**
-stable is currently not actually stable, I'm working on a fix to make it playable, but for now it has game breaking bugs~~
+Entering "n" at the game's first prompt ("Would you like to enter the Dungeon?") will take you to the Overworld immediately.
 
-~~The file you're going to want to run is stable/tui.py. I run it from WSL using the command: "python3 stable/tui.py" from inside the dungeon_text
-folder, but as long as you run it from the Terminal/Command Line the program should work fine.~~
+## Install
 
-~~From there, I believe the gameplay is fairly self-explanitory, but if you have any questions feel free to email me at 
-mrollinswaterman@uchicago.edu or miles.r.waterman@gmail.com~~
+To run the game, you first need to have Python installed on your machine, or in whichever environment you'd like to play in
+* [MacOS](https://docs.python-guide.org/starting/install3/osx/)
+* [Windows](https://www.python.org/downloads/windows/)
+* [Linux](https://docs.python-guide.org/starting/install3/linux/)
+
+Once Python is installed, you need the dungeon_text main file. You can either:
+* [Download the ZIP file](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives)
+* [Clone the repoistory](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
+
+Next, you have a choice between playing from the *src* file or the *stable* file. The *src* file represents the most current, but also unstable version of the game. It is, for all intents and purposes, a testing environment. There will likely be game breaking bugs, and it's not really designed to be playable, but just as a mechanism to add and test new features until they are ready for stable.
+
+The *stable* file is the (hopefully) playable version of the project. It doesn't include as many features as the *src* file, but the game should be fully playable. 
+
+Either way, to start the game, run this command from the dungeon_text directory:
+* python3 *filename*/tui.py
+
+where *filename* is whichever game version you'd like to play.
+
+## Bugs & Feature Requests
+
+Add an [issue on the Github repo](https://github.com/mrollinswaterman/dungeon_text/issues). 
+
+## Attribution
+
+Nothing yet.

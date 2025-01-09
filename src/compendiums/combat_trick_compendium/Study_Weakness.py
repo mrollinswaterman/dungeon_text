@@ -1,7 +1,7 @@
 import random
-from mechanics.trick import Combat_Trick
+import mechanics
 
-class Study_Weakness(Combat_Trick):
+class Study_Weakness(mechanics.Combat_Trick):
 
     def __init__(self, parent):
         super().__init__(parent, parent)

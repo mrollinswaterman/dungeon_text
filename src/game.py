@@ -44,11 +44,7 @@ def initialize():
 
     create_commands_dict()
 
-    test = mechanics.Enchantment(PLAYER.weapon)
-
-    test.acquire("Flaming")
-
-    print(test.on_hits[0].__dict__)
+    PLAYER.weapon.enchant("Molten")
 
     return True
 

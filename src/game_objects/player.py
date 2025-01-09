@@ -1,14 +1,15 @@
 import time, os, csv
+from compendiums import combat_trick_compendium
 import controllers.player_turn
 import globals
 import game_objects
 import items
 import controllers
 import game
+import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    import mechanics
-    #import combat_trick_compendium
+    import compendiums.combat_trick_compendium as combat_trick_compendium
 
 class playerHeader(game_objects.Header):
 
@@ -109,15 +110,17 @@ class Player(game_objects.Game_Object):
                     return 0
                 else: return roll + self.bonus("dex") + self.base_attack_bonus + self.weapon.attack_bonus
             
-    def roll_damage(self) -> int:
-        """Returns a damage roll (weapon dice + str bonus)"""
-        if controllers.player_turn.GOD_MODE: return 2#999
+    def roll_damage(self) -> "mechanics.DamageInstance":
+        """Returns a damage instance """
+        if controllers.player_turn.GOD_MODE: return mechanics.DamageInstance(self.weapon, 2)#999
         if self.weapon.broken:
             globals.type_text(f"You can't use a broken {self.weapon.id}, so your hands will have to do.")
-            return (globals.d(4) + self.bonus("str")) * self.stats.damage_multiplier
+            amount = (globals.d(4) + self.bonus("str")) * self.stats.damage_multiplier
+            return mechanics.DamageInstance(self, amount)
         
         self.weapon.lose_durability()
-        return (self.weapon.roll_damage() + self.bonus("str")) * self.stats.damage_multiplier
+        amount = (self.weapon.roll_damage() + self.bonus("str")) * self.stats.damage_multiplier
+        return mechanics.DamageInstance(self.weapon, amount)
 
     #MODIFY RESOURCES
     def lose_hp(self, num:int) -> None:
@@ -165,36 +168,33 @@ class Player(game_objects.Game_Object):
     def attack(self) -> None:
         super().attack()
         self._bonus_crit_range = 0
-
-    def take_damage(self, taken: int, source) -> int:
-        if self.armor is None:
-            self.armor = 0
-        
-        super().take_damage(taken, source)
     
     def use(self, item:"items.Item"):
         if super().use(item) is False:
-            base = globals.get_item_type(item)
+            base = globals.get_type(item)
             match base:
-                case "equipment": 
+                case "Equipment": 
                     self.equip(item)
                     return True
-        globals.error_message(None, f"You can't use that {item.id}. Please try again.")
-        return False
+            globals.error_message(None, f"You can't use an item of type '{base}'. Please try again.")
+            return False
+        return True
     
     #ENCHANTMENTS
     def apply_on_attacks(self):
-        pass
+        return None
 
     def apply_on_hits(self):
-        for entry in self.weapon.enchantments:
-            self.weapon.enchantments[entry].apply("on_hit")
+        return None
     
+    def apply_on_misses(self):
+        return None
+
     #CRITS
     def critical_hit(self) -> None:
         crit = 2 if self.weapon.broken or self.weapon is None else self.weapon.crit
         self.stats.damage_multiplier = crit
-        taken = self.target.take_damage(self.roll_damage(), self)
+        taken = self.target.take_damage(self.roll_damage())
         self.apply_on_hits()
         self.stats.damage_multiplier = 1
         return None
@@ -240,8 +240,9 @@ class Player(game_objects.Game_Object):
         ]
         return text
     
-    def take_damage_narration(self, info:tuple[int, game_objects.Game_Object | game_objects.Event]):
-        taken, source = info
+    def take_damage_narration(self, damage:"mechanics.DamageInstance"):
+        taken = damage.amount
+        source = damage.source
         if taken > 0:
             text = [
                 f"You took {taken} damage from the {source.id}.",

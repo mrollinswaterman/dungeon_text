@@ -7,7 +7,7 @@ class Bleeding(mechanics.Status):
         super().__init__(source)
         self.source = "the bleeding"
 
-        self._effect = mechanics.RampingDoT(self.source)
+        self._effect = mechanics.StackingDoT(self.source)
         self.effect.duration = 4
         self.effect.potency = "1d4"
 
