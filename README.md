@@ -21,9 +21,11 @@ Once Python is installed, you need the dungeon_text main file. You can either:
 * [Download the ZIP file](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives)
 * [Clone the repoistory](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 
-Next, you have a choice between playing from the *src* file or the *stable* file. The *src* file represents the most current, but also unstable version of the game. It is, for all intents and purposes, a testing environment. There will likely be game breaking bugs, and it's not really designed to be playable, but just as a mechanism to add and test new features until they are ready for stable.
+Next, you have a choice between playing from the *src* file or the *stable* file. 
 
-The *stable* file is the (hopefully) playable version of the project. It doesn't include as many features as the *src* file, but the game should be fully playable. 
+The *src* file represents the most current, but also unstable version of the game. It is, for all intents and purposes, a testing environment. There will likely be game breaking bugs, and it's not really designed to be playable, but just as a mechanism to add and test new features until they are ready for stable.
+
+The *stable* file is the (hopefully) playable version of the project. It doesn't include as many features as the *src* file, but the game should be fully functional. 
 
 Either way, to start the game, run this command from the dungeon_text directory:
 * python3 *filename*/tui.py
