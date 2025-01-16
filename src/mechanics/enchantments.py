@@ -5,6 +5,7 @@ import csv
 from time import sleep
 import globals
 import mechanics
+import effects
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import game_objects
@@ -19,6 +20,10 @@ class Enchantment(mechanics.Mechanic):
             "on_attack":[],
             "on_miss":[]
         }
+
+    @property
+    def effects(self) -> list[mechanics.Mechanic]:
+        return self._effects
     
     @property
     def on_hits(self) -> list[mechanics.Mechanic]:
@@ -43,14 +48,6 @@ class Enchantment(mechanics.Mechanic):
 
         return ret
 
-    @property
-    def target(self) -> "game_objects.Game_Object | None":
-        base = globals.get_base_type(self.source)
-        match base:
-            case "Game_Object": return self.source.target
-            case "Item": return self.source.owner.target
-            case _: raise ValueError("Invalid source for Enchantment class")
-
     def apply(self, effect_type:str):
         for entry in self._effects[effect_type]:
             effect:mechanics.Mechanic = entry[0]
@@ -61,11 +58,11 @@ class Enchantment(mechanics.Mechanic):
             else:
                 pass
 
-    def add_active(self, active_type:str, obj: mechanics.Mechanic, proc:float=1.0) -> bool:
+    def add_effect(self, effect_type:str, obj: mechanics.Mechanic, proc:float=1.0) -> bool:
 
-        active = (obj, proc)
+        eff = (obj, proc)
 
-        self._effects[active_type].append(active)
+        self._effects[effect_type].append(eff)
         return True
 
     def acquire(self, source:dict[str, str] | str) -> bool:

@@ -1,6 +1,8 @@
 import csv
+import effects.constant_effects
 import globals
 import mechanics
+import effects
 #import game_objects
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -11,16 +13,12 @@ class Status(mechanics.Mechanic):
     
     def __init__(self, source):
         super().__init__(source)
-
         self.id = self.__class__.__name__
-
         self._source:"game_objects.Game_Object | items.Item" = self.source
         self.source = ""
 
-        self._effect:mechanics.Effect | list[mechanics.Effect] = None
-
+        self._effects:list[effects.Effect] = []
         self.switch_word = ""
-
         self.save_DC = 12
 
     @property
@@ -48,54 +46,33 @@ class Status(mechanics.Mechanic):
         match src_type:
             case "Game_Object": return self._source.target
             case "Item": return self._source.owner.target
-
-    @property
-    def effect(self) -> mechanics.Effect:
-        match self._effect:
-            case mechanics.Effect(): return self._effect
-            case list():
-                if len(self._effect) == 1: return self._effect
-
-                return self.effects
             
     @property
-    def effects(self) -> mechanics.Effect:
-        """Returns false if status has only (1) associated effect"""
-        match self._effect:
-            case mechanics.Effect(): return False
-            case list():
-                if len(self._effect) == 1: return False
-                return self._effect
+    def effects(self) -> list[effects.Effect]:
+        return self._effects
     
     def start(self):
-        if not self.effects:
-            self.effect.start()
-        else:
-            for effect in self.effects:
-                effect.start()
         globals.type_text(self.start_msg)
-        if not self.effects:
-            if not self.effect.active:
-                self.end()
-        else:
-            for effect in self.effects:
-                if not effect.active:
-                    self._effect.remove(effect)
-            if len(self._effect) <= 0:
-                self.end()
+        for effect in self.effects:
+            effect.start()
+            if not effect.active:
+                self._effects.remove(effect)
+        if len(self._effects) <= 0:
+            self.end()
 
     def update(self):
-        self.effect.update()
-        if not self.effect.active:
-            self.end()
+        for effect in self.effects:
+            if effect.active:
+                effect.update()
+            elif not effect.active:
+                self._effects.remove(effect)
 
     def refresh(self):
         globals.type_text(self.refresh_msg)
 
     def end(self):
-        self.effect.duration = 0
-        self.effect.end()
         globals.type_text(self.end_msg)
+        self._effects = []
 
     def save_attempt(self) -> bool:
         return None
@@ -104,12 +81,14 @@ class StatModifier(Status):
 
     def __init__(self, source):
         super().__init__(source)
-
         self.id = None
-
-        self._effect = mechanics.ModifyStat(self.source)
+        self._effects = [effects.ModifyStat(self.source)]
         self.effect.duration = 3
         self.effect.potency = -3
+
+    @property
+    def effect(self) -> effects.ModifyStat:
+        return self._effects[0]
 
     def start(self):
         assert self.id is not None

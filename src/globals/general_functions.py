@@ -106,7 +106,7 @@ def print_line_by_line(master:list[list[str]], max_width:int=35) -> None:
             while(len(string) < max_width):
                 string = string + " "
             #Adds a tab between each item, except the first
-            current = f"{current} {string}" if j == 0 else f"{current}{" " * 5}{string}"
+            current = f"{current} {string}" if j == 0 else f"{current}{' ' * 5}{string}"
         time.sleep(.01)
         i += 1
         print(current)

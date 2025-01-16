@@ -20,6 +20,7 @@ START_CMD = True
 RUNNING = False
 
 def initialize():
+    print(float('inf'))
     global PLAYER, SHOPKEEP, ARMORY, SCENE
     import items, globals, game_objects, controllers, mechanics
 

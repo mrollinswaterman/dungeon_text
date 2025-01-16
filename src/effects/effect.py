@@ -11,11 +11,15 @@ class Effect(mechanics.Mechanic):
     def __init__(self, source:"game_objects.Game_Object" | mechanics.Mechanic):
         super().__init__(source)
         self.id = "Effect"
+        self.potency = 2
 
     @property
     def active(self):
         return True
     
+    def start(self):
+        return True
+
     def deal_damage(self, amount:int):
         dealt = mechanics.DamageInstance(self.source, amount)
         return self.target.take_damage(dealt)
@@ -23,7 +27,7 @@ class Effect(mechanics.Mechanic):
     def end(self):
         raise NotImplementedError
 
-class Instant(Effect):
+class Instant_Effect(Effect):
     """
     Instants are (1) time effects. They do one thing then terminate
 
@@ -32,13 +36,15 @@ class Instant(Effect):
     def __init__(self, source):
         super().__init__(source)
         self.id = "Instant"
-        self.potency = 2
 
     @property
     def active(self):
         return False
+    
+    def end(self):
+        return None
 
-class Constant(Effect):
+class Constant_Effect(Effect):
     """
     Constants are similar to instants except they're effect linger until specifically dispelled
 
@@ -47,31 +53,39 @@ class Constant(Effect):
     def __init__(self, source):
         super().__init__(source)
         self.id = "Constant"
-        self.potency = 2
-        self.duration = 2
+        self.duration = float('inf')
 
     @property
     def active(self):
         return self.duration > 0
+    
+    def update(self):
+        self.duration -= 1
+        if not self.active:
+            self.end()
 
     def end(self):
         self.duration = 0
 
 
-class Status(Effect):
+class Repeated_Effect(Effect):
     """
     Statuses are effects that do something each turn cycle, usually damage. They are similar
     to constant effects, except that their update involves more than just ticking duration down
     """
     def __init__(self, source):
         super().__init__(source)
-        self.id = "Instant"
-        self.potency = 2
+        self.id = "Repeated"
         self.duration = 2
 
     @property
     def active(self):
         return self.duration > 0
+    
+    def update(self):
+        self.duration -= 1
+        if not self.active:
+            self.end()
 
     def end(self):
         self.duration = 0

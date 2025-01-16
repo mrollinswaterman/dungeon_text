@@ -1,5 +1,8 @@
 {
     "python.analysis.typeCheckingMode": "off",
     "python.analysis.autoImportCompletions": true,
-    "workbench.colorTheme": "Shades of Purple (Super Dark)"
+    "workbench.colorTheme": "Ayu Dark",
+    "editor.tokenColorCustomizations": {
+        "variables": "#7919e7"
+     },
 }
