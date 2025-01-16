@@ -1,167 +1,12 @@
-#Game Object class
-
-##Required Modules: globals, items
 from __future__ import annotations
-from multiprocessing import Value
-import random, csv
+import random
 
 import globals
 import mechanics
+import game_objects
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import items
-
-class Statblock():
-
-    def __init__(self, parent:Game_Object):
-
-        self.parent = parent
-        self.id:str = f"{self.parent.id} Statblock"
-
-        #Core Stats
-        self.level:int = self.parent.level
-        self.level_range:tuple[int, int] = (1, 20)
-        self.hit_dice:int = 8
-
-        #Ability Scores
-        self.str:int = 12
-        self.dex:int = 12
-        self.con:int = 12
-        self.int:int = 12
-        self.wis:int = 12
-        self.cha:int = 12
-
-        #Derived stats
-        self.base_evasion:int = 9
-        self.damage_taken_multiplier:int = 1
-        self.damage_multiplier:int = 1
-
-        #Resources
-        self.max_hp:int = 1
-        self.max_ap:int = 1
-        self.max_mp:int = 0
-        self.temp_hp:int = 0
-        
-        #Combat Stats (mob only)
-        self.armor:"items.Armor" | int | None = None
-        self.damage: int | str | None = None
-        self.dc:int = 0
-
-    def value(self, stat:str) -> int | str:
-        return self.__dict__[stat]
-    
-    def bonus(self, stat:str) -> int:
-        return globals.bonus(self.__dict__[stat])
-    
-    def modify(self, stat:str, num:int):
-        self.__dict__[stat] += num
-
-    def load(self, filename:str):
-        with open(filename, "r") as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                self.copy(row)
-    
-    def copy(self, source:dict):
-        for entry in source:
-            if entry in self.__dict__:
-                match self.__dict__[entry]:
-                    case str(): self.__dict__[entry] = source[entry]
-                    case int():self.__dict__[entry] = int(source[entry])
-                    case _: self.__dict__[entry] = source[entry]
-
-class Condition_Monitor():
-    def __init__(self, parent):
-        self.parent:Game_Object = parent
-        self._effects:dict[str, mechanics.Mechanic] = {}
-        self._cleanse_pool:set[mechanics.Mechanic] = set()
-
-    @property
-    def active(self) -> list[mechanics.Mechanic]:
-        return list(self._effects.values())
-    
-    @property
-    def active_ids(self) -> list[str]:
-        return list(self._effects.keys())
-
-    def add(self, effect:mechanics.Mechanic):
-        assert effect is mechanics.Mechanic()
-        if effect in self.active:
-            effect = self._effects[effect.id]
-            effect.refresh()
-        else:
-            self._effects[effect.id] = effect
-            effect.start()
-
-    def update(self):
-        for element in self.active:
-            if element.active:
-                element.update()
-            if not element.active:
-                self._cleanse_pool.add(element)
-
-        self.cleanse()
-    
-    def cleanse(self):
-        """Removes all effects in the cleanse pool from effects list,
-            ending them if they are active"""
-        for element in self._cleanse_pool:
-            if element.active:
-                element.end()
-            del self._effects[element.id]
-
-        self._cleanse_pool = set()
-
-    def cleanse_all(self):
-        """Adds all active effects to the cleanse pool, then cleases"""
-        self._cleanse_pool.update(self.active)
-        self.cleanse()
-
-class Header():
-    """Header class, controls which text is used to describe a GameObject
-        3 types: default, action, ownership"""
-
-    parent:Game_Object
-    default:str
-    action:str
-    ownership:str
-    damage: str
-
-    def __init__(self, parent:Game_Object):
-        self.parent = parent
-        self._default = f"The {self.parent.id}"
-        self._action = f"The {self.parent.id} is"
-        self._ownership = f"The {self.parent.id}'s"
-        self.damage = self._default
-
-        self.prev = ""
-
-    @property
-    def default(self):
-        if self.prev != self._default:
-            self.prev = self._default
-            return self._default
-        else:
-            self.prev = "It"
-            return self.prev
-        
-    @property
-    def action(self):
-        if self.prev != self._action:
-            self.prev = self._action
-            return self._action
-        else:
-            self.prev = "It's"
-            return self.prev
-
-    @property
-    def default(self):
-        if self.prev != self._ownership:
-            self.prev = self._ownership
-            return self._ownership
-        else:
-            self.prev = "Its"
-            return self.prev
 
 class Game_Object():
 
@@ -171,8 +16,8 @@ class Game_Object():
         self.id = id
         self.name = self.id
         self.level = 1
-        self.stats:Statblock = Statblock(self)
-        self.header:Header = Header(self)
+        self.stats:game_objects.Statblock = game_objects.Statblock(self)
+        self.header:game_objects.Header = game_objects.Header(self)
 
         #Derived stats
         self.stats.max_hp = 10 + self.bonus("con")
@@ -189,7 +34,7 @@ class Game_Object():
         self.armor: "items.Armor" | int | None = None
 
         #Combat tools
-        self.condition_monitor:Condition_Monitor = Condition_Monitor(self)
+        self.condition_monitor:game_objects.Condition_Monitor = game_objects.Condition_Monitor(self)
         self.damage_types:list[str] = ["Physical", "Slashing"]
         self.immunities:list[str] = [None]
         self.resistances: list[str] = [None]
@@ -229,7 +74,7 @@ class Game_Object():
         """Returns the Object's target"""
         raise NotImplementedError
 
-    #METHODS
+    #VIP Methods
     def update(self):
         self.reset_ap()
         self.condition_monitor.update() 
