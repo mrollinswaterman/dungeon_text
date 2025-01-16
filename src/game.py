@@ -44,7 +44,7 @@ def initialize():
 
     create_commands_dict()
 
-    PLAYER.weapon.enchant("Molten")
+    #PLAYER.weapon.enchant("Molten")
 
     return True
 

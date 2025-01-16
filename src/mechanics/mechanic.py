@@ -18,19 +18,6 @@ class Mechanic():
         match src_type:
             case "Game_Object": return self.source.target
             case "Item": return self.source.owner.target
-
-    @property
-    def active(self):
-        return True
-    
-    def update(self):
-        return None
-    
-    def start(self):
-        return None
-    
-    def end(self):
-        return None
     
     def __eq__(self, value:Mechanic):
         for entry in self.__dict__:

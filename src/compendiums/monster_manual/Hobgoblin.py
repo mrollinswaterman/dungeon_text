@@ -22,31 +22,31 @@ stats = {
     "dc": 10,
 }
 
-class Taunt(mechanics.Condition):
+class Taunted(mechanics.StatModifier):
 
     def __init__(self, source):
         super().__init__(source)
-        self.id = f"{self.source.id}'s Taunt"
 
-        reduce_evasion = mechanics.ModifyStat(self)
-        reduce_evasion.stat = "base_evasion"
-        reduce_evasion.duration = 3
-        reduce_evasion.potency = -2
+        self.source = f"{self.source.header.ownership} Taunt."
+        self.save_DC = 15
 
-        self.active_effects = [reduce_evasion]
+        my_info = {
+            "stat": "base_evasion",
+            "id": self.__class__.__name__,
+            "potency": None
+        }
 
-        self.start_message = f"The {self.source.id}'s insults distract you, making you an easier target."
-        self.continue_message = f"The {self.source.id} jeers crawl further under your skin."
-        self.end_message = f"You are no longer Taunted."
+        self.acquire(my_info)
 
-    def cleanse_check(self) -> bool:
+    def save_attempt(self):
         globals.type_text("You attempt to refocus your mind...")
-        if self.target.roll_a_check("cha") >= 15:
+        if self.target.roll_a_check("cha") >= self.save_DC:
             globals.type_text("You push the Hobgoblin's mockery out of your head.")
             self.end()
             return True
         else:
             globals.type_text("You are unable to clear your thoughts.")
+            return False
 
 class Hobgoblin(game_objects.Mob):
     def __init__(self, id="Hobgoblin", stat_dict=stats):
@@ -71,8 +71,8 @@ class Hobgoblin(game_objects.Mob):
         if self.target.roll_a_check("cha") >= 1200:#self.stats.dc:
             globals.type_text(f"Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
         else:
-            taunt = Taunt(self)
-            self.target.conditions.add(taunt)
+            taunt = Taunted(self)
+            self.target.apply(taunt)
         return None
     
     def roll_narration(self):

@@ -23,7 +23,7 @@ class On_Fire(mechanics.Status):
     
     def save_attempt(self) -> bool:
         globals.type_text(f"{self.target.header.action} attempting to put out {self.source}...")
-        if self.target.roll_a_check("dex") >= self.save_target:
+        if self.target.roll_a_check("dex") >= self.save_DC:
             globals.type_text(f"It worked. {self.source} sputters out.")
             self.end()
             return True

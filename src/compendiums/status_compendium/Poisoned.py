@@ -11,14 +11,14 @@ class Poisoned(mechanics.Status):
         self.effect.duration = 3
         self.effect.potency = "1d4"
 
-        self.save_target = 10
+        self.save_DC = 10
 
     @property
     def refresh_msg(self) -> str:
         return f"{self.id} spreads further through {self.target.header.ownership} system..."
     
     def update(self):
-        if self.target.roll_a_check("con") >= self.save_target + self.effect.duration:
+        if self.target.roll_a_check("con") >= self.save_DC + self.effect.duration:
             globals.type_text(f"{self.target.header.default} resists the posion, taking no damage.")
             self.effect.duration -= 1
         else:
@@ -30,7 +30,7 @@ class Poisoned(mechanics.Status):
     
     def save_attempt(self) -> bool:
         globals.type_text(f"{self.target.header.action} attempting to cleanse the poison...")
-        if self.target.roll_a_check("con") >= self.save_target:
+        if self.target.roll_a_check("con") >= self.save_DC:
             globals.type_text(f"Success. The poison is out of {self.target.header.ownership} system.")
             self.end()
             return True

@@ -21,32 +21,23 @@ stats = {
     "dc": 10,
 }
 
-class Burrowed(mechanics.Condition):
+class Burrowed(mechanics.Status):
 
     def __init__(self, source):
         super().__init__(source)
         self.id = "Burrow"
 
-        increase_evasion = mechanics.ModifyStat(self)
-        increase_evasion.stat = "base_evasion"
-        increase_evasion.potency = 3
-        increase_evasion.duration = 10000
+        dodge = mechanics.ModifyStat(self)
+        dodge.stat = "base_evasion"
+        dodge.potency = 3
+        dodge.duration = "100000000"
 
-        self.active_effects.append(increase_evasion)
+        armor = mechanics.ModifyStat(self)
+        armor.stat = "armor"
+        armor.potency = 2
+        armor.duration = dodge.duration
 
-        increase_armor = mechanics.ModifyStat(self)
-        increase_armor.stat = "armor"
-        increase_armor.potency = 2
-        increase_armor.duration = 10000
-
-        self.active_effects.append(increase_armor)
-
-        #decrease_damage = ModifyStat(self, self.target)
-        #decrease_damage.stat = "damage_multiplier"
-        #decrease_damage.potency = -0.5
-        #decrease_damage.duration = 10000
-
-        #self.active_effects.append(decrease_damage)
+        self._effect = [dodge, armor]
 
         self.start_message = f"The {self.source.id} burrows underground, making itself a difficult target."
 

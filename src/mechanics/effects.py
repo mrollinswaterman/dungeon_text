@@ -41,17 +41,6 @@ class Effect(mechanics.Mechanic):
 
     def end(self):
         self.duration = 0
-
-class SingleInstanceDamage(Effect):
-
-    def __init__(self, source):
-        super().__init__(source)
-        self.duration = 1
-
-    def start(self) -> int:
-        dmg = self.deal_damage(globals.XdY(self.potency))
-        self.end()
-        return dmg
  
 class DamageOverTime(Effect):
 
