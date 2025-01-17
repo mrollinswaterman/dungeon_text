@@ -2,7 +2,6 @@ from multiprocessing import Value
 import time, sys, csv, random
 import game
 import globals
-import items
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -24,6 +23,7 @@ def exit():
     sys.exit()
 
 def save():
+    import items
     import compendiums.item_compendium as item_compendium
     assert game.PLAYER.weapon is not None
     assert game.PLAYER.armor is not None
@@ -40,7 +40,7 @@ def save():
 
     #append all inventory item_to_dicts to list
     for entry in game.PLAYER.inventory:
-        item:"items.Item" = game.PLAYER.inventory[entry]
+        item:items.Item = game.PLAYER.inventory[entry]
         item.save()
         item_saved_list.append(item.saved)
 
@@ -50,7 +50,7 @@ def save():
     item_saved_list.append(game.PLAYER.weapon.saved)
     item_saved_list.append(game.PLAYER.armor.saved)
 
-    temp_item:"items.Item" = item_compendium.dict["Health_Potion"]("Common")
+    temp_item:items.Item = item_compendium.dict["Health_Potion"]("Common")
     temp_item.save()
     #create fieldnames list from item_to_dict keys
     header1 = list(game.PLAYER.weapon.saved.keys())

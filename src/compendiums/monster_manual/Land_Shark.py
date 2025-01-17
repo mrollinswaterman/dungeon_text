@@ -1,5 +1,7 @@
 #Land Shark mob file
-import game_objects, globals, items, mechanics
+import game_objects
+import globals
+import effects
 
 stats = {
     "level": 1, 
@@ -21,18 +23,18 @@ stats = {
     "dc": 10,
 }
 
-class Burrowed(mechanics.Status):
+class Burrowed(effects.Status_Effect):
 
     def __init__(self, source):
         super().__init__(source)
         self.id = "Burrow"
 
-        dodge = mechanics.ModifyStat(self)
+        dodge = effects.ModifyStat(self)
         dodge.stat = "base_evasion"
         dodge.potency = 3
         dodge.duration = "100000000"
 
-        armor = mechanics.ModifyStat(self)
+        armor = effects.ModifyStat(self)
         armor.stat = "armor"
         armor.potency = 2
         armor.duration = dodge.duration
@@ -41,18 +43,18 @@ class Burrowed(mechanics.Status):
 
         self.start_message = f"The {self.source.id} burrows underground, making itself a difficult target."
 
-class Erupt(mechanics.Condition):
+class Erupt(effects.Status_Effect):
 
     def __init__(self, source):
         super().__init__(source)
         self.id = "Erupt"
 
-        temp_hp = mechanics.GainTempHP(self)
+        temp_hp = effects.GainTempHP(self)
         temp_hp.potency = 2 * self.source.bonus("con")
 
         self.active_effects.append(temp_hp)
 
-        vulnerable = mechanics.ModifyStat(self)
+        vulnerable = effects.ModifyStat(self)
         vulnerable.stat = "damage_taken_multiplier"
         vulnerable.potency = 1#makes the land shark take x2 damage
         vulnerable.duration = 3

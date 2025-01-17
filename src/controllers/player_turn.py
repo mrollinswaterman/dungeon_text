@@ -1,4 +1,4 @@
-##Required Modules: globals, controllers, narrator, items
+##Note: player update is called a the START of the turn
 
 import time, sys
 import game

@@ -39,7 +39,7 @@ class Player(game_objects.Game_Object):
         self.header = playerHeader(self)
         
         self._bonus_crit_range = 0
-        self.combat_trick:"mechanics.Combat_Trick" | None = None
+        self.combat_trick:mechanics.Combat_Trick | None = None
 
     #properties
     @property
@@ -194,7 +194,9 @@ class Player(game_objects.Game_Object):
     def critical_hit(self) -> None:
         crit = 2 if self.weapon.broken or self.weapon is None else self.weapon.crit
         self.stats.damage_multiplier = crit
-        taken = self.target.take_damage(self.roll_damage())
+        dmg = self.roll_damage()
+        print(dmg)
+        taken = self.target.take_damage(dmg)
         self.apply_on_hits()
         self.stats.damage_multiplier = 1
         return None

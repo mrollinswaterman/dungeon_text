@@ -34,7 +34,7 @@ class Header():
             return self.prev
 
     @property
-    def default(self):
+    def ownership(self):
         if self.prev != self._ownership:
             self.prev = self._ownership
             return self._ownership

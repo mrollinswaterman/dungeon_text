@@ -1,5 +1,7 @@
 from __future__ import annotations
 import globals
+import game_objects
+import items
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import game_objects
@@ -7,13 +9,15 @@ if TYPE_CHECKING:
 
 class Mechanic():
 
-    def __init__(self, source:"game_objects.Game_Object | items.Item" | Mechanic):
-        self.source = source
+    def __init__(self, source):
+        self.source:game_objects.Game_Object = source
         self.id = "Mechanic"
+        self._target:"game_objects.Game_Object" = None
 
     #properties
     @property
-    def target(self) -> "game_objects.Game_Object":
+    def target(self) -> game_objects.Game_Object:
+        if self._target is not None: return self._target
         src_type = globals.get_base_type(self.source)
         match src_type:
             case "Game_Object": return self.source.target

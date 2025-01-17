@@ -1,6 +1,5 @@
 from __future__ import annotations
 import random
-
 import globals
 import mechanics
 import game_objects
@@ -34,7 +33,7 @@ class Game_Object():
         self.armor: "items.Armor" | int | None = None
 
         #Combat tools
-        self.condition_monitor:game_objects.Condition_Monitor = game_objects.Condition_Monitor(self)
+        self.condition_monitor:game_objects.Monitor = game_objects.Monitor(self)
         self.damage_types:list[str] = ["Physical", "Slashing"]
         self.immunities:list[str] = [None]
         self.resistances: list[str] = [None]
@@ -201,9 +200,7 @@ class Game_Object():
             case _:
                 if roll >= self.target.evasion():
                     self.narrate(self.hit_narration)
-                    dealt = self.roll_damage()
-                    print(f"DEALT: {dealt}")
-                    self.target.take_damage(dealt)
+                    self.target.take_damage(self.roll_damage())
                     self.apply_on_hits()
                 else:
                     self.narrate(self.miss_narration)
@@ -215,12 +212,17 @@ class Game_Object():
             if immunity in damage.types:
                 damage.amount = 0
                 return damage
+
+        return damage
             
     def check_resistances(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
+        print(damage)
         for resist in self.resistances:
             if resist in damage.types:
                 damage.amount //= 2
                 return damage
+
+        return damage
 
     def take_damage(self, damage:"mechanics.DamageInstance") -> int:
         damage = self.check_immunities(damage)

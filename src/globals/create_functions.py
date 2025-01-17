@@ -1,14 +1,15 @@
 import random
 import globals
 import game
-import items
 
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import game_objects
     import mechanics
+    import items
 
 def generate_item_rarity():
+    import items
     """Generates item rarity based on player level"""
 
     if globals.probability(1+game.PLAYER.level):
@@ -38,6 +39,7 @@ def create_enchantment(name:str, source:"game_objects.Game_Object | items.Item")
     return None
 
 def create_item(source_dict={}):
+    import items
     import compendiums.item_compendium as item_compendium
 
     cast = items.Anvil()

@@ -1,4 +1,3 @@
-import globals
 import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -8,7 +7,7 @@ class Effect(mechanics.Mechanic):
     """
     An effect is a mechanical function that changes a game objects' properties in some way
     """
-    def __init__(self, source:"game_objects.Game_Object" | mechanics.Mechanic):
+    def __init__(self, source:"game_objects.Game_Object | mechanics.Mechanic"):
         super().__init__(source)
         self.id = "Effect"
         self.potency = 2

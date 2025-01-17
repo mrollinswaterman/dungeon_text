@@ -1,5 +1,5 @@
 #Hobgoblin mob file
-import mechanics
+import effects
 import game_objects, globals
 
 stats = {
@@ -22,7 +22,7 @@ stats = {
     "dc": 10,
 }
 
-class Taunted(mechanics.StatModifier):
+class Taunted(effects.StatModifier):
 
     def __init__(self, source):
         super().__init__(source)

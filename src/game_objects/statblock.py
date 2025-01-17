@@ -1,4 +1,5 @@
 import csv
+import globals
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import items

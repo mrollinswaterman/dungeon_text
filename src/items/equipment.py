@@ -5,7 +5,6 @@ from __future__ import annotations
 import random
 import items
 import globals
-import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import items
@@ -24,7 +23,7 @@ class Equipment(items.Item):
         self.damage_types:str | list[str] = ""
         self.durability:int = None
 
-        self.enchantments:list["mechanics.Enchantment"] = list
+        #self.enchantments:list["mechanics.Enchantment"] = list
 
         self.anvil = anvil
         self.smelt()
@@ -79,37 +78,6 @@ class Equipment(items.Item):
         self.enchantments = set()
 
         #if my anvil has enchantments, procces the enchantments and proc chances strings
-
-    def enchant(self, effect:mechanics.Enchantment | str):
-        repeat = self.get(effect)
-        if repeat is not None:
-            globals.type_text(f"Your {self.id} is already enchanted with {repeat.id}!")
-            return False
-
-        match effect:
-            case str():
-                temp = mechanics.Enchantment(self)
-                temp.acquire(effect)
-                effect = temp
-            case mechanics.Enchantment():
-                effect.source = self
-
-        self.enchantments.append(effect)
-        
-    def get(self, effect:mechanics.Enchantment | str) -> mechanics.Enchantment | None:
-        base = globals.get_base_type(effect)
-        id = None
-        match base:
-            case "str":
-                id = effect
-            case "Mechanic":
-                id = effect.id
-            case _: raise ValueError(f"Can't enchant an item with a(n) '{base}'\n")
-
-        for entry in self.enchantments:
-            if entry.id == id:
-                return entry
-        return None
     
     def apply(self, effect_type:str):
         """Applies an effect type"""

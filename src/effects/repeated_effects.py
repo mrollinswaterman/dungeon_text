@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     import game_objects
     import items
 
-class Status(effects.Repeated_Effect):
+class Status_Effect(effects.Repeated_Effect):
     
     def __init__(self, source):
         super().__init__(source)
@@ -12,9 +12,13 @@ class Status(effects.Repeated_Effect):
         self._source:"game_objects.Game_Object | items.Item" = self.source
         self.source = ""
 
-        self._effects:list[effects.Repeated_Effect] = []
+        self._effects:list[effects.Repeated_Effect] = []  # might need to make this a dictionary so effects can be accessed by name
         self.switch_word = ""
         self.save_DC = 12
+
+    @property
+    def active(self) -> bool:
+        return len(self._effects) > 0
 
     @property
     def base_msg(self) -> str:
@@ -34,13 +38,6 @@ class Status(effects.Repeated_Effect):
     def end_msg(self) -> str:
         self.switch_word = "no longer"
         return self.base_msg
-
-    @property
-    def target(self) -> "game_objects.Game_Object":
-        src_type = globals.get_base_type(self._source)
-        match src_type:
-            case "Game_Object": return self._source.target
-            case "Item": return self._source.owner.target
             
     @property
     def effects(self) -> list[effects.Effect]:
@@ -48,15 +45,17 @@ class Status(effects.Repeated_Effect):
     
     def start(self):
         globals.type_text(self.start_msg)
-        for effect in self.effects:
+        actives = self.effects
+        for effect in actives:
             effect.start()
             if not effect.active:
                 self._effects.remove(effect)
-        if len(self._effects) <= 0:
+        if not self.active:
             self.end()
 
     def update(self):
-        for effect in self.effects:
+        actives = self.effects
+        for effect in actives:
             if effect.active:
                 effect.update()
             elif not effect.active:
@@ -67,6 +66,8 @@ class Status(effects.Repeated_Effect):
 
     def end(self):
         globals.type_text(self.end_msg)
+        for effect in self.effects:
+            effect.end()
         self._effects = []
 
     def save_attempt(self) -> bool:
