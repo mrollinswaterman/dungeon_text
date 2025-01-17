@@ -1,4 +1,76 @@
 import effects
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    import game_objects
+    import items
+
+class Status(effects.Repeated_Effect):
+    
+    def __init__(self, source):
+        super().__init__(source)
+        self.id = self.__class__.__name__
+        self._source:"game_objects.Game_Object | items.Item" = self.source
+        self.source = ""
+
+        self._effects:list[effects.Repeated_Effect] = []
+        self.switch_word = ""
+        self.save_DC = 12
+
+    @property
+    def base_msg(self) -> str:
+        return f"{self.target.header.action} {self.switch_word} {self.id}."
+
+    @property
+    def start_msg(self) -> str:
+        self.switch_word = "now"
+        return self.base_msg
+
+    @property
+    def refresh_msg(self) -> str:
+        self.switch_word = "already"
+        return self.base_msg
+    
+    @property
+    def end_msg(self) -> str:
+        self.switch_word = "no longer"
+        return self.base_msg
+
+    @property
+    def target(self) -> "game_objects.Game_Object":
+        src_type = globals.get_base_type(self._source)
+        match src_type:
+            case "Game_Object": return self._source.target
+            case "Item": return self._source.owner.target
+            
+    @property
+    def effects(self) -> list[effects.Effect]:
+        return self._effects
+    
+    def start(self):
+        globals.type_text(self.start_msg)
+        for effect in self.effects:
+            effect.start()
+            if not effect.active:
+                self._effects.remove(effect)
+        if len(self._effects) <= 0:
+            self.end()
+
+    def update(self):
+        for effect in self.effects:
+            if effect.active:
+                effect.update()
+            elif not effect.active:
+                self._effects.remove(effect)
+
+    def refresh(self):
+        globals.type_text(self.refresh_msg)
+
+    def end(self):
+        globals.type_text(self.end_msg)
+        self._effects = []
+
+    def save_attempt(self) -> bool:
+        return None
 
 class DamageOverTime(effects.Repeated_Effect):
 
