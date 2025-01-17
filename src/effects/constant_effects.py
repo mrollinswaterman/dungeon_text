@@ -80,16 +80,13 @@ class ModifyStat(effects.Constant_Effect):
     def start(self):
         self.potency = globals.XdY(self.potency)
         try:
-            self.target.stats.modify(self.stat, self.potency)
+            self.target.modify(self.stat, self.potency)
         except KeyError:
             raise ValueError(f"Can't modify non-existent stat '{self.stat}'.")
 
-        polarity = "increased" if self.potency > 0 else "decreased"
-        text = f"{self.target.header.ownership} {globals.STATS[self.stat]} {polarity} by {abs(self.potency)}."
-
-        globals.type_header(text)
-
     def end(self):
+        #End function doesnt use game_object.modify stat because I want a specific print statement
+        #not just generic 'x stat has increased'.
         self.target.stats.modify(self.stat, -(self.potency))
         globals.type_header(f"{self.target.header.ownership} {globals.STATS[self.stat]} returned to normal.")
         super().end()

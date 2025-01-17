@@ -22,7 +22,7 @@ stats = {
     "damage": "1d12",
     "dc": 10,
 }
-
+"""
 class Burrowed(effects.Status_Effect):
 
     def __init__(self, source):
@@ -63,7 +63,7 @@ class Erupt(effects.Status_Effect):
 
         self.start_message = f"The {self.source.id} erupts from the ground, making itself Vulnerable to attack."
         self.end_message = f"The {self.source.id} is no longer Vulnerable."
-
+"""
 class Land_Shark(game_objects.Mob):
     def __init__(self, id="Land Shark", stat_dict=stats):
         super().__init__(id, stat_dict)
@@ -79,7 +79,7 @@ class Land_Shark(game_objects.Mob):
 
     @property
     def burrowed(self) -> bool:
-        return self.conditions.get("Burrow") is not None
+        return self.monitor.get("Burrow") is not None
 
     def trigger(self):
         if not super().trigger():
@@ -97,14 +97,14 @@ class Land_Shark(game_objects.Mob):
     def special(self) -> None:
         if not self.burrowed:
             self.spend_ap(0) #indicates a full round action
-            burrow = Burrowed(self)
-            self.conditions.add(burrow)
+            #burrow = Burrowed(self)
+            #self.conditions.add(burrow)
         else:
             self.spend_ap()
             self.conditions.cleanse("Burrow")
             self.rounds_burrowed = 0
-            erupt = Erupt(self)
-            self.conditions.add(erupt)
+            #erupt = Erupt(self)
+            #self.conditions.add(erupt)
         return None
    
     def roll_narration(self):

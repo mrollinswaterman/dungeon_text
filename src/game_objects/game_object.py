@@ -1,11 +1,13 @@
 from __future__ import annotations
 import random
 import globals
-import mechanics
 import game_objects
+import items
+import effects
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import items
+    import mechanics
 
 class Game_Object():
 
@@ -33,7 +35,7 @@ class Game_Object():
         self.armor: "items.Armor" | int | None = None
 
         #Combat tools
-        self.condition_monitor:game_objects.Monitor = game_objects.Monitor(self)
+        self.monitor:game_objects.Monitor = game_objects.Monitor(self)
         self.damage_types:list[str] = ["Physical", "Slashing"]
         self.immunities:list[str] = [None]
         self.resistances: list[str] = [None]
@@ -76,11 +78,11 @@ class Game_Object():
     #VIP Methods
     def update(self):
         self.reset_ap()
-        self.condition_monitor.update() 
+        self.monitor.update() 
         self.clean_inventory()
 
-    def apply(self, effect:mechanics.Mechanic):
-        self.condition_monitor.add(effect)
+    def apply(self, effect:effects.Effect):
+        self.monitor.add(effect)
 
     def bonus(self, stat:str) -> int:
         return self.stats.bonus(stat)
@@ -247,15 +249,17 @@ class Game_Object():
 
         return damage.amount
 
-    def modify(self, stat:str, amount:int, source) -> None:
+    def modify_stat(self, stat:str, amount:int) -> None:
         try:
             self.stats.modify(stat, amount)
         except KeyError:
             raise ValueError(f"Can't modify non-existent stat '{stat}'.")
 
-        text = f"{self.header.ownership} {globals.STATS[stat]} increased by {amount}."
+        text = f"{self.header.ownership} {globals.STATS[stat]} {switch_word} by {amount}."
+        
+        switch_word = "increased"
         if amount < 0:
-            text = f"{self.header.ownership} {globals.STATS[stat]} decreased by {abs(amount)}."
+            switch_word = "decreased"
 
         globals.type_text(text)
 

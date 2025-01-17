@@ -68,7 +68,7 @@ class Hobgoblin(game_objects.Mob):
         self.spend_ap(0)
         globals.type_text(f"The {self.id} hurls enraging insults at you.")
 
-        if self.target.roll_a_check("cha") >= 1200:#self.stats.dc:
+        if self.target.roll_a_check("cha") >= self.stats.dc:
             globals.type_text(f"Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
         else:
             taunt = Taunt(self)
