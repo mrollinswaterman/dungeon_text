@@ -31,8 +31,6 @@ class Game_Object():
 
         #Items / Equipment
         self.inventory:dict[str, "items.Item"] = {}
-        self.weapon: "items.Weapon" | None = None
-        self.armor: "items.Armor" | int | None = None
 
         #Combat tools
         self.monitor:game_objects.Monitor = game_objects.Monitor(self)
@@ -70,6 +68,10 @@ class Game_Object():
     def target(self) -> Game_Object:
         """Returns the Object's target"""
         raise NotImplementedError
+    
+    @property
+    def armor_value(self) -> int:
+        return self.stats.armor
 
     #VIP Methods
     def update(self):
@@ -225,15 +227,9 @@ class Game_Object():
         damage = self.check_immunities(damage)
         damage = self.check_resistances(damage)
 
-        my_armor = 0
-        match self.armor:
-            case items.Armor(): my_armor = self.armor.value
-            case int(): my_armor = self.armor
-            case _: raise ValueError(f"unrecogized armor type '{self.armor}'\n")
-
         taken = int(damage.amount * self.stats.damage_taken_multiplier)
 
-        taken -= my_armor
+        taken -= self.armor_value
 
         if taken < 0: taken = 0
 

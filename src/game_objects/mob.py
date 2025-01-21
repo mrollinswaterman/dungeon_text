@@ -9,27 +9,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     pass
 
-default = {
-    "level": 1,
-    "level_range": (1, 20),
-    "hit_dice": 8,
-    "str": 10,
-    "dex": 10,
-    "con": 10,
-    "int": 10,
-    "wis": 10,
-    "cha": 10,
-    "base_evasion": 9,
-    "damage_taken_multiplier": 1,
-    "damage_multiplier": 1,
-    "max_hp": 0,
-    "max_ap": 1,
-    "max_mp": 0,
-    "armor": 0,
-    "damage": "1d6",
-    "dc": 10,
-}
-
 class Mob(game_objects.Game_Object):
 
         def __init__(self, id:str="default"):
@@ -40,10 +19,6 @@ class Mob(game_objects.Game_Object):
             self.load()
 
         #properties
-        @property
-        def caster_level(self) -> int:
-            return max(1, self.level // 5)
-
         @property
         def can_act(self) -> bool:
             return self.ap > 0 and not self.dead
@@ -57,13 +32,17 @@ class Mob(game_objects.Game_Object):
             return self.ap == self.stats.max_ap
 
         @property
-        def flee_threshold(self) -> float:
-        #Percent current %HP threshold at which the enemy tries to flee (higher==more cowardly)"""
-            return 10
+        def caster_level(self) -> int:
+            return max(1, self.level // 5)
 
         @property
         def fleeing(self) -> bool:
             return self.flee_check() or self.retreating
+
+        @property
+        def flee_threshold(self) -> float:
+        #Percent current %HP threshold at which the enemy tries to flee (higher ==> more cowardly)
+            return 15
 
         @property
         def target(self) -> "game_objects.Game_Object":
@@ -193,8 +172,6 @@ class Mob(game_objects.Game_Object):
                     self.__dict__[entry] = globals.make_dict(source_stat_block[entry])
             
             #generate level from my level range
-            self.stats.armor = int(self.stats.armor)
-            self.armor = self.stats.armor
             self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])
             self.stats.level = self.level
             #set ap

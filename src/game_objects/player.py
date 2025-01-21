@@ -39,23 +39,37 @@ class Player(game_objects.Game_Object):
         self.stats.max_ap = 1 + (self.level // 5)
 
         self.header = playerHeader(self)
+
+        self.armor:items.Armor = None
+        self.weapon:items.Weapon = None
         
         self._bonus_crit_range = 0
         self.combat_trick:mechanics.Combat_Trick | None = None
 
     #properties
     @property
-    def carrying_capacity(self) -> float:
-        return 5.5 * self.stats.str
-    
-    @property
-    def bonus_crit_range(self) -> int:
-        return min(4, self._bonus_crit_range)
+    def armor_value(self) -> int:
+        if self.armor.broken: return 0
+        return self.armor.value
 
     @property
     def available_carrying_capacity(self) -> float:
         return self.carrying_capacity - self.carrying
 
+    @property
+    def bonus_crit_range(self) -> int:
+        #bonus crit capped +4 (ie, min roll you can ever crit on is like a 14 with the correct weapon)
+        return min(4, self._bonus_crit_range)
+
+    @property
+    def can_level_up(self) -> bool:
+        """Checks if the player has enough XP to level up"""
+        return self.xp >= (15 * self.level)
+
+    @property
+    def carrying_capacity(self) -> float:
+        return 5.5 * self.stats.str
+    
     @property
     def carrying(self) -> float:
         total_weight = 0
@@ -66,11 +80,6 @@ class Player(game_objects.Game_Object):
         if self.armor is not None: total_weight += self.armor.weight
         if self.weapon is not None: total_weight += self.weapon.weight
         return total_weight
-
-    @property
-    def can_level_up(self):
-        """Checks if the player has enough XP to level up"""
-        return self.xp >= (15 * self.level)
 
     @property
     def target(self):
