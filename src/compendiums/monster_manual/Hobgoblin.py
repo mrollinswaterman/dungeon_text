@@ -2,59 +2,17 @@
 import effects
 import game_objects, globals
 
-stats = {
-    "level": 1,
-    "level_range": (1, 6),
-    "hit_dice": 10,
-    "str": 12,
-    "dex": 12,
-    "con": 12,
-    "int": 9,
-    "wis": 7,
-    "cha": 14,
-    "base_evasion": 8,
-    "damage_taken_multiplier": 1,
-    "damage_multiplier": 1,
-    "max_hp": 0,
-    "max_ap": 0,
-    "armor": 1,
-    "damage": "1d8",
-    "dc": 10,
-}
-
-class Taunted(effects.StatModifier):
-
-    def __init__(self, source):
-        super().__init__(source)
-
-        self.source = f"{self.source.header.ownership} Taunt."
-        self.save_DC = 15
-
-        my_info = {
-            "stat": "base_evasion",
-            "id": self.__class__.__name__,
-            "potency": None
-        }
-
-        self.acquire(my_info)
-
-    def save_attempt(self):
-        globals.type_text("You attempt to refocus your mind...")
-        if self.target.roll_a_check("cha") >= self.save_DC:
-            globals.type_text("You push the Hobgoblin's mockery out of your head.")
-            self.end()
-            return True
-        else:
-            globals.type_text("You are unable to clear your thoughts.")
-            return False
-
 class Hobgoblin(game_objects.Mob):
-    def __init__(self, id="Hobgoblin", stat_dict=stats):
-        super().__init__(id, stat_dict)
-        self.stats.dc = 24 + self.bonus("cha")#12 + cha
+    def __init__(self):
+        super().__init__(id="Hobgoblin")
+
         #base gold & xp
         self.gold += 10
         self.xp += 5
+
+    @property
+    def save_dc(self):
+        return self.stats.base_save_dc + self.bonus("cha")
 
     def trigger(self):
         """Return True if the player's evasion is >= 10, and the 
@@ -68,7 +26,7 @@ class Hobgoblin(game_objects.Mob):
         self.spend_ap(0)
         globals.type_text(f"The {self.id} hurls enraging insults at you.")
 
-        if self.target.roll_a_check("cha") >= 1200:#self.stats.dc:
+        if self.target.roll_a_check("cha") >= 1200:#self.save_dc:
             globals.type_text(f"Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
         else:
             taunt = Taunted(self)
@@ -104,5 +62,31 @@ class Hobgoblin(game_objects.Mob):
             f"You dodge the club's wide arc."
         ]
         return base + me
+    
+class Taunted(effects.StatModifier):
+
+    def __init__(self, source):
+        super().__init__(source)
+
+        self.source = f"{self.source.header.ownership} Taunt."
+        self.save_DC = 15
+
+        my_info = {
+            "stat": "base_evasion",
+            "id": self.__class__.__name__,
+            "potency": None
+        }
+
+        self.acquire(my_info)
+
+    def save_attempt(self):
+        globals.type_text("You attempt to refocus your mind...")
+        if self.target.roll_a_check("cha") >= self.save_DC:
+            globals.type_text("You push the Hobgoblin's mockery out of your head.")
+            self.end()
+            return True
+        else:
+            globals.type_text("You are unable to clear your thoughts.")
+            return False
 
 object = Hobgoblin

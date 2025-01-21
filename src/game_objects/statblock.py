@@ -1,5 +1,6 @@
 import csv
 import globals
+from ast import literal_eval as make_tuple
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import items
@@ -15,7 +16,7 @@ class Statblock():
         #Core Stats
         self.level:int = self.parent.level
         self.level_range:tuple[int, int] = (1, 20)
-        self.hit_dice:int = 8
+        self.hit_die:int = 8
 
         #Ability Scores
         self.str:int = 12
@@ -39,7 +40,7 @@ class Statblock():
         #Combat Stats (mob only)
         self.armor:"items.Armor" | int | None = None
         self.damage: int | str | None = None
-        self.dc:int = 0
+        self.base_save_dc:int = 0
 
     def value(self, stat:str) -> int | str:
         return self.__dict__[stat]
@@ -58,8 +59,15 @@ class Statblock():
     
     def copy(self, source:dict):
         for entry in source:
-            if entry in self.__dict__:
+            if entry in self.__dict__ and entry != "id":
                 match self.__dict__[entry]:
                     case str(): self.__dict__[entry] = source[entry]
-                    case int():self.__dict__[entry] = int(source[entry])
+                    case int(): self.__dict__[entry] = int(source[entry])
+                    case tuple(): self.__dict__[entry] = make_tuple(source[entry])
                     case _: self.__dict__[entry] = source[entry]
+
+    def __str__(self):
+        ret = ""
+        for entry in self.__dict__:
+            ret = ret + f"{entry}: {self.__dict__[entry]}\n"
+        return ret

@@ -1,5 +1,6 @@
 #All globally required game objects (player, scene, shopkeep, etc) are intialized here
-
+import csv
+import globals
 from typing import TYPE_CHECKING, Union, Any
 if TYPE_CHECKING:
     import game_objects
@@ -19,8 +20,8 @@ START_CMD = True
 
 RUNNING = False
 
+
 def initialize():
-    print(float('inf'))
     global PLAYER, SHOPKEEP, ARMORY, SCENE
     import items, globals, game_objects, controllers, mechanics
 

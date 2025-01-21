@@ -1,0 +1,8 @@
+id,level_range,hit_die,str,dex,con,int,wis,cha,base_evasion,armor,damage,base_save_dc,damage_types,resistances,immunities
+default,"1,4",10,10,16,10,9,7,6,9,0,1d6,10,"Physical: Slashing",,
+Goblin Gang,"2,6",8,14,10,14,8,10,6,7,0,3d4,10,"Physical: Slashing",,
+Hobgoblin,"1,6",10,12,12,12,9,7,14,8,1,1d8,10,"Physical: Bludgeoning",,
+Clockwork Hound,"6,13",10,16,14,14,18,10,7,10,3,2d8,10,"Physical: Piercing,Slashing",Slashing,
+Bandit,"2,7",10,14,12,12,14,8,10,9,1,2d4,10,"Physical: Slashing, Piercing",,
+Land Shark,"3,10",12,15,9,16,7,7,7,8,3,1d12,10,"Physical: Piercing",Slashing,
+Goblin,"1,4",10,10,16,10,9,7,6,9,0,1d6,10,"Physical: Slashing",,

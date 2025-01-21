@@ -40,10 +40,6 @@ class Game_Object():
         self.immunities:list[str] = [None]
         self.resistances: list[str] = [None]
 
-        #Player Exclusive
-        self.combat_trick = None
-        self._bonus_crit_range = None
-
         #Misc.
         self.prev_narration = ""
 
@@ -218,7 +214,6 @@ class Game_Object():
         return damage
             
     def check_resistances(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
-        print(damage)
         for resist in self.resistances:
             if resist in damage.types:
                 damage.amount //= 2

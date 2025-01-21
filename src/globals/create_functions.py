@@ -8,6 +8,22 @@ if TYPE_CHECKING:
     import mechanics
     import items
 
+def make_list(input:str) -> list[str | None]:
+    if input is None or input == '': return [None]
+    return input.split(",")
+
+def make_dict(input: str) -> dict[str, list[str]] | None:
+    if input is None or input == '': return None
+    input = input.split(";")
+    ret = {}
+    print(input)
+    for entry in input:
+        current = entry.split(":")
+        ret[current[0]] = make_list(current[1])
+
+    print(ret)
+    return ret
+
 def generate_item_rarity():
     import items
     """Generates item rarity based on player level"""

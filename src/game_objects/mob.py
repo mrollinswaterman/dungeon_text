@@ -1,9 +1,10 @@
 import random
+import csv
+from xml.dom import ValidationErr
 import globals
 import game_objects
 import game
 import mechanics
-
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     pass
@@ -31,13 +32,10 @@ default = {
 
 class Mob(game_objects.Game_Object):
 
-        def __init__(self, id:str="Anonymous_Mob", stat_dict:dict=default):
+        def __init__(self, id:str="default"):
             #identification
             super().__init__(id)
-            self.stats.copy(stat_dict)
-            self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])
-            self.stats.level = self.level
-
+            self.base_save_cd = 0
             self.retreating = False
             self.load()
 
@@ -173,49 +171,70 @@ class Mob(game_objects.Game_Object):
         
         #LOAD
         def load(self):
-            """Updates the mob's loot, stats, and ability scores after level has been assigned"""
-            self.gold = 0
-            self.xp = 0
+            """Loads the mob's info from the csv file"""
+            source_stat_block = None
+
+            #find my statblock in the source file
+            with open("monster_stats.csv", "r") as file:
+                r = csv.DictReader(file)
+                for entry in r:
+                    if entry["id"] == self.id:
+                        source_stat_block = entry
+                        break
+                file.close()
+            
+            #throw an error if my id isn't found in the csv file
+            if source_stat_block is None: raise ValueError(f"The id '{self.id}' was not found in the monster files.")
+
+            #copy the statblock to my statblock and my own attributes
+            self.stats.copy(source_stat_block)
+            for entry in source_stat_block:
+                if entry in self.__dict__ and entry != "id":
+                    self.__dict__[entry] = globals.make_dict(source_stat_block[entry])
+            
+            #generate level from my level range
+            self.stats.armor = int(self.stats.armor)
+            self.armor = self.stats.armor
+            self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])
+            self.stats.level = self.level
+            #set ap
             self.stats.max_ap = 1 + (self.level // 5)
             self.ap = self.stats.max_ap
+
             #calculate stats
             self.calculate_loot()
             self.calculate_hp()
-            self.calculate_ability_scores
-
-        def calculate_hp(self) -> None:
-            """Re-calculates mob's HP based on current level"""
-            self.stats.max_hp = 0
-            temp = self.stats.hit_dice + self.bonus("con")
-            for _ in range(self.level-1):
-                temp += globals.d(self.stats.hit_dice) + self.bonus("con")
-
-            self.stats.max_hp = temp
-            self.hp = self.stats.max_hp
-
+            self.calculate_ability_scores()
+        
         def calculate_loot(self):
-            """Adds a random extra amount of XP and Gold per level it is above base to the mob"""
+            """Adds a random amount of bonus reward XP and Gold scaling with level"""
             for _ in range(self.level+1):
                 xtra_gold = globals.d(6) 
                 xtra_xp = globals.d(6)
                 self.gold += xtra_gold * self.level // 3
                 self.xp += xtra_xp * max(self.level // 5, 1)
 
+        def calculate_hp(self) -> None:
+            """Re-calculates mob's HP based on current level"""
+            self.stats.max_hp = 0
+            temp = self.stats.hit_die + self.bonus("con")
+            for _ in range(self.level-1):
+                temp += globals.d(self.stats.hit_die) + self.bonus("con")
+
+            self.stats.max_hp = temp
+            self.hp = self.stats.max_hp
+
         def calculate_ability_scores(self):
             """Randomly adds extra points to a mob's ability scores, increasing based on level"""
             for _ in range(self.level + 1 // 2):
-                stat = random.choice(list(globals.CORE_STATS.keys()))
+                stat = random.choice(list(globals.ABILITY_SCORES.keys()))
                 self.stats.__dict__[stat] += 1
 
         #SPECIALs + TRIGGER
         def special(self):
             """Mob's special move"""
-            return self.conditions.get("Enraged") is None
+            return self.monitor.get("Enraged") is None
         
         def trigger(self):
-            """Trigger that determines if the mob should do their special move.
-            Mobs can't do specials while under certain effects, and each mob
-            runs it's parent trigger function to see if it is able to do it's special
-            or if it must attack due to effects."""
-
-            return self.conditions.get("Enraged") is None
+            """Trigger that determines if the mob should do their special move."""
+            return self.monitor.get("Enraged") is None

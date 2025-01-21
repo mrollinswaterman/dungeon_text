@@ -16,15 +16,20 @@ class Monitor():
         return list(self._effects.keys())"""
     
     @property
-    def effects(self) -> list[effects.Effect]:
+    def effects_list(self) -> list[effects.Effect]:
         return list(self._effects.values())
     
     @property
     def effect_ids(self) -> list[str]:
         return list(self._effects.keys())
+    
+    def get(self, effect_id:str) -> effects.Effect | None:
+        if effect_id in self._effects:
+            return self._effects[effect_id]
+        else: return None
 
     def add(self, obj:"effects.Effect"):
-        if obj in self.effects:
+        if obj in self.effects_list:
             current = self._effects[obj.id]
             obj.refresh()
         else:
@@ -32,13 +37,12 @@ class Monitor():
             obj.start()
 
     def update(self):
-        actives = self.effects
+        actives = self.effects_list
         for effect in actives:
             if effect.active:
                 effect.update()
             if not effect.active:
                 del self._effects[effect.id]
-                #self._cleanse_pool.add(element)
 
     def cleanse(self, obj:"str | effects.Effect"):
         match obj:
@@ -51,7 +55,7 @@ class Monitor():
         del self._effects[my_effect.id]
 
     def cleanse_all(self):
-        cleanse_pool = self.effects
+        cleanse_pool = self.effects_list
         for effect in cleanse_pool:
             self.cleanse(effect)
         self._effects = {}
