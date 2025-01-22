@@ -169,7 +169,7 @@ class Mob(game_objects.Game_Object):
             self.stats.copy(source_stat_block)
             for entry in source_stat_block:
                 if entry in self.__dict__ and entry != "id":
-                    self.__dict__[entry] = globals.make_dict(source_stat_block[entry])
+                    self.__dict__[entry] = globals.build_damage_type(source_stat_block[entry])
             
             #generate level from my level range
             self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])

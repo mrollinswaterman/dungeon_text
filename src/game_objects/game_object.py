@@ -214,10 +214,12 @@ class Game_Object():
         pass
             
     def check_resistances(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
-        if self.resistances.is_physical and damage.type.is_physical:
-            if True in self.resistances.physical:
-                damage.amount /= 2
-                return damage
+        for supertype in self.resistances.__dict__:
+            print(supertype)
+            if self.resistances.is_physical and damage.type.is_physical:
+                if True in self.resistances.physical:
+                    damage.amount /= 2
+                    return damage
 
             if self.resistances.physical == damage.type.physical:
                 damage.amount /= 2

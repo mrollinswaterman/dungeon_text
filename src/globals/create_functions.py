@@ -15,7 +15,7 @@ def build_damage_type(input:str=None) -> "mechanics.DamageType":
     """
     #physical is the assume super-type if none is specified
     import mechanics
-    if input is None: return mechanics.DamageType()
+    if input is None or input == '': return mechanics.DamageType()
     #find a more efficient way to differentiate magic vs physical
     ret = mechanics.DamageType()
     if "Magic" in input:

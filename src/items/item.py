@@ -72,7 +72,7 @@ class Anvil():
     damage:str
     crit:int
     crit_range:int
-    damage_types:str
+    damage_type:str
 
     #Armor attributes
     armor_value:int
@@ -98,7 +98,7 @@ class Anvil():
         self.damage= None
         self.crit = None
         self.crit_range = None
-        self.damage_types = None
+        self.damage_type = None
 
         #Armor attributes
         self.armor_value = None

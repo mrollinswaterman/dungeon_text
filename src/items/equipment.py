@@ -22,7 +22,7 @@ class Equipment(items.Item):
         self.max_dex_bonus:int = None
         self.durability:int = None
 
-        self.anvil = anvil
+        self.__anvil__ = anvil
         self.smelt()
     
     #properties
@@ -64,14 +64,9 @@ class Equipment(items.Item):
     #methods
     def smelt(self):
         """Copies an item's anvil stats to it's own class attributes"""
-        try:
-            self.damage_type = globals.build_damage_type(self.anvil.__dict__["damage_type"])
-        except KeyError:
-            print(self.anvil.__dict__)
-            raise Exception
-        for entry in self.anvil.__dict__:
+        for entry in self.__anvil__.__dict__:
             if entry in self.__dict__ and self.__dict__[entry] is None:
-                self.__dict__[entry] = self.anvil.__dict__[entry]
+                self.__dict__[entry] = self.__anvil__.__dict__[entry]
 
         if self.durability is None:
             self.durability = self.max_durability
@@ -121,9 +116,9 @@ class Equipment(items.Item):
     #META functions (save/load/format, etc)
     def save(self):
         #reset ID before saving it
-        self.id = self.anvil.id
+        self.id = self.__anvil__.id
         super().save()
-        for entry in self.anvil.__dict__:
+        for entry in self.__anvil__.__dict__:
             if entry in self.__dict__ and entry not in self.saved:
                 self.saved[entry] = self.__dict__[entry]
         self.saved["durability"] = self.durability if self.durability is not None else self.max_durability
@@ -161,12 +156,12 @@ class Weapon(Equipment):
     @property
     def display(self) -> list[str]:
         #return f"({super().display}, {self.damage}, {self.crit_range}–20/x{self.crit}): {self.value}g, {self.weight} lbs."
-        return super().display + [f"{' '*5}Damage: {self.anvil.damage} {self.damage_type}, {self.crit_range}–20/x{self.crit}, Dex Cap: +{self.max_dex_bonus}"]
+        return super().display + [f"{' '*5}Damage: {self.__anvil__.damage} {self.damage_type}, {self.crit_range}–20/x{self.crit}, Dex Cap: +{self.max_dex_bonus}"]
 
     @property
     def format(self) -> list[str]:
         return super().format + [
-            f"{' '*3}Damage: {self.anvil.damage}{' '*3}Crit: {self.crit_range}–20/x{self.crit}",
+            f"{' '*3}Damage: {self.__anvil__.damage}{' '*3}Crit: {self.crit_range}–20/x{self.crit}",
             f"{' '*3}Durability: {self.durability}/{self.max_durability}",
         ]
     #methods
@@ -180,9 +175,8 @@ class Weapon(Equipment):
         #set crit range to 20 if it's null
         self.crit_range = 20 if self.crit_range is None or self.crit_range == "" else self.crit_range
 
-        #if anvil had multiple damage types, split them at the '/'
-        self.damage_types = self.damage_types.split("/")
-        self.damage_types.append("Physical")
+        #set damage type
+        self.damage_type = globals.build_damage_type(self.__anvil__.__dict__["damage_type"])
 
     #weapon methods
     def roll_damage(self) -> int:

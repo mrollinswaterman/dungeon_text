@@ -48,7 +48,7 @@ def initialize():
 
     test = globals.build_damage_type("Slashing")
 
-    print(test.__dict__)
+    print(test)
 
     #PLAYER.weapon.enchant("Molten")
 
