@@ -25,12 +25,6 @@ def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
     import items, globals, game_objects, controllers, mechanics
 
-    tetx = "S;ash/Peirce/Magic/Shlash".split("Magic")
-
-    print(tetx[0].split("/"))
-
-    raise Exception
-
     PLAYER = game_objects.Player()
 
     SCENE = controllers.Scene()
@@ -51,6 +45,10 @@ def initialize():
     #PLAYER.pick_up(hp_pots, True)
 
     create_commands_dict()
+
+    test = globals.build_damage_type("Slashing")
+
+    print(test.__dict__)
 
     #PLAYER.weapon.enchant("Molten")
 

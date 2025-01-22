@@ -1,9 +1,11 @@
 from __future__ import annotations
 import random
+from sysconfig import is_python_build
 import globals
 import game_objects
 import items
 import effects
+import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import items
@@ -209,17 +211,16 @@ class Game_Object():
         return None
     
     def check_immunities(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
-        for immunity in self.immunities:
-            if immunity in damage.types:
-                damage.amount = 0
-                return damage
-
-        return damage
+        pass
             
     def check_resistances(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
-        for resist in self.resistances:
-            if resist in damage.types:
-                damage.amount //= 2
+        if self.resistances.is_physical and damage.type.is_physical:
+            if True in self.resistances.physical:
+                damage.amount /= 2
+                return damage
+
+            if self.resistances.physical == damage.type.physical:
+                damage.amount /= 2
                 return damage
 
         return damage

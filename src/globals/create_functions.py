@@ -8,13 +8,21 @@ if TYPE_CHECKING:
     import mechanics
     import items
 
-def build_damage_type(input:str=None) -> "mechanics.Damage_Type":
+def build_damage_type(input:str=None) -> "mechanics.DamageType":
+    """
+    Creates and returns a DamageType object based on an input string.
+    Returns an empty type if input is None
+    """
+    #physical is the assume super-type if none is specified
     import mechanics
     if input is None: return mechanics.DamageType()
     #find a more efficient way to differentiate magic vs physical
     ret = mechanics.DamageType()
     if "Magic" in input:
+        #split into physical types and magic types
         my_types = input.split("Magic")
+
+        #process physical
         physical_types = my_types[0].split("/")
         if my_types[-1] == '':
             my_types = my_types.pop()
@@ -23,13 +31,18 @@ def build_damage_type(input:str=None) -> "mechanics.Damage_Type":
 
         ret._physical = physical_types
 
+        #process magic
         magic_types = my_types[1].split("/")
-        if magic_types[0] == "Magic":
-            magic_types.pop(0)
+        if magic_types[-1] == '':
+            magic_types = magic_types.pop()
 
-        
+        if len(magic_types) <= 0:
+            magic_types = [True]
+
+        ret._magic = magic_types
         return ret
 
+    #just process physical
     my_types = input.split("/")
     if my_types[-1] == '':
         my_types = my_types.pop()

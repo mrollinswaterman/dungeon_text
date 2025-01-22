@@ -18,8 +18,8 @@ class Equipment(items.Item):
         rarity = anvil.rarity if rarity is None else rarity
         super().__init__(id, rarity)
         self.weight_class:"items.Weight_Class" | str | int = None
-        self.max_dex_bonus:int = None
         self.damage_type:"mechanics.DamageType" = globals.build_damage_type()
+        self.max_dex_bonus:int = None
         self.durability:int = None
 
         self.anvil = anvil
@@ -64,13 +64,14 @@ class Equipment(items.Item):
     #methods
     def smelt(self):
         """Copies an item's anvil stats to it's own class attributes"""
+        try:
+            self.damage_type = globals.build_damage_type(self.anvil.__dict__["damage_type"])
+        except KeyError:
+            print(self.anvil.__dict__)
+            raise Exception
         for entry in self.anvil.__dict__:
             if entry in self.__dict__ and self.__dict__[entry] is None:
                 self.__dict__[entry] = self.anvil.__dict__[entry]
-
-        dmg_types = self.anvil.__dict__["damage_type"]
-        if "Magic" not in dmg_types:
-            self.damage_type._physical = dmg_types
 
         if self.durability is None:
             self.durability = self.max_durability
