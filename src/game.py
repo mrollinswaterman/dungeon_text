@@ -25,6 +25,12 @@ def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
     import items, globals, game_objects, controllers, mechanics
 
+    tetx = "S;ash/Peirce/Magic/Shlash".split("Magic")
+
+    print(tetx[0].split("/"))
+
+    raise Exception
+
     PLAYER = game_objects.Player()
 
     SCENE = controllers.Scene()

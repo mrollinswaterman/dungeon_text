@@ -1,4 +1,4 @@
-type,id,damage,damage_types,crit,crit_range,weight_class,armor_value,max_dex_bonus,rarity
+type,id,damage,damage_type,crit,crit_range,weight_class,armor_value,max_dex_bonus,rarity
 Weapon,Longsword,1d8,Slashing,2,,Light,,6,Common
 Weapon,Battleaxe,1d8,Slashing,3,,Medium,,3
 Weapon,Light Flail,1d8,Bludgeoning,2,,Medium,,4

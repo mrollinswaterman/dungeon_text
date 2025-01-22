@@ -13,17 +13,14 @@ if TYPE_CHECKING:
 class Equipment(items.Item):
 
     def __init__(self, anvil:"items.Anvil", id:str=None, rarity: "items.Rarity" | str | int=None):
-        import game_objects
         #check for custom rarity, and set it if it's there
         id = anvil.id if id is None else id
         rarity = anvil.rarity if rarity is None else rarity
         super().__init__(id, rarity)
         self.weight_class:"items.Weight_Class" | str | int = None
         self.max_dex_bonus:int = None
-        self.damage_types:str | list[str] = ""
+        self.damage_type:"mechanics.DamageType" = globals.build_damage_type()
         self.durability:int = None
-
-        #self.enchantments:list["mechanics.Enchantment"] = list
 
         self.anvil = anvil
         self.smelt()
@@ -70,6 +67,10 @@ class Equipment(items.Item):
         for entry in self.anvil.__dict__:
             if entry in self.__dict__ and self.__dict__[entry] is None:
                 self.__dict__[entry] = self.anvil.__dict__[entry]
+
+        dmg_types = self.anvil.__dict__["damage_type"]
+        if "Magic" not in dmg_types:
+            self.damage_type._physical = dmg_types
 
         if self.durability is None:
             self.durability = self.max_durability

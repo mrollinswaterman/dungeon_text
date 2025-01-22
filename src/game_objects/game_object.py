@@ -34,9 +34,10 @@ class Game_Object():
 
         #Combat tools
         self.monitor:game_objects.Monitor = game_objects.Monitor(self)
-        self.damage_types:list[str] = ["Physical", "Slashing"]
-        self.immunities:list[str] = [None]
-        self.resistances: list[str] = [None]
+        self.damage_type:mechanics.DamageType = mechanics.DamageType()
+        self.damage_type._physical = ["Slashing", "Piercing"]
+        self.immunities:mechanics.DamageType = mechanics.DamageType()
+        self.resistances:mechanics.DamageType = mechanics.DamageType()
 
         #Misc.
         self.prev_narration = ""
