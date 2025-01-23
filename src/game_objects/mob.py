@@ -128,18 +128,18 @@ class Mob(game_objects.Game_Object):
             if taken > 0:
                 taken = f"{taken} damage"
                 match source:
-                    case game_objects.Player():
+                    case game_objects.Player():  #the player
                         text = [
                             f"You did {taken} to the {self.id}.",
                             f"The {self.id} took {taken}.",
                             f"You hit the {self.id} for {taken}.",
                             ]   
-                    case str():
+                    case str():  #the name of an effect or some other string literal
                         text = [
                             f"The {self.id} took {taken} from {source}.",
                             f"{source} dealt {taken} to the {self.id}.",
                         ] 
-                    case _:
+                    case _:  # an item or weapon
                         text = [
                             f"Your {source.id} did {taken}.",
                             f"The {source.id} dealt {taken} to the {self.id}.",

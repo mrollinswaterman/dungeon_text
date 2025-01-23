@@ -211,19 +211,49 @@ class Game_Object():
         return None
     
     def check_immunities(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
-        pass
-            
-    def check_resistances(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
+        #To check immunities, we check resistances against our immunities list, and
+        #if we would resist anything, we are immune to it instead
+        target = damage.amount / 2
+
+        check = self.check_resistances(damage, self.immunities)
+
+        if check.amount == target:
+            damage.amount = 0
         
-        if True in self.resistances.physical and damage.type.is_physical:
-            damage.amount /= 2
-            return damage
+        return damage
             
+    def check_resistances(self, damage:"mechanics.DamageInstance", my_list:"mechanics.DamageType"=None) -> "mechanics.DamageInstance":
+        if my_list is None: my_list = self.resistances
+
+        #check if im resistant to physical
+        if damage.type.is_physical:
+
+            if True in my_list.physical:
+                damage.amount /= 2
+                return damage
+            
+            if my_list.physical == damage.type.physical:
+                damage.amount /= 2
+                return damage
+        
+        #check if im resistant to magic
+        if damage.type.is_magic:
+            if True in my_list.magic:
+                damage.amount /= 2
+                return damage
+            
+            if my_list.magic == damage.type.magic:
+                damage.amount /= 2
+                return damage
 
         return damage
 
     def take_damage(self, damage:"mechanics.DamageInstance") -> int:
+        start = damage.amount
         damage = self.check_immunities(damage)
+        if damage.amount != start:
+            print("target is immune!")
+            raise Exception
         damage = self.check_resistances(damage)
 
         taken = int(damage.amount * self.stats.damage_taken_multiplier)
@@ -293,6 +323,9 @@ class Game_Object():
         text:list[str] = func() if param is None else func(param)
         if self.prev_narration in text:
             text.remove(self.prev_narration)
+        
+        if len(text) <= 0:
+            raise ValueError("no valid options in text", func())
         final = random.choice(text)
         self.prev_narration = final
         globals.type_text(final)

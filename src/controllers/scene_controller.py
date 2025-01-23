@@ -84,7 +84,7 @@ class Scene():
     def select_next(self):
         """Starts a new scene with a new enemy or event"""
         if globals.probability(85): #85% chance of an enemy spawning next
-            self.enemy = controllers.spawn_random_mob()
+            self.enemy = globals.spawn_random_mob()
             self.begin_encounter()
         else: #remainging 15% chance of an event spawning
             self.event: game_objects.Event = globals.spawn_random_event()
@@ -114,8 +114,8 @@ class Scene():
         if not game.PLAYER.can_level_up:
             narrator.continue_run()
         else:
-            pass
             #level_up_player()
+            narrator.continue_run()
 
 """
 

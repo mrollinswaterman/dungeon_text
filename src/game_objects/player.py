@@ -123,7 +123,7 @@ class Player(game_objects.Game_Object):
             
     def roll_damage(self) -> "mechanics.DamageInstance":
         """Returns a damage instance """
-        if controllers.player_turn.GOD_MODE: return mechanics.DamageInstance(self.weapon, 2)#999
+        if controllers.player_turn.GOD_MODE: return mechanics.DamageInstance(self.weapon, 1)#999
         if self.weapon.broken:
             globals.type_text(f"You can't use a broken {self.weapon.id}, so your hands will have to do.")
             amount = (globals.d(4) + self.bonus("str")) * self.stats.damage_multiplier
@@ -146,7 +146,7 @@ class Player(game_objects.Game_Object):
         self.xp -= 15 * self.level
         self.level += 1
         prev_max = self.stats.max_hp
-        self.stats.max_hp += (globals.d(self.stats.hit_dice) + self.bonus("con"))
+        self.stats.max_hp += (globals.d(self.stats.hit_die) + self.bonus("con"))
         if self.hp == prev_max:# ie, you were full HP before level up
             self.hp = self.stats.max_hp
         if self.hp < (prev_max * .5): #if you were under 1/2 HP, heal to 1/2 HP

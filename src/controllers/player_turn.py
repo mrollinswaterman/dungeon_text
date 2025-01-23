@@ -6,7 +6,7 @@ import globals
 import items
 import narrator
 
-GOD_MODE = False
+GOD_MODE = True
 
 def turn():
     """Runs the player's turn"""

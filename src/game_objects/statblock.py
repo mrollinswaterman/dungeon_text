@@ -38,7 +38,7 @@ class Statblock():
         self.temp_hp:int = 0
         
         #Combat Stats (mob only)
-        self.armor:"items.Armor" | int | None = None
+        self.armor:"items.Armor" | int | None = 0
         self.damage: int | str | None = None
         self.base_save_dc:int = 0
 
@@ -59,12 +59,15 @@ class Statblock():
     
     def copy(self, source:dict):
         for entry in source:
+            if source[entry] is None or source[entry] == '': continue
             if entry in self.__dict__ and entry != "id":
                 match self.__dict__[entry]:
                     case str(): self.__dict__[entry] = source[entry]
                     case int(): self.__dict__[entry] = int(source[entry])
                     case tuple(): self.__dict__[entry] = make_tuple(source[entry])
                     case _: self.__dict__[entry] = source[entry]
+
+        #print(self.__dict__)
 
     def __str__(self):
         ret = ""

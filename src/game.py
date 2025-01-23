@@ -23,7 +23,7 @@ RUNNING = False
 
 def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
-    import items, globals, game_objects, controllers, mechanics
+    import game_objects, controllers
 
     PLAYER = game_objects.Player()
 
@@ -45,12 +45,6 @@ def initialize():
     #PLAYER.pick_up(hp_pots, True)
 
     create_commands_dict()
-
-    test = globals.build_damage_type("Slashing")
-
-    print(test)
-
-    #PLAYER.weapon.enchant("Molten")
 
     return True
 

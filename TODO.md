@@ -7,6 +7,7 @@ This file contains a list of tasks and ideas
 - [X] Player save file
 - [ ] Add a start menu where the user can choose a name for their character and maybe choose starting stats as well?? (give them 8 points, all stats start at 10, some sort of diminishing returns on pumping stats?)
 - [ ] Use ~~Tkinter~~ HTML/JS/CSS or some GUI framework to take the game off the Command Line
+- [ ] Implement a testing suite???
 
 ## GUI
 
@@ -21,8 +22,8 @@ identical to something that's still on the screen (hint: line 2 of the type func
 
 ## Internal Logic
 
-- [ ] ~~Magic system??~~ Now WIP
-- [ ] Achievements??
+- [ ] Magic system
+- [ ] Achievements
 - [ ] Legendary / unique weapons
 - [ ] Shopkeep “mood” meter → different narration lines depending on how much he likes you (impacted by how much you buy+sell, and charisma) 
 - [ ] Templates → demonic, hellish, angelic, divine → templates that can be applied to mobs that give them stat bonus + special abilities?
@@ -160,6 +161,7 @@ Alternatively, just prevent the game from printing anything at all while it's sa
 - [ ] Have shopkeep automatically sort it's inventory by something (rarity, price, whatever)
 - [ ] Make Shopkeep successful sale message print before player spend_gold() message print (maybe add a silent gold check, then print successful sale, then print spent gold?)
 - [X] If you try to load a fresh game without having saved, items don't load right (durability is set to "None" instead of a value)
-- [ ] Total Defense messages are bugged, maybe just Combat Tricks in general
+- [ ] Combat Tricks bugged
+- [ ] Status effects menu bugged
 - [ ] Add resists + immunities to game_objects's save dictionary
 

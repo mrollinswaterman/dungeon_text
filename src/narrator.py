@@ -1,10 +1,10 @@
 ##Required Modules: globals, commands, controllers
 
 import time, random
+import globals
+import game
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    import globals
-    import commands
     import controllers
 
 SCENE_CHANGE = [
@@ -84,7 +84,7 @@ def continue_run():
             case "y":
                 done = True
                 next_scene_options()
-                globals.SCENE.select_next()
+                game.SCENE.select_next()
             case "n":
                 done = True
                 print("")
@@ -93,13 +93,13 @@ def continue_run():
                 globals.error_message(cmd)
 
 def exit_the_dungeon():
-    globals.RUNNING = False
+    game.RUNNING = False
     globals.type_with_lines(random.choice(EXIT_DUNGEON))
-    globals.SHOPKEEP.restock()
+    game.SHOPKEEP.restock()
     menu_options()
 
 def ask_quantity() -> int | bool:
-    default = commands.commands["_"]
+    default = game.COMMANDS["_"]
 
     globals.type_text(f"Please enter desired quantity:")
     done = False
@@ -117,10 +117,10 @@ def ask_quantity() -> int | bool:
                 print(f"Invalid quantity '{cmd}'. Please enter a valid quantity.", 0.01)
 
 def buy_something():
-    options = commands.commands["_"]
+    options = game.COMMANDS["_"]
     done = False
     while not done:
-        globals.SHOPKEEP.print_inventory()
+        game.SHOPKEEP.print_inventory()
         globals.type_with_lines()
         print("Enter an item's number to purchase it -OR- Go Back - (b)\n")
         cmd = globals.get_cmd()
@@ -130,9 +130,9 @@ def buy_something():
         else:
             try:
                 item_index = int(cmd) - 1
-                item = globals.SHOPKEEP.get(item_index)
+                item = game.SHOPKEEP.get(item_index)
                 if item is not None:
-                    globals.SHOPKEEP.sell(item)
+                    game.SHOPKEEP.sell(item)
                     done = True
                     return buy_something()
                 else:
@@ -145,7 +145,7 @@ def leave_the_shop():
     menu_options()
 
 def shopkeep_options():
-    options = commands.commands["shopkeep_options"]
+    options = game.COMMANDS["shopkeep_options"]
 
     global PREV_MENU
     PREV_MENU = shopkeep_options
@@ -166,7 +166,7 @@ def rest():
     back()
 
 def select_item():
-    options = commands.commands["_"]
+    options = game.COMMANDS["_"]
 
     globals.type_header("Enter an item's number to use it -OR- Go Back - (b)")
     done = False
@@ -178,8 +178,8 @@ def select_item():
             options[cmd]()
         else:
             try:
-                item = globals.PLAYER.get_item(int(cmd) - 1)
-                if globals.PLAYER.use(item):
+                item = game.PLAYER.get_item(int(cmd) - 1)
+                if game.PLAYER.use(item):
                     done = True
                     show_inventory()
                 else:
@@ -188,11 +188,11 @@ def select_item():
                 globals.error_message(cmd)
 
 def show_inventory():
-    globals.PLAYER.print_inventory()
+    game.PLAYER.print_inventory()
     select_item()
 
 def menu_options():
-    options = commands.commands["overworld_menu"]
+    options = game.COMMANDS["overworld_menu"]
 
     global PREV_MENU
     PREV_MENU = menu_options
