@@ -78,11 +78,6 @@ def save():
 def bonus(num:int) -> int:
     return globals.BONUS[num]
 
-def get_cmd() -> str:
-    cmd = input(">> ").lower()
-    print("")
-    return cmd
-
 def find_max_depth(master:list[list[str]]) -> int:
     mx = len(master[0])
     for i in master:
@@ -113,24 +108,6 @@ def print_line_by_line(master:list[list[str]], max_width:int=35) -> None:
         time.sleep(.01)
         i += 1
         print(current)
-
-def get_base_type(obj:Any) -> str:
-    """Returns the base type of the given object
-        i.e. Item, Game_Object, Mechanic, etc"""
-    bases = obj.__class__.__mro__
-    return bases[len(bases)-2].__name__
-
-def get_subtype(obj:Any) -> str:
-    """Returns the subtype of an object,
-        i.e. Equipment, Enchantment, Combat_Trick, etc"""
-    bases = obj.__class__.__mro__
-    return bases[len(bases)-3].__name__
-
-def get_type(obj: Any) -> str:
-    """Returns the type of an object,
-        i.e. Weapon, Stackable, Consumable"""
-    bases = obj.__class__.__bases__
-    return bases[0].__name__
 
 def d(num):
     """Rolls a dX where X is some number (ie d6, d20, etc)"""
