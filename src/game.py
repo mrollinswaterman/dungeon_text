@@ -46,6 +46,10 @@ def initialize():
 
     create_commands_dict()
 
+    test = game_objects.Event()
+
+    test.run("str")
+
     return True
 
 def start():

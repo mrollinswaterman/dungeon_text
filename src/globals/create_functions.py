@@ -145,4 +145,5 @@ def spawn_event(name:str):
 
 def spawn_random_event():
     import compendiums.event_compendium as event_compendium
+    return game_objects.Event2()
     return random.choice(list(event_compendium.dict.values()))()

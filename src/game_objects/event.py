@@ -49,7 +49,7 @@ FAILURE_LINES = {
 }
 
 
-class Event():
+class Event_Old():
 
     def __init__(self, id=""):
 
