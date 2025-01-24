@@ -89,7 +89,8 @@ class Game_Object():
         return self.stats.bonus(stat)
     
     def evasion(self) -> int:
-        return self.stats.base_evasion + self.bonus("dex")
+        return 0
+        #return self.stats.base_evasion + self.bonus("dex")
 
     #ROLLS
     def roll_a_check(self, stat:str) -> int:
@@ -203,7 +204,9 @@ class Game_Object():
             case _:
                 if roll >= self.target.evasion():
                     self.narrate(self.hit_narration)
-                    self.target.take_damage(self.roll_damage())
+                    dmg = self.roll_damage()
+                    print(dmg.amount)
+                    self.target.take_damage(dmg)
                     self.apply_on_hits()
                 else:
                     self.narrate(self.miss_narration)
@@ -252,9 +255,10 @@ class Game_Object():
         start = damage.amount
         damage = self.check_immunities(damage)
         if damage.amount != start:
-            print("target is immune!")
-            raise Exception
+            globals.type_text(f"{self.header.action} immune!")
         damage = self.check_resistances(damage)
+        if damage.amount != start:
+            globals.type_text(f"{self.header.action} resistant!")
 
         taken = int(damage.amount * self.stats.damage_taken_multiplier)
 

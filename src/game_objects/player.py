@@ -50,7 +50,7 @@ class Player(game_objects.Game_Object):
     @property
     def armor_value(self) -> int:
         if self.armor.broken: return 0
-        return self.armor.value
+        return self.armor.armor_value
 
     @property
     def available_carrying_capacity(self) -> float:
@@ -123,7 +123,7 @@ class Player(game_objects.Game_Object):
             
     def roll_damage(self) -> "mechanics.DamageInstance":
         """Returns a damage instance """
-        if controllers.player_turn.GOD_MODE: return mechanics.DamageInstance(self.weapon, 1)#999
+        if controllers.player_turn.GOD_MODE: return mechanics.DamageInstance(self.weapon, 999)#999
         if self.weapon.broken:
             globals.type_text(f"You can't use a broken {self.weapon.id}, so your hands will have to do.")
             amount = (globals.d(4) + self.bonus("str")) * self.stats.damage_multiplier
@@ -205,9 +205,7 @@ class Player(game_objects.Game_Object):
     def critical_hit(self) -> None:
         crit = 2 if self.weapon.broken or self.weapon is None else self.weapon.crit
         self.stats.damage_multiplier = crit
-        dmg = self.roll_damage()
-        print(dmg)
-        taken = self.target.take_damage(dmg)
+        taken = self.target.take_damage(self.roll_damage())
         self.apply_on_hits()
         self.stats.damage_multiplier = 1
         return None
@@ -408,7 +406,7 @@ class Player(game_objects.Game_Object):
 
     ##MISC.
     def save(self) -> dict:
-        self.conditions.cleanse_all()
+        self.monitor.cleanse_all()
 
         player_tod = {
             "name": self.name,

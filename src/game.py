@@ -124,7 +124,7 @@ def create_commands_dict():
     }
 
     for entry in COMMANDS:
-        COMMANDS[entry]["exit"] = exit
+        COMMANDS[entry]["exit"] = globals.exit
         COMMANDS[entry]["reset"] = player_turn.reset
         COMMANDS[entry]["c"] = player_turn.cancel
         COMMANDS[entry]["b"] = narrator.back

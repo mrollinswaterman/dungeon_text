@@ -1,9 +1,11 @@
 ##Required Modules: globals
 
 import random
+import game
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import globals
+    import mechanics
 
 FAILURE_LINES = {
     "str": [
@@ -59,13 +61,14 @@ class Event():
         self._passed = False
         self._end_messages:list[str] = []
         self._damage_header = ""
+        self.damage_type:"mechanics.DamageType" = globals.build_damage_type("Bludgeoning")
         self._loot = {
             "xp": 0,
             "gold": 0,
             "drops": []
         }
 
-        self._player = globals.PLAYER
+        self._player = game.PLAYER
 
     #properties
     @property

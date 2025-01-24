@@ -23,6 +23,7 @@ def exit():
     sys.exit()
 
 def save():
+    globals.type_text("Saving...")
     import items
     import compendiums.item_compendium as item_compendium
     assert game.PLAYER.weapon is not None
@@ -71,6 +72,8 @@ def save():
             w.writeheader()
             w.writerows(item_saved_list)
             file.close()
+
+    print(" Saved!")
 
 def bonus(num:int) -> int:
     return globals.BONUS[num]
