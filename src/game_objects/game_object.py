@@ -135,11 +135,18 @@ class Game_Object():
 
     def heal(self, num:int):
         """Heals the Object for num amount"""
-        self.hp += num
-        if self.hp > self.stats.max_hp:
-            num = num - (self.hp - self.stats.max_hp)
+        if self.hp == self.stats.max_hp:
+            globals.type_text("You are already full HP.")
+            return 0
+        if self.hp + num > self.stats.max_hp:
+            ret = self.hp - (self.stats.max_hp - num)
             self.hp = self.stats.max_hp
+            num = ret
+        else:
+            self.hp += num
+
         self.heal_narration(num)
+        return num
 
     def spend_ap(self, num:int=1) -> bool:
         """Spends Action points equal to num, 0 spends max AP points"""

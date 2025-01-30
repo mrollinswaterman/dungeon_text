@@ -1,11 +1,4 @@
-*You're going to need more than brawn to solve this one.
+*You push with all your might, but the boulder doesn't budge. You'll need to really 
+put your back into it this time.
 
-*Your bulging biceps aren't up to this task.
-
-*No amount of strength can solve this problem.
-
-*Strength isn't enough.
-
-*That won't work here...
-
-*Trying to brute force this isn't the best idea...
+*You hit the boulder. Nothing happens... Maybe if you hit it harder?

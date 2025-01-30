@@ -2,7 +2,7 @@
 import stat
 import game_objects.event as event
 import globals
-import status_compendium
+#import status_compendium
 
 success = {
     "con": ["You grit your teeth and continue forwards, making it out without a scratch.", 
@@ -50,7 +50,7 @@ class Smog(event.Event):
 
     def failure(self):
         super().failure()
-        poison = status_compendium.Poisoned.object(self)
-        self._player.apply(poison)
+        #poison = status_compendium.Poisoned.object(self)
+        #self._player.apply(poison)
 
 object = Smog

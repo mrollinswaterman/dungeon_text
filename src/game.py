@@ -1,5 +1,5 @@
 #All globally required game objects (player, scene, shopkeep, etc) are intialized here
-import csv
+import sys 
 import globals
 from typing import TYPE_CHECKING, Union, Any
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ RUNNING = False
 
 def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
-    import game_objects, controllers
+    import game_objects, controllers, compendiums
 
     PLAYER = game_objects.Player()
 
@@ -46,9 +46,17 @@ def initialize():
 
     create_commands_dict()
 
-    test = game_objects.Event()
+    test = compendiums.event_compendium.dict["boulder"]()
 
-    test.run("str")
+    test.start()
+
+    test.run("dex")
+
+    test.run("int")
+
+    test.run("dex")
+
+    sys.exit()
 
     return True
 

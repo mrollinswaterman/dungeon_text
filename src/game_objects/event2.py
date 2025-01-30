@@ -10,13 +10,18 @@ class Event(game_objects.Game_Object):
 
         self.stats:dict[str, int] = {}
 
+        if self.id == "event": self.id = "default"
+
     @property
     def attempts(self) -> int:
         return self._attempts
 
     @property
     def done(self) -> bool:
-        return self.attempts <= 0
+        return self._attempts <= 0
+    
+    def start(self):
+        return self.message("start")
     
     def success(self):
         return True
@@ -26,7 +31,6 @@ class Event(game_objects.Game_Object):
         return False
     
     def run(self, stat:str):
-        self.id = "default"
         if self.done: raise ValueError("event is finished")
 
         self._attempts -= 1
@@ -45,7 +49,7 @@ class Event(game_objects.Game_Object):
         if game.PLAYER.roll_a_check(stat) >= self.stats[stat]:
             self.message("success", stat)
             return True
-        
+
         self.message("failure", stat)
         return False
         
@@ -53,6 +57,8 @@ class Event(game_objects.Game_Object):
         filename = f"event_text/{self.id}/{msg_type}/{stat}.txt"
 
         if stat is None: filename = f"event_text/{self.id}/{msg_type}.txt"
+
+        filename = self.check_default(filename)
 
         with open(filename, "r") as file:
             content = file.read().split("\n\n")
@@ -62,6 +68,19 @@ class Event(game_objects.Game_Object):
             file.close()
         
         if text[0] != "*":
-            return self.failure_message(stat)
+            return self.message(msg_type, stat)
+        
+        if text[-1] == '\n':
+            text = text[0:-1]
         
         globals.type_text(text[1:len(text)])
+    
+    def check_default(self, filename:str):
+        try:
+            with open(filename, "r") as file:
+                file.close()
+            return filename
+        except:
+            ret = filename.split("/")
+            ret[1] = "default"
+            return "/".join(ret)
