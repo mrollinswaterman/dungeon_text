@@ -1,57 +1,62 @@
 #Mysterious Berries event class
-import random
 import globals
-import game_objects.event as event
 import game
+import game_objects
 
 
-class Berries(event.Event):
+class Berries(game_objects.Event):
 
-    def __init__(self, id="Berries"):
-        super().__init__(id)
+    def __init__(self):
+        super().__init__()
 
         #determines if the berries are poisonous
-        self._poisonous = globals.probability(50)
+        self._poisonous = globals.probability(1)
 
         self.stats["int"] = 15
         self.stats["wis"] = 20
 
-    def success(self):
+    def end(self):
         if self._poisonous: 
-            self.message("end_poisonous")
+            return self.message("end_poisonous")
+        else:
+            return self.message("end")
+
+    def success(self) -> bool:
+        self.end()
+        if self._poisonous: 
             return True
         else: 
-            self.message("end")
             if game.PLAYER.heal(4) > 0:
                 globals.type_text("Delicious! You can feel your strength returning.")
             else:
                 globals.type_text("Delicious!")
         return True
 
-    def message(self, msg_type:str, stat:str=None):
+    def message(self, msg_type:str, stat:str=None) -> None:
         if msg_type == "success":
-            if self._poisonous: return super().message("success_poisonous", stat)
-            else: return super().message("success_safe", stat)
-
-    def failure(self):
-        print("")#formatting
-        super().failure()
-        print("")#formatting
-        if self._poisonous:
-            functions.type_text("You probably shouldn't have eaten those...")
-            if self._player.hp >= 4*2:
-                self._player.lose_hp(3)
-                functions.type_text("The posion berries did 3 damage to you.")
-            else:
-                functions.type_text("You don't feel so good, but nothing bad happened this time.")
-            return None
+            if self._poisonous: 
+                return super().message("success_poisonous", stat)
+            else: 
+                return super().message("success_safe", stat)
+            
         else:
-            if self._player.hp < self._player.max_hp:
-                functions.type_text("You got lucky. The berries turned out to be edible.")
-                self._player.heal(2)
+            return super().message(msg_type, stat)
+
+    def failure(self) -> bool:
+        super().failure()
+        if self._poisonous:
+            globals.type_text("You probably shouldn't have eaten those...")
+
+            if game.PLAYER.hp > 8:
+                game.PLAYER.lose_hp(3)
+                globals.type_text("The posion berries did 3 damage to you.")
             else:
-                functions.type_text("You got lucky. The berries turned out to be edible.")
-                self._player.heal(2)
-            return None
+                globals.type_text("You don't feel well, but nothing bad happened... this time.")
+        
+        else:
+            globals.type_text("You got lucky. The berries turned out to to be edible.")
+            game.PLAYER.heal(2)
+
+        return False
 
 object = Berries

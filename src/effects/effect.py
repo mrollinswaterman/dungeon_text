@@ -20,7 +20,7 @@ class Effect(mechanics.Mechanic):
         return True
 
     def deal_damage(self, amount:int):
-        dealt = mechanics.DamageInstance(self.source, amount)
+        dealt = mechanics.DamageInstance(self, amount)
         return self.target.take_damage(dealt)
 
     def end(self):

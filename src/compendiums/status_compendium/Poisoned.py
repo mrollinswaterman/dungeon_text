@@ -1,15 +1,15 @@
 import globals
-import mechanics
+import effects
+import game_objects
 
-class Poisoned(mechanics.Status):
+class Poisoned(effects.Status_Effect):
 
     def __init__(self, source):
         super().__init__(source)
-        self.source = "the poison"
-
-        self._effect = mechanics.DecreasingDoT(self.source)
-        self.effect.duration = 3
-        self.effect.potency = "1d4"
+        self.header._damage = "the poison"
+        self._effect = effects.DecreasingDoT(self.source)
+        self._effect.duration = 3
+        self._effect.potency = "1d4"
 
         self.save_DC = 10
 

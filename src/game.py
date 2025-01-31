@@ -1,5 +1,6 @@
 #All globally required game objects (player, scene, shopkeep, etc) are intialized here
 import sys 
+import compendiums.status_compendium
 import globals
 from typing import TYPE_CHECKING, Union, Any
 if TYPE_CHECKING:
@@ -46,15 +47,15 @@ def initialize():
 
     create_commands_dict()
 
-    test = compendiums.event_compendium.dict["boulder"]()
+    enemy = globals.spawn_random_mob()
 
-    test.start()
+    test = compendiums.status_compendium.dict["Poisoned"](enemy)
 
-    test.run("dex")
+    print(test._source.target)
 
-    test.run("int")
+    PLAYER.apply(test)
 
-    test.run("dex")
+    PLAYER.update()
 
     sys.exit()
 

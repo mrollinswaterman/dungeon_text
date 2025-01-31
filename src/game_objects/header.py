@@ -1,17 +1,18 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import game_objects
+    import effects
 
 class Header():
     """Header class, controls which text is used to describe a GameObject
         3 types: default, action, ownership"""
 
-    def __init__(self, parent:"game_objects.Game_Object"):
+    def __init__(self, parent:"game_objects.Game_Object | effects.StatusEffect"):
         self.parent = parent
         self._default:str = f"The {self.parent.id}"
         self._action:str = f"The {self.parent.id} is"
         self._ownership:str = f"The {self.parent.id}'s"
-        self.damage:str = self._default
+        self._damage:str = None
 
         self.prev = ""
 
@@ -41,3 +42,10 @@ class Header():
         else:
             self.prev = "Its"
             return self.prev
+        
+    @property 
+    def damage(self):
+        if self._damage is None: 
+            return self.default
+        else:
+            return self._damage

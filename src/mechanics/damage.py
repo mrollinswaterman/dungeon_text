@@ -1,31 +1,34 @@
 #file for damage class instances and damage types
+import game
 import globals
+import mechanics
 from typing import TYPE_CHECKING
-from mechanics.mechanic import Mechanic
 if TYPE_CHECKING:
     import game_objects
     import items
 
-class DamageInstance(Mechanic):
+class DamageInstance(mechanics.Mechanic):
 
-    def __init__(self, source:"game_objects.Game_Object | items.Item", amount:int):
+    def __init__(self, source, amount:int):
 
-        self._source = source
+        self.source:items.Item | game_objects.Game_Object | mechanics.Mechanic = source
         self.amount = amount
         self.type:DamageType = self.source.damage_type
 
     @property
-    def source(self) -> "game_objects.Game_Object":
-        base = globals.get_base_type(self._source)
+    def source_id(self) -> "game_objects.Game_Object":
+        base = globals.get_base_type(self.source)
         match base:
-            case "Item": return self._source.owner
-            case "Game_Object": return self._source
+            case "Item": return self.source.owner.header.damage
+            case "Game_Object": return self.source.header.damage
+            case "Mechanic": return self.source.source.header.damage
 
-class DamageType(Mechanic):
+
+class DamageType(mechanics.Mechanic):
 
     def __init__(self):
 
-        self._physical:list[str | bool] = []
+        self._physical:list[str | bool] = ["Physical"]
         self._magic:list[str | bool] = []
 
     @property

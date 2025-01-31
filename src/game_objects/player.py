@@ -252,24 +252,27 @@ class Player(game_objects.Game_Object):
         return text
     
     def take_damage_narration(self, damage:"mechanics.DamageInstance"):
-        taken = damage.amount
-        source = damage.source
+        taken = f"{damage.amount} damage"
+        source = damage.source_id
         if taken > 0:
             text = [
-                f"You took {taken} damage from the {source.id}.",
-                f"The {source.id} dealt {taken} damage to you.",
-                f"The {source.id} did {taken} damage.",  
+                f"You took {taken} from the {source}.",
+                f"The {source} dealt {taken} to you.",
+                f"The {source} did {taken}.",  
                 ]
         else:
             text = [
-                f"You took no damage from the {source.id}!",
-                f"The {source.id} did no damage to you!",
+                f"You took no damage from the {source}!",
+                f"The {source} did no damage to you!",
                 ]
+
         #if source isnt a GameObject, don't add "hit you for..." text to final list, else do
         match source:
             case game_objects.Game_Object():
-                if taken > 0: text.append(f"The {source.id} hit you for {taken} damage.")
-                else: f"The {source.id} hit you for no damage."
+                if taken > 0: 
+                    text.append(f"The {source} hit you for {taken}.")
+                else: 
+                    text.append(f"The {source} hit you for no damage.")
             case _:
                 pass
         return text
