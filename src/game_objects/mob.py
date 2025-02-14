@@ -123,29 +123,29 @@ class Mob(game_objects.Game_Object):
             return text
 
         def take_damage_narration(self, damage:"mechanics.DamageInstance") -> list[str]:
-            taken = damage.amount
-            source = damage.source
-            if taken > 0:
-                taken = f"{taken} damage"
-                match source:
-                    case game_objects.Player():  #the player
-                        text = [
-                            f"You did {taken} to the {self.id}.",
-                            f"The {self.id} took {taken}.",
-                            f"You hit the {self.id} for {taken}.",
-                            ]   
-                    case str():  #the name of an effect or some other string literal
-                        text = [
-                            f"The {self.id} took {taken} from {source}.",
-                            f"{source} dealt {taken} to the {self.id}.",
-                        ] 
-                    case _:  # an item or weapon
-                        text = [
-                            f"Your {source.id} did {taken}.",
-                            f"The {source.id} dealt {taken} to the {self.id}.",
-                            f"The {self.id} took {taken} from your {source.id}."
-                        ]
-            else: text = [f"The {self.id} took no damage!"] 
+            if damage.amount <= 0: 
+                return [
+                    f"{self.id} took no damage from {source}!",
+                    f"{source} did no damage to {self.id}!",
+                ]
+
+            taken = f"{damage.amount} damage"
+            source = f"{damage.header.damage}"
+            text = [
+                    f"{source} did {taken} to {self.id}.",
+                    f"{source} dealt {taken} to {self.id}.",
+                    f"{self.id} took {taken} from {source}."
+                    ]
+
+            #if source isnt a GameObject, don't add "hit you for..." text to final list, else do
+            match damage.source:
+                case game_objects.Game_Object():
+                    if taken > 0: 
+                        text.append(f"{source} hit {self.id} for {taken}.")
+                    else: 
+                        text.append(f"{source} hit {self.id} for no damage.")
+                case _:
+                    pass
             return text
         
         #LOAD

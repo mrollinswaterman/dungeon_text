@@ -1,11 +1,10 @@
 import effects
-import game
+import game_objects
 import globals
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import game_objects
     import items
-
 
 class DamageOverTime(effects.Repeated_Effect):
 
@@ -53,14 +52,24 @@ class StackingDoT(effects.Repeated_Effect):
         super().end()
 
 class Status_Effect(effects.Repeated_Effect):
-    
+    """
+    A Status Effect is a type of Repeated Effect, but it is also a wrapper for other repeated effects.
+    The Status Effect's 'repeated effect' is applying each of the effects attached to it.
+
+    Status Effects have specific names, unlike other effects (eg. Poisoned, Bleeding, etc)
+    """
     def __init__(self, source):
         super().__init__(source)
         self.id = self.__class__.__name__
-        self.header = game_objects.Header(self)
+
+        # Status Effects have their own headers with custom values for damage
+        self._header = self.source.header
+        self._header.damage = ""
+
         self._effects:list[effects.Repeated_Effect] = []  # might need to make this a dictionary so effects can be accessed by name
         self.switch_word = ""
         self.save_DC = 12
+
 
     @property
     def active(self) -> bool:

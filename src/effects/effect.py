@@ -6,6 +6,9 @@ if TYPE_CHECKING:
 class Effect(mechanics.Mechanic):
     """
     An effect is a mechanical function that changes a game objects' properties in some way
+
+    They have a source which can be a Game Object, or another Mechanic (i.e. a Combat Trick
+    or Status Effect)
     """
     def __init__(self, source:"game_objects.Game_Object | mechanics.Mechanic"):
         super().__init__(source)

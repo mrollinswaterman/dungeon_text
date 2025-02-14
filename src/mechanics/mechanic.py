@@ -8,13 +8,23 @@ if TYPE_CHECKING:
     import items
 
 class Mechanic():
+    """
+    desc. needed
+    """
 
     def __init__(self, source):
         self.source:game_objects.Game_Object = source
         self.id = "Mechanic"
         self._target:"game_objects.Game_Object" = None
+        self._header = None
 
     #properties
+    @property
+    def header(self):
+        if not self._header:
+            return self.source.header
+        else:
+            return self._header
     @property
     def target(self) -> game_objects.Game_Object:
         if self._target is not None: return self._target

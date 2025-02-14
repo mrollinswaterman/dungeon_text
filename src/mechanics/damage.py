@@ -25,47 +25,49 @@ class DamageInstance(mechanics.Mechanic):
 
 
 class DamageType(mechanics.Mechanic):
+    """
+    Each Game Object has a Damage Type object associated with it that describes the 
+    types of damage it can deal
+
+    The resistances and immunities of each Game Object are also represented by Damage Type objects
+
+    Each Damage Instance object inherits the Damage Type of it's source
+    """
+
+    physical = False
+    magic = False
+    slashing = False
+    piercing = False
+    bludgeoning = False
 
     def __init__(self):
+        pass
 
-        self._physical:list[str | bool] = ["Physical"]
-        self._magic:list[str | bool] = []
+    def set(self, types:list[str]) -> None:
+        """
+        Sets the damage types of a damage type object
 
-    @property
-    def is_physical(self) -> bool:
-        return len(self._physical) > 0
-    
-    @property
-    def physical(self) -> list:
-        return self._physical
+        Takes a list of stirng literals and for each them, if the string is present in the
+        object's dictionary, it sets 
+        """
+        for item in types:
+            if item.lower() in self.__dict__:
+                self.__dict__[item.lower()] = True
 
-    @property
-    def is_magic(self) -> bool:
-        return len(self._magic) > 0
-    
-    @property
-    def magic(self) -> list:
-        return self._magic
-    
+    def unset(self, types:list[str]) -> None:
+        """
+        Inverse function to self.set, turns all given types to False
+        """
+        for item in types:
+            if item.lower() in self.__dict__:
+                self.__dict__[item.lower()] = False
+
     def __str__(self):
         ret = ""
-        if self.is_physical:
-            ret = "Physical:"
-            for entry in self.physical:
-                ret = f" {ret} {entry}"
-        if self.is_magic:
-            ret = ret + '\n' + "Magic:"
-            for entry in self.magic:
-                ret = f" {ret} {entry}"
-
-        if len(ret) <= 0:
-            ret = "None"
         return ret
     
     def __eq__(self, value):
         for entry in self.__dict__:
-            if entry not in value.__dict__:
-                return False
             if self.__dict__[entry] != value.__dict__[entry]:
                 return False
         return True
