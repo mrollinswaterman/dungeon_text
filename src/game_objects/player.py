@@ -252,7 +252,7 @@ class Player(game_objects.Game_Object):
         return text
     
     def take_damage_narration(self, damage:"mechanics.DamageInstance"):
-        if damage.amount <= 0: return "You took no damage!"
+        if damage.amount <= 0: return ["You took no damage!", "You took 0 damage!", ]
         taken = f"{damage.amount} damage"
         source = f"{damage.header.damage}"
         if taken > 0:

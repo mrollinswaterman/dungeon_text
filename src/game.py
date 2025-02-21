@@ -51,8 +51,6 @@ def initialize():
 
     test = compendiums.status_compendium.dict["Poisoned"](enemy)
 
-    print(test._source.target)
-
     PLAYER.apply(test)
 
     PLAYER.update()

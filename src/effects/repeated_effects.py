@@ -3,28 +3,44 @@ import game_objects
 import globals
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    import game_objects
     import items
 
 class DamageOverTime(effects.Repeated_Effect):
+    """
+    Deals damage to its target every turn.
+
+    Increase and Decrease potency functions are adjust the effect's potency
+    up or down the dice progression scale based on the specifications
+    of the status effect that the DoT object is attached to
+    """
 
     def __init__(self, source):
         super().__init__(source)
+
+    def decrease_potency(self):
+        match self.potency:
+            case str(): 
+                idx = globals.DICE_PROGRESSION.find(self.potency)
+                self.potency = globals.DICE_PROGRESSION[idx - 1]
+            case int():
+                self.potency = self.potency // 2
+                self.potency = max(1, self.potency)
+        return None
+
+    def increase_potency(self):
+        match self.potency:
+            case str():
+                idx = globals.DICE_PROGRESSION.find(self.potency)
+                if idx > len(globals.DICE_PROGRESSION):
+                    return None
+                self.potency = globals.DICE_PROGRESSION[idx + 1]
+            case int():
+                self.potency += 2
+
+        return None
 
     def update(self):
         self.deal_damage(globals.XdY(self.potency))
-        super().update()
-
-class DecreasingDoT(effects.Repeated_Effect):
-
-    def __init__(self, source):
-        super().__init__(source)
-        self.max_potency = self.potency
-
-    def update(self):
-        self.potency = self.potency // 2  #halve potency each tick
-        self.potency = max(1, self.potency)  #minimum of 1 damage
-        self.deal_damage(self.potency) #damage target
         super().update()
 
 class StackingDoT(effects.Repeated_Effect):
@@ -41,7 +57,7 @@ class StackingDoT(effects.Repeated_Effect):
             self.stacks = self.max_stacks
             self.deal_damage((damage * self.stacks) + self.stacks)  
             return self.end()
-        else: # damage target, scaling with stacks
+        else: # If not at max stacks, damage target, scaling with stacks, then decrease stacks
             self.deal_damage(damage * self.stacks)
             self.stacks -= 1
 
@@ -63,25 +79,26 @@ class Status_Effect(effects.Repeated_Effect):
         self.id = self.__class__.__name__
 
         # Status Effects have their own headers with custom values for damage
-        self._header = self.source.header
-        self._header.damage = ""
+        #self._header = self.source.header
+        self._header = game_objects.Header(self)
+        self._header._damage = ""
 
-        self._effects:list[effects.Repeated_Effect] = []  # might need to make this a dictionary so effects can be accessed by name
+        self._effects_list:list[effects.Repeated_Effect] = []  # might need to make this a dictionary so effects can be accessed by name
         self.switch_word = ""
         self.save_DC = 12
 
 
     @property
     def active(self) -> bool:
-        return len(self._effects) > 0
+        return len(self._effects_list) > 0
 
     @property
     def base_msg(self) -> str:
         return f"{self.target.header.action} {self.switch_word} {self.id}."
     
     @property
-    def effects(self) -> list[effects.Effect]:
-        return self._effects
+    def effects_list(self) -> list[effects.Effect]:
+        return self._effects_list
 
     @property
     def end_msg(self) -> str:
@@ -100,21 +117,21 @@ class Status_Effect(effects.Repeated_Effect):
 
     def start(self):
         globals.type_text(self.start_msg)
-        actives = self.effects
+        actives = self.effects_list
         for effect in actives:
             effect.start()
             if not effect.active:
-                self._effects.remove(effect)
+                self._effects_list.remove(effect)
         if not self.active:
             self.end()
 
     def update(self):
-        actives = self.effects
+        actives = self.effects_list
         for effect in actives:
             if effect.active:
                 effect.update()
             elif not effect.active:
-                self._effects.remove(effect)
+                self._effects_list.remove(effect)
         super().update()
 
     def refresh(self):
@@ -122,9 +139,9 @@ class Status_Effect(effects.Repeated_Effect):
 
     def end(self):
         globals.type_text(self.end_msg)
-        for effect in self.effects:
+        for effect in self.effects_list:
             effect.end()
-        self._effects = []
+        self._effects_list = []
 
     def save_attempt(self) -> bool:
         return None

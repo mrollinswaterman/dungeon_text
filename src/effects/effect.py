@@ -69,10 +69,9 @@ class Constant_Effect(Effect):
     def end(self):
         self.duration = 0
 
-
 class Repeated_Effect(Effect):
     """
-    Statuses are effects that do something each turn cycle, usually damage. They are similar
+    Repeated effect do something each turn cycle, usually damage. They are similar
     to constant effects, except that their update involves more than just ticking duration down
     """
     def __init__(self, source):
