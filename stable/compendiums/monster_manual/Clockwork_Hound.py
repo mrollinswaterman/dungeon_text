@@ -4,29 +4,9 @@ import game_objects, globals
 from items.stackable import Stackable
 from items.equipment import Equipment
 
-stats = {
-    "level": 1,
-    "level_range": (6, 13),
-    "hit_dice": 10,
-    "str": 16,
-    "dex": 14,
-    "con": 14,
-    "int": 18,
-    "wis": 10,
-    "cha": 7,
-    "base_evasion": 10,
-    "damage_taken_multiplier": 1,
-    "damage_multiplier": 1,
-    "max_hp": 0,
-    "max_ap": 0,
-    "armor": 3,
-    "damage": "2d8",
-    "dc": 10,
-}
-
 class Clockwork_Hound(game_objects.Mob):
-    def __init__(self, id="Clockwork Hound", stat_dict=stats):
-        super().__init__(id, stat_dict)
+    def __init__(self):
+        super().__init__(id="Clockwork Hound")
         #base gold & xp
         self.gold += 30
         self.xp += 15

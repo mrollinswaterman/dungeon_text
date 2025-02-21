@@ -1,8 +1,7 @@
 #Power attack combat trick file
-import stable.globals.functions as functions
-from mechanics.trick import Combat_Trick
+import mechanics
 
-class Power_Attack(Combat_Trick):
+class Power_Attack(mechanics.Combat_Trick):
 
     def __init__(self, parent):
         super().__init__(parent, parent)

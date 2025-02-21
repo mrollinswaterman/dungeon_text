@@ -83,8 +83,8 @@ class Scene():
 
     def select_next(self):
         """Starts a new scene with a new enemy or event"""
-        if globals.probability(85): #85% chance of an enemy spawning next
-            self.enemy = controllers.spawn_random_mob()
+        if globals.probability(1): #85% chance of an enemy spawning next
+            self.enemy = globals.spawn_random_mob()
             self.begin_encounter()
         else: #remainging 15% chance of an event spawning
             self.event: game_objects.Event = globals.spawn_random_event()
@@ -105,6 +105,40 @@ class Scene():
         globals.type_with_lines()
         self.start_combat_round()
 
+    def run_event(self):
+        stats = game.COMMANDS["stats"]
+
+        done = False
+        while not done:
+            narrator.event_options()
+            cmd = globals.get_cmd()
+
+            if cmd in stats:
+                if stats[cmd] is None:
+                    self.event.run(cmd, globals.PLAYER.roll_a_check(cmd))
+                    if self.event.passed is True:# if passed, reset event tries and SCENE.next()
+                        done = True
+                        self.event.set_tries(2)
+                        self.event.set_passed(False)
+                        globals.PLAYER.recieve_reward(self.event.loot)
+                        if not globals.PLAYER.can_level_up:
+                            narrator.continue_run()
+                        else:
+                            pass
+                            #level_up_player()
+                    elif self.event.tries is True:# if not passed yet, and still tries left, run it again
+                        globals.type_with_lines()
+                    else: # if failed, tell the player and move on
+                        done = True
+                        self.event.failure()
+                        self.event = None
+                        narrator.continue_run()
+                else:
+                    stats[cmd]()
+
+            else:
+                globals.type_text(f"Invalid stat '{cmd}'. Please try again.")
+
     def end(self):
         globals.type_text(f"You killed the {self.enemy.id}!")
         game.PLAYER.receive_loot()
@@ -114,43 +148,11 @@ class Scene():
         if not game.PLAYER.can_level_up:
             narrator.continue_run()
         else:
-            pass
             #level_up_player()
+            narrator.continue_run()
 
 """
 
-def run_event(event: "game_objects.Event"):
-    stats = commands.commands["stats"]
-
-    done = False
-    while not done:
-        narrator.event_options()
-        cmd = globals.get_cmd()
-
-        if cmd in stats:
-            if stats[cmd] is None:
-                event.run(cmd, globals.PLAYER.roll_a_check(cmd))
-                if event.passed is True:# if passed, reset event tries and SCENE.next()
-                    done = True
-                    event.set_tries(2)
-                    event.set_passed(False)
-                    globals.PLAYER.recieve_reward(event.loot)
-                    if not globals.PLAYER.can_level_up:
-                        narrator.continue_run()
-                    else:
-                        level_up_player()
-                elif event.tries is True:# if not passed yet, and still tries left, run it again
-                    globals.type_with_lines()
-                else: # if failed, tell the player and move on
-                    done = True
-                    event.failure()
-                    SCENE.event = None
-                    narrator.continue_run()
-            else:
-                stats[cmd]()
-
-        else:
-            globals.type_text(f"Invalid stat '{cmd}'. Please try again.")
 
 def level_up_player():
     stats = commands.commands["stats"]

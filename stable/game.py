@@ -1,5 +1,7 @@
 #All globally required game objects (player, scene, shopkeep, etc) are intialized here
-
+import sys 
+import compendiums.status_compendium
+import globals
 from typing import TYPE_CHECKING, Union, Any
 if TYPE_CHECKING:
     import game_objects
@@ -19,9 +21,10 @@ START_CMD = True
 
 RUNNING = False
 
+
 def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
-    import globals, game_objects, controllers, mechanics
+    import game_objects, controllers, compendiums
 
     PLAYER = game_objects.Player()
 
@@ -36,13 +39,25 @@ def initialize():
 
     PLAYER.equip(ARMORY.get("Longsword"), True)
     PLAYER.equip(ARMORY.get("Padded Leather"), True)
-    PLAYER.gain_gold(10000)
+    #PLAYER.gain_gold(10000)
 
     #hp_pots:"items.Stackable" = item_compendium.Health_Potion(max(1, PLAYER.level // 4))
     #hp_pots.set_quantity(5)
     #PLAYER.pick_up(hp_pots, True)
 
     create_commands_dict()
+
+    #enemy = globals.spawn_random_mob()
+
+    #test = compendiums.status_compendium.dict["Poisoned"](enemy)
+
+    #print(test._source.target)
+
+    #PLAYER.apply(test)
+
+    #PLAYER.update()
+
+    #sys.exit()
 
     return True
 
@@ -122,7 +137,7 @@ def create_commands_dict():
     }
 
     for entry in COMMANDS:
-        COMMANDS[entry]["exit"] = exit
+        COMMANDS[entry]["exit"] = globals.exit
         COMMANDS[entry]["reset"] = player_turn.reset
         COMMANDS[entry]["c"] = player_turn.cancel
         COMMANDS[entry]["b"] = narrator.back

@@ -1,29 +1,9 @@
 #Bandit mob file
 import game_objects.mob as mob
 
-stats = {
-    "level": 1,
-    "level_range": (2, 7),
-    "hit_dice": 10,
-    "str": 14,
-    "dex": 12,
-    "con": 12,
-    "int": 14,
-    "wis": 8,
-    "cha": 10,
-    "base_evasion": 9,
-    "damage_taken_multiplier": 1,
-    "damage_multiplier": 1,
-    "max_hp": 0,
-    "max_ap": 0,
-    "armor": 1,
-    "damage": "2d4",
-    "dc": 10
-}
-
 class Bandit(mob.Mob):
-    def __init__(self, id="Bandit", stat_dict=stats):
-        super().__init__(id, stat_dict)
+    def __init__(self):
+        super().__init__(id="Bandit")
         #base gold & xp
         self.gold += 15
         self.xp += 8

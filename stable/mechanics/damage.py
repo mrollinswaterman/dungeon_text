@@ -21,7 +21,7 @@ class DamageInstance(mechanics.Mechanic):
         match base:
             case "Item": return self.source.owner.header.damage
             case "Game_Object": return self.source.header.damage
-            case "Mechanic": return self.source.header.damage
+            case "Mechanic": return self.source.source.header.damage
 
 
 class DamageType(mechanics.Mechanic):

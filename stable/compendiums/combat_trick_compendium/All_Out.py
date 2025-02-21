@@ -1,7 +1,7 @@
 #Power attack combat trick file
-from mechanics.trick import Combat_Trick
+import mechanics
 
-class All_Out(Combat_Trick):
+class All_Out(mechanics.Combat_Trick):
 
     def __init__(self, parent):
         super().__init__(parent, parent)

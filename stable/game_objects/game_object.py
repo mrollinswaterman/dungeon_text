@@ -1,157 +1,15 @@
-#Game Object class
-
-##Required Modules: globals, items
 from __future__ import annotations
-import enum, random, csv
-
+import random
+from sysconfig import is_python_build
 import globals
-from typing import Any
+import game_objects
+import items
+import effects
+import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import items
     import mechanics
-
-class Damage_Type(enum.Enum):
-    TRUE = 0
-    PHYSICAL = 1
-    MAGIC = 2
-
-class Statblock():
-
-    def __init__(self, parent:Game_Object):
-
-        self.parent = parent
-        self.id:str = f"{self.parent.id} Statblock"
-
-        #Core Stats
-        self.level:int = self.parent.level
-        self.level_range:tuple[int, int] = (1, 20)
-        self.hit_dice:int = 8
-
-        #Ability Scores
-        self.str:int = 12
-        self.dex:int = 12
-        self.con:int = 12
-        self.int:int = 12
-        self.wis:int = 12
-        self.cha:int = 12
-
-        #Derived stats
-        self.base_evasion:int = 9
-        self.damage_taken_multiplier:int = 1
-        self.damage_multiplier:int = 1
-
-        #Resources
-        self.max_hp:int = 1
-        self.max_ap:int = 1
-        self.max_mp:int = 0
-        self.temp_hp:int = 0
-        
-        #Combat Stats (mob only)
-        self.armor:"items.Armor" | int | None = None
-        self.damage: int | str | None = None
-        self.dc:int = 0
-
-    def value(self, stat:str) -> int | str:
-        return self.__dict__[stat]
-    
-    def bonus(self, stat:str) -> int:
-        return globals.bonus(self.__dict__[stat])
-    
-    def modify(self, stat:str, num:int):
-        self.__dict__[stat] += num
-
-    def load(self, filename:str):
-        with open(filename, "r") as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                self.copy(row)
-    
-    def copy(self, source:dict):
-        for entry in source:
-            if entry in self.__dict__:
-                match self.__dict__[entry]:
-                    case str(): self.__dict__[entry] = source[entry]
-                    case int():self.__dict__[entry] = int(source[entry])
-                    case _: self.__dict__[entry] = source[entry]
-
-class Status_Handler():
-    def __init__(self, parent):
-        self.parent:Game_Object = parent
-        self.dict:dict[str, mechanics.Condition | mechanics.Effect] = {}
-        self.cleanse_pool: set[mechanics.Condition | mechanics.Effect] = set()
-    
-    #properties
-    @property
-    def list(self) -> list["mechanics.Condition"]:
-        return list(self.dict.values())
-
-    #methods
-    def get(self, status:mechanics.Condition | mechanics.Effect | str | int) -> mechanics.Condition | mechanics.Effect| None:
-        """Returns a condition from the Conditon_Handler's dictionary.
-            Can access by str(id) or int(index)"""
-        try:
-            match status:
-                case str():
-                    return self.dict[status]
-                case int():
-                    return self.list[status]
-                case _:
-                    return self.dict[status.id]
-        except IndexError: return None
-        except KeyError: return None
-
-    def add(self, condition:mechanics.Condition):
-        if condition.id not in self.dict:
-            self.dict[condition.id] = condition
-            condition.start()
-        else:
-            condition = self.get(condition)
-            if condition is not None:
-                condition.refresh()
-
-    def update(self):
-        for condition in self.list:
-            condition.update()
-            if not condition.active:
-                self.cleanse_pool.add(condition)
-
-        for condition in self.cleanse_pool:
-            self.cleanse(condition)
-        self.cleanse_pool = set()
-    
-    def cleanse(self, condition:mechanics.Condition | mechanics.Effect | str | int) -> bool:
-        condition = self.get(condition)
-        if condition is not None:
-            condition.end()
-            del self.dict[condition.id]
-            return True
-        else: return False
-
-    def cleanse_all(self):
-        for condition in self.list:
-            self.cleanse_pool.add(condition)
-
-        for condition in self.cleanse_pool:
-            self.cleanse(condition)
-        self.cleanse_pool = set()
-
-class Header():
-    """Header class, controls which text is used to describe a GameObject
-        3 types: default, action, ownership"""
-
-    parent:Game_Object
-    default:str
-    action:str
-    ownership:str
-    damage: str
-
-    def __init__(self, parent:Game_Object):
-        self.parent = parent
-        self.default = f"The {self.parent.id}"
-        self.action = f"The {self.parent.id} is"
-        self.ownership = f"The {self.parent.id}'s"
-        self.damage = self.default
 
 class Game_Object():
 
@@ -161,8 +19,8 @@ class Game_Object():
         self.id = id
         self.name = self.id
         self.level = 1
-        self.stats:Statblock = Statblock(self)
-        self.header:Header = Header(self)
+        self.stats:game_objects.Statblock = game_objects.Statblock(self)
+        self.header:game_objects.Header = game_objects.Header(self)
 
         #Derived stats
         self.stats.max_hp = 10 + self.bonus("con")
@@ -175,16 +33,14 @@ class Game_Object():
 
         #Items / Equipment
         self.inventory:dict[str, "items.Item"] = {}
-        self.weapon: "items.Weapon" | None = None
-        self.armor: "items.Armor" | int | None = None
 
         #Combat tools
-        self.status:Status_Handler | None = None
-        self.damage_type:Damage_Type = Damage_Type(1)
+        self.monitor:game_objects.Monitor = game_objects.Monitor(self)
+        self.damage_type:mechanics.DamageType = mechanics.DamageType()
+        self.damage_type.set(["Physical", "Slashing"])  # set default damage type to Physical Slashing
 
-        #Player Exclusive
-        self.combat_trick = None
-        self._bonus_crit_range = None
+        self.immunities:mechanics.DamageType = mechanics.DamageType()
+        self.resistances:mechanics.DamageType = mechanics.DamageType()
 
         #Misc.
         self.prev_narration = ""
@@ -216,18 +72,26 @@ class Game_Object():
     def target(self) -> Game_Object:
         """Returns the Object's target"""
         raise NotImplementedError
+    
+    @property
+    def armor_value(self) -> int:
+        return self.stats.armor
 
-    #METHODS
+    #VIP Methods
     def update(self):
         self.reset_ap()
-        self.conditions.update() 
+        self.monitor.update() 
         self.clean_inventory()
+
+    def apply(self, effect:effects.Effect):
+        self.monitor.add(effect)
 
     def bonus(self, stat:str) -> int:
         return self.stats.bonus(stat)
     
     def evasion(self) -> int:
-        return self.stats.base_evasion + self.bonus("dex")
+        return 0
+        #return self.stats.base_evasion + self.bonus("dex")
 
     #ROLLS
     def roll_a_check(self, stat:str) -> int:
@@ -249,7 +113,7 @@ class Game_Object():
             return 0
         return roll + self.bonus("dex") + (self.level // 5)
     
-    def roll_damage(self):
+    def roll_damage(self) -> "mechanics.DamageInstance":
         raise NotImplementedError
 
     #MODIFY RESOURCES
@@ -272,11 +136,18 @@ class Game_Object():
 
     def heal(self, num:int):
         """Heals the Object for num amount"""
-        self.hp += num
-        if self.hp > self.stats.max_hp:
-            num = num - (self.hp - self.stats.max_hp)
+        if self.hp == self.stats.max_hp:
+            globals.type_text("You are already full HP.")
+            return 0
+        if self.hp + num > self.stats.max_hp:
+            ret = self.hp - (self.stats.max_hp - num)
             self.hp = self.stats.max_hp
+            num = ret
+        else:
+            self.hp += num
+
         self.heal_narration(num)
+        return num
 
     def spend_ap(self, num:int=1) -> bool:
         """Spends Action points equal to num, 0 spends max AP points"""
@@ -341,50 +212,93 @@ class Game_Object():
             case _:
                 if roll >= self.target.evasion():
                     self.narrate(self.hit_narration)
-                    taken = self.roll_damage()
-                    self.target.take_damage(taken, self)
+                    dmg = self.roll_damage()
+                    print(dmg.amount)
+                    self.target.take_damage(dmg)
                     self.apply_on_hits()
                 else:
                     self.narrate(self.miss_narration)
                     self.apply_on_misses()
         return None
+    
+    def check_immunities(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
+        #To check immunities, we check resistances against our immunities list, and
+        #if we would resist anything, we are immune to it instead
+        target = damage.amount / 2
 
-    def take_damage(self, taken:int, source:Game_Object | "items.Item" | str) -> int:
-        taken *= self.stats.damage_taken_multiplier
-        taken = int(taken)
-        if self.armor is None: self.armor = 0
-        match source:
-            case Game_Object() | items.Item():
-                if source.damage_type.name == "PHYSICAL":
-                    final = taken
-                    #Reduce damage taken by self.armor, adjusted depending on if self.armor is an item object or an int
-                    match self.armor:
-                        case items.Armor(): final -= self.armor.armor_value
-                        case _: final -= self.armor
-            case _:
-                final = taken
+        check = self.check_resistances(damage, self.immunities)
 
-        self.lose_hp(final)
-        self.narrate(self.take_damage_narration, (final, source))
+        if check.amount == target:
+            damage.amount = 0
+        
+        return damage
+            
+    def check_resistances(self, damage:"mechanics.DamageInstance", my_list:"mechanics.DamageType"=None) -> "mechanics.DamageInstance":
+        if my_list is None: my_list = self.resistances
 
-        return final
+        #check if im resistant to physical
+        if damage.type.is_physical:
 
-    def modify(self, stat:str, amount:int, source) -> None:
+            if True in my_list.physical:
+                damage.amount /= 2
+                return damage
+            
+            if my_list.physical == damage.type.physical:
+                damage.amount /= 2
+                return damage
+        
+        #check if im resistant to magic
+        if damage.type.is_magic:
+            if True in my_list.magic:
+                damage.amount /= 2
+                return damage
+            
+            if my_list.magic == damage.type.magic:
+                damage.amount /= 2
+                return damage
+
+        return damage
+
+    def take_damage(self, damage:"mechanics.DamageInstance") -> int:
+        start = damage.amount
+        damage = self.check_immunities(damage)
+        if damage.amount != start:
+            globals.type_text(f"{self.header.action} immune!")
+        damage = self.check_resistances(damage)
+        if damage.amount != start:
+            globals.type_text(f"{self.header.action} resistant!")
+
+        taken = int(damage.amount * self.stats.damage_taken_multiplier)
+
+        taken -= self.armor_value
+
+        if taken < 0: taken = 0
+
+        damage.amount = taken
+
+        self.lose_hp(taken)
+        self.narrate(self.take_damage_narration, damage)
+
+        return damage.amount
+
+    def modify_stat(self, stat:str, amount:int) -> None:
         try:
             self.stats.modify(stat, amount)
         except KeyError:
             raise ValueError(f"Can't modify non-existent stat '{stat}'.")
 
-        text = f"{self.header.ownership} {globals.STATS[stat]} increased by {amount}."
+        text = f"{self.header.ownership} {globals.STATS[stat]} {switch_word} by {amount}."
+        
+        switch_word = "increased"
         if amount < 0:
-            text = f"{self.header.ownership} {globals.STATS[stat]} decreased by {abs(amount)}."
+            switch_word = "decreased"
 
         globals.type_text(text)
 
     def use(self, item:"items.Item"):
-        base = globals.get_item_subtype(item)
+        base = globals.get_type(item)
         match base:
-            case "consumable":
+            case "Consumable":
                 item.use()
                 return True
             case _: 
@@ -398,14 +312,13 @@ class Game_Object():
         raise NotImplementedError
     
     def apply_on_misses(self):
-        return None
         raise NotImplementedError
 
     #CRITS
     def critical_hit(self):
         globals.type_text("A critical hit! Uh oh...")
         self.stats.damage_multiplier = 2
-        taken = self.target.take_damage(self.roll_damage(), self)
+        taken = self.target.take_damage(self.roll_damage())
         self.apply_on_hits()
         self.stats.damage_multiplier = 1
         return None
@@ -422,6 +335,9 @@ class Game_Object():
         text:list[str] = func() if param is None else func(param)
         if self.prev_narration in text:
             text.remove(self.prev_narration)
+        
+        if len(text) <= 0:
+            raise ValueError("no valid options in text", func())
         final = random.choice(text)
         self.prev_narration = final
         globals.type_text(final)
@@ -429,9 +345,9 @@ class Game_Object():
 
     def roll_narration(self) -> list[str]:
         text = [
-            f"The {self.id} moves to attack, ",
-            f"The {self.id} lunges at you, ",
-            f"The {self.id} prepares to strike... "
+            f"{self.header.default} moves to attack, ",
+            f"{self.header.default} lunges at you, ",
+            f"{self.header.default} prepares to strike... "
         ]
         return text
 
@@ -439,11 +355,11 @@ class Game_Object():
         text = [
             f"You fail to move before the attack hits you.",
             f"A hit.",
-            f"The {self.id} hits you.",
+            f"{self.header.default} hits you.",
             f"It's attack lands.",
             f"You can't dodge this one.",
             f"You take a hit.",
-            f"The {self.id} manages to break your guard."
+            f"{self.header.default} manages to break your guard."
         ]
         return text
     
@@ -451,16 +367,16 @@ class Game_Object():
         text = [
             f"It's attack goes wide.",
             f"Luck is on your side this time.",
-            f"The {self.id} fails.",
+            f"{self.header.default} fails.",
             f"You stave off the attack.",
             f"The attack flies right by you.",
             f"You are unscathed.",
-            f"The {self.id} doesn't manage to hit you.",
+            f"{self.header.default} doesn't manage to hit you.",
             f"You leap out of harm's way."
         ]
         return text
 
-    def take_damage_narration(self, info:tuple[int, Game_Object | "items.Item"]) -> list[str]:
+    def take_damage_narration(self, damage:"mechanics.DamageInstance") -> list[str]:
         raise NotImplementedError
 
     def heal_narration(self, num:int) -> list[str]:
@@ -470,9 +386,9 @@ class Game_Object():
     #INVENTORY
     def pick_up(self, item:"items.Item", silent=False):
         """Adds an item to the Object's inventory"""
-        base = globals.get_item_type(item)
+        base = globals.get_subtype(item)
         match base:
-            case "stackable":
+            case "Stackable":
                 #if you have a stack of those items already, just add to it
                 held:"items.Stackable" | None = self.get_item(item.id)
                 if held is not None:
@@ -481,7 +397,7 @@ class Game_Object():
                 #if you don't, add the object to your inventory
                 else:
                     self.inventory[item.id] = item
-            case "item" | "equipment":
+            case "Item" | "Equipment":
                 self.inventory[item.id] = item
             case _:
                 raise ValueError(f"Unrecognized object {item}.")
@@ -499,9 +415,9 @@ class Game_Object():
         """Check all stackable items and make sure anything with quantity 0 is removed"""
         for entry in self.inventory:
             item:"items.Item | items.Stackable" = self.inventory[entry]
-            base = globals.get_item_type(item)
+            base = globals.get_subtype(item)
             match base:
-                case "stackable": 
+                case "Stackable": 
                     if item.quantity <= 0:
                         del self.inventory[entry]
                         item.owner = None
@@ -513,7 +429,7 @@ class Game_Object():
 
         ref: can be str (item id), int (item index), or an instance of the Item class
         """
-        base = globals.get_object_type(ref)
+        base = globals.get_base_type(ref)
         match base:
             case "str":
                 try: return self.inventory[ref]
@@ -523,7 +439,7 @@ class Game_Object():
                 try: return list(self.inventory.values())[ref]
                 except IndexError: return None
 
-            case "item":
+            case "Item":
                 try: return self.inventory[ref.id]
                 except KeyError: return None
 

@@ -1,4 +1,4 @@
-##Required Modules: globals, controllers, narrator, items
+##Note: player update is called a the START of the turn
 
 import time, sys
 import game
@@ -6,7 +6,7 @@ import globals
 import items
 import narrator
 
-GOD_MODE = False
+GOD_MODE = True
 
 def turn():
     """Runs the player's turn"""

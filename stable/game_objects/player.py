@@ -1,51 +1,75 @@
-##Required Modules: globals, game_objects, items, commands
-
-import time, os, csv, enum
+import time, os, csv
+from compendiums import combat_trick_compendium
 import controllers.player_turn
 import globals
 import game_objects
 import items
 import controllers
 import game
+import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    import mechanics
-    import combat_trick_compendium
+    import compendiums.combat_trick_compendium as combat_trick_compendium
 
-class Stance(enum.Enum):
-    NONE = 0
-    RIPOSTE = 1
-    TOTAL_DEFENSE = 2
-    ALL_OUT = 3
+class playerHeader(game_objects.Header):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.combat_trick = None
+        self._bonus_crit_range = None
+
+    @property
+    def default(self):
+        return "you"
+    
+    @property
+    def action(self):
+        return "you are"
+    
+    @property
+    def ownership(self):
+        return "your"
 
 class Player(game_objects.Game_Object):
 
     def __init__(self):
         super().__init__("Player")
-        self.conditions:"game_objects.Conditions_Handler" = game_objects.Conditions_Handler(self)
+        #self.conditions:"game_objects.Conditions_Handler" = game_objects.Conditions_Handler(self)
         self.level = 1
         self.stats.max_ap = 1 + (self.level // 5)
 
-        self.header.default = "You"
-        self.header.action = "You're"
-        self.header.ownership = "Your"
+        self.header = playerHeader(self)
+
+        self.armor:items.Armor = None
+        self.weapon:items.Weapon = None
         
         self._bonus_crit_range = 0
-        self.combat_trick:"mechanics.Combat_Trick" | None = None
+        self.combat_trick:mechanics.Combat_Trick | None = None
 
     #properties
     @property
-    def carrying_capacity(self) -> float:
-        return 5.5 * self.stats.str
-    
-    @property
-    def bonus_crit_range(self) -> int:
-        return min(4, self._bonus_crit_range)
+    def armor_value(self) -> int:
+        if self.armor.broken: return 0
+        return self.armor.armor_value
 
     @property
     def available_carrying_capacity(self) -> float:
         return self.carrying_capacity - self.carrying
 
+    @property
+    def bonus_crit_range(self) -> int:
+        #bonus crit capped +4 (ie, min roll you can ever crit on is like a 14 with the correct weapon)
+        return min(4, self._bonus_crit_range)
+
+    @property
+    def can_level_up(self) -> bool:
+        """Checks if the player has enough XP to level up"""
+        return self.xp >= (15 * self.level)
+
+    @property
+    def carrying_capacity(self) -> float:
+        return 5.5 * self.stats.str
+    
     @property
     def carrying(self) -> float:
         total_weight = 0
@@ -56,11 +80,6 @@ class Player(game_objects.Game_Object):
         if self.armor is not None: total_weight += self.armor.weight
         if self.weapon is not None: total_weight += self.weapon.weight
         return total_weight
-
-    @property
-    def can_level_up(self):
-        """Checks if the player has enough XP to level up"""
-        return self.xp >= (15 * self.level)
 
     @property
     def target(self):
@@ -102,15 +121,17 @@ class Player(game_objects.Game_Object):
                     return 0
                 else: return roll + self.bonus("dex") + self.base_attack_bonus + self.weapon.attack_bonus
             
-    def roll_damage(self) -> int:
-        """Returns a damage roll (weapon dice + str bonus)"""
-        if controllers.player_turn.GOD_MODE: return 2#999
+    def roll_damage(self) -> "mechanics.DamageInstance":
+        """Returns a damage instance """
+        if controllers.player_turn.GOD_MODE: return mechanics.DamageInstance(self.weapon, 999)#999
         if self.weapon.broken:
             globals.type_text(f"You can't use a broken {self.weapon.id}, so your hands will have to do.")
-            return (globals.d(4) + self.bonus("str")) * self.stats.damage_multiplier
+            amount = (globals.d(4) + self.bonus("str")) * self.stats.damage_multiplier
+            return mechanics.DamageInstance(self, amount)
         
         self.weapon.lose_durability()
-        return (self.weapon.roll_damage() + self.bonus("str")) * self.stats.damage_multiplier
+        amount = (self.weapon.roll_damage() + self.bonus("str")) * self.stats.damage_multiplier
+        return mechanics.DamageInstance(self.weapon, amount)
 
     #MODIFY RESOURCES
     def lose_hp(self, num:int) -> None:
@@ -125,7 +146,7 @@ class Player(game_objects.Game_Object):
         self.xp -= 15 * self.level
         self.level += 1
         prev_max = self.stats.max_hp
-        self.stats.max_hp += (globals.d(self.stats.hit_dice) + self.bonus("con"))
+        self.stats.max_hp += (globals.d(self.stats.hit_die) + self.bonus("con"))
         if self.hp == prev_max:# ie, you were full HP before level up
             self.hp = self.stats.max_hp
         if self.hp < (prev_max * .5): #if you were under 1/2 HP, heal to 1/2 HP
@@ -158,36 +179,33 @@ class Player(game_objects.Game_Object):
     def attack(self) -> None:
         super().attack()
         self._bonus_crit_range = 0
-
-    def take_damage(self, taken: int, source) -> int:
-        if self.armor is None:
-            self.armor = 0
-        
-        super().take_damage(taken, source)
     
     def use(self, item:"items.Item"):
         if super().use(item) is False:
-            base = globals.get_item_type(item)
+            base = globals.get_type(item)
             match base:
-                case "equipment": 
+                case "Equipment": 
                     self.equip(item)
                     return True
-        globals.error_message(None, f"You can't use that {item.id}. Please try again.")
-        return False
+            globals.error_message(None, f"You can't use an item of type '{base}'. Please try again.")
+            return False
+        return True
     
     #ENCHANTMENTS
     def apply_on_attacks(self):
-        pass
+        return None
 
     def apply_on_hits(self):
-        for entry in self.weapon.enchantments:
-            self.weapon.enchantments[entry].apply("on_hit")
+        return None
     
+    def apply_on_misses(self):
+        return None
+
     #CRITS
     def critical_hit(self) -> None:
         crit = 2 if self.weapon.broken or self.weapon is None else self.weapon.crit
         self.stats.damage_multiplier = crit
-        taken = self.target.take_damage(self.roll_damage(), self)
+        taken = self.target.take_damage(self.roll_damage())
         self.apply_on_hits()
         self.stats.damage_multiplier = 1
         return None
@@ -233,24 +251,29 @@ class Player(game_objects.Game_Object):
         ]
         return text
     
-    def take_damage_narration(self, info:tuple[int, game_objects.Game_Object | game_objects.Event]):
-        taken, source = info
+    def take_damage_narration(self, damage:"mechanics.DamageInstance"):
+        if damage.amount <= 0: return "You took no damage!"
+        taken = f"{damage.amount} damage"
+        source = f"{damage.header.damage}"
         if taken > 0:
             text = [
-                f"You took {taken} damage from the {source.id}.",
-                f"The {source.id} dealt {taken} damage to you.",
-                f"The {source.id} did {taken} damage.",  
+                f"You took {taken} from {source}.",
+                f"{source} dealt {taken} to you.",
+                f"{source} did {taken}.",  
                 ]
         else:
             text = [
-                f"You took no damage from the {source.id}!",
-                f"The {source.id} did no damage to you!",
+                f"You took no damage from {source}!",
+                f"{source} did no damage to you!",
                 ]
+
         #if source isnt a GameObject, don't add "hit you for..." text to final list, else do
         match source:
             case game_objects.Game_Object():
-                if taken > 0: text.append(f"The {source.id} hit you for {taken} damage.")
-                else: f"The {source.id} hit you for no damage."
+                if taken > 0: 
+                    text.append(f"{source} hit you for {taken}.")
+                else: 
+                    text.append(f"{source} hit you for no damage.")
             case _:
                 pass
         return text
@@ -387,7 +410,7 @@ class Player(game_objects.Game_Object):
 
     ##MISC.
     def save(self) -> dict:
-        self.conditions.cleanse_all()
+        self.monitor.cleanse_all()
 
         player_tod = {
             "name": self.name,

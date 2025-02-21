@@ -4,7 +4,7 @@ import importlib
 dict = {}
 
 for module in os.listdir(os.path.dirname(__file__)):
-    if module == '__init__.py' or module[-len(".py"):] != '.py':
+    if module == '__init__.py' or module[-len(".py"):] != '.py' or module != "Berries.py":
         continue
     scenario = importlib.import_module("."+module[:-len(".py")], "compendiums.event_compendium")
     instance = scenario.object()
@@ -12,4 +12,4 @@ for module in os.listdir(os.path.dirname(__file__)):
 
 del module
 
-del dict["Trap Room"]
+#del dict["Trap Room"]
