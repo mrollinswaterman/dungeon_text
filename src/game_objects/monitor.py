@@ -15,11 +15,11 @@ class Monitor():
     def active_ids(self) -> list[str]:
         return list(self._effects.keys())"""
     
-    @property
+    @property #List of all effect objects
     def effects_list(self) -> list[effects.Effect]:
         return list(self._effects.values())
     
-    @property
+    @property #List of all effect IDs
     def effect_ids(self) -> list[str]:
         return list(self._effects.keys())
     
@@ -29,6 +29,7 @@ class Monitor():
         else: return None
 
     def add(self, obj:"effects.Effect"):
+        print(f"adding effect: {obj.id}")
         if obj in self.effects_list:
             current = self._effects[obj.id]
             obj.refresh()

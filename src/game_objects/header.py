@@ -19,7 +19,7 @@ class Header():
         status effect it would say "the fire")
     """
 
-    def __init__(self, parent:"game_objects.Game_Object | effects.StatusEffect"):
+    def __init__(self, parent:"game_objects.Game_Object | effects.Status_Effect"):
         self.parent = parent
         self._default:str = f"the {self.parent.id}"
         self._action:str = f"the {self.parent.id} is"

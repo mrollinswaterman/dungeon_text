@@ -20,6 +20,10 @@ class Mechanic():
 
     #properties
     @property
+    def damage_type(self):
+        return self.source.damage_type
+
+    @property
     def header(self):
         if not self._header:
             return self.source.header
