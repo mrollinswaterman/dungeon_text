@@ -13,10 +13,10 @@ class Mechanic():
     """
 
     def __init__(self, source):
-        self.source:game_objects.Game_Object = source
+        self.source:game_objects.Game_Object | items.Item = source
         self.id = "Mechanic"
         self._target:"game_objects.Game_Object" = None
-        self._header = None
+        self._header = self.source.header
 
     #properties
     @property
@@ -25,17 +25,15 @@ class Mechanic():
 
     @property
     def header(self):
-        if not self._header:
-            return self.source.header
-        else:
-            return self._header
+        return self._header
+
     @property
     def target(self) -> game_objects.Game_Object:
         if self._target is not None: return self._target
         src_type = globals.get_base_type(self.source)
         match src_type:
-            case "Game_Object": return self.source.target
             case "Item": return self.source.owner.target
+            case _: return self.source.target
     
     def __eq__(self, value:Mechanic):
         for entry in self.__dict__:

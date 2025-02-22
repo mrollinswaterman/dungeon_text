@@ -123,13 +123,10 @@ class Mob(game_objects.Game_Object):
             return text
 
         def take_damage_narration(self, damage:"mechanics.DamageInstance") -> list[str]:
-            if damage.amount <= 0: 
-                return [
-                    f"{self.id} took no damage from {source}!",
-                    f"{source} did no damage to {self.id}!",
-                ]
-
             taken = f"{damage.amount} damage"
+            if damage.amount <= 0:
+                damage.amount = 0
+                taken = "no damage"
             source = f"{damage.header.damage}"
             text = [
                     f"{source} did {taken} to {self.id}.",
@@ -140,12 +137,7 @@ class Mob(game_objects.Game_Object):
             #if source isnt a GameObject, don't add "hit you for..." text to final list, else do
             match damage.source:
                 case game_objects.Game_Object():
-                    if taken > 0: 
-                        text.append(f"{source} hit {self.id} for {taken}.")
-                    else: 
-                        text.append(f"{source} hit {self.id} for no damage.")
-                case _:
-                    pass
+                    text.append(f"{source} hit {self.id} for {taken}")
             return text
         
         #LOAD

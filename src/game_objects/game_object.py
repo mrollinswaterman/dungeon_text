@@ -213,7 +213,6 @@ class Game_Object():
                 if roll >= self.target.evasion():
                     self.narrate(self.hit_narration)
                     dmg = self.roll_damage()
-                    print(dmg.amount)
                     self.target.take_damage(dmg)
                     self.apply_on_hits()
                 else:
@@ -301,7 +300,6 @@ class Game_Object():
     #NARRATION
     def narrate(self, func, param=None) -> None:
         text:list[str] = func() if param is None else func(param)
-        print(text)
         if self.prev_narration in text:
             text.remove(self.prev_narration)
         
