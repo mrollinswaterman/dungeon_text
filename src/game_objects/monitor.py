@@ -29,7 +29,6 @@ class Monitor():
         else: return None
 
     def add(self, obj:"effects.Effect"):
-        print(f"adding effect: {obj.id}")
         if obj in self.effects_list:
             current = self._effects[obj.id]
             obj.refresh()

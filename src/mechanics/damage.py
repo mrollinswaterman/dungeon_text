@@ -12,9 +12,12 @@ class DamageInstance(mechanics.Mechanic):
     def __init__(self, source, amount:int):
         super().__init__(source)
         self.source:items.Item | game_objects.Game_Object | mechanics.Mechanic = source
+        self._header = self.source.header
         self.amount = amount
         self.id = f"{self.source.id} Damage Instance"
         self.type:DamageType = self.source.damage_type
+
+        print(self._header.default)
 
     @property
     def source_id(self) -> "game_objects.Game_Object":

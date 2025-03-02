@@ -16,11 +16,12 @@ class DamageOverTime(effects.Repeated_Effect):
 
     def __init__(self, source):
         super().__init__(source)
+        self.max_potency = globals.XdY(self.potency, max=True)
 
     def decrease_potency(self):
         match self.potency:
             case str(): 
-                idx = globals.DICE_PROGRESSION.find(self.potency)
+                idx = globals.DICE_PROGRESSION.index(self.potency)
                 self.potency = globals.DICE_PROGRESSION[idx - 1]
             case int():
                 self.potency = self.potency // 2
@@ -30,7 +31,7 @@ class DamageOverTime(effects.Repeated_Effect):
     def increase_potency(self):
         match self.potency:
             case str():
-                idx = globals.DICE_PROGRESSION.find(self.potency)
+                idx = globals.DICE_PROGRESSION.index(self.potency)
                 if idx > len(globals.DICE_PROGRESSION):
                     return None
                 self.potency = globals.DICE_PROGRESSION[idx + 1]

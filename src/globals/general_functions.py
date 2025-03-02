@@ -105,7 +105,7 @@ def d(num):
     """Rolls a dX where X is some number (ie d6, d20, etc)"""
     return random.randrange(1, num+1)
 
-def XdY(damage:str | list | tuple | int) -> int:
+def XdY(damage:str | list | tuple | int, max=False) -> int:
     """Rolls X dYs and returns the total (ie 2d4, 3d6, etc)
         If passed a single integer, just returns the integer"""
 
@@ -123,7 +123,10 @@ def XdY(damage:str | list | tuple | int) -> int:
 
     for _ in range(num):
         final += d(dice)
-    return final
+    
+    if not max: return final
+    else:
+        return num*dice
 
 def probability(chance):
     return random.random() < (chance / 100)

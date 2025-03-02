@@ -1,3 +1,4 @@
+from sympy import EX
 import globals
 import effects
 
@@ -15,7 +16,7 @@ class Poisoned(effects.Status_Effect):
     def __init__(self, source):
         super().__init__(source)
         self._header._damage = "the poison"
-        self._effect = effects.DamageOverTime(self.source)
+        self._effect = effects.DamageOverTime(self)
         self._effect.duration = 3
         self._effect.potency = "1d4"
 
@@ -29,7 +30,7 @@ class Poisoned(effects.Status_Effect):
     def update(self):
         super().update()
         if self.target.roll_a_check("con") >= self.save_DC + self._effect.max_potency:
-            globals.type_text(f"{self.target.header.default} able to resist the posion, reducing it's potency.")
+            globals.type_text(f"{self.target.header.action} able to resist the posion, reducing it's potency.")
             self._effect.decrease_potency()
 
     def refresh(self):
