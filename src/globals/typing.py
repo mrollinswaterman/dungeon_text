@@ -43,6 +43,9 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
             char = char.upper()
             first = False
 
+        if text[idx-2] == "." and char.isalpha():
+            char = char.upper()
+
         print(char, end='', flush=True)
         waitTime = speed
 

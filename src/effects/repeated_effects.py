@@ -1,3 +1,4 @@
+from sympy import EX
 import effects
 import game_objects
 import globals
@@ -48,22 +49,35 @@ class StackingDoT(effects.Repeated_Effect):
 
     def __init__(self, source):
         super().__init__(source)
-        self.stacks = 1
+        self.stacks = 3
         self.max_stacks = 10
+
+    def check_stacks(self):
+        """
+        Checks to make sure the stacking DoT effect is not at 0 stacks
+
+        If it is at 0, end the effect.
+        """
+        if self.stacks <= 0:
+            self.end()
     
     def update(self):
-        damage = globals.XdY(self.potency)
+        damage = 0
+        for _ in range(self.stacks):
+            damage += globals.XdY(self.potency)
 
         if self.stacks >= self.max_stacks: # at max stacks, deal large amount of damage and cleanse
             self.stacks = self.max_stacks
-            self.deal_damage((damage * self.stacks) + self.stacks)  
+            self.deal_damage(damage + self.stacks)  
             return self.end()
         else: # If not at max stacks, damage target, scaling with stacks, then decrease stacks
-            self.deal_damage(damage * self.stacks)
+            self.deal_damage(damage)
             self.stacks -= 1
 
+        self.check_stacks()
+
         super().update()
-    
+
     def end(self):
         self.stacks = 0
         super().end()
@@ -133,7 +147,11 @@ class Status_Effect(effects.Repeated_Effect):
                 effect.update()
             elif not effect.active:
                 self._effects_list.remove(effect)
-        super().update()
+
+        if not self.active:
+            self.end()
+        else:
+            super().update()
 
     def refresh(self):
         globals.type_text(self.refresh_msg)

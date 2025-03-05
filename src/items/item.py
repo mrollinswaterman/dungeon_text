@@ -146,6 +146,13 @@ class Item():
     @property
     def level(self) -> int:
         return self.owner.level
+    
+    @property
+    def header(self) -> "game_objects.Header":
+        if self.owner.header is None:
+            return None
+        else:
+            return self.owner.header
 
     @property
     def weight(self) -> float:
