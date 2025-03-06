@@ -232,7 +232,7 @@ class Player(game_objects.Game_Object):
             f"Your attack lands.",
             f"Your {self.weapon.id} strikes true.",
             f"The {self.target.id} wasn't able to dodge this one.",
-            f"Sucess."
+            f"Success."
         ]
         return text
 
