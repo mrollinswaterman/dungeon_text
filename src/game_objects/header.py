@@ -1,3 +1,4 @@
+import random
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import game_objects
@@ -24,6 +25,7 @@ class Header():
         self._default:str = f"the {self.parent.id}"
         self._action:str = f"the {self.parent.id} is"
         self._ownership:str = f"the {self.parent.id}'s"
+        self._tries = [f"the {self.parent.id} attempts", f"the {self.parent.id} tries"]
         self._damage:str = None
 
         self.prev = ""
@@ -53,6 +55,15 @@ class Header():
             return self._ownership
         else:
             self.prev = "its"
+            return self.prev
+        
+    @property
+    def tries(self):
+        if self.prev not in self._tries:
+            self.prev = random.choice(self._tries)
+            return self.prev
+        else:
+            self.prev = random.choice(["it tries", "it attempts"])
             return self.prev
         
     @property 

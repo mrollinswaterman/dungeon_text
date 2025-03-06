@@ -1,3 +1,4 @@
+import random
 import time, os, csv
 from compendiums import combat_trick_compendium
 import controllers.player_turn
@@ -29,6 +30,10 @@ class playerHeader(game_objects.Header):
     @property
     def ownership(self):
         return "your"
+    
+    @property
+    def tries(self):
+        return random.choice(["you try", "you attempt"])
 
 class Player(game_objects.Game_Object):
 
@@ -260,7 +265,7 @@ class Player(game_objects.Game_Object):
         text = [
             f"You took {taken} from {source}.",
             f"{source} dealt {taken} to you.",
-            f"{source} did {taken}.",  
+            f"{source} did {taken} to you.",  
             ]
 
         #if source isnt a GameObject, don't add "hit you for..." text to final list, else do

@@ -16,7 +16,7 @@ class Game_Object():
     def __init__(self, id="Game Object"):
 
         #Core properties
-        self.id = id
+        self._id = id
         self.name = self.id
         self.level = 1
         self.stats:game_objects.Statblock = game_objects.Statblock(self)
@@ -46,36 +46,43 @@ class Game_Object():
         self.prev_narration = ""
 
     #PROPERTIES
-    @property
-    def dead(self) -> bool:
-        """Checks if the Object is alive or not"""
-        return self.hp <= 0
     
     @property
-    def caster_level(self) -> int:
-        return 1 + (self.level // 5)
+    def armor_value(self) -> int:
+        return self.stats.armor
 
     @property
     def base_attack_bonus(self) -> int:
         return max(1, self.level // 5)
 
     @property
-    def needs_healing(self) -> bool:
-        return self.hp < self.stats.max_hp
-    
-    @property
     def can_act(self) -> bool:
         """Checks if the Object can act (ie AP > 0)"""
         return self.ap > 0 and not self.dead
+
+    @property
+    def caster_level(self) -> int:
+        return 1 + (self.level // 5)
+
+    @property
+    def dead(self) -> bool:
+        """Checks if the Object is alive or not"""
+        return self.hp <= 0
+
+    @property
+    def id(self) -> str:
+        return self._id
+
+    @property
+    def needs_healing(self) -> bool:
+        return self.hp < self.stats.max_hp
+
     
     @property
     def target(self) -> Game_Object:
         """Returns the Object's target"""
         raise NotImplementedError
-    
-    @property
-    def armor_value(self) -> int:
-        return self.stats.armor
+
 
     #VIP Methods
     def update(self):

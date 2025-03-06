@@ -17,8 +17,6 @@ class DamageInstance(mechanics.Mechanic):
         self.id = f"{self.source.id} Damage Instance"
         self.type:DamageType = self.source.damage_type
 
-        print(self._header.default)
-
     @property
     def source_id(self) -> "game_objects.Game_Object":
         base = globals.get_base_type(self.source)

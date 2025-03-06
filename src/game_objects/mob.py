@@ -1,6 +1,8 @@
 import random
 import csv
 from xml.dom import ValidationErr
+
+from serial import PortNotOpenError
 import globals
 import game_objects
 import game
@@ -42,7 +44,11 @@ class Mob(game_objects.Game_Object):
         @property
         def flee_threshold(self) -> float:
         #Percent current %HP threshold at which the enemy tries to flee (higher ==> more cowardly)
-            return 15
+            return 
+        
+        @property
+        def id(self) -> str:
+            return f"the {self._id}"
 
         @property
         def target(self) -> "game_objects.Game_Object":
@@ -149,7 +155,7 @@ class Mob(game_objects.Game_Object):
             with open("monster_stats.csv", "r") as file:
                 r = csv.DictReader(file)
                 for entry in r:
-                    if entry["id"] == self.id:
+                    if entry["id"] == self._id:
                         source_stat_block = entry
                         break
                 file.close()
