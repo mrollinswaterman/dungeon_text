@@ -1,11 +1,11 @@
 #Feint combat trick file
-import stable.globals.functions as functions
-from mechanics.trick import Combat_Trick
-from game_objects.game_object import Game_Object
+import globals
+import mechanics
+import game_objects
 
-class Feint(Combat_Trick):
+class Feint(mechanics.Combat_Trick):
 
-    def __init__(self, parent:Game_Object):
+    def __init__(self, parent:game_objects.Game_Object):
         super().__init__(parent, parent.target)
 
         self.default_evasion = self.parent.target.evasion
@@ -15,12 +15,12 @@ class Feint(Combat_Trick):
 
     def start(self):
         self.parent.spend_ap()
-        functions.type_text(self.start_message)
+        globals.type_text(self.start_message)
         if self.parent.roll_a_check("cha") >= self.parent.target.roll_a_check("cha"):
             self.replace_effect.start()
-            functions.type_text(f"A success. You faked out the {self.parent.target.id}!")
+            globals.type_text(f"A success. You faked out the {self.parent.target.id}!")
         else:
-            functions.type_text(f"The {self.parent.target.id} saw through your trick.")
+            globals.type_text(f"The {self.parent.target.id} saw through your trick.")
             self.end()
     
     def evasion(self) -> int:

@@ -1,5 +1,3 @@
-##Required Modules: globals, commands, narrator
-
 import game
 import controllers.player_turn as player_turn
 import narrator

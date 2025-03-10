@@ -236,8 +236,13 @@ class Player(game_objects.Game_Object):
             f"You hit {self.target.header.default}.",
             f"Your attack lands.",
             f"Your {self.weapon.id} strikes true.",
+<<<<<<< HEAD
             f"{self.target.header.default} wasn't able to dodge this one.",
             f"Sucess."
+=======
+            f"The {self.target.id} wasn't able to dodge this one.",
+            f"Success."
+>>>>>>> 758d840291e1bff6f6c58cbdec9fe60795fe3575
         ]
         return text
 

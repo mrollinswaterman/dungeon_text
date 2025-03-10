@@ -1,6 +1,6 @@
 #Trap Room Event class
 import random
-import stable.globals.functions as functions
+import globals
 import game_objects.event as event
 
 start = [
@@ -48,11 +48,11 @@ class Trap_Room(event.Event):
         self._passed = True
         if self._loot["xp"] <= 0:
             self.set_xp(int(self.stat_dc(code) / 1.5))
-        functions.type_text(random.choice(self._messages[True][code]))#print a random success message
+        globals.type_text(random.choice(self._messages[True][code]))#print a random success message
 
     def failure(self):
         self._tries = -1
-        functions.type_text(random.choice(self._end_messages))
+        globals.type_text(random.choice(self._end_messages))
         
     def run(self, code:str="dex"):
         dmg = 0
@@ -67,6 +67,8 @@ class Trap_Room(event.Event):
         
         if roll == 0:
             dmg = self._damage_cap
+
+        
 
         taken = self._player.take_damage(min(dmg, self._damage_cap), self)
         return None

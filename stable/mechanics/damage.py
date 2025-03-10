@@ -10,11 +10,9 @@ if TYPE_CHECKING:
 class DamageInstance(mechanics.Mechanic):
 
     def __init__(self, source, amount:int):
-        super().__init__(source)
+
         self.source:items.Item | game_objects.Game_Object | mechanics.Mechanic = source
-        self._header = self.source.header
         self.amount = amount
-        self.id = f"{self.source.id} Damage Instance"
         self.type:DamageType = self.source.damage_type
 
     @property
@@ -23,7 +21,8 @@ class DamageInstance(mechanics.Mechanic):
         match base:
             case "Item": return self.source.owner.header.damage
             case "Game_Object": return self.source.header.damage
-            case "Mechanic": return self.source.header.damage
+            case "Mechanic": return self.source.source.header.damage
+
 
 class DamageType(mechanics.Mechanic):
     """
@@ -42,11 +41,7 @@ class DamageType(mechanics.Mechanic):
     bludgeoning = False
 
     def __init__(self):
-        self.physical = False
-        self.magic = False
-        self.slashing = False
-        self.piercing = False
-        self.bludgeoning = False
+        pass
 
     def set(self, types:list[str]) -> None:
         """
@@ -69,17 +64,10 @@ class DamageType(mechanics.Mechanic):
 
     def __str__(self):
         ret = ""
-        if self.physical:
-            ret = f"{ret}Physical:"
-
-        else:
-            ret = f"{ret}Magic:"
-
-        for item in self.__dict__:
-            if item.capitalize() not in ret and self.__dict__[item]:
-                ret = f"{ret} {item.capitalize()}"
-
         return ret
     
     def __eq__(self, value):
-        return self.__dict__ == value.__dict__
+        for entry in self.__dict__:
+            if self.__dict__[entry] != value.__dict__[entry]:
+                return False
+        return True

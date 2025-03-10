@@ -1,6 +1,8 @@
 #Smog Cloud Event class
+import stat
 import game_objects.event as event
-from condition_compendium import Poisoned
+import globals
+#import status_compendium
 
 success = {
     "con": ["You grit your teeth and continue forwards, making it out without a scratch.", 
@@ -47,9 +49,8 @@ class Smog(event.Event):
         self.add_end_message(end)
 
     def failure(self):
-        import global_variables
         super().failure()
-        poison = Poisoned.object(self)
-        global_variables.PLAYER.conditions.add(poison)
+        #poison = status_compendium.Poisoned.object(self)
+        #self._player.apply(poison)
 
 object = Smog

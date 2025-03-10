@@ -2,29 +2,9 @@
 import random
 import globals, game_objects
 
-stats = {
-    "level": 1,
-    "level_range": (1, 4),
-    "hit_dice": 10,
-    "str": 10,
-    "dex": 16,
-    "con": 10,
-    "int": 9,
-    "wis": 7,
-    "cha": 6,
-    "base_evasion": 9,
-    "damage_taken_multiplier": 1,
-    "damage_multiplier": 1,
-    "max_hp": 0,
-    "max_ap": 0,
-    "armor": 0,
-    "damage": "1d6",
-    "dc": 10,
-}
-
 class Goblin(game_objects.Mob):
-    def __init__(self, id="Goblin", stat_dict=stats):
-        super().__init__(id, stat_dict)
+    def __init__(self):
+        super().__init__(id="Goblin")
         self.stolen = False
         #base xp & gold
         self.gold += 10
