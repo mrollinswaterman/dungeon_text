@@ -43,7 +43,7 @@ identical to something that's still on the screen (hint: line 2 of the type func
 
 - [X] Some kind of reward for stat check events
 - [X] Shopkeep/exiting the dungeon in general
-- [ ] ~~Damage types??~~ WIP, not fully implemented
+- [X] Damage types
 - [ ] Max level?
 - [ ] Player death / respawning
 - [ ] Minibosses / unique enemies

@@ -1,8 +1,12 @@
+from errno import ENOEXEC
 import random
+
+from sympy import EX
 import globals
 import game
 
 from typing import TYPE_CHECKING, Any
+
 if TYPE_CHECKING:
     import game_objects
     import mechanics
@@ -13,46 +17,17 @@ def build_damage_type(input:str=None) -> "mechanics.DamageType":
     Creates and returns a DamageType object based on an input string.
     Returns an empty type if input is None
     """
-    #physical is the assume super-type if none is specified
     import mechanics
-    if input is None or input == '': return mechanics.DamageType()
-    #find a more efficient way to differentiate magic vs physical
     ret = mechanics.DamageType()
-    if "Magic" in input:
-        #split into physical types and magic types
-        my_types = input.split("Magic")
-
-        #process physical
-        physical_types = my_types[0].split("/")
-        if my_types[-1] == '':
-            my_types = my_types.pop()
-        if my_types[0] == "Physical":
-            my_types.pop(0)
-
-        ret._physical = physical_types
-
-        #process magic
-        magic_types = my_types[1].split("/")
-        if magic_types[-1] == '':
-            magic_types = magic_types.pop()
-
-        if len(magic_types) <= 0:
-            magic_types = [True]
-
-        ret._magic = magic_types
-        return ret
-
-    #just process physical
-    my_types = input.split("/")
-    if my_types[-1] == '':
-        my_types = my_types.pop()
-    if my_types[0] == "Physical":
-        my_types.pop(0)
-
-    ret._physical = my_types
+    if input is None: return ret 
+    types = input.split("/")
+    if types[0] != "Magic":
+        final = ["Physical"] + types
+        ret.set(final)
+    else:
+        ret.set(["Magic"] + types)
 
     return ret
-    
 
 def generate_item_rarity():
     import items

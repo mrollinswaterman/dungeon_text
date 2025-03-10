@@ -5,7 +5,7 @@ import game
 
 class Event(game_objects.Game_Object):
     def __init__(self):
-        self._id = self.__class__.__name__.lower()
+        self.id = self.__class__.__name__.lower()
         self._attempts = 2
 
         self.stats:dict[str, int] = {}

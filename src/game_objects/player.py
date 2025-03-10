@@ -219,8 +219,8 @@ class Player(game_objects.Game_Object):
     def roll_narration(self, roll):
         roll_text = self.process_roll(roll)
         text = [
-            f"You heft your {self.weapon.id} and attack the {self.target.id},",
-            f"You charge the {self.target.id},",
+            f"You heft your {self.weapon.id} and attack {self.target.header.default},",
+            f"You charge {self.target.header.default},",
             f"You swing your {self.weapon.id},",
             f"Brandishing your {self.weapon.id}, you prepare to strike...",
         ]
@@ -232,11 +232,11 @@ class Player(game_objects.Game_Object):
     def hit_narration(self) -> None:
         text = [
             f"A hit.",
-            f"The {self.target.id} didn't get out of the way in time.",
-            f"You hit the {self.target.id}.",
+            f"{self.target.header.default} didn't get out of the way in time.",
+            f"You hit {self.target.header.default}.",
             f"Your attack lands.",
             f"Your {self.weapon.id} strikes true.",
-            f"The {self.target.id} wasn't able to dodge this one.",
+            f"{self.target.header.default} wasn't able to dodge this one.",
             f"Sucess."
         ]
         return text
@@ -245,14 +245,14 @@ class Player(game_objects.Game_Object):
         text = [
             f"You missed.",
             f"No luck this time.",
-            f"The {self.target.id} deftly dodges your attack.",
-            f"Your attack whizzes past the {self.target.id}, missing by a hair.",
-            f"You don't crack the {self.target.id}'s defenses this time.",
+            f"{self.target.header.default} deftly dodges your attack.",
+            f"Your attack whizzes past {self.target.header.default}, missing by a hair.",
+            f"You don't crack {self.target.header.default}'s defenses this time.",
             f"It leaps out of the way in the nick of time.",
             f"No dice.",
             f"A miss.",
-            f"The {self.target.id} ducks your strike.",
-            f"The {self.target.id} manages to weather your onslaught for now."
+            f"{self.target.header.default} ducks your strike.",
+            f"{self.target.header.default} manages to weather your onslaught for now."
         ]
         return text
     

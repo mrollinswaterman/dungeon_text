@@ -16,7 +16,7 @@ class Game_Object():
     def __init__(self, id="Game Object"):
 
         #Core properties
-        self._id = id
+        self.id = id
         self.name = self.id
         self.level = 1
         self.stats:game_objects.Statblock = game_objects.Statblock(self)
@@ -41,6 +41,7 @@ class Game_Object():
 
         self.immunities:mechanics.DamageType = mechanics.DamageType()
         self.resistances:mechanics.DamageType = mechanics.DamageType()
+        self.resistances.set(["Physical", "Slashing"])
 
         #Misc.
         self.prev_narration = ""
@@ -68,10 +69,6 @@ class Game_Object():
     def dead(self) -> bool:
         """Checks if the Object is alive or not"""
         return self.hp <= 0
-
-    @property
-    def id(self) -> str:
-        return self._id
 
     @property
     def needs_healing(self) -> bool:
@@ -228,19 +225,20 @@ class Game_Object():
         return None
     
     def check_immunities(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
+        if damage.type == self.immunities:
+            globals.type_text(f"{self.header.action} immune!")
+            damage.amount /= 2
         return damage
             
     def check_resistances(self, damage:"mechanics.DamageInstance", my_list:"mechanics.DamageType"=None) -> "mechanics.DamageInstance":
+        if damage.type == self.resistances:
+            globals.type_text(f"{self.header.action} resistant!")
+            damage.amount = 0
         return damage
 
     def take_damage(self, damage:"mechanics.DamageInstance") -> int:
-        start = damage.amount
         damage = self.check_immunities(damage)
-        if damage.amount != start:
-            globals.type_text(f"{self.header.action} immune!")
         damage = self.check_resistances(damage)
-        if damage.amount != start:
-            globals.type_text(f"{self.header.action} resistant!")
 
         taken = int(damage.amount * self.stats.damage_taken_multiplier)
 

@@ -49,23 +49,13 @@ def initialize():
 
     enemy = globals.spawn_random_mob()
 
-    test = compendiums.status_compendium.dict["Blinded"](enemy, PLAYER)
-
     SCENE.enemy = enemy
 
-    PLAYER.apply(test)
-
     PLAYER.attack()
-
-    test.end()
 
     PLAYER.reset_ap()
 
     PLAYER.attack()
-
-    #test.refresh()
-
-    #test.save_attempt()
 
     sys.exit()
 

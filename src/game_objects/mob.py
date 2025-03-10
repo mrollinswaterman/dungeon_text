@@ -45,10 +45,6 @@ class Mob(game_objects.Game_Object):
         def flee_threshold(self) -> float:
         #Percent current %HP threshold at which the enemy tries to flee (higher ==> more cowardly)
             return 
-        
-        @property
-        def id(self) -> str:
-            return f"the {self._id}"
 
         @property
         def target(self) -> "game_objects.Game_Object":
@@ -135,9 +131,9 @@ class Mob(game_objects.Game_Object):
                 taken = "no damage"
             source = f"{damage.header.damage}"
             text = [
-                    f"{source} did {taken} to {self.id}.",
-                    f"{source} dealt {taken} to {self.id}.",
-                    f"{self.id} took {taken} from {source}."
+                    f"{source} did {taken} to {self.header.default}.",
+                    f"{source} dealt {taken} to {self.header.default}.",
+                    f"{self.header.default} took {taken} from {source}."
                     ]
 
             #if source isnt a GameObject, don't add "hit you for..." text to final list, else do
@@ -155,7 +151,7 @@ class Mob(game_objects.Game_Object):
             with open("monster_stats.csv", "r") as file:
                 r = csv.DictReader(file)
                 for entry in r:
-                    if entry["id"] == self._id:
+                    if entry["id"] == self.id:
                         source_stat_block = entry
                         break
                 file.close()

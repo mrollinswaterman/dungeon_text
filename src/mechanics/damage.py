@@ -25,7 +25,6 @@ class DamageInstance(mechanics.Mechanic):
             case "Game_Object": return self.source.header.damage
             case "Mechanic": return self.source.source.header.damage
 
-
 class DamageType(mechanics.Mechanic):
     """
     Each Game Object has a Damage Type object associated with it that describes the 
@@ -43,7 +42,11 @@ class DamageType(mechanics.Mechanic):
     bludgeoning = False
 
     def __init__(self):
-        pass
+        self.physical = False
+        self.magic = False
+        self.slashing = False
+        self.piercing = False
+        self.bludgeoning = False
 
     def set(self, types:list[str]) -> None:
         """
@@ -66,10 +69,17 @@ class DamageType(mechanics.Mechanic):
 
     def __str__(self):
         ret = ""
+        if self.physical:
+            ret = f"{ret}Physical:"
+
+        else:
+            ret = f"{ret}Magic:"
+
+        for item in self.__dict__:
+            if item.capitalize() not in ret and self.__dict__[item]:
+                ret = f"{ret} {item.capitalize()}"
+
         return ret
     
     def __eq__(self, value):
-        for entry in self.__dict__:
-            if self.__dict__[entry] != value.__dict__[entry]:
-                return False
-        return True
+        return self.__dict__ == value.__dict__

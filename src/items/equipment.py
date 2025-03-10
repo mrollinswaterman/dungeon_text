@@ -18,7 +18,7 @@ class Equipment(items.Item):
         rarity = anvil.rarity if rarity is None else rarity
         super().__init__(id, rarity)
         self.weight_class:"items.Weight_Class" | str | int = None
-        self.damage_type:"mechanics.DamageType" = globals.build_damage_type()
+        self.damage_type:"mechanics.DamageType" = None
         self.max_dex_bonus:int = None
         self.durability:int = None
 
