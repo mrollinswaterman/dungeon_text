@@ -25,6 +25,7 @@ RUNNING = False
 def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
     import game_objects, controllers, compendiums
+    import tests
 
     PLAYER = game_objects.Player()
 
@@ -47,17 +48,7 @@ def initialize():
 
     create_commands_dict()
 
-    enemy = globals.spawn_random_mob()
-
-    SCENE.enemy = enemy
-
-    PLAYER.attack()
-
-    PLAYER.reset_ap()
-
-    PLAYER.attack()
-
-    sys.exit()
+    #tests.run()
 
     return True
 

@@ -1,4 +1,3 @@
-from sympy import EX
 import globals
 import effects
 

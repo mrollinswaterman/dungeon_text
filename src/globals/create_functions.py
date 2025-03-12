@@ -1,7 +1,5 @@
-from errno import ENOEXEC
 import random
 
-from sympy import EX
 import globals
 import game
 
@@ -119,6 +117,7 @@ def spawn_event(name:str):
         raise ValueError(f"No event by id '{name}'.")
 
 def spawn_random_event():
+    import game_objects
     import compendiums.event_compendium as event_compendium
-    return game_objects.Event2()
+    return game_objects.Event()
     return random.choice(list(event_compendium.dict.values()))()

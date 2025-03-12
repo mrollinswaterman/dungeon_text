@@ -1,8 +1,5 @@
 import random
 import csv
-from xml.dom import ValidationErr
-
-from serial import PortNotOpenError
 import globals
 import game_objects
 import game
@@ -16,7 +13,7 @@ class Mob(game_objects.Game_Object):
         def __init__(self, id:str="default"):
             #identification
             super().__init__(id)
-            self.base_save_cd = 0
+            self.base_save_dc = 0
             self.retreating = False
             self.load()
 

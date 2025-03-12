@@ -1,4 +1,3 @@
-from sympy import EX
 import effects
 import game_objects
 import globals

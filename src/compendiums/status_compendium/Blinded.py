@@ -1,4 +1,3 @@
-from sympy import EX
 import effects
 import globals
 from typing import TYPE_CHECKING
