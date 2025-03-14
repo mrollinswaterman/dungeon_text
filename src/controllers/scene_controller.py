@@ -88,12 +88,9 @@ class Scene():
             self.begin_encounter()
         else: #remainging 15% chance of an event spawning
             self.event: game_objects.Event = globals.spawn_random_event()
-            self.event.set_tries(2)
-            self.event.set_passed(False)
             game.PLAYER.update()#update player before event text goes off
             self.event.start()#prints event start text
-            globals.type_with_lines()
-            #run_event(self.event)
+            self.run_event()
 
     def begin_encounter(self):
         """Sets the enemy for the scene if it's None, and prints the encounter header"""
@@ -106,35 +103,33 @@ class Scene():
         self.start_combat_round()
 
     def run_event(self):
-        stats = game.COMMANDS["stats"]
+        options = game.COMMANDS["stats"]
 
         done = False
         while not done:
             narrator.event_options()
             cmd = globals.get_cmd()
 
-            if cmd in stats:
-                if stats[cmd] is None:
-                    self.event.run(cmd, globals.PLAYER.roll_a_check(cmd))
-                    if self.event.passed is True:# if passed, reset event tries and SCENE.next()
-                        done = True
-                        self.event.set_tries(2)
-                        self.event.set_passed(False)
-                        globals.PLAYER.recieve_reward(self.event.loot)
-                        if not globals.PLAYER.can_level_up:
+            if cmd in options:
+                if options[cmd] is None: # not the exit command basically
+                    match self.event.run(cmd):
+                        case True: 
+                            done = True
+                            #globals.PLAYER.recieve_reward(self.event.loot)
+                            if not globals.PLAYER.can_level_up:
+                                narrator.continue_run()
+                            else:
+                                pass
+                                #level_up_player()
+                        case None:
+                            continue
+                        case False:
+                            done = True
+                            self.event = None
                             narrator.continue_run()
-                        else:
-                            pass
-                            #level_up_player()
-                    elif self.event.tries is True:# if not passed yet, and still tries left, run it again
-                        globals.type_with_lines()
-                    else: # if failed, tell the player and move on
-                        done = True
-                        self.event.failure()
-                        self.event = None
-                        narrator.continue_run()
+
                 else:
-                    stats[cmd]()
+                    options[cmd]()
 
             else:
                 globals.type_text(f"Invalid stat '{cmd}'. Please try again.")

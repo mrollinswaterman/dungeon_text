@@ -16,8 +16,6 @@ class playerHeader(game_objects.Header):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.combat_trick = None
-        self._bonus_crit_range = None
 
     @property
     def default(self):

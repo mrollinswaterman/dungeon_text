@@ -3,16 +3,14 @@ import globals
 
 def run():
     import game_objects, controllers, compendiums, game
+    from compendiums import event_compendium as events
 
-    
-    enemy = globals.spawn_random_mob()
+    ev = events.dict["smog"]()
 
-    game.SCENE.enemy = enemy
+    ev.start()
 
-    game.PLAYER.attack()
+    ev.run("cha")
 
-    game.PLAYER.reset_ap()
-
-    game.PLAYER.attack()
+    ev.run("int")
 
     sys.exit()

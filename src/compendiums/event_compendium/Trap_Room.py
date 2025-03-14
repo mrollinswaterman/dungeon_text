@@ -1,76 +1,31 @@
 #Trap Room Event class
-import random
-import globals
-import game_objects.event as event
+import game_objects
+import mechanics
+import game
 
-start = [
-    "As you're walking away, you hear a slight click, then a whistling sound.",
-    "The ground shifts slightly benath you, and suddenly a gout of flames bursts forth from the wall beside you.",
-    "The floor you're on begins open, revealing a pit of deadly spikes."
-]
+class Trap_Room(game_objects.Event):
 
-success = {
-    "dex": ["You deftly avoid the nasty surprise.",
-            "Your instincts take you out of harms' way.",
-            "Good thing you're always on edge, or things might have gone badly.",
-            "Your training kicks in and manage to slip away without a scratch"]
-}
+    def __init__(self):
+        super().__init__()
 
-failure = {
-    "dex": ["You duck and dodge, but not quite fast enough. Luckily, you're only hurt.",
-            "Your skills weren't enough this time. The trap left its mark on you.",
-            "You move, but a littel too late. You're alive, but just barely.",
-            "As you nurse your injury, you vow never to fall asleep at the wheel like that again."]
-}
+        self.stats["dex"] = 18
 
-class Trap_Room(event.Event):
+        self.damage_type = mechanics.DamageType()
+        self.damage_type.set(["Physical"])
 
-    def __init__(self, id="Trap Room"):
-        super().__init__(id)
+        self.header = game_objects.Header(self)
+        self.header._damage = "the Dwarven trap"
 
-        self.add_stat("dex", 15)
+        self._damage_cap = 5
 
-        self.add_text(random.choice(start))
-
-        self.add_message(True, success)
-
-        self.add_message(False, failure)
-
-        self._damage_cap = 7 + self._player.level // 3
-
-        self._damage_header = "Dwarven trap"
-
-    @property
-    def damage_type(self) -> str:
-        return "Physical"
-
-    def success(self, code:str="dex") -> None:
-        self._passed = True
-        if self._loot["xp"] <= 0:
-            self.set_xp(int(self.stat_dc(code) / 1.5))
-        globals.type_text(random.choice(self._messages[True][code]))#print a random success message
+    def deal_damage(self):
+        damage = mechanics.DamageInstance(self, self._damage_cap)
+        taken = game.PLAYER.take_damage(damage)
+        return taken
 
     def failure(self):
-        self._tries = -1
-        globals.type_text(random.choice(self._end_messages))
-        
-    def run(self, code:str="dex"):
-        dmg = 0
-        roll = self._player.roll_a_check(code)
-        if roll >= self.stat_dc(code):
-            self.success(code)
-            return None
-        self.try_again(code)
-        diff = ((self.stat_dc(code) - roll) + 1) // 2
-        for _ in range(diff):
-            dmg += 1
-        
-        if roll == 0:
-            dmg = self._damage_cap
-
-        
-
-        taken = self._player.take_damage(min(dmg, self._damage_cap), self)
-        return None
+        super().failure()
+        self.deal_damage()
+        return False
 
 object = Trap_Room

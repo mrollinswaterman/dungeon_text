@@ -48,7 +48,7 @@ def initialize():
 
     create_commands_dict()
 
-    #tests.run()
+    tests.run()
 
     return True
 
@@ -71,8 +71,6 @@ def create_commands_dict():
         "tui": {
             "y": tui.etd,
             "n": tui.ltd,
-            "test": tui.test,
-            "t":tui.test,
             "i":PLAYER.print_inventory,
         },
 
@@ -101,6 +99,7 @@ def create_commands_dict():
             "t":PLAYER.total_defense,
             "all":PLAYER.all_out,
             "s":PLAYER.study_weakness,
+            "c": player_turn.cancel
         },
 
         "overworld_menu": {
@@ -115,12 +114,16 @@ def create_commands_dict():
             "l":narrator.leave_the_shop,
             "s": None,
             "i": narrator.show_inventory,
+            "b": narrator.back
         },
 
         "cleanse_an_effect": {
+            "c": player_turn.cancel
         },
 
         "item_select": {
+            "c": player_turn.cancel,
+            "b": narrator.back
         },
 
         "_": {
@@ -129,6 +132,6 @@ def create_commands_dict():
 
     for entry in COMMANDS:
         COMMANDS[entry]["exit"] = globals.exit
-        COMMANDS[entry]["reset"] = player_turn.reset
-        COMMANDS[entry]["c"] = player_turn.cancel
-        COMMANDS[entry]["b"] = narrator.back
+        #COMMANDS[entry]["reset"] = player_turn.reset
+        #COMMANDS[entry]["c"] = player_turn.cancel
+        #COMMANDS[entry]["b"] = narrator.back
