@@ -117,7 +117,11 @@ def spawn_event(name:str):
         raise ValueError(f"No event by id '{name}'.")
 
 def spawn_random_event():
-    import game_objects
-    import compendiums.event_compendium as event_compendium
-    return game_objects.Event()
-    return random.choice(list(event_compendium.dict.values()))()
+    import compendiums.event_compendium as events
+
+    ev = random.choice(list(events.dict.values()))()
+
+    if ev.id != "Trap_Room":
+        return ev
+    else:
+        return spawn_random_event()

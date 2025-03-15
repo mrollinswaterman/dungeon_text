@@ -53,10 +53,9 @@ class StackingDoT(effects.Repeated_Effect):
 
     def check_stacks(self):
         """
-        Checks to make sure the stacking DoT effect is not at 0 stacks
-
-        If it is at 0, end the effect.
+        If stacks are 0, cleanse the effect.
         """
+
         if self.stacks <= 0:
             self.end()
     
@@ -88,6 +87,7 @@ class Status_Effect(effects.Repeated_Effect):
 
     Status Effects have specific names, unlike other effects (eg. Poisoned, Bleeding, etc)
     """
+
     def __init__(self, source):
         super().__init__(source)
         self.id = self.__class__.__name__

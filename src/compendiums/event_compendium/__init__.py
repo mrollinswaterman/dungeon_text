@@ -11,5 +11,3 @@ for module in os.listdir(os.path.dirname(__file__)):
     dict[instance.id] = scenario.object
 
 del module
-
-del dict["trap_room"]

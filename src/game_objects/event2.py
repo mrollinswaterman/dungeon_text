@@ -22,6 +22,10 @@ class Event(game_objects.Game_Object):
     @property
     def done(self) -> bool:
         return self._attempts <= 0
+    
+    @property
+    def target(self) -> game_objects.Game_Object:
+        return game.PLAYER
 
     #Methods
 

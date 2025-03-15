@@ -24,8 +24,14 @@ class Trap_Room(game_objects.Event):
         return taken
 
     def failure(self):
-        super().failure()
         self.deal_damage()
         return False
+    
+    def run(self):
+        result = super().run("dex")
+        match result:
+            case True: return self.success()
+        
+            case _: return self.failure()
 
 object = Trap_Room

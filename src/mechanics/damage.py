@@ -59,6 +59,8 @@ class DamageType(mechanics.Mechanic):
             if item.lower() in self.__dict__:
                 self.__dict__[item.lower()] = True
 
+        print(f"Setting types: \n\t {types}")
+
     def unset(self, types:list[str]) -> None:
         """
         Inverse function to self.set, turns all given types to False
@@ -72,8 +74,11 @@ class DamageType(mechanics.Mechanic):
         if self.physical:
             ret = f"{ret}Physical:"
 
-        else:
+        elif self.magic:
             ret = f"{ret}Magic:"
+
+        else:
+            return "None"
 
         for item in self.__dict__:
             if item.capitalize() not in ret and self.__dict__[item]:
@@ -82,4 +87,4 @@ class DamageType(mechanics.Mechanic):
         return ret
     
     def __eq__(self, value):
-        return self.__dict__ == value.__dict__
+        return self.__dict__ == value.__dict__ and self.__dict__

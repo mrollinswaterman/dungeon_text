@@ -5,12 +5,12 @@ def run():
     import game_objects, controllers, compendiums, game
     from compendiums import event_compendium as events
 
-    ev = events.dict["smog"]()
+    ev = events.dict["glyphs"]()
 
     ev.start()
 
     ev.run("cha")
 
-    ev.run("int")
+    ev.run("dex")
 
     sys.exit()

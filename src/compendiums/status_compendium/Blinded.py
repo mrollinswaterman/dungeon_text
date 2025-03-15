@@ -5,6 +5,12 @@ if TYPE_CHECKING:
     import game_objects
 
 class Blinded(effects.Status_Effect):
+    """
+    Blinds the target, giving them a 50% miss chance on all attacks
+
+    Replaces the target's "attack" method with a custom method that rolls
+    miss chance before resolving the attack
+    """
 
     def __init__(self, source, target:"game_objects.Game_Object"=None):
         super().__init__(source)

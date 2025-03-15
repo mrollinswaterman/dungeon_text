@@ -19,7 +19,7 @@ class Smog(game_objects.Event):
 
     def failure(self):
         super().failure()
-        poison = globals.create_status("poisoned", self)
+        poison = globals.create_status("Poisoned", self)
         game.PLAYER.apply(poison)
 
 object = Smog

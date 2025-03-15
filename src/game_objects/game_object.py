@@ -1,6 +1,7 @@
 from __future__ import annotations
 import random
 from sysconfig import is_python_build
+from tkinter import Y
 import globals
 import game_objects
 import items
@@ -41,7 +42,6 @@ class Game_Object():
 
         self.immunities:mechanics.DamageType = mechanics.DamageType()
         self.resistances:mechanics.DamageType = mechanics.DamageType()
-        self.resistances.set(["Physical", "Slashing"])
 
         #Misc.
         self.prev_narration = ""

@@ -1,5 +1,6 @@
 #Glyphs event class
 import game_objects
+import globals
 
 class Glyphs(game_objects.Event):
     def __init__(self):
@@ -10,10 +11,10 @@ class Glyphs(game_objects.Event):
         import controllers
         from compendiums import event_compendium as events
         super().failure()
-        print("starting trap room!")
-        #trap = events.Trap_Room()
-        #trap.start()
-        #trap.run()
-        return None
+        print("="*110+'\n')
+        trap = globals.spawn_event("trap_room")
+        trap.start()
+        trap.run()
+        return False
 
 object = Glyphs

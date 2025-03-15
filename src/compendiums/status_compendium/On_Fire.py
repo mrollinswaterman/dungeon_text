@@ -3,6 +3,11 @@ import effects
 import globals
 
 class On_Fire(effects.Status_Effect):
+    """
+    Sets the target on fire, dealing damage every turn.
+
+    On refresh, duration is increased
+    """
 
     def __init__(self, source):
         super().__init__(source)

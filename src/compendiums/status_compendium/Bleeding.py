@@ -2,6 +2,16 @@ import globals
 import effects
 
 class Bleeding(effects.Status_Effect):
+    """
+    Deals damage each turn, scaling with how many stacks of bleed the target has. More stacks == more damage
+
+    On refresh, asdd 2 stacks to the target.
+
+    Each turn the target rolls an automatic CON save. On success, the bleed deals no damage this turn
+    and it's stacks and duration are reduced. If either hits 0, the status effect is cleansed.
+
+    At max stacks, cleanse all stacks and the target takes massive damage.
+    """
 
     def __init__(self, source):
         super().__init__(source)

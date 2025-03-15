@@ -48,7 +48,7 @@ def initialize():
 
     create_commands_dict()
 
-    tests.run()
+    #tests.run()
 
     return True
 

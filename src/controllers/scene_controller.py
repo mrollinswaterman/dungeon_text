@@ -87,7 +87,7 @@ class Scene():
             self.enemy = globals.spawn_random_mob()
             self.begin_encounter()
         else: #remainging 15% chance of an event spawning
-            self.event: game_objects.Event = globals.spawn_random_event()
+            self.event: game_objects.Event = globals.spawn_event("Glyphs")#globals.spawn_random_event()
             game.PLAYER.update()#update player before event text goes off
             self.event.start()#prints event start text
             self.run_event()
