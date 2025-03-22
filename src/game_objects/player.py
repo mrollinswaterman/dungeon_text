@@ -299,7 +299,7 @@ class Player(game_objects.Game_Object):
     def feint(self) -> None:
         self.combat_trick = combat_trick_compendium.dict["Feint"](self)
         self.combat_trick.start()
-    
+
     def riposte(self) -> None:
         pass
 

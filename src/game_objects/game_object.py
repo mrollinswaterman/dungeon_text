@@ -38,7 +38,7 @@ class Game_Object():
         #Combat tools
         self.monitor:game_objects.Monitor = game_objects.Monitor(self)
         self.damage_type:mechanics.DamageType = mechanics.DamageType()
-        self.damage_type.set(["Physical", "Slashing"])  # set default damage type to Physical Slashing
+        self.damage_type.set(["Physical", "Bludgeoning"])  # set default damage type to Physical Bludgeoning
 
         self.immunities:mechanics.DamageType = mechanics.DamageType()
         self.resistances:mechanics.DamageType = mechanics.DamageType()
@@ -79,7 +79,6 @@ class Game_Object():
     def target(self) -> Game_Object:
         """Returns the Object's target"""
         raise NotImplementedError
-
 
     #VIP Methods
     def update(self):

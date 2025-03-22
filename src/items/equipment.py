@@ -3,12 +3,14 @@
 ##Required Modules: globals, items, mechanics, game_objects
 from __future__ import annotations
 import random
+
+from numpy import save
 import items
 import globals
+import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    import items
-    import mechanics
+    pass
 
 class Equipment(items.Item):
 
@@ -17,8 +19,8 @@ class Equipment(items.Item):
         id = anvil.id if id is None else id
         rarity = anvil.rarity if rarity is None else rarity
         super().__init__(id, rarity)
-        self.weight_class:"items.Weight_Class" | str | int = None
-        self.damage_type:"mechanics.DamageType" = None
+        self.weight_class:items.Weight_Class = items.Weight_Class()
+        self.damage_type:mechanics.DamageType = mechanics.DamageType()
         self.max_dex_bonus:int = None
         self.durability:int = None
 
@@ -71,10 +73,11 @@ class Equipment(items.Item):
         if self.durability is None:
             self.durability = self.max_durability
 
+        self.damage_type = globals.build_damage_type(self.__anvil__.__dict__["damage_type"])
+        self.weight_class = items.Weight_Class(self.__anvil__.__dict__["weight_class"])
+
         #set enchants to empty dictionary to avoid any confusion
         self.enchantments = set()
-
-        #if my anvil has enchantments, procces the enchantments and proc chances strings
     
     def apply(self, effect_type:str):
         """Applies an effect type"""
@@ -123,12 +126,7 @@ class Equipment(items.Item):
                 self.saved[entry] = self.__dict__[entry]
         self.saved["durability"] = self.durability if self.durability is not None else self.max_durability
         self.saved["weight_class"] = self.weight_class.string
-        self.saved["enchantments"] = ""
-        for effect in self.enchantments:
-            self.saved["enchantments"] = self.saved["enchantments"] + effect.id + "/"
-
-        #save enchantments and their respective proc chances into a string seperated by "/"s
-        #i.e "Flaming/Serrated"
+        self.saved["damage_type"] = self.damage_type.string
 
 class Weapon(Equipment):
 

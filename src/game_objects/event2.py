@@ -6,12 +6,12 @@ import game
 
 class Event(game_objects.Game_Object):
     def __init__(self):
-        self.id = self.__class__.__name__.lower()
+        self.id = self.__class__.__name__
         self._attempts = 2
 
         self.stats:dict[str, int] = {}
 
-        if self.id == "event": self.id = "default"
+        if self.id == "Event": self.id = "Default"
 
     #Properties
 

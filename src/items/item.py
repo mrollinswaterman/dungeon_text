@@ -37,7 +37,7 @@ class Rarity():
 
 class Weight_Class():
 
-    def __init__(self, class_ref):
+    def __init__(self, class_ref=None):
         codex = {
             None: 2,
             "None": 2,
@@ -47,14 +47,21 @@ class Weight_Class():
             "Superheavy": 10
         }
 
-        if class_ref in list(codex.keys()):
-            self.value = codex[class_ref]
-            self.string = class_ref
-        elif class_ref in list(codex.values()):
-            self.value = class_ref
-            self.string = codex.keys(self.value-1)
-        else:
-            raise ValueError(f"Weight class '{class_ref}' not found in codex.")
+        match class_ref:
+            case Weight_Class():
+                self.value = class_ref.value
+                self.string = class_ref.string
+            
+            case _:
+                if class_ref in list(codex.keys()):
+                    self.value = codex[class_ref]
+                    self.string = class_ref
+                elif class_ref in list(codex.values()):
+                    self.value = class_ref
+                    self.string = codex.keys(self.value-1)
+                else:
+                    raise ValueError(f"Weight class '{class_ref}' not found in codex.")
+       
 
 class Anvil():
     id:str

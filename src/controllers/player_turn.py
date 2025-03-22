@@ -196,9 +196,9 @@ def use_an_item(item:"items.Item | items.Consumable") -> bool:
 
 def flee() -> None:
     """Attempts to run away from the current encounter"""
-    if game.PLAYER.conditions.get("Enraged") is not None:
-        globals.type_text("You cannot flee while Enraged.")
-        return None
+    #if game.PLAYER.monitor.get("Enraged") is not None:
+        #globals.type_text("You cannot flee while Enraged.")
+        #return None
     
     game.RUNNING = False
     globals.type_text("You attempt to flee...")

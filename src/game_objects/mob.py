@@ -15,6 +15,7 @@ class Mob(game_objects.Game_Object):
             super().__init__(id)
             self.base_save_dc = 0
             self.retreating = False
+            self._flee_threshold = 10
             self.load()
 
         #properties
@@ -41,7 +42,7 @@ class Mob(game_objects.Game_Object):
         @property
         def flee_threshold(self) -> float:
         #Percent current %HP threshold at which the enemy tries to flee (higher ==> more cowardly)
-            return 
+            return self._flee_threshold
 
         @property
         def target(self) -> "game_objects.Game_Object":
@@ -159,9 +160,14 @@ class Mob(game_objects.Game_Object):
             #copy the statblock to my statblock and my own attributes
             self.stats.copy(source_stat_block)
             for entry in source_stat_block:
+                if source_stat_block[entry] == "":
+                    source_stat_block[entry] = None
                 if entry in self.__dict__ and entry != "id":
-                    self.__dict__[entry] = globals.build_damage_type(source_stat_block[entry])
+                    self.__dict__[entry] = source_stat_block[entry]
 
+            #set unqiue stats that require their own class instance (damage type)
+            self.resistances = globals.build_damage_type(source_stat_block["resistances"])
+            self.immunities = globals.build_damage_type(source_stat_block["immunities"])
             #generate level from my level range
             self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])
             self.stats.level = self.level

@@ -12,7 +12,7 @@ class Glyphs(game_objects.Event):
         from compendiums import event_compendium as events
         super().failure()
         print("="*110+'\n')
-        trap = globals.spawn_event("trap_room")
+        trap = globals.spawn_event("Trap_Room")
         trap.start()
         trap.run()
         return False

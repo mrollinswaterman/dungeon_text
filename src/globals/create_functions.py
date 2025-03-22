@@ -110,9 +110,10 @@ def spawn_random_mob() -> "game_objects.Mob":
     else: return enemy
 
 def spawn_event(name:str):
-    import compendiums.event_compendium as event_compendium
+    import compendiums.event_compendium as events
+    print(events.dict)
     try:
-        return event_compendium.dict[name]()
+        return events.dict[name]()
     except KeyError:
         raise ValueError(f"No event by id '{name}'.")
 

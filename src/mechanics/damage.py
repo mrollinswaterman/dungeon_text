@@ -48,6 +48,15 @@ class DamageType(mechanics.Mechanic):
         self.piercing = False
         self.bludgeoning = False
 
+    #properties
+    @property
+    def string(self):
+        ret = ""
+        for i in self.__dict__:
+            if self.__dict__[i]:
+                ret = ret + i.capitalize() + "/"
+        return ret[0:-1]
+
     def set(self, types:list[str]) -> None:
         """
         Sets the damage types of a damage type object
@@ -58,8 +67,6 @@ class DamageType(mechanics.Mechanic):
         for item in types:
             if item.lower() in self.__dict__:
                 self.__dict__[item.lower()] = True
-
-        print(f"Setting types: \n\t {types}")
 
     def unset(self, types:list[str]) -> None:
         """
