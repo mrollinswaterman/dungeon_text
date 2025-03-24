@@ -55,6 +55,8 @@ class DamageType(mechanics.Mechanic):
         for i in self.__dict__:
             if self.__dict__[i]:
                 ret = ret + i.capitalize() + "/"
+        if ret == "":
+            return "None"
         return ret[0:-1]
 
     def set(self, types:list[str]) -> None:

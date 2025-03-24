@@ -37,7 +37,6 @@ class Player(game_objects.Game_Object):
 
     def __init__(self):
         super().__init__("Player")
-        #self.conditions:"game_objects.Conditions_Handler" = game_objects.Conditions_Handler(self)
         self.level = 1
         self.stats.max_ap = 1 + (self.level // 5)
 

@@ -27,6 +27,8 @@ def initialize():
     import game_objects, controllers, compendiums
     import tests
 
+    tests.run()
+
     PLAYER = game_objects.Player()
 
     SCENE = controllers.Scene()
@@ -47,8 +49,6 @@ def initialize():
     #PLAYER.pick_up(hp_pots, True)
 
     create_commands_dict()
-
-    #tests.run()
 
     return True
 
