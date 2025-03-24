@@ -6,7 +6,8 @@ This file contains a list of tasks and ideas
 
 - [ ] Add a start menu where the user can choose a name for their character and maybe choose starting stats as well?? (give them 8 points, all stats start at 10, some sort of diminishing returns on pumping stats?)
 - [ ] Use ~~Tkinter~~ HTML/JS/CSS or some GUI framework to take the game off the Command Line
-- [ ] Implement a testing suite???
+- [ ] Implement a unit testing suite
+
 
 ## GUI
 
@@ -85,7 +86,7 @@ Special move, uses half max durability for a double damage on the attack (can mi
 - [ ] Freezing: reduces Action Points by 1 for 2 turns on hit
 - [ ] Poisoned: applies poison on-hit
 - [ ] Draining: heals attacker for some % of pre-mitigation damage done on-hit
-- [X] Serrated: applies Bleed on-hit
+- [ ] Serrated: applies Bleed on-hit
 
 ## Spells:
 
