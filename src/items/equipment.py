@@ -3,18 +3,13 @@
 ##Required Modules: globals, items, mechanics, game_objects
 from __future__ import annotations
 import random
-
-from numpy import save
 import items
 import globals
 import mechanics
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    pass
 
 class Equipment(items.Item):
 
-    def __init__(self, anvil:"items.Anvil", id:str=None, rarity: "items.Rarity" | str | int=None):
+    def __init__(self, anvil:"items.Anvil", id:str=None, rarity: items.Rarity | str | int=None):
         #check for custom rarity, and set it if it's there
         id = anvil.id if id is None else id
         rarity = anvil.rarity if rarity is None else rarity
@@ -77,7 +72,7 @@ class Equipment(items.Item):
         self.weight_class = items.Weight_Class(self.__anvil__.__dict__["weight_class"])
 
         #set enchants to empty dictionary to avoid any confusion
-        self.enchantments = set()
+        #self.enchantments = set()
     
     def apply(self, effect_type:str):
         """Applies an effect type"""
@@ -130,7 +125,7 @@ class Equipment(items.Item):
 
 class Weapon(Equipment):
 
-    def __init__(self, anvil:"items.Anvil", id=None, rarity=None):
+    def __init__(self, anvil:items.Anvil, id=None, rarity=None):
         #set Weapon specific attributes to null before smelt
         self.damage:str | None = None
         self.crit:int | None = None

@@ -1,10 +1,11 @@
 import random
+import csv
 
 import globals
 import game
+import items
 
 from typing import TYPE_CHECKING, Any
-
 if TYPE_CHECKING:
     import game_objects
     import mechanics
@@ -57,31 +58,62 @@ def create_enchantment(name:str, source:"game_objects.Game_Object | items.Item")
         return enchants.dict[name](source)
     return None
 
-def create_item(source_dict={}):
+def craft_item(item:dict | str, rarity:str|items.Rarity=None) -> items.Item:
+    ret = None
+    #Check wether the item_id is a name or a dictionary
+    match item:
+        case str():
+            #Check Item CSV files for a matching name, and create the associated item mold
+            with open("equipment_stats.csv", "r") as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    if row["id"] == item:
+                        ret = create_mold(row)
+            file.close()
+
+            with open("item_stats.csv", "r") as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    if row["id"] == item:
+                        ret = create_mold(row)
+            file.close()
+
+            if ret is None: raise ValueError("Item ID not recogized")
+        case dict():
+            ret = create_mold(item)
+    
+    if rarity is None: return ret
+
+    ret.rarity = items.Rarity(rarity)
+    return ret
+
+def create_mold(source):
     import items
     import compendiums.item_compendium as item_compendium
 
     cast = items.Anvil()
-    cast.copy(source_dict)
+    cast.copy(source)
+    if cast.id == "Health_Potion":
+        print("SRC")
+        print(source)
+        print("CAST")
+        print(cast)
     match cast.anvil_type:
         case "Weapon":
             return items.Weapon(cast)
         case "Armor":
             return items.Armor(cast)
         case _:
-            pass
+            if cast.id in item_compendium.dict:
+                final:items.Stackable = item_compendium.dict[cast.id](cast)
+            else: final = items.Stackable(cast)
 
-    if cast.anvil_type in item_compendium.dict:
-        final:items.Stackable = item_compendium.dict[cast.anvil_type](cast.rarity)
-    else: final = items.Stackable(cast)
-
-    final.set_quantity(cast.quantity)
-    return final
+            final.set_quantity(1)
+            return final
 
 def spawn_mob(name:str) -> "game_objects.Mob":
     """
-    Spawn a specific mob by name
-    Returns a Mob Object
+    Spawn a specific mob by name. Returns a Mob Object
     """
     import compendiums.monster_manual as monster_manual
     try:
@@ -111,7 +143,6 @@ def spawn_random_mob() -> "game_objects.Mob":
 
 def spawn_event(name:str):
     import compendiums.event_compendium as events
-    print(events.dict)
     try:
         return events.dict[name]()
     except KeyError:

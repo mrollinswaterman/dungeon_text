@@ -134,6 +134,10 @@ class Anvil():
     @property
     def enchanted(self):
         return self.enchantments is not None and self.enchantments != ""
+    
+    def __str__(self):
+        print(self.__dict__)
+        return ""
 
 class Item():
 
@@ -141,6 +145,7 @@ class Item():
         self.id = id
         self._name = self.id
         self.rarity:Rarity = None
+        if rarity == '': rarity = None
         match rarity:
             case str() | int(): self.rarity = Rarity(rarity)
             case Rarity(): self.rarity = rarity
@@ -195,7 +200,7 @@ class Item():
     #META functions (save/load, etc)
     def save(self) -> None:
         self.saved = {
-            "type": self.__class__.__name__,
+            "type": globals.get_type(self),
             "id": self.id,
             "name": self.name,
             "rarity": self.rarity.string

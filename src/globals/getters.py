@@ -20,5 +20,9 @@ def get_subtype(obj:Any) -> str:
 def get_type(obj: Any) -> str:
     """Returns the type of an object,
         i.e. Weapon, Stackable, Consumable"""
-    bases = obj.__class__.__bases__
+    import compendiums.item_compendium as items
+    
+    bases = obj.__class__.__mro__
+    if bases[0].__name__ in items.dict:
+        return bases[1].__name__
     return bases[0].__name__

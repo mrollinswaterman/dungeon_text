@@ -8,7 +8,6 @@ class Glyphs(game_objects.Event):
         self.stats["int"] = 15
 
     def failure(self):
-        import controllers
         from compendiums import event_compendium as events
         super().failure()
         print("="*110+'\n')

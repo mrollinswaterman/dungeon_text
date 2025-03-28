@@ -3,12 +3,20 @@ import globals
 from mechanics import damage, magic
 
 def run():
+    import game
+    global SPEED
     player_tests()
 
     print("All tests passed successfully!\n")
+    globals.set_SPEED(3)
+    #sys.exit()
+
+def item_tests():
+    pass
 
 def player_tests():
     import game_objects
+    globals.set_SPEED(0)
 
     p1 = game_objects.Player()
 
@@ -31,16 +39,34 @@ def player_tests():
     assert(p1.resistances.string == "None")
     assert(p1.immunities.string == "None")
 
+    #Weapon
+    wep = globals.craft_item("Longsword", "Common")
+    assert(p1.equip(wep))
+    assert(globals.get_TEXTBOX() == "Longsword equipped.")
+
+    enemy = globals.spawn_mob("Goblin")
+    
+    pots = globals.craft_item("Health_Potion", "Common")
+    pots.set_quantity(5)
+
+    p1.pick_up(pots)
+
+    print(p1.get_item(pots.id).quantity)
+
+    p1.load_inventory("inventory.csv")
+
+    print(p1.get_item(pots.id).quantity)
+
+    sys.exit()
+
 def event_tests():
     import game_objects, controllers, compendiums, game
     from compendiums import event_compendium as events
 
-    ev = events.dict["glyphs"]()
+    ev = events.dict["Glyphs"]()
 
     ev.start()
 
     ev.run("cha")
 
     ev.run("dex")
-
-    sys.exit()

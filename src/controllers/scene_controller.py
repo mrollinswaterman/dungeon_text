@@ -111,8 +111,7 @@ class Scene():
                             if not game.PLAYER.can_level_up:
                                 narrator.continue_run()
                             else:
-                                pass
-                                #level_up_player()
+                                self.level_up_player()
                         case None:
                             continue
                         case False:
@@ -148,7 +147,7 @@ class Scene():
 
     def end(self):
         globals.type_text(f"You killed the {self.enemy.id}!")
-        game.PLAYER.receive_loot()
+        #game.PLAYER.receive_loot()
         self.enemy = None
         self.turn_order.clear()
 
@@ -156,28 +155,3 @@ class Scene():
             narrator.continue_run()
         else:
             self.level_up_player()
-"""
-
-
-def level_up_player():
-    stats = commands.commands["stats"]
-
-    narrator.level_up_options()
-    done = False
-    while not done:
-        cmd = globals.get_cmd()
-        if cmd in stats:
-            done = True
-            if stats[cmd] is None:
-                globals.PLAYER.level_up(cmd)
-            else:
-                stats[cmd]()
-
-    globals.type_text(f"Your {globals.STATS[cmd]} increased by 1. You are now Level {globals.PLAYER.level}")
-    if globals.PLAYER.can_level_up is True:
-        level_up_player()
-    else:
-        narrator.continue_run()
-
-        
-"""

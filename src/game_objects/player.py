@@ -48,6 +48,8 @@ class Player(game_objects.Game_Object):
         self._bonus_crit_range = 0
         self.combat_trick:mechanics.Combat_Trick | None = None
 
+        self._target = None
+
     #properties
     @property
     def armor_value(self) -> int:
@@ -85,7 +87,10 @@ class Player(game_objects.Game_Object):
 
     @property
     def target(self):
-        return game.SCENE.enemy
+        if self._target is None:
+            return game.SCENE.enemy
+        else:
+            return self._target
 
     #methods
     def update(self) -> None:
@@ -454,7 +459,8 @@ class Player(game_objects.Game_Object):
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
-                item = globals.create_item(row)
+                item = globals.craft_item(row)
+                #item.load(row)
                 if idx >= size - 2:
                     self.equip(item, True)
                 else:

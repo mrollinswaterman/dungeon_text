@@ -24,10 +24,10 @@ RUNNING = False
 
 def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
-    import game_objects, controllers, compendiums
+    import game_objects, controllers, compendiums, items
     import tests
 
-    tests.run()
+    #tests.run()
 
     PLAYER = game_objects.Player()
 
@@ -40,15 +40,19 @@ def initialize():
 
     game_objects.forge_all_items()
 
-    PLAYER.equip(ARMORY.get("Longsword"), True)
-    PLAYER.equip(ARMORY.get("Padded Leather"), True)
+
+
+    PLAYER.equip(globals.craft_item("Longsword", "Common"), True)
+    PLAYER.equip(globals.craft_item("Padded Leather", "Common"), True)
     PLAYER.gain_gold(10000)
 
-    #hp_pots:"items.Stackable" = item_compendium.Health_Potion(max(1, PLAYER.level // 4))
-    #hp_pots.set_quantity(5)
-    #PLAYER.pick_up(hp_pots, True)
+    hp_pots:items.Stackable = globals.craft_item("Health_Potion", "Common")
+    hp_pots.set_quantity(5)
+    PLAYER.pick_up(hp_pots, True)
 
     create_commands_dict()
+
+    #tests.run()
 
     return True
 

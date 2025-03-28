@@ -161,7 +161,9 @@ class Game_Object():
         elif self.can_act:
             self.ap -= num
         else:
-            raise ValueError(f"Not enough AP. {num} required, and only {self.ap} available!")
+            error = f"Not enough AP. {num} required, and only {self.ap} available!"
+            globals.type_text(error, 0.5)
+            return False
         return True
 
     def reset_ap(self) -> None:
@@ -270,8 +272,8 @@ class Game_Object():
         base = globals.get_type(item)
         match base:
             case "Consumable":
-                item.use()
-                return True
+                return item.use()
+                #return True
             case _: 
                 return False
 

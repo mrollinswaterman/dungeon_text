@@ -43,7 +43,7 @@ def save():
     item_saved_list.append(game.PLAYER.weapon.saved)
     item_saved_list.append(game.PLAYER.armor.saved)
 
-    temp_item:items.Item = item_compendium.dict["Health_Potion"]("Common")
+    temp_item:items.Item = globals.craft_item("Health_Potion")
     temp_item.save()
     #create fieldnames list from item_to_dict keys
     header1 = list(game.PLAYER.weapon.saved.keys())

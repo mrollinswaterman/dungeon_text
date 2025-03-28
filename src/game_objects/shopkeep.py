@@ -1,21 +1,19 @@
 #Shopkeep class
 
-#Required Modules: items, globals
-import random, time, copy, csv
+import random, time, csv
 import globals
 import game
 import items
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import items
-    import compendiums.item_compendium as item_compendium
 
 def forge_all_items():
     for _ in range(2):
         with open("equipment_stats.csv", "r") as file:
             reader = csv.DictReader(file)
             for row in reader:
-                game.ARMORY.add(globals.create_item(row))
+                game.ARMORY.add(globals.craft_item(row))
 
 class Armory():
 
@@ -34,7 +32,7 @@ class Armory():
             all.add(i)
         return all 
 
-    def get(self, id:str) -> "items.Weapon | items.Armor":
+    def get(self, id:str) -> items.Weapon | items.Armor:
         """Finds an item in the Armory"""
         for item in self.master:
             if item.id == id:
@@ -70,7 +68,7 @@ class Shopkeep():
         return len(self.inventory)
 
     #methods
-    def get(self, ref:"str | int | items.Item") -> "items.Item | items.Stackable | None":
+    def get(self, ref:"str | int | items.Item") -> items.Item | items.Stackable | None:
         match ref:
             case str():
                 for item in self.inventory:
@@ -108,9 +106,12 @@ class Shopkeep():
                     num = item.quantity
                     self.inventory.remove(item)
                 item.remove_quantity(num)
-                #at this point, item is re-assigned to a new stackable object which is then 
-                #added to the shopkeep's inventory and sold to the player
-                item:"items.Stackable" = globals.create_item(item.anvil.__dict__)
+                #at this point, item is re-assigned to a new stackable object instance which is then 
+                #added to the shopkeep's inventory to be sold to the player
+
+                #this is done so that the Shopkeep can keep the old instance of the stackable object
+                #if the player doesn't buy all available inventory
+                item:items.Stackable = globals.craft_item(item.id)
                 item.set_quantity(num)
                 self.inventory.append(item)
             case _:
@@ -123,7 +124,6 @@ class Shopkeep():
                 item.owner = None
                 globals.type_text(self.generate_successful_sale_message(item))
                 self.player.pick_up(item) 
-                #self.check_stock()
                 return True
             else:
                 globals.type_text(f"The Shopkeep grunts and gestures to the {item.id}'s price. You don't have the coin.")
@@ -158,9 +158,9 @@ class Shopkeep():
         w_count = random.randrange(3, 6)
         a_count = random.randrange(3, 6)
 
-        #hp_pots:"items.Stackable" = item_compendium.Health_Potion.object(items.Rarity(max(1, game.PLAYER.level // 4)))
-        #hp_pots.set_quantity(5)
-        #self.stock(hp_pots)
+        hp_pots:items.Stackable = globals.craft_item("Health_Potion", "Common")
+        hp_pots.quantity = 5
+        self.stock(hp_pots)
 
         for _ in range(w_count):
             self.stock(random.choice(list(game.ARMORY.weapons)))
