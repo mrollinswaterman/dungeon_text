@@ -27,8 +27,6 @@ def initialize():
     import game_objects, controllers, compendiums, items
     import tests
 
-    #tests.run()
-
     PLAYER = game_objects.Player()
 
     SCENE = controllers.Scene()
@@ -42,7 +40,7 @@ def initialize():
 
     PLAYER.equip(globals.craft_item("Longsword", "Common"), True)
     PLAYER.equip(globals.craft_item("Padded Leather", "Common"), True)
-    #PLAYER.gain_gold(10000)
+    PLAYER.gain_gold(500)
 
     hp_pots:items.Stackable = globals.craft_item("Health_Potion", "Common")
     hp_pots.set_quantity(5)
@@ -50,15 +48,12 @@ def initialize():
 
     create_commands_dict()
 
-    #tests.run()
-
     return True
 
 def start():
-    import tui
-    global START_CMD
-    START_CMD = True
-    tui.begin()
+    global RUNNING
+    RUNNING = True
+    SCENE.select_next()
 
 def stop():
     global START_CMD
@@ -69,7 +64,7 @@ def create_commands_dict():
     import controllers.player_turn as player_turn
     import tui
     import narrator
-    import tests
+
     COMMANDS = {
         "tui": {
             "y": tui.etd,

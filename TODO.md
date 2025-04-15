@@ -131,5 +131,7 @@ Alternatively, just prevent the game from printing anything at all while it's sa
 - [ ] There is an extra "|" character after all menu options that shouldn't be there
 - [ ] Find a prettier way to handle not passing a roll check to the mob's narration function (line 320 in game_object)
 - [ ] Make Shopkeep successful sale message print before player spend_gold() message print (maybe add a silent gold check, then print successful sale, then print spent gold?)
+- [ ] Items not picked up after being bought
+
 
 

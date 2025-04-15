@@ -134,7 +134,10 @@ def spawn_random_mob() -> "game_objects.Mob":
     enemy:"game_objects.Mob" = random.choice(list(monster_manual.dict.values()))()
 
     lower_bound = max(game.PLAYER.level - 2, 1)
-    upper_bound = min(game.PLAYER.level + 5, 20)
+    if game.PLAYER.level < 5:
+        upper_bound = 4
+    else:
+        upper_bound = min(int(game.PLAYER.level * 1.5), 20)
 
     base_level = enemy.stats.level_range[0]
     max_level = enemy.stats.level_range[1]

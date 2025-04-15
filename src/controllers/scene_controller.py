@@ -55,9 +55,11 @@ class Turn_Order():
         if combatant not in self.queue:
             self.queue.append(combatant)
 
-    def clear(self):
+    def reset(self):
         self.queue = []
         self.passed = []
+        self.combatants = {}
+        self.round = 0
 
 class Scene():
 
@@ -75,6 +77,7 @@ class Scene():
         self.turn_order.go()
 
     def select_next(self):
+        self.turn_order.reset()
         """Starts a new scene with a new enemy or event"""
         if globals.probability(85): #85% chance of an enemy spawning next
             self.enemy = globals.spawn_random_mob()
@@ -155,7 +158,7 @@ class Scene():
         globals.type_text(f"You killed the {self.enemy.id}!")
         self.loot()
         self.enemy = None
-        self.turn_order.clear()
+        self.turn_order.reset()
 
         if not game.PLAYER.can_level_up:
             narrator.continue_run()

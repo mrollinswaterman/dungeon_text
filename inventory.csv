@@ -1,4 +1,4 @@
 type,id,name,rarity,durability,quantity
 Consumable,Health_Potion,Health Potions,Common,,5
-Weapon,Longsword,Longsword,Common,20,
+Weapon,Longsword,Longsword,Common,8,
 Armor,Padded Leather,Padded Leather,Common,15,
