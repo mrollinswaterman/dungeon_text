@@ -1,3 +1,10 @@
+#Filepaths
+MOBS_FILEPATH = "csv_files/monster_stats.csv"
+PLAYER_FILEPATH = "csv_files/player.csv"
+INVENTORY_FILEPATH = "csv_files/inventory.csv"
+EQUIPMENT_FILEPATH = "csv_files/equipment_stats.csv"
+ITEMS_FILEPATH = "csv_files/item_stats.csv"
+
 LEVELCAP = 7
 
 BONUS = {

@@ -1,0 +1,5 @@
+type,id,on_attack,on_hit,on_miss
+Weapon,Flaming,,On_Fire,,
+Weapon,Serrated,,Bleeding,,
+Weapon,Poisoned,,Poisoned,,
+Weapon,Freezing,,Slowed,,

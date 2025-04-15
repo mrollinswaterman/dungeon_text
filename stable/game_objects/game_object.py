@@ -1,6 +1,7 @@
 from __future__ import annotations
 import random
 from sysconfig import is_python_build
+from tkinter import Y
 import globals
 import game_objects
 import items
@@ -24,12 +25,12 @@ class Game_Object():
 
         #Derived stats
         self.stats.max_hp = 10 + self.bonus("con")
-        self.hp = self.stats.max_hp
-        self.ap = self.stats.max_ap
+        self.hp:int = self.stats.max_hp
+        self.ap:int = self.stats.max_ap
 
         #Resources
-        self.xp = 0
-        self.gold = 0
+        self.xp:int = 0
+        self.gold:int = 0
 
         #Items / Equipment
         self.inventory:dict[str, "items.Item"] = {}
@@ -37,7 +38,7 @@ class Game_Object():
         #Combat tools
         self.monitor:game_objects.Monitor = game_objects.Monitor(self)
         self.damage_type:mechanics.DamageType = mechanics.DamageType()
-        self.damage_type.set(["Physical", "Slashing"])  # set default damage type to Physical Slashing
+        self.damage_type.set(["Physical", "Bludgeoning"])  # set default damage type to Physical Bludgeoning
 
         self.immunities:mechanics.DamageType = mechanics.DamageType()
         self.resistances:mechanics.DamageType = mechanics.DamageType()
@@ -46,36 +47,37 @@ class Game_Object():
         self.prev_narration = ""
 
     #PROPERTIES
-    @property
-    def dead(self) -> bool:
-        """Checks if the Object is alive or not"""
-        return self.hp <= 0
     
     @property
-    def caster_level(self) -> int:
-        return 1 + (self.level // 5)
+    def armor_value(self) -> int:
+        return self.stats.armor
 
     @property
     def base_attack_bonus(self) -> int:
         return max(1, self.level // 5)
 
     @property
-    def needs_healing(self) -> bool:
-        return self.hp < self.stats.max_hp
-    
-    @property
     def can_act(self) -> bool:
         """Checks if the Object can act (ie AP > 0)"""
         return self.ap > 0 and not self.dead
+
+    @property
+    def caster_level(self) -> int:
+        return 1 + (self.level // 5)
+
+    @property
+    def dead(self) -> bool:
+        """Checks if the Object is alive or not"""
+        return self.hp <= 0
+
+    @property
+    def needs_healing(self) -> bool:
+        return self.hp < self.stats.max_hp
     
     @property
     def target(self) -> Game_Object:
         """Returns the Object's target"""
         raise NotImplementedError
-    
-    @property
-    def armor_value(self) -> int:
-        return self.stats.armor
 
     #VIP Methods
     def update(self):
@@ -90,8 +92,7 @@ class Game_Object():
         return self.stats.bonus(stat)
     
     def evasion(self) -> int:
-        return 0
-        #return self.stats.base_evasion + self.bonus("dex")
+        return self.stats.base_evasion + self.bonus("dex")
 
     #ROLLS
     def roll_a_check(self, stat:str) -> int:
@@ -158,7 +159,9 @@ class Game_Object():
         elif self.can_act:
             self.ap -= num
         else:
-            raise ValueError(f"Not enough AP. {num} required, and only {self.ap} available!")
+            error = f"Not enough AP. {num} required, and only {self.ap} available!"
+            globals.type_text(error, 0.5)
+            return False
         return True
 
     def reset_ap(self) -> None:
@@ -213,7 +216,6 @@ class Game_Object():
                 if roll >= self.target.evasion():
                     self.narrate(self.hit_narration)
                     dmg = self.roll_damage()
-                    print(dmg.amount)
                     self.target.take_damage(dmg)
                     self.apply_on_hits()
                 else:
@@ -222,51 +224,20 @@ class Game_Object():
         return None
     
     def check_immunities(self, damage:"mechanics.DamageInstance") -> "mechanics.DamageInstance":
-        #To check immunities, we check resistances against our immunities list, and
-        #if we would resist anything, we are immune to it instead
-        target = damage.amount / 2
-
-        check = self.check_resistances(damage, self.immunities)
-
-        if check.amount == target:
-            damage.amount = 0
-        
+        if damage.type == self.immunities:
+            globals.type_text(f"{self.header.action} immune!")
+            damage.amount /= 2
         return damage
             
     def check_resistances(self, damage:"mechanics.DamageInstance", my_list:"mechanics.DamageType"=None) -> "mechanics.DamageInstance":
-        if my_list is None: my_list = self.resistances
-
-        #check if im resistant to physical
-        if damage.type.is_physical:
-
-            if True in my_list.physical:
-                damage.amount /= 2
-                return damage
-            
-            if my_list.physical == damage.type.physical:
-                damage.amount /= 2
-                return damage
-        
-        #check if im resistant to magic
-        if damage.type.is_magic:
-            if True in my_list.magic:
-                damage.amount /= 2
-                return damage
-            
-            if my_list.magic == damage.type.magic:
-                damage.amount /= 2
-                return damage
-
+        if damage.type == self.resistances:
+            globals.type_text(f"{self.header.action} resistant!")
+            damage.amount = 0
         return damage
 
     def take_damage(self, damage:"mechanics.DamageInstance") -> int:
-        start = damage.amount
         damage = self.check_immunities(damage)
-        if damage.amount != start:
-            globals.type_text(f"{self.header.action} immune!")
         damage = self.check_resistances(damage)
-        if damage.amount != start:
-            globals.type_text(f"{self.header.action} resistant!")
 
         taken = int(damage.amount * self.stats.damage_taken_multiplier)
 
@@ -299,8 +270,8 @@ class Game_Object():
         base = globals.get_type(item)
         match base:
             case "Consumable":
-                item.use()
-                return True
+                return item.use()
+                #return True
             case _: 
                 return False
 
@@ -328,7 +299,7 @@ class Game_Object():
         self.fumble_table()
 
     def fumble_table(self):
-        raise NotImplementedError
+        return None
 
     #NARRATION
     def narrate(self, func, param=None) -> None:

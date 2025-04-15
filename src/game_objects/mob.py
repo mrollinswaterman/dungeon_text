@@ -60,6 +60,7 @@ class Mob(game_objects.Game_Object):
         def roll_damage(self) -> mechanics.DamageInstance:
             """Rolls damage (damage dice)"""
             dmg = globals.XdY(self.stats.damage)
+            dmg += self.bonus("str")
 
             return mechanics.DamageInstance(self, dmg)
 
@@ -146,7 +147,7 @@ class Mob(game_objects.Game_Object):
             source_stat_block = None
 
             #find my statblock in the source file
-            with open("monster_stats.csv", "r") as file:
+            with open(globals.MOBS_FILEPATH, "r") as file:
                 r = csv.DictReader(file)
                 for entry in r:
                     if entry["id"] == self.id:

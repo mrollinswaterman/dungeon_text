@@ -24,7 +24,10 @@ RUNNING = False
 
 def initialize():
     global PLAYER, SHOPKEEP, ARMORY, SCENE
-    import game_objects, controllers, compendiums
+    import game_objects, controllers, compendiums, items
+    import tests
+
+    #tests.run()
 
     PLAYER = game_objects.Player()
 
@@ -37,27 +40,17 @@ def initialize():
 
     game_objects.forge_all_items()
 
-    PLAYER.equip(ARMORY.get("Longsword"), True)
-    PLAYER.equip(ARMORY.get("Padded Leather"), True)
+    PLAYER.equip(globals.craft_item("Longsword", "Common"), True)
+    PLAYER.equip(globals.craft_item("Padded Leather", "Common"), True)
     #PLAYER.gain_gold(10000)
 
-    #hp_pots:"items.Stackable" = item_compendium.Health_Potion(max(1, PLAYER.level // 4))
-    #hp_pots.set_quantity(5)
-    #PLAYER.pick_up(hp_pots, True)
+    hp_pots:items.Stackable = globals.craft_item("Health_Potion", "Common")
+    hp_pots.set_quantity(5)
+    PLAYER.pick_up(hp_pots, True)
 
     create_commands_dict()
 
-    #enemy = globals.spawn_random_mob()
-
-    #test = compendiums.status_compendium.dict["Poisoned"](enemy)
-
-    #print(test._source.target)
-
-    #PLAYER.apply(test)
-
-    #PLAYER.update()
-
-    #sys.exit()
+    #tests.run()
 
     return True
 
@@ -76,12 +69,11 @@ def create_commands_dict():
     import controllers.player_turn as player_turn
     import tui
     import narrator
+    import tests
     COMMANDS = {
         "tui": {
             "y": tui.etd,
             "n": tui.ltd,
-            "test": tui.test,
-            "t":tui.test,
             "i":PLAYER.print_inventory,
         },
 
@@ -110,6 +102,7 @@ def create_commands_dict():
             "t":PLAYER.total_defense,
             "all":PLAYER.all_out,
             "s":PLAYER.study_weakness,
+            "c": player_turn.cancel
         },
 
         "overworld_menu": {
@@ -124,20 +117,24 @@ def create_commands_dict():
             "l":narrator.leave_the_shop,
             "s": None,
             "i": narrator.show_inventory,
+            "b": narrator.back
         },
 
         "cleanse_an_effect": {
+            "c": player_turn.cancel
         },
 
         "item_select": {
+            "c": player_turn.cancel,
+            "b": narrator.back
         },
 
         "_": {
+            "b": narrator.back
         },
     }
 
     for entry in COMMANDS:
         COMMANDS[entry]["exit"] = globals.exit
         COMMANDS[entry]["reset"] = player_turn.reset
-        COMMANDS[entry]["c"] = player_turn.cancel
-        COMMANDS[entry]["b"] = narrator.back
+        #COMMANDS[entry]["c"] = player_turn.cancel

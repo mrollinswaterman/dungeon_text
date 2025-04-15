@@ -1,4 +1,4 @@
-type,id,name,rarity,weight_class,max_dex_bonus,durability,damage,crit,crit_range,damage_type,armor_value,quantity,unit_weight,unit_value
-Consumable,Health_Potion,Health Potion,Common,,,,,,,,,1,5,8
-Weapon,Longsword,Longsword,Common,Light,6,10,1d8,2,20,Physical/Slashing,,,,
-Armor,Padded Leather,Padded Leather,Common,Light,5,15,,,,Physical,2,,,
+type,id,name,rarity,durability,quantity
+Consumable,Health_Potion,Health Potions,Common,,5
+Weapon,Longsword,Longsword,Common,20,
+Armor,Padded Leather,Padded Leather,Common,15,

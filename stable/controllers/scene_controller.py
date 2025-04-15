@@ -62,8 +62,6 @@ class Turn_Order():
 class Scene():
 
     def __init__(self):
-        #Player
-        self.player:Union[game_objects.Player, None] = None
         #Enemy
         self.enemy:Union[game_objects.Mob, None] = None
         #Event
@@ -71,29 +69,21 @@ class Scene():
         #Turn Order
         self.turn_order = Turn_Order()
 
-        #self.turn_order.add(self.player, controllers.player_turn.turn)
-        #self.turn_order.add(self.enemy, controllers.enemy_turn.turn)
-
     def start_combat_round(self):
-    
-        self.turn_order.add(self.player, controllers.player_turn.turn)
+        self.turn_order.add(game.PLAYER, controllers.player_turn.turn)
         self.turn_order.add(self.enemy, controllers.enemy_turn.turn)
-
         self.turn_order.go()
 
     def select_next(self):
         """Starts a new scene with a new enemy or event"""
-        if globals.probability(1): #85% chance of an enemy spawning next
+        if globals.probability(85): #85% chance of an enemy spawning next
             self.enemy = globals.spawn_random_mob()
             self.begin_encounter()
         else: #remainging 15% chance of an event spawning
             self.event: game_objects.Event = globals.spawn_random_event()
-            self.event.set_tries(2)
-            self.event.set_passed(False)
             game.PLAYER.update()#update player before event text goes off
             self.event.start()#prints event start text
-            globals.type_with_lines()
-            #run_event(self.event)
+            self.run_event()
 
     def begin_encounter(self):
         """Sets the enemy for the scene if it's None, and prints the encounter header"""
@@ -106,73 +96,68 @@ class Scene():
         self.start_combat_round()
 
     def run_event(self):
-        stats = game.COMMANDS["stats"]
+        options = game.COMMANDS["stats"]
 
         done = False
         while not done:
             narrator.event_options()
             cmd = globals.get_cmd()
 
-            if cmd in stats:
-                if stats[cmd] is None:
-                    self.event.run(cmd, globals.PLAYER.roll_a_check(cmd))
-                    if self.event.passed is True:# if passed, reset event tries and SCENE.next()
-                        done = True
-                        self.event.set_tries(2)
-                        self.event.set_passed(False)
-                        globals.PLAYER.recieve_reward(self.event.loot)
-                        if not globals.PLAYER.can_level_up:
+            if cmd in options:
+                if options[cmd] is None: # not the exit command basically
+                    match self.event.run(cmd):
+                        case True: 
+                            done = True
+                            if not game.PLAYER.can_level_up:
+                                narrator.continue_run()
+                            else:
+                                self.level_up_player()
+                        case None:
+                            continue
+                        case False:
+                            done = True
+                            self.event = None
                             narrator.continue_run()
-                        else:
-                            pass
-                            #level_up_player()
-                    elif self.event.tries is True:# if not passed yet, and still tries left, run it again
-                        globals.type_with_lines()
-                    else: # if failed, tell the player and move on
-                        done = True
-                        self.event.failure()
-                        self.event = None
-                        narrator.continue_run()
+
                 else:
-                    stats[cmd]()
+                    options[cmd]()
 
             else:
-                globals.type_text(f"Invalid stat '{cmd}'. Please try again.")
+                globals.type_text(f"Invalid stat '{cmd}'. Please try again.")\
+                
+    def level_up_player(self):
+        options = game.COMMANDS["stats"]
+
+        narrator.level_up_options()
+        done = False
+        while not done:
+            cmd = globals.get_cmd()
+            if cmd in options:
+                done = True
+                if options[cmd] is None:
+                    game.PLAYER.level_up(cmd)
+                else:
+                    options[cmd]()
+
+        globals.type_text(f"Your {globals.STATS[cmd]} increased by 1. You are now Level {game.PLAYER.level}")
+        if game.PLAYER.can_level_up is True:
+            self.level_up_player()
+        else:
+            narrator.continue_run()
+
+    def loot(self):
+        game.PLAYER.gain_xp(self.enemy.xp)
+        game.PLAYER.gain_gold(self.enemy.gold)
+
+        #TODO: give the player the option to take the monster's inventory loot
 
     def end(self):
         globals.type_text(f"You killed the {self.enemy.id}!")
-        game.PLAYER.receive_loot()
+        self.loot()
         self.enemy = None
         self.turn_order.clear()
 
         if not game.PLAYER.can_level_up:
             narrator.continue_run()
         else:
-            #level_up_player()
-            narrator.continue_run()
-
-"""
-
-
-def level_up_player():
-    stats = commands.commands["stats"]
-
-    narrator.level_up_options()
-    done = False
-    while not done:
-        cmd = globals.get_cmd()
-        if cmd in stats:
-            done = True
-            if stats[cmd] is None:
-                globals.PLAYER.level_up(cmd)
-            else:
-                stats[cmd]()
-
-    globals.type_text(f"Your {globals.STATS[cmd]} increased by 1. You are now Level {globals.PLAYER.level}")
-    if globals.PLAYER.can_level_up is True:
-        level_up_player()
-    else:
-        narrator.continue_run()
-
-        
-"""
+            self.level_up_player()

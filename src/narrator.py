@@ -157,6 +157,9 @@ def shopkeep_options():
     done = False
     while not done:
         cmd = globals.get_cmd()
+        if cmd == "s":
+            globals.under_construction()
+            continue
         if cmd in options:
             done = True
             options[cmd]()

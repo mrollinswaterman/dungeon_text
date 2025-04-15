@@ -28,9 +28,14 @@ def build_damage_type(input:str=None) -> "mechanics.DamageType":
 
     return ret
 
-def generate_item_rarity():
+def generate_item_rarity(input:str|items.Rarity|None) -> items.Rarity:
     import items
-    """Generates item rarity based on player level"""
+    """
+    Generates item rarity based on player level
+    If input is not none, i.e a string or int, return a Rarity object with input as it's source
+    """
+
+    if input is not None: return items.Rarity(input)
 
     if globals.probability(1+game.PLAYER.level):
         return items.Rarity("Legendary")
@@ -62,42 +67,41 @@ def craft_item(item:dict | str, rarity:str|items.Rarity=None) -> items.Item:
     ret = None
     #Check wether the item_id is a name or a dictionary
     match item:
-        case str():
-            #Check Item CSV files for a matching name, and create the associated item mold
-            with open("equipment_stats.csv", "r") as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    if row["id"] == item:
-                        ret = create_mold(row)
-            file.close()
-
-            with open("item_stats.csv", "r") as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    if row["id"] == item:
-                        ret = create_mold(row)
-            file.close()
-
-            if ret is None: raise ValueError("Item ID not recogized")
         case dict():
-            ret = create_mold(item)
+            try:
+                item = item["id"]
+            except KeyError:
+                raise ValueError("""Unrecognizable dictionary passed to 'craft_item'.
+                Dictionary needs an 'id' key and value!""")
+    
+    #Check Item CSV files for a matching name, and create the associated item mold
+    with open(globals.EQUIPMENT_FILEPATH, "r") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row["id"] == item:
+                ret = create_mold(row)
+    file.close()
+
+    with open(globals.ITEMS_FILEPATH, "r") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row["id"] == item:
+                ret = create_mold(row)
+    file.close()
+
+    if ret is None: raise ValueError("Item ID not recogized")
     
     if rarity is None: return ret
 
     ret.rarity = items.Rarity(rarity)
     return ret
 
-def create_mold(source):
+def create_mold(source) -> items.Item:
     import items
     import compendiums.item_compendium as item_compendium
 
     cast = items.Anvil()
     cast.copy(source)
-    if cast.id == "Health_Potion":
-        print("SRC")
-        print(source)
-        print("CAST")
-        print(cast)
     match cast.anvil_type:
         case "Weapon":
             return items.Weapon(cast)
@@ -107,8 +111,6 @@ def create_mold(source):
             if cast.id in item_compendium.dict:
                 final:items.Stackable = item_compendium.dict[cast.id](cast)
             else: final = items.Stackable(cast)
-
-            final.set_quantity(1)
             return final
 
 def spawn_mob(name:str) -> "game_objects.Mob":

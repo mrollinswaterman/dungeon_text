@@ -1,11 +1,11 @@
-import globals
+"""import globals
 import mechanics
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import game_objects
 
-class Prone(mechanics.Status):
+class Prone():
 
     def __init__(self, source):
         super().__init__(source)
@@ -16,7 +16,6 @@ class Prone(mechanics.Status):
 
     def save_attempt(self):
         self.end()
-
-object = Prone
+object = Prone"""
 
 

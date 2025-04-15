@@ -1,3 +1,4 @@
+import random
 import time, os, csv
 from compendiums import combat_trick_compendium
 import controllers.player_turn
@@ -15,8 +16,6 @@ class playerHeader(game_objects.Header):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.combat_trick = None
-        self._bonus_crit_range = None
 
     @property
     def default(self):
@@ -29,12 +28,15 @@ class playerHeader(game_objects.Header):
     @property
     def ownership(self):
         return "your"
+    
+    @property
+    def tries(self):
+        return random.choice(["you try", "you attempt"])
 
 class Player(game_objects.Game_Object):
 
     def __init__(self):
         super().__init__("Player")
-        #self.conditions:"game_objects.Conditions_Handler" = game_objects.Conditions_Handler(self)
         self.level = 1
         self.stats.max_ap = 1 + (self.level // 5)
 
@@ -45,6 +47,8 @@ class Player(game_objects.Game_Object):
         
         self._bonus_crit_range = 0
         self.combat_trick:mechanics.Combat_Trick | None = None
+
+        self._target = None
 
     #properties
     @property
@@ -83,7 +87,10 @@ class Player(game_objects.Game_Object):
 
     @property
     def target(self):
-        return game.SCENE.enemy
+        if self._target is None:
+            return game.SCENE.enemy
+        else:
+            return self._target
 
     #methods
     def update(self) -> None:
@@ -214,8 +221,8 @@ class Player(game_objects.Game_Object):
     def roll_narration(self, roll):
         roll_text = self.process_roll(roll)
         text = [
-            f"You heft your {self.weapon.id} and attack the {self.target.id},",
-            f"You charge the {self.target.id},",
+            f"You heft your {self.weapon.id} and attack {self.target.header.default},",
+            f"You charge {self.target.header.default},",
             f"You swing your {self.weapon.id},",
             f"Brandishing your {self.weapon.id}, you prepare to strike...",
         ]
@@ -227,11 +234,11 @@ class Player(game_objects.Game_Object):
     def hit_narration(self) -> None:
         text = [
             f"A hit.",
-            f"The {self.target.id} didn't get out of the way in time.",
-            f"You hit the {self.target.id}.",
+            f"{self.target.header.default} didn't get out of the way in time.",
+            f"You hit {self.target.header.default}.",
             f"Your attack lands.",
             f"Your {self.weapon.id} strikes true.",
-            f"The {self.target.id} wasn't able to dodge this one.",
+            f"{self.target.header.default} wasn't able to dodge this one.",
             f"Sucess."
         ]
         return text
@@ -240,42 +247,33 @@ class Player(game_objects.Game_Object):
         text = [
             f"You missed.",
             f"No luck this time.",
-            f"The {self.target.id} deftly dodges your attack.",
-            f"Your attack whizzes past the {self.target.id}, missing by a hair.",
-            f"You don't crack the {self.target.id}'s defenses this time.",
+            f"{self.target.header.default} deftly dodges your attack.",
+            f"Your attack whizzes past {self.target.header.default}, missing by a hair.",
+            f"You don't crack {self.target.header.default}'s defenses this time.",
             f"It leaps out of the way in the nick of time.",
             f"No dice.",
             f"A miss.",
-            f"The {self.target.id} ducks your strike.",
-            f"The {self.target.id} manages to weather your onslaught for now."
+            f"{self.target.header.default} ducks your strike.",
+            f"{self.target.header.default} manages to weather your onslaught for now."
         ]
         return text
     
     def take_damage_narration(self, damage:"mechanics.DamageInstance"):
-        if damage.amount <= 0: return "You took no damage!"
         taken = f"{damage.amount} damage"
+        if damage.amount <= 0: 
+            damage.amount = 0
+            taken = "no damage"
         source = f"{damage.header.damage}"
-        if taken > 0:
-            text = [
-                f"You took {taken} from {source}.",
-                f"{source} dealt {taken} to you.",
-                f"{source} did {taken}.",  
-                ]
-        else:
-            text = [
-                f"You took no damage from {source}!",
-                f"{source} did no damage to you!",
-                ]
+        text = [
+            f"You took {taken} from {source}.",
+            f"{source} dealt {taken} to you.",
+            f"{source} did {taken} to you.",  
+            ]
 
         #if source isnt a GameObject, don't add "hit you for..." text to final list, else do
         match source:
             case game_objects.Game_Object():
-                if taken > 0: 
-                    text.append(f"{source} hit you for {taken}.")
-                else: 
-                    text.append(f"{source} hit you for no damage.")
-            case _:
-                pass
+                text.append(f"{source} hit you for {taken}.")
         return text
     
     def heal_narration(self, num: int) -> list[str]:
@@ -299,13 +297,12 @@ class Player(game_objects.Game_Object):
 
     #TRICKS
     def power_attack(self) -> int:
-        self.combat_trick = combat_trick_compendium.dict["Power_Attack"](self)
-        self.combat_trick.start()
+        raise NotImplementedError
 
     def feint(self) -> None:
         self.combat_trick = combat_trick_compendium.dict["Feint"](self)
         self.combat_trick.start()
-    
+
     def riposte(self) -> None:
         pass
 
@@ -450,6 +447,8 @@ class Player(game_objects.Game_Object):
         empty_check = True if os.stat(filename).st_size == 0 else False
         if empty_check: return None
         size = 0
+        for item in list(self.inventory.keys()):
+            del self.inventory[item]
         self.inventory = {}
         self.weapon = None
         self.armor = None
@@ -461,7 +460,10 @@ class Player(game_objects.Game_Object):
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
-                item = globals.create_item(row)
+                id = row["id"]
+                item = globals.craft_item(id)
+                item.load(row)
+                #print(item.__dict__)
                 if idx >= size - 2:
                     self.equip(item, True)
                 else:

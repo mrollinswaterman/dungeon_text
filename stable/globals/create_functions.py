@@ -1,6 +1,9 @@
 import random
+import csv
+
 import globals
 import game
+import items
 
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
@@ -13,50 +16,26 @@ def build_damage_type(input:str=None) -> "mechanics.DamageType":
     Creates and returns a DamageType object based on an input string.
     Returns an empty type if input is None
     """
-    #physical is the assume super-type if none is specified
     import mechanics
-    if input is None or input == '': return mechanics.DamageType()
-    #find a more efficient way to differentiate magic vs physical
     ret = mechanics.DamageType()
-    if "Magic" in input:
-        #split into physical types and magic types
-        my_types = input.split("Magic")
-
-        #process physical
-        physical_types = my_types[0].split("/")
-        if my_types[-1] == '':
-            my_types = my_types.pop()
-        if my_types[0] == "Physical":
-            my_types.pop(0)
-
-        ret._physical = physical_types
-
-        #process magic
-        magic_types = my_types[1].split("/")
-        if magic_types[-1] == '':
-            magic_types = magic_types.pop()
-
-        if len(magic_types) <= 0:
-            magic_types = [True]
-
-        ret._magic = magic_types
-        return ret
-
-    #just process physical
-    my_types = input.split("/")
-    if my_types[-1] == '':
-        my_types = my_types.pop()
-    if my_types[0] == "Physical":
-        my_types.pop(0)
-
-    ret._physical = my_types
+    if input is None: return ret 
+    types = input.split("/")
+    if types[0] != "Magic":
+        final = ["Physical"] + types
+        ret.set(final)
+    else:
+        ret.set(["Magic"] + types)
 
     return ret
-    
 
-def generate_item_rarity():
+def generate_item_rarity(input:str|items.Rarity|None) -> items.Rarity:
     import items
-    """Generates item rarity based on player level"""
+    """
+    Generates item rarity based on player level
+    If input is not none, i.e a string or int, return a Rarity object with input as it's source
+    """
+
+    if input is not None: return items.Rarity(input)
 
     if globals.probability(1+game.PLAYER.level):
         return items.Rarity("Legendary")
@@ -84,31 +63,59 @@ def create_enchantment(name:str, source:"game_objects.Game_Object | items.Item")
         return enchants.dict[name](source)
     return None
 
-def create_item(source_dict={}):
+def craft_item(item:dict | str, rarity:str|items.Rarity=None) -> items.Item:
+    ret = None
+    #Check wether the item_id is a name or a dictionary
+    match item:
+        case dict():
+            try:
+                item = item["id"]
+            except KeyError:
+                raise ValueError("""Unrecognizable dictionary passed to 'craft_item'.
+                Dictionary needs an 'id' key and value!""")
+    
+    #Check Item CSV files for a matching name, and create the associated item mold
+    with open(globals.EQUIPMENT_FILEPATH, "r") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row["id"] == item:
+                ret = create_mold(row)
+    file.close()
+
+    with open(globals.ITEMS_FILEPATH, "r") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row["id"] == item:
+                ret = create_mold(row)
+    file.close()
+
+    if ret is None: raise ValueError("Item ID not recogized")
+    
+    if rarity is None: return ret
+
+    ret.rarity = items.Rarity(rarity)
+    return ret
+
+def create_mold(source) -> items.Item:
     import items
     import compendiums.item_compendium as item_compendium
 
     cast = items.Anvil()
-    cast.copy(source_dict)
+    cast.copy(source)
     match cast.anvil_type:
         case "Weapon":
             return items.Weapon(cast)
         case "Armor":
             return items.Armor(cast)
         case _:
-            pass
-
-    if cast.anvil_type in item_compendium.dict:
-        final:items.Stackable = item_compendium.dict[cast.anvil_type](cast.rarity)
-    else: final = items.Stackable(cast)
-
-    final.set_quantity(cast.quantity)
-    return final
+            if cast.id in item_compendium.dict:
+                final:items.Stackable = item_compendium.dict[cast.id](cast)
+            else: final = items.Stackable(cast)
+            return final
 
 def spawn_mob(name:str) -> "game_objects.Mob":
     """
-    Spawn a specific mob by name
-    Returns a Mob Object
+    Spawn a specific mob by name. Returns a Mob Object
     """
     import compendiums.monster_manual as monster_manual
     try:
@@ -137,13 +144,18 @@ def spawn_random_mob() -> "game_objects.Mob":
     else: return enemy
 
 def spawn_event(name:str):
-    import compendiums.event_compendium as event_compendium
+    import compendiums.event_compendium as events
     try:
-        return event_compendium.dict[name]()
+        return events.dict[name]()
     except KeyError:
         raise ValueError(f"No event by id '{name}'.")
 
 def spawn_random_event():
-    import compendiums.event_compendium as event_compendium
-    return game_objects.Event2()
-    return random.choice(list(event_compendium.dict.values()))()
+    import compendiums.event_compendium as events
+
+    ev = random.choice(list(events.dict.values()))()
+
+    if ev.id != "Trap_Room":
+        return ev
+    else:
+        return spawn_random_event()

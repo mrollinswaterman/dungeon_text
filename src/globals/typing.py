@@ -28,6 +28,11 @@ def error_message(cmd:str="", text:str=None) -> None:
     text = f'Inavlid command "{cmd}". Please try again.' if text is None else text
     type_text(text)
 
+def under_construction():
+    text = f'That function is currently unavailable!'
+    print(text)
+    print()
+
 def type_with_lines(text:str=None, num:int=1, speed:float=None, newln=True) -> None:
     print("="*110+"\n")
     type_text(text, speed, newln)

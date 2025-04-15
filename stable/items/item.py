@@ -37,7 +37,7 @@ class Rarity():
 
 class Weight_Class():
 
-    def __init__(self, class_ref):
+    def __init__(self, class_ref=None):
         codex = {
             None: 2,
             "None": 2,
@@ -47,14 +47,21 @@ class Weight_Class():
             "Superheavy": 10
         }
 
-        if class_ref in list(codex.keys()):
-            self.value = codex[class_ref]
-            self.string = class_ref
-        elif class_ref in list(codex.values()):
-            self.value = class_ref
-            self.string = codex.keys(self.value-1)
-        else:
-            raise ValueError(f"Weight class '{class_ref}' not found in codex.")
+        match class_ref:
+            case Weight_Class():
+                self.value = class_ref.value
+                self.string = class_ref.string
+            
+            case _:
+                if class_ref in list(codex.keys()):
+                    self.value = codex[class_ref]
+                    self.string = class_ref
+                elif class_ref in list(codex.values()):
+                    self.value = class_ref
+                    self.string = codex.keys(self.value-1)
+                else:
+                    raise ValueError(f"Weight class '{class_ref}' not found in codex.")
+       
 
 class Anvil():
     id:str
@@ -64,9 +71,6 @@ class Anvil():
     #EQUIPMENT attributes
     weight_class:Weight_Class
     max_dex_bonus:int
-    durability:int
-    enchantments:str
-    proc_chances:str
 
     #Weapon attributes
     damage:str
@@ -78,7 +82,6 @@ class Anvil():
     armor_value:int
 
     #Stackable attributes
-    quantity:int
     unit_weight:int
     unit_value:int
 
@@ -89,10 +92,8 @@ class Anvil():
 
         #EQUIPMENT attributes
         self.weight_class = None
-        self.max_dex_bonus = 6
+        self.max_dex_bonus = None
         self.durability = None
-        self.enchantments = None
-        self.proc_chances = None
 
         #Weapon attributes
         self.damage= None
@@ -123,21 +124,19 @@ class Anvil():
         
         if self.anvil_type is None:
             self.anvil_type = source["type"] 
-
-    @property
-    def enchanted(self):
-        return self.enchantments is not None and self.enchantments != ""
+    
+    def __str__(self):
+        print(self.__dict__)
+        return ""
 
 class Item():
 
     def __init__(self, id:str, rarity=None):
         self.id = id
         self._name = self.id
-        self.rarity:Rarity = None
-        match rarity:
-            case str() | int(): self.rarity = Rarity(rarity)
-            case Rarity(): self.rarity = rarity
-            case _: self.rarity = globals.generate_item_rarity()
+        self.__anvil__ = None
+        if rarity == '': rarity = None
+        self.rarity:Rarity = globals.generate_item_rarity(rarity)
         self.description = ""
         self.owner:"game_objects.Game_Object" | None = None
         self.saved:dict[str, str | int] = {}
@@ -146,6 +145,13 @@ class Item():
     @property
     def level(self) -> int:
         return self.owner.level
+    
+    @property
+    def header(self) -> "game_objects.Header":
+        if self.owner.header is None:
+            return None
+        else:
+            return self.owner.header
 
     @property
     def weight(self) -> float:
@@ -178,21 +184,24 @@ class Item():
         ]
 
     #methods
-    #META functions (save/load, etc)
+    def smelt(self) -> None:
+        if self.__anvil__ is None: return None
+        for entry in self.__anvil__.__dict__:
+            if entry in self.__dict__ and self.__dict__[entry] is None:
+                self.__dict__[entry] = self.__anvil__.__dict__[entry]
+
     def save(self) -> None:
         self.saved = {
-            "type": self.__class__.__name__,
+            "type": globals.get_type(self),
             "id": self.id,
             "name": self.name,
             "rarity": self.rarity.string
         }
 
     def load(self, save_file:dict) -> None:
-        for entry in save_file:
-            if entry in self.__dict__:
-                self.__dict__[entry] = save_file[entry]
-        
-        self.rarity = Rarity(self.rarity)
+        #self.__anvil__.copy(save_file)
+        #self.smelt()
+        return None
 
     def __str__(self) -> str:
         final = ""

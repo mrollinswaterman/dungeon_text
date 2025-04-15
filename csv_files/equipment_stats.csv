@@ -1,0 +1,26 @@
+type,id,damage,damage_type,crit,crit_range,weight_class,armor_value,max_dex_bonus,rarity
+Weapon,Longsword,1d8,Slashing,2,,Light,,6,
+Weapon,Battleaxe,1d8,Slashing,3,,Medium,,3
+Weapon,Light Flail,1d8,Bludgeoning,2,,Medium,,4
+Weapon,Scimitar,1d6,Slashing,2,18,Light,,6
+Weapon,Trident,1d10,Piercing,2,,Heavy,,3
+Weapon,Mace,1d8,Bludgeoning,2,,Medium,,4
+Weapon,Greatsword,2d6,Slashing,2,,Medium,,3
+Weapon,Glaive,1d10,Slashing,3,,Medium,,4
+Weapon,Greataxe,1d12,Slashing,3,,Heavy,,2
+Weapon,Scythe,2d4,Slashing,4,16,Heavy,,
+Weapon,Halberd,1d10,Slashing/Piercing,3,,Medium,,4
+Weapon,Rapier,1d4,Slashing/Piercing,4,17,None,,12
+Weapon,Ultra Greatsword,2d10,Slashing/Bludgeoning,2,,Heavy,,0
+Armor,Padded Leather,,,,,Light,2,5,
+Armor,Studded Leather,,,,,Light,3,5
+Armor,Haramaki,,,,,None,1,12
+Armor,Chain Shirt,,,,,Light,4,4
+Armor,Breastplate,,,,,Medium,6,3
+Armor,Chain Mail,,,,,Medium,6,2
+Armor,Armored Coat,,,,,Medium,5,5
+Armor,Scale Mail,,,,,Medium,5,4
+Armor,Half-plate,,,,,Heavy,8,1
+Armor,Stoneplate,,,,,Heavy,10,0
+Armor,Banded Mail,,,,,Heavy,7,2
+Armor,Full-plate,,,,,Heavy,9,1

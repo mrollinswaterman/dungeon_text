@@ -1,12 +1,13 @@
 ##Note: player update is called a the START of the turn
 
+import glob
 import time, sys
 import game
 import globals
 import items
 import narrator
 
-GOD_MODE = True
+GOD_MODE = False
 
 def turn():
     """Runs the player's turn"""
@@ -25,6 +26,10 @@ def turn():
         done = False
         while not done:
             code = globals.get_cmd()
+
+            if code == "ct" or code == "e":
+                globals.under_construction()
+                continue
 
             #check if code is an action
             if code in actions:
@@ -95,7 +100,7 @@ def turn_options():
     print("\n")
 
 def combat_tricks():
-    ct = game.COMMANDS["combat_tricks"]
+    """ct = game.COMMANDS["combat_tricks"]
 
     globals.type_text("Select a trick to use -OR- Cancel - (c)")
     options = [
@@ -118,13 +123,14 @@ def combat_tricks():
             done = True
             ct[code]()
         else:
-            globals.error_message(code)
+            globals.error_message(code)"""
     
+    globals.under_construction()
     return None
 
 def cleanse_a_condition():
     """Attempts to cleanse a chosen condition"""
-    effects = game.COMMANDS["cleanse_an_effect"]
+    """effects = game.COMMANDS["cleanse_an_effect"]
 
     globals.type_text("Select an effect to cleanse -OR- Cancel - (c)")
     for idx, condition in enumerate(game.PLAYER.conditions.list):
@@ -155,7 +161,9 @@ def cleanse_a_condition():
                     return None
             except TypeError:
                 raise Exception
-            globals.error_message(code)
+            globals.error_message(code)"""
+    globals.under_construction()
+    return None
 
 def show_inventory() -> None:
     import game
@@ -196,9 +204,9 @@ def use_an_item(item:"items.Item | items.Consumable") -> bool:
 
 def flee() -> None:
     """Attempts to run away from the current encounter"""
-    if game.PLAYER.conditions.get("Enraged") is not None:
-        globals.type_text("You cannot flee while Enraged.")
-        return None
+    #if game.PLAYER.monitor.get("Enraged") is not None:
+        #globals.type_text("You cannot flee while Enraged.")
+        #return None
     
     game.RUNNING = False
     globals.type_text("You attempt to flee...")
@@ -241,15 +249,15 @@ def end_game():
 
 def load():
     """Loads the player.csv save file"""
-    game.PLAYER.load("player.csv", "inventory.csv")
+    game.PLAYER.load(globals.PLAYER_FILEPATH, globals.INVENTORY_FILEPATH)
 
 def reset():
     """Wipes the player.csv and inventory.csv files"""
-    with open('player.csv', "r+") as file:
+    with open(globals.PLAYER_FILEPATH, "r+") as file:
         file.truncate(0)
         file.close()
 
-    with open('inventory.csv', "r+") as file:
+    with open(globals.INVENTORY_FILEPATH, "r+") as file:
         file.truncate(0)
         file.close()
 

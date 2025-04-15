@@ -1,10 +1,16 @@
+import effects
 import globals
-import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import game_objects
 
-class Blinded(mechanics.Status):
+class Blinded(effects.Status_Effect):
+    """
+    Blinds the target, giving them a 50% miss chance on all attacks
+
+    Replaces the target's "attack" method with a custom method that rolls
+    miss chance before resolving the attack
+    """
 
     def __init__(self, source, target:"game_objects.Game_Object"=None):
         super().__init__(source)
@@ -13,8 +19,10 @@ class Blinded(mechanics.Status):
 
         self.default = self.target.attack
 
-        self._effect:mechanics.MethodReplacement = mechanics.MethodReplacement(self, self.target)
-        self.effect.replacement_target = "attack"
+        self._effect:effects.MethodReplacement = effects.MethodReplacement(self, self.target)
+        self._effect.replacement_target = "attack"
+
+        self._effects_list = [self._effect]
 
     @property
     def target(self):

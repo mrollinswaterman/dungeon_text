@@ -22,7 +22,6 @@ class Stackable(items.Item):
 
     @property
     def value(self) -> int:
-        print(self.quantity, self.unit_value)
         return self.quantity * self.unit_value
 
     @property
@@ -47,15 +46,13 @@ class Stackable(items.Item):
 
     #methods
     def smelt(self):
-        """Copies an item's anvil stats to it's own class attributes"""
-        if self.__anvil__ is None: return None
-        for entry in self.__anvil__.__dict__:
-            if entry in self.__dict__ and self.__dict__[entry] is None:
-                self.__dict__[entry] = self.__anvil__.__dict__[entry]
+        if super().smelt() is None: return None
+
+        if self.quantity is None:
+            self.set_quantity(1)
 
     def set_quantity(self, amount:int) -> None:
         self.quantity = amount
-        self.__anvil__.quantity = amount
 
     def remove_quantity(self, amount:int=1) -> None:
         if self.quantity >= amount:
@@ -65,9 +62,12 @@ class Stackable(items.Item):
     #META functions (ie save/load/format etc)
     def save(self) -> None:
         super().save()
-        for entry in self.__anvil__.__dict__:
-            if entry in self.__dict__ and entry not in self.saved:
-                self.saved[entry] = self.__dict__[entry]
+        self.saved["quantity"] = self.quantity
+
+    def load(self, source:dict[str, str]) -> None:
+        if "quantity" in source:
+            self.quantity = int(source["quantity"])
+        return None
     
 class Consumable(Stackable):
 

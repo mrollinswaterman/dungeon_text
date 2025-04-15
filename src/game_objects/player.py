@@ -297,8 +297,7 @@ class Player(game_objects.Game_Object):
 
     #TRICKS
     def power_attack(self) -> int:
-        self.combat_trick = combat_trick_compendium.dict["Power_Attack"](self)
-        self.combat_trick.start()
+        raise NotImplementedError
 
     def feint(self) -> None:
         self.combat_trick = combat_trick_compendium.dict["Feint"](self)
@@ -448,6 +447,8 @@ class Player(game_objects.Game_Object):
         empty_check = True if os.stat(filename).st_size == 0 else False
         if empty_check: return None
         size = 0
+        for item in list(self.inventory.keys()):
+            del self.inventory[item]
         self.inventory = {}
         self.weapon = None
         self.armor = None
@@ -459,8 +460,10 @@ class Player(game_objects.Game_Object):
         with open(filename, encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for idx, row in enumerate(reader):
-                item = globals.craft_item(row)
-                #item.load(row)
+                id = row["id"]
+                item = globals.craft_item(id)
+                item.load(row)
+                #print(item.__dict__)
                 if idx >= size - 2:
                     self.equip(item, True)
                 else:

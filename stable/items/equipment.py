@@ -5,20 +5,17 @@ from __future__ import annotations
 import random
 import items
 import globals
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    import items
-    import mechanics
+import mechanics
 
 class Equipment(items.Item):
 
-    def __init__(self, anvil:"items.Anvil", id:str=None, rarity: "items.Rarity" | str | int=None):
-        #check for custom rarity, and set it if it's there
+    def __init__(self, anvil:"items.Anvil", id:str=None, rarity: items.Rarity | str | int=None):
         id = anvil.id if id is None else id
+        #check for custom rarity, and set it if it's there
         rarity = anvil.rarity if rarity is None else rarity
         super().__init__(id, rarity)
-        self.weight_class:"items.Weight_Class" | str | int = None
-        self.damage_type:"mechanics.DamageType" = globals.build_damage_type()
+        self.weight_class:items.Weight_Class = items.Weight_Class()
+        self.damage_type:mechanics.DamageType = mechanics.DamageType()
         self.max_dex_bonus:int = None
         self.durability:int = None
 
@@ -37,13 +34,6 @@ class Equipment(items.Item):
     @property
     def max_durability(self) -> int:
         return 10 * self.rarity.value
-    
-    @property
-    def enchantment_space_remaining(self) -> int:
-        total = 0
-        for entry in self.enchantments:
-            total += entry.cost
-        return self.rarity.value - total
 
     @property
     def broken(self) -> bool:
@@ -63,19 +53,15 @@ class Equipment(items.Item):
 
     #methods
     def smelt(self):
-        """Copies an item's anvil stats to it's own class attributes"""
-        for entry in self.__anvil__.__dict__:
-            if entry in self.__dict__ and self.__dict__[entry] is None:
-                self.__dict__[entry] = self.__anvil__.__dict__[entry]
-
+        """
+        Copies an item's anvil stats to its own internal __dict__
+        """
+        super().smelt()
         if self.durability is None:
             self.durability = self.max_durability
+        self.damage_type = globals.build_damage_type(self.__anvil__.__dict__["damage_type"])
+        self.weight_class = items.Weight_Class(self.__anvil__.__dict__["weight_class"])
 
-        #set enchants to empty dictionary to avoid any confusion
-        self.enchantments = set()
-
-        #if my anvil has enchantments, procces the enchantments and proc chances strings
-    
     def apply(self, effect_type:str):
         """Applies an effect type"""
         for entry in self.enchantments:
@@ -103,12 +89,11 @@ class Equipment(items.Item):
             stopword = "Broken"
             query = self.id.split()
             resultwords = [word for word in query if word != stopword]
-            #(resultwords)
             self.id = ''.join(resultwords)
 
     def destroy(self) -> None:
         """Destroys the item irrepairably"""
-        #in the future might have this just clreate a Resource object called Scrap and set self equal to it
+        #in the future might have this just create a Resource object called Scrap and set self equal to it
         for entry in self.__dict__:
             self.__dict__[entry] = None
         self.id = "Scrap"
@@ -118,21 +103,19 @@ class Equipment(items.Item):
         #reset ID before saving it
         self.id = self.__anvil__.id
         super().save()
-        for entry in self.__anvil__.__dict__:
-            if entry in self.__dict__ and entry not in self.saved:
-                self.saved[entry] = self.__dict__[entry]
         self.saved["durability"] = self.durability if self.durability is not None else self.max_durability
-        self.saved["weight_class"] = self.weight_class.string
-        self.saved["enchantments"] = ""
-        for effect in self.enchantments:
-            self.saved["enchantments"] = self.saved["enchantments"] + effect.id + "/"
+    
+    def load(self, source:dict[str, str]) -> None:
+        if "durability" in source:
+            self.durability = int(source["durability"])
 
-        #save enchantments and their respective proc chances into a string seperated by "/"s
-        #i.e "Flaming/Serrated"
+        if "rarity" in source:
+                self.rarity = items.Rarity(source["rarity"])
+        return None
 
 class Weapon(Equipment):
 
-    def __init__(self, anvil:"items.Anvil", id=None, rarity=None):
+    def __init__(self, anvil:items.Anvil, id=None, rarity=None):
         #set Weapon specific attributes to null before smelt
         self.damage:str | None = None
         self.crit:int | None = None
@@ -185,9 +168,6 @@ class Weapon(Equipment):
     #META functions (save/load/format, etc)
     def save(self) -> None:
         super().save()
-
-    def load(self, stats_file) -> None:
-        super().load(stats_file)
 
 class Armor(Equipment):
 

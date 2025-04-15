@@ -46,6 +46,8 @@ identical to something that's still on the screen (hint: line 2 of the type func
 (ie, "The Shopkeep says the Blacksmith might be able to craft something special with enough Land Shark teeth)
 - [ ] Add a menu if the player hits "n" initally that lets them enter the overworld, save, or quit the game.
 - [ ] Add a 1/round "Reaction" ability to all objects, can act on the opponents turn to do something (i.e add +5 to Evasion at the cost of -5 on all attack checks on your next turn, interurrpt a spell cast, chase a fleeing enemy, etc) 
+- [ ] Add the ability to "loot" an enemy, taking the items in their inventory.
+- [ ] Offer player half the counter's loot for letting an enemy go, else there's no reason to do so 
 
 ## Items
 
@@ -128,9 +130,6 @@ Special move, uses half max durability for a double damage on the attack (can mi
 Alternatively, just prevent the game from printing anything at all while it's saving (maybe make type_text() function always return None??)
 - [ ] There is an extra "|" character after all menu options that shouldn't be there
 - [ ] Find a prettier way to handle not passing a roll check to the mob's narration function (line 320 in game_object)
-- [ ] Have shopkeep automatically sort it's inventory by something (rarity, price, whatever)
 - [ ] Make Shopkeep successful sale message print before player spend_gold() message print (maybe add a silent gold check, then print successful sale, then print spent gold?)
-- [ ] Combat Tricks bugged
-- [ ] Status effects menu bugged
-- [ ] Add resists + immunities to game_objects's save dictionary
+
 

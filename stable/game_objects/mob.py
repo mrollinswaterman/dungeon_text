@@ -1,6 +1,5 @@
 import random
 import csv
-from xml.dom import ValidationErr
 import globals
 import game_objects
 import game
@@ -14,8 +13,9 @@ class Mob(game_objects.Game_Object):
         def __init__(self, id:str="default"):
             #identification
             super().__init__(id)
-            self.base_save_cd = 0
+            self.base_save_dc = 0
             self.retreating = False
+            self._flee_threshold = 10
             self.load()
 
         #properties
@@ -42,7 +42,7 @@ class Mob(game_objects.Game_Object):
         @property
         def flee_threshold(self) -> float:
         #Percent current %HP threshold at which the enemy tries to flee (higher ==> more cowardly)
-            return 15
+            return self._flee_threshold
 
         @property
         def target(self) -> "game_objects.Game_Object":
@@ -60,6 +60,7 @@ class Mob(game_objects.Game_Object):
         def roll_damage(self) -> mechanics.DamageInstance:
             """Rolls damage (damage dice)"""
             dmg = globals.XdY(self.stats.damage)
+            dmg += self.bonus("str")
 
             return mechanics.DamageInstance(self, dmg)
 
@@ -123,29 +124,21 @@ class Mob(game_objects.Game_Object):
             return text
 
         def take_damage_narration(self, damage:"mechanics.DamageInstance") -> list[str]:
-            if damage.amount <= 0: 
-                return [
-                    f"{self.id} took no damage from {source}!",
-                    f"{source} did no damage to {self.id}!",
-                ]
-
             taken = f"{damage.amount} damage"
+            if damage.amount <= 0:
+                damage.amount = 0
+                taken = "no damage"
             source = f"{damage.header.damage}"
             text = [
-                    f"{source} did {taken} to {self.id}.",
-                    f"{source} dealt {taken} to {self.id}.",
-                    f"{self.id} took {taken} from {source}."
+                    f"{source} did {taken} to {self.header.default}.",
+                    f"{source} dealt {taken} to {self.header.default}.",
+                    f"{self.header.default} took {taken} from {source}."
                     ]
 
             #if source isnt a GameObject, don't add "hit you for..." text to final list, else do
             match damage.source:
                 case game_objects.Game_Object():
-                    if taken > 0: 
-                        text.append(f"{source} hit {self.id} for {taken}.")
-                    else: 
-                        text.append(f"{source} hit {self.id} for no damage.")
-                case _:
-                    pass
+                    text.append(f"{source} hit {self.id} for {taken}")
             return text
         
         #LOAD
@@ -154,7 +147,7 @@ class Mob(game_objects.Game_Object):
             source_stat_block = None
 
             #find my statblock in the source file
-            with open("monster_stats.csv", "r") as file:
+            with open(globals.MOBS_FILEPATH, "r") as file:
                 r = csv.DictReader(file)
                 for entry in r:
                     if entry["id"] == self.id:
@@ -168,9 +161,14 @@ class Mob(game_objects.Game_Object):
             #copy the statblock to my statblock and my own attributes
             self.stats.copy(source_stat_block)
             for entry in source_stat_block:
+                if source_stat_block[entry] == "":
+                    source_stat_block[entry] = None
                 if entry in self.__dict__ and entry != "id":
-                    self.__dict__[entry] = globals.build_damage_type(source_stat_block[entry])
+                    self.__dict__[entry] = source_stat_block[entry]
 
+            #set unqiue stats that require their own class instance (damage type)
+            self.resistances = globals.build_damage_type(source_stat_block["resistances"])
+            self.immunities = globals.build_damage_type(source_stat_block["immunities"])
             #generate level from my level range
             self.level = random.randrange(self.stats.level_range[0], self.stats.level_range[1])
             self.stats.level = self.level

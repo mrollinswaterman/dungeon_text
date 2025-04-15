@@ -25,12 +25,12 @@ class Game_Object():
 
         #Derived stats
         self.stats.max_hp = 10 + self.bonus("con")
-        self.hp = self.stats.max_hp
-        self.ap = self.stats.max_ap
+        self.hp:int = self.stats.max_hp
+        self.ap:int = self.stats.max_ap
 
         #Resources
-        self.xp = 0
-        self.gold = 0
+        self.xp:int = 0
+        self.gold:int = 0
 
         #Items / Equipment
         self.inventory:dict[str, "items.Item"] = {}
@@ -73,7 +73,6 @@ class Game_Object():
     @property
     def needs_healing(self) -> bool:
         return self.hp < self.stats.max_hp
-
     
     @property
     def target(self) -> Game_Object:
@@ -93,8 +92,7 @@ class Game_Object():
         return self.stats.bonus(stat)
     
     def evasion(self) -> int:
-        return 0
-        #return self.stats.base_evasion + self.bonus("dex")
+        return self.stats.base_evasion + self.bonus("dex")
 
     #ROLLS
     def roll_a_check(self, stat:str) -> int:
@@ -301,7 +299,7 @@ class Game_Object():
         self.fumble_table()
 
     def fumble_table(self):
-        raise NotImplementedError
+        return None
 
     #NARRATION
     def narrate(self, func, param=None) -> None:

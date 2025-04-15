@@ -145,9 +145,15 @@ class Scene():
         else:
             narrator.continue_run()
 
+    def loot(self):
+        game.PLAYER.gain_xp(self.enemy.xp)
+        game.PLAYER.gain_gold(self.enemy.gold)
+
+        #TODO: give the player the option to take the monster's inventory loot
+
     def end(self):
         globals.type_text(f"You killed the {self.enemy.id}!")
-        #game.PLAYER.receive_loot()
+        self.loot()
         self.enemy = None
         self.turn_order.clear()
 

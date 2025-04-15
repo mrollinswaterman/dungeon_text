@@ -137,7 +137,9 @@ def buy_something():
                     return buy_something()
                 else:
                     globals.error_message(cmd)
-            except IndexError:#ValueError:
+            except ValueError:
+                globals.error_message(cmd)
+            except IndexError:
                 globals.error_message(cmd)
 
 def leave_the_shop():
@@ -155,6 +157,9 @@ def shopkeep_options():
     done = False
     while not done:
         cmd = globals.get_cmd()
+        if cmd == "s":
+            globals.under_construction()
+            continue
         if cmd in options:
             done = True
             options[cmd]()

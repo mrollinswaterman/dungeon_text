@@ -1,16 +1,25 @@
 import globals
 import effects
-import game_objects
 
 class Poisoned(effects.Status_Effect):
+    """
+    Poisons the target, dealing damage every turn. 
+    
+    Each time damage is dealt, the target makes an automatic 
+    constitution check. If they succeed the check, the poison's 
+    potency is permanently reduced.
+
+    Example: 1d4 --> 1d3 --> 1d2 --> 1
+    """
 
     def __init__(self, source):
         super().__init__(source)
-        self.header._damage = "the poison"
-        self._effect = effects.DecreasingDoT(self.source)
+        self._header._damage = "the poison"
+        self._effect = effects.DamageOverTime(self)
         self._effect.duration = 3
         self._effect.potency = "1d4"
 
+        self._effects_list.append(self._effect)
         self.save_DC = 10
 
     @property
@@ -18,15 +27,18 @@ class Poisoned(effects.Status_Effect):
         return f"{self.id} spreads further through {self.target.header.ownership} system..."
     
     def update(self):
-        if self.target.roll_a_check("con") >= self.save_DC + self.effect.duration:
-            globals.type_text(f"{self.target.header.default} resists the posion, taking no damage.")
-            self.effect.duration -= 1
-        else:
-            super().update()
+        super().update()
+        if self.target.roll_a_check("con") >= self.save_DC + self._effect.max_potency:
+            globals.type_text(f"{self.target.header.action} able to resist the posion, reducing it's potency.")
+            self._effect.decrease_potency()
 
     def refresh(self):
         super().refresh()
-        self.effect.duration += 2
+        self._effect.duration += 2
+        if self.target.roll_a_check("con") < self.save_DC + self._effect.max_potency:
+            globals.type_text(f"The poison's effect grows more potent...")
+            self._effect.increase_potency
+
     
     def save_attempt(self) -> bool:
         globals.type_text(f"{self.target.header.action} attempting to cleanse the poison...")

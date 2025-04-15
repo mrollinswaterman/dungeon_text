@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 def forge_all_items():
     for _ in range(2):
-        with open("equipment_stats.csv", "r") as file:
+        with open("csv_files/equipment_stats.csv", "r") as file:
             reader = csv.DictReader(file)
             for row in reader:
                 game.ARMORY.add(globals.craft_item(row))
@@ -133,6 +133,8 @@ class Shopkeep():
             return False
         
     def buy(self, item:"items.Item", num:int=1) -> bool:
+        globals.under_construction()
+        return None
         if item.id in self.player.inventory:
             if self.gold >= item.value:
                 self.gold -= item.value

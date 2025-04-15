@@ -17,6 +17,7 @@ class Hobgoblin(game_objects.Mob):
     def trigger(self):
         """Return True if the player's evasion is >= 10, and the 
         player is not currently suffering from a Hobgoblin's taunt"""
+        return False
         if not super().trigger():
             return False
         return self.target.evasion() >= 10 and self.target.monitor.get("Taunted") is None
@@ -26,11 +27,11 @@ class Hobgoblin(game_objects.Mob):
         self.spend_ap(0)
         globals.type_text(f"The {self.id} hurls enraging insults at you.")
 
-        if self.target.roll_a_check("cha") >= 1200:#self.save_dc:
+        if self.target.roll_a_check("cha") >= self.save_dc:
             globals.type_text(f"Your mind is an impenetrable fortess. The {self.id}'s words have no effect.")
         else:
-            taunt = Taunted(self)
-            self.target.apply(taunt)
+            #apply the taunt
+            pass
         return None
     
     def roll_narration(self):
@@ -63,30 +64,6 @@ class Hobgoblin(game_objects.Mob):
         ]
         return base + me
     
-class Taunted(effects.StatModifier):
-
-    def __init__(self, source):
-        super().__init__(source)
-
-        self.source = f"{self.source.header.ownership} Taunt."
-        self.save_DC = 15
-
-        my_info = {
-            "stat": "base_evasion",
-            "id": self.__class__.__name__,
-            "potency": None
-        }
-
-        self.acquire(my_info)
-
-    def save_attempt(self):
-        globals.type_text("You attempt to refocus your mind...")
-        if self.target.roll_a_check("cha") >= self.save_DC:
-            globals.type_text("You push the Hobgoblin's mockery out of your head.")
-            self.end()
-            return True
-        else:
-            globals.type_text("You are unable to clear your thoughts.")
-            return False
+#add taunt status_effect
 
 object = Hobgoblin

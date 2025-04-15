@@ -15,11 +15,11 @@ class Monitor():
     def active_ids(self) -> list[str]:
         return list(self._effects.keys())"""
     
-    @property
+    @property #List of all effect objects
     def effects_list(self) -> list[effects.Effect]:
         return list(self._effects.values())
     
-    @property
+    @property #List of all effect IDs
     def effect_ids(self) -> list[str]:
         return list(self._effects.keys())
     

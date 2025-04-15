@@ -40,11 +40,9 @@ def initialize():
 
     game_objects.forge_all_items()
 
-
-
     PLAYER.equip(globals.craft_item("Longsword", "Common"), True)
     PLAYER.equip(globals.craft_item("Padded Leather", "Common"), True)
-    PLAYER.gain_gold(10000)
+    #PLAYER.gain_gold(10000)
 
     hp_pots:items.Stackable = globals.craft_item("Health_Potion", "Common")
     hp_pots.set_quantity(5)
@@ -71,6 +69,7 @@ def create_commands_dict():
     import controllers.player_turn as player_turn
     import tui
     import narrator
+    import tests
     COMMANDS = {
         "tui": {
             "y": tui.etd,

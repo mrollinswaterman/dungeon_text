@@ -5,8 +5,9 @@ class Goblin_Gang(mob.Mob):
     def __init__(self):
         super().__init__(id="Goblin Gang")
         
-        #goblin_gang gets x1.5 HP
-        self.stats.max_hp *= 1.5
+        #goblin_gang gets +5 HP
+        self.stats.max_hp += 5
+        self.stats.max_hp = int(self.stats.max_hp)
         self.hp = self.stats.max_hp
         
         self.gold += 20
