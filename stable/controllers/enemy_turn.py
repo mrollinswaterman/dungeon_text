@@ -14,6 +14,7 @@ def turn():
         enemy.update()
 
         if enemy.dead:
+            globals.type_text(f"You killed the {enemy.id}!")
             game.SCENE.end()
             return None
 
@@ -56,7 +57,7 @@ def turn_options():
     return enemy_attack()
 
 def enemy_flee_attempt():
-    """Runs when the enemy tries to escape."""
+    """Runs when the enemy tries to escape"""
     enemy = game.SCENE.enemy
 
     globals.type_text(f"The {enemy.id} attempts to flee...")
@@ -75,11 +76,11 @@ def enemy_flee_attempt():
                     game.SCENE.turn_order.go()
                 else:
                     globals.type_text(f"You try catching the {enemy.id} to no avail. It got away.")
-                    narrator.continue_run()
+                    game.SCENE.end()
                 return None
             case "n":
                 globals.type_text(f"You let the {enemy.id} go.")
-                narrator.continue_run()
+                game.SCENE.end()
                 return None
             case _:
                 globals.type_text(f"Invalid command '{command}'. Please try again.")

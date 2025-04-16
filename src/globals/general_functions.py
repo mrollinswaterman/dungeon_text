@@ -22,7 +22,7 @@ def save():
     assert game.PLAYER.armor is not None
 
     player_dict = game.PLAYER.save()
-    with open('player.csv', "w", newline='') as file:
+    with open(globals.PLAYER_FILEPATH, "w", newline='') as file:
         file.truncate(0)
         w = csv.DictWriter(file, player_dict.keys())
         w.writeheader()
@@ -58,7 +58,7 @@ def save():
     for i in header3: 
         if i not in fields: fields.append(i)
 
-    with open("inventory.csv", "w", newline='') as file:
+    with open(globals.INVENTORY_FILEPATH, "w", newline='') as file:
             file.truncate(0)
             w = csv.DictWriter(file, fieldnames=list(fields))
             w.writeheader()

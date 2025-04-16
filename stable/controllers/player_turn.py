@@ -54,6 +54,7 @@ def turn():
         if game.SCENE.enemy.dead:
             game.PLAYER.reset_ap()
             game.RUNNING = False
+            globals.type_text(f"You killed the {game.SCENE.enemy.id}!")
             game.SCENE.end()
             return None
         

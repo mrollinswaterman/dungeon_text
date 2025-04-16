@@ -21,6 +21,7 @@ class Turn_Order():
     @property
     def empty(self) -> bool:
         return len(self.queue) <= 0
+
     @property
     def current(self):
         return self.queue[0]
@@ -148,15 +149,23 @@ class Scene():
         else:
             narrator.continue_run()
 
-    def loot(self):
-        game.PLAYER.gain_xp(self.enemy.xp)
-        game.PLAYER.gain_gold(self.enemy.gold)
+    def loot(self, half=False):
+        XP = self.enemy.xp
+        GOLD = self.enemy.gold
+        if half:
+            XP = int(XP//2)
+            GOLD = int(GOLD//2)
+            
+        game.PLAYER.gain_xp(XP)
+        game.PLAYER.gain_gold(GOLD)
 
         #TODO: give the player the option to take the monster's inventory loot
 
     def end(self):
-        globals.type_text(f"You killed the {self.enemy.id}!")
-        self.loot()
+        if not self.enemy.dead:
+            self.loot(True)
+        else:
+            self.loot()
         self.enemy = None
         self.turn_order.reset()
 
@@ -164,3 +173,4 @@ class Scene():
             narrator.continue_run()
         else:
             self.level_up_player()
+

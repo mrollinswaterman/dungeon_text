@@ -73,11 +73,11 @@ def type_text(text:str=None, speed:float=None, newln=True) -> None:
         waitTime = speed
 
         #add waitTime time if char is punctuation
-        waitTime += 30 if char in end_line else 0
+        waitTime += 45 if char in end_line else 0
         #add waitTime if char is a "pause character" ie ",", ":", etc
-        waitTime += 20 if char in pause_chars else 0
+        waitTime += 35 if char in pause_chars else 0
         #add waitTime time for end of text
-        waitTime += 50 if idx == len(text) else 0
+        waitTime += 65 if idx == len(text) else 0
 
         time.sleep(waitTime/100)
         if idx / 120 >= 1.0 and char in end_line:
