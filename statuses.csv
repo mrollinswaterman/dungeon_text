@@ -1,4 +1,0 @@
-id,stat,potency
-Weakened,str,,
-Slowed,dex,,
-Vulnerable,damage_taken_multiplier,0.5
