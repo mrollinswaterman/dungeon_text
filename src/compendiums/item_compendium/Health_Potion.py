@@ -14,13 +14,11 @@ class Health_Potion(items.Consumable):
         return "Health Potion"
 
     def use(self):
-        if not super().use(): return False
-
         if self.owner.needs_healing:
             self.owner.heal(max(int(self.owner.level * 1.5), self.rarity.value * 3))
-            return True
+            return super().use()
         else:
             globals.type_text("You are already full HP.")
-            return False
+            return None
 
 object = Health_Potion

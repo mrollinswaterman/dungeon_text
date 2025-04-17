@@ -1,4 +1,5 @@
 from game_objects.game_object import *
+from game_objects.inventory import *
 from game_objects.statblock import *
 from game_objects.header import *
 from game_objects.monitor import *

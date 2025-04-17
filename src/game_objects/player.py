@@ -76,14 +76,7 @@ class Player(game_objects.Game_Object):
     
     @property
     def carrying(self) -> float:
-        total_weight = 0
-        for entry in self.inventory:
-            if self.inventory[entry] is not None:#check to make sure the entry is valid
-                held_item:"items.Item" = self.inventory[entry]
-                total_weight += held_item.weight
-        if self.armor is not None: total_weight += self.armor.weight
-        if self.weapon is not None: total_weight += self.weapon.weight
-        return total_weight
+        return self.inventory.total_weight
 
     @property
     def target(self):
@@ -187,7 +180,7 @@ class Player(game_objects.Game_Object):
         super().attack()
         self._bonus_crit_range = 0
     
-    def use(self, item:"items.Item"):
+    def use(self, item:items.Item):
         if super().use(item) is False:
             base = globals.get_type(item)
             match base:
@@ -318,14 +311,7 @@ class Player(game_objects.Game_Object):
         self.combat_trick = combat_trick_compendium.dict["Study_Weakness"](self)
         self.combat_trick.start()
 
-    #INVENTORY STUFF
-    def pick_up(self, item: items.Item | items.Stackable, silent:bool=False) -> bool:
-        if self.can_carry(item):
-            return super().pick_up(item, silent)
-        else:
-            return False
-
-    def equip(self, item: "items.Item", silent=False) -> bool:
+    def equip(self, item:items.Item, silent=False) -> bool:
         """Equips the player with a given equipment"""
         match item:
             case items.Weapon():
@@ -333,11 +319,13 @@ class Player(game_objects.Game_Object):
                 self.pick_up(prev, True)
                 self.drop(item)
                 self.weapon = item
+                self.weapon.owner = self
             case items.Armor():
                 prev = self.armor
                 self.pick_up(prev, True)
                 self.drop(item)
                 self.armor = item
+                self.armor.owner = self
             case _:
                 return False
         if not silent: globals.type_text(f"{item.id} equipped.")
@@ -345,65 +333,10 @@ class Player(game_objects.Game_Object):
         return True
 
     #Add an unequip function
-
     def can_carry(self, item:items.Item | None) -> bool:
         """Checks if the player can carry item. Returns True if they can, False if not"""
         if item is None: return False
         else: return self.carrying + item.weight <= self.carrying_capacity
-
-    def print_inventory(self) -> None:
-        line_len = 30
-        globals.type_with_lines()
-        print(f'{line_len * " "}Inventory:{line_len * " "}\t\t\tEquipped:\n')
-        self.display_inventory()
-        print(f"Gold: {self.gold}g", end='')
-        time.sleep(0.05)
-        print(f"\t Carrying Capacity: {self.carrying}/{self.carrying_capacity}\n")
-        globals.type_with_lines()
-
-    def display_items(self, start:int, equipment:"items.Item"):
-        """Processes an item's format property and feeds it to globals.print_line_by_line
-            to be printed"""
-        index = start
-        item_1 = [""]
-        item_2 = [""]
-        equip_format = [""]
-        if self.get_item(index + 1) is not None:
-            item_1 = self.get_item(index).format
-            item_1[0] = f"{index+1}. {item_1[0]}"
-
-            item_2 = self.get_item(index + 1).format
-            item_2[0] = f"{index+2}. {item_2[0]}"
-        elif self.get_item(index) is not None:
-            item_1 = self.get_item(index).format
-            item_1[0] = f"{index+1}. {item_1[0]}"
-
-        if equipment is not None:
-            equip_format = equipment.format
-            equipment_index = 1 if index == 0 else index
-            equip_format[0] = f"{equipment_index}. {equip_format[0]}"
-
-        globals.print_line_by_line([item_1, item_2, equip_format])
-
-    def display_inventory(self):
-        """Formats and prints the players inventory, line-by-line"""
-        item_index = 0
-
-        while(item_index < len(self.inventory) + 4):
-            equipment = None
-            if item_index == 0:
-                equipment = self.weapon
-            elif item_index == 2:
-                equipment = self.armor
-            self.display_items(item_index, equipment)
-            item_index += 2
-            print("\n")
-
-    def receive_loot(self):
-        self.gain_xp(self.target.xp)
-        self.gain_gold(self.target.gold)
-        for entry in self.target.inventory:
-            self.pick_up(self.target.inventory[entry])
 
     ##MISC.
     def save(self) -> dict:
@@ -442,33 +375,8 @@ class Player(game_objects.Game_Object):
                 
         self.load_inventory(inventory_file)
     
-    def load_inventory(self, filename) -> None:
-        #check if inventory file is emtpty
-        empty_check = True if os.stat(filename).st_size == 0 else False
-        if empty_check: return None
-        size = 0
-        for item in list(self.inventory.keys()):
-            del self.inventory[item]
-        self.inventory = {}
-        self.weapon = None
-        self.armor = None
-        with open(filename, encoding="utf-8") as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                size += 1
-            file.close()
-        with open(filename, encoding="utf-8") as file:
-            reader = csv.DictReader(file)
-            for idx, row in enumerate(reader):
-                id = row["id"]
-                item = globals.craft_item(id)
-                item.load(row)
-                #print(item.__dict__)
-                if idx >= size - 2:
-                    self.equip(item, True)
-                else:
-                    self.pick_up(item, True)
-            file.close()
+    def load_inventory(self, filename):
+        return self.inventory.load(filename)
 
 """
 # arush wrote this while drunk, he won't let me delete it

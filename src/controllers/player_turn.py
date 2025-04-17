@@ -195,13 +195,13 @@ def item_select() -> None:
             except ValueError:
                 globals.error_message(code)
 
-def use_an_item(item:"items.Item | items.Consumable") -> bool:
+def use_an_item(item:items.Item | items.Consumable) -> bool:
     """Uses an item if the player has the item in their inventory."""
     if item is None:
         globals.error_message(None, "Invalid item selected. Please try again.")
         return False
 
-    return game.PLAYER.use(game.PLAYER.get_item(item.id))
+    return game.PLAYER.use(item)
 
 def flee() -> None:
     """Attempts to run away from the current encounter"""

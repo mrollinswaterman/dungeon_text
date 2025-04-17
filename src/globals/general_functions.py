@@ -32,8 +32,8 @@ def save():
     item_saved_list = []
 
     #append all inventory item_to_dicts to list
-    for entry in game.PLAYER.inventory:
-        item:items.Item = game.PLAYER.inventory[entry]
+    for entry in game.PLAYER.inventory.contents:
+        item:items.Item = game.PLAYER.inventory.contents[entry]
         item.save()
         item_saved_list.append(item.saved)
 

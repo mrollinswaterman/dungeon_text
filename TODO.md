@@ -47,11 +47,11 @@ identical to something that's still on the screen (hint: line 2 of the type func
 - [ ] Add a menu if the player hits "n" initally that lets them enter the overworld, save, or quit the game.
 - [ ] Add a 1/round "Reaction" ability to all objects, can act on the opponents turn to do something (i.e add +5 to Evasion at the cost of -5 on all attack checks on your next turn, interurrpt a spell cast, chase a fleeing enemy, etc) 
 - [ ] Add the ability to "loot" an enemy, taking the items in their inventory.
-- [ ] Offer player half the counter's loot for letting an enemy go, else there's no reason to do so 
+- [X] Offer player half the counter's loot for letting an enemy go, else there's no reason to do so 
 
 ## Items
 
-- [ ] Firebomb → does a set amount of damage, target can dex save for half, if they beat by more than 10, save for full. Chance to set on fire if they don't save by for full
+- [ ] Firebomb → does a set amount of damage, target can dex save for half, if they beat by more than 10, save for full. Chance to set on fire if they don't save for full
 - [ ] Distilled Rage -> self-buff, induces enraged condition for 3(?) rounds when used
 - [ ] Add "Scroll" type items that can be used to cast spells. Every 3-5 uses (maybe Int dependent) can roll an int check to "learn" the spell, permanently adding it to your spellbook. Scrolls have a use cap (6-10, Int dependent as well??) and can't be repaired. 
 

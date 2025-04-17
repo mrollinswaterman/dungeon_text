@@ -2,6 +2,7 @@ from __future__ import annotations
 import random
 from sysconfig import is_python_build
 from tkinter import Y
+import game
 import globals
 import game_objects
 import items
@@ -20,6 +21,7 @@ class Game_Object():
         self.id = id
         self.name = self.id
         self.level = 1
+        self._inventory:game_objects.Inventory = game_objects.Inventory(self)
         self.stats:game_objects.Statblock = game_objects.Statblock(self)
         self.header:game_objects.Header = game_objects.Header(self)
 
@@ -31,9 +33,6 @@ class Game_Object():
         #Resources
         self.xp:int = 0
         self.gold:int = 0
-
-        #Items / Equipment
-        self.inventory:dict[str, "items.Item"] = {}
 
         #Combat tools
         self.monitor:game_objects.Monitor = game_objects.Monitor(self)
@@ -78,12 +77,15 @@ class Game_Object():
     def target(self) -> Game_Object:
         """Returns the Object's target"""
         raise NotImplementedError
+    
+    @property
+    def inventory(self) -> game_objects.Inventory:
+        return self._inventory
 
     #VIP Methods
     def update(self):
         self.reset_ap()
         self.monitor.update() 
-        self.clean_inventory()
 
     def apply(self, effect:effects.Effect):
         self.monitor.add(effect)
@@ -271,9 +273,7 @@ class Game_Object():
         match base:
             case "Consumable":
                 return item.use()
-                #return True
-            case _: 
-                return False
+        return False
 
     #ENCHANTMENTS
     def apply_on_attacks(self):
@@ -353,65 +353,16 @@ class Game_Object():
     def heal_narration(self, num:int) -> list[str]:
         """Handles specific narration for Object's healing"""
         raise NotImplementedError
-
-    #INVENTORY
-    def pick_up(self, item:"items.Item", silent=False):
-        """Adds an item to the Object's inventory"""
-        base = globals.get_subtype(item)
-        match base:
-            case "Stackable":
-                #if you have a stack of those items already, just add to it
-                held:"items.Stackable" | None = self.get_item(item.id)
-                if held is not None:
-                    held.set_quantity(held.quantity + item.quantity)
-                    #item = held
-                #if you don't, add the object to your inventory
-                else:
-                    self.inventory[item.id] = item
-            case "Item" | "Equipment":
-                self.inventory[item.id] = item
-            case _:
-                raise ValueError(f"Unrecognized object {item}.")
-
-        item.owner = self
-        if not silent: globals.type_text(item.pickup_message)
     
-    def drop(self, item:"items.Item"):
-        item = self.get_item(item)
-        if item is not None:
-            del self.inventory[item.id]
-            item.owner = None
+    #INVENTORY STUFF
+    def pick_up(self, item:items.Item, silent=False) -> bool:
+        return self._inventory.pick_up(item, silent)
 
-    def clean_inventory(self):
-        """Check all stackable items and make sure anything with quantity 0 is removed"""
-        for entry in self.inventory:
-            item:"items.Item | items.Stackable" = self.inventory[entry]
-            base = globals.get_subtype(item)
-            match base:
-                case "Stackable": 
-                    if item.quantity <= 0:
-                        del self.inventory[entry]
-                        item.owner = None
-
-    def get_item(self, ref: "items.Item" | str | int | None) -> "items.Item | None":
-        """
-        Checks if the Object has an item in it's inventory. 
-        Returns the item if so, else None
-
-        ref: can be str (item id), int (item index), or an instance of the Item class
-        """
-        base = globals.get_base_type(ref)
-        match base:
-            case "str":
-                try: return self.inventory[ref]
-                except KeyError: return None
-
-            case "int":
-                try: return list(self.inventory.values())[ref]
-                except IndexError: return None
-
-            case "Item":
-                try: return self.inventory[ref.id]
-                except KeyError: return None
-
-            case _: raise ValueError(f"Unrecogized type '{type(ref)}'.")
+    def drop(self, item:items.Item, silent=False) -> bool:
+        return self._inventory.drop(item, silent)
+    
+    def get_item(self, ref:items.Item | str | int | None) -> items.Item | None:
+        return self.inventory.get_item(ref)
+    
+    def print_inventory(self):
+        print(self.inventory)
