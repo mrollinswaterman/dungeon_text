@@ -117,7 +117,7 @@ class Inventory():
             item_index += 2
             print("\n")
 
-    def __str__(self):
+    def print_contents(self):
         line_len = 30
         globals.type_with_lines()
         print(f'{line_len * " "}Inventory:{line_len * " "}\t\t\tEquipped:\n')
@@ -126,7 +126,7 @@ class Inventory():
         time.sleep(0.05)
         print(f"\t Carrying Capacity: {self.owner.carrying}/{self.owner.carrying_capacity}\n")
         globals.type_with_lines()
-        return ""
+        return None
     
     def load(self, filename:str) -> None:
         #check if inventory file is emtpty

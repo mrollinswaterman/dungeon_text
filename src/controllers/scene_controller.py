@@ -143,7 +143,7 @@ class Scene():
                 else:
                     options[cmd]()
 
-        globals.type_text(f"Your {globals.STATS[cmd]} increased by 1. You are now Level {game.PLAYER.level}")
+        globals.type_text(f"Your {globals.STATS[cmd]} increased by 1. You are now Level {game.PLAYER.level}!")
         if game.PLAYER.can_level_up is True:
             self.level_up_player()
         else:

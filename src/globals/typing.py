@@ -35,18 +35,17 @@ def under_construction():
 
 def type_with_lines(text:str=None, num:int=1, speed:float=None, newln=True) -> None:
     print("="*110+"\n")
-    type_text(text, speed, newln)
+    if text is not None: type_text(text, speed, newln)
     if num > 1:
         print("="*110+"\n")
 
-def type_header(text:str=None, speed:float=None, newln:bool=True) -> None:
+def type_header(text:str=None, newln=True) -> None:
     type_text(text, 1, newln)
 
-def type_header_with_lines(text=None, num=1, speed=None, newln=True) -> None:
+def type_header_with_lines(text=None, num=1, newln=True) -> None:
     type_with_lines(text, num, 1, newln)
 
 def type_text(text:str=None, speed:float=None, newln=True) -> None:
-    import tests
     global text_box
     """Adds a typing effect to text"""
     if text is None or text == "":

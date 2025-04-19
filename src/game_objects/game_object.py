@@ -365,4 +365,4 @@ class Game_Object():
         return self.inventory.get_item(ref)
     
     def print_inventory(self):
-        print(self.inventory)
+        return self.inventory.print_contents()

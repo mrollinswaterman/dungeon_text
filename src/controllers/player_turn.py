@@ -76,7 +76,7 @@ def turn_options():
     import game
 
     header = f"What would you like to do?"
-    globals.type_header(header, None, False)
+    globals.type_header(header, newln=False)
     stats = {
         "lvl": f"Lvl: {game.PLAYER.level}",
         "hp": f'HP: {"[" + "/"*game.PLAYER.hp+" "*(game.PLAYER.stats.max_hp-game.PLAYER.hp) + "]"}',
@@ -96,8 +96,11 @@ def turn_options():
         "Wait - (w)", "Retreat - (r)"
     ]
     print("\t", end="")
-    for item in options:
-        print(item + " | ", end="")
+    for i,_ in enumerate(options):
+        if i != len(options) - 1:
+            print(options[i] + " | ", end="")
+        else:
+            print(options[i], end="")
     print("\n")
 
 def combat_tricks():
@@ -175,7 +178,8 @@ def item_select() -> None:
     """Lets the player select an inventory item to use"""
     item_selection = game.COMMANDS["item_select"]
 
-    globals.type_text("Enter an Item's number to use it -OR- Cancel - (c)")
+    header = f"Enter an Item's number to use it -OR- Cancel - (c)"
+    globals.type_header(header)
 
     done = False
     while not done:
