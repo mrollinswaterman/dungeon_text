@@ -1,12 +1,9 @@
-from multiprocessing import Value
 import time, sys, csv, random
 import game
 import globals
 from typing import TYPE_CHECKING, Any
-
 if TYPE_CHECKING:
-    import game_objects
-    import mechanics
+    pass
 
 def exit():
     game.RUNNING = False

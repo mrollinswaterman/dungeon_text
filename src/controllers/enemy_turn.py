@@ -1,6 +1,7 @@
 #enemy turn controller file
 
 ##Required Modules: globals, controllers, controllers
+from errno import EMEDIUMTYPE
 import controllers.player_turn
 import globals
 import controllers
@@ -14,9 +15,7 @@ def turn():
         enemy.update()
 
         if enemy.dead:
-            globals.type_text(f"You killed the {enemy.id}!")
-            game.SCENE.end()
-            return None
+            return game.SCENE.end()
 
         while enemy.can_act:
             done = turn_options()
@@ -27,15 +26,13 @@ def turn():
                     return None
             
                 if enemy.dead:
-                    game.SCENE.end()
-                    return None
+                    return game.SCENE.end()
             
                 if enemy.can_act and not enemy.fleeing:
                     print("\n")
 
-        if game.RUNNING:
-            globals.type_with_lines()
-            game.SCENE.turn_order.go()
+        globals.type_with_lines()
+        game.SCENE.turn_order.go()
         return None
     
     else:

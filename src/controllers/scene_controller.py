@@ -77,7 +77,7 @@ class Scene():
         self.turn_order.add(self.enemy, controllers.enemy_turn.turn)
         self.turn_order.go()
 
-    def select_next(self):
+    def select_next(self) -> None:
         self.turn_order.reset()
         """Starts a new scene with a new enemy or event"""
         if globals.probability(85): #85% chance of an enemy spawning next
@@ -88,6 +88,7 @@ class Scene():
             game.PLAYER.update()#update player before event text goes off
             self.event.start()#prints event start text
             self.run_event()
+        return None
 
     def begin_encounter(self):
         """Sets the enemy for the scene if it's None, and prints the encounter header"""
@@ -145,9 +146,9 @@ class Scene():
 
         globals.type_text(f"Your {globals.STATS[cmd]} increased by 1. You are now Level {game.PLAYER.level}!")
         if game.PLAYER.can_level_up is True:
-            self.level_up_player()
+            return self.level_up_player()
         else:
-            narrator.continue_run()
+            return narrator.continue_run()
 
     def loot(self, half=False):
         XP = self.enemy.xp
@@ -163,14 +164,15 @@ class Scene():
 
     def end(self):
         if not self.enemy.dead:
-            self.loot(True)
+            self.loot(half=True)
         else:
+            globals.type_text(f"You killed the {self.enemy.id}!")
             self.loot()
         self.enemy = None
         self.turn_order.reset()
 
         if not game.PLAYER.can_level_up:
-            narrator.continue_run()
+            return narrator.continue_run()
         else:
-            self.level_up_player()
+            return self.level_up_player()
 

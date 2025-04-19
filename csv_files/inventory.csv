@@ -1,4 +1,6 @@
 type,id,name,rarity,durability,quantity
-Consumable,Health_Potion,Health Potions,Uncommon,,5
-Weapon,Longsword,Longsword,Common,9,
+Consumable,Health_Potion,Health Potions,Common,,5
+Weapon,Scythe,Scythe,Common,10,
+Armor,Scale Mail,Scale Mail,Epic,60,
+Weapon,Longsword,Longsword,Common,3,
 Armor,Padded Leather,Padded Leather,Common,15,

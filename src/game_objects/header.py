@@ -28,43 +28,29 @@ class Header():
         self._tries = [f"the {self.parent.id} attempts", f"the {self.parent.id} tries"]
         self._damage:str = None
 
+        self.alt = True
+
         self.prev = ""
 
     @property
     def default(self):
-        if self.prev != self._default:
-            self.prev = self._default
-            return self._default
-        else:
-            self.prev = "it"
-            return self.prev
+        if self.alt: return "it"
+        return self._default
         
     @property
     def action(self):
-        if self.prev != self._action:
-            self.prev = self._action
-            return self._action
-        else:
-            self.prev = "it's"
-            return self.prev
+        if self.alt: return "it's"
+        return self._action
 
     @property
     def ownership(self):
-        if self.prev != self._ownership:
-            self.prev = self._ownership
-            return self._ownership
-        else:
-            self.prev = "its"
-            return self.prev
+        if self.alt: return "its"
+        return self.ownership
         
     @property
     def tries(self):
-        if self.prev not in self._tries:
-            self.prev = random.choice(self._tries)
-            return self.prev
-        else:
-            self.prev = random.choice(["it tries", "it attempts"])
-            return self.prev
+        if self.alt: return random.choice(["it tries", "it attempts"])
+        return self.tries
         
     @property 
     def damage(self):

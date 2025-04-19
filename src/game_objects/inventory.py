@@ -18,7 +18,7 @@ class Inventory():
             ret += self.contents[item].weight
         return int(ret)
 
-    def pick_up(self, item: items.Item | items.Stackable, silent:bool=False) -> bool:
+    def pick_up(self, item: items.Item, silent:bool=False) -> bool:
         """Adds an item to the Object's inventory"""
         if not self.owner.can_carry(item):
             return False

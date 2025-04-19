@@ -1,10 +1,7 @@
 import random
 import csv
-
-import globals
 import game
-import items
-
+import globals
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import game_objects
@@ -28,7 +25,7 @@ def build_damage_type(input:str=None) -> "mechanics.DamageType":
 
     return ret
 
-def generate_item_rarity(input:str|items.Rarity|None) -> items.Rarity:
+def generate_item_rarity(input:"str|items.Rarity|None") -> "items.Rarity":
     import items
     """
     Generates item rarity based on player level
@@ -63,7 +60,8 @@ def create_enchantment(name:str, source:"game_objects.Game_Object | items.Item")
         return enchants.dict[name](source)
     return None
 
-def craft_item(item:dict | str, rarity:str|items.Rarity=None) -> items.Item:
+def craft_item(item:dict | str, rarity:"str|items.Rarity"=None) -> "items.Item":
+    import items
     ret = None
     #Check wether the item_id is a name or a dictionary
     match item:
@@ -96,7 +94,7 @@ def craft_item(item:dict | str, rarity:str|items.Rarity=None) -> items.Item:
     ret.rarity = items.Rarity(rarity)
     return ret
 
-def create_mold(source) -> items.Item:
+def create_mold(source) -> "items.Item":
     import items
     import compendiums.item_compendium as item_compendium
 

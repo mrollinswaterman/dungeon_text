@@ -1,11 +1,11 @@
 ##Note: player update is called a the START of the turn
-
-import glob
-import time, sys
+import sys
 import game
 import globals
-import items
 import narrator
+from typing import TYPE_CHECKING, Any
+if TYPE_CHECKING:
+    import items
 
 GOD_MODE = False
 
@@ -22,6 +22,7 @@ def turn():
         return None
 
     while game.PLAYER.can_act:
+        game.SCENE.enemy.header.alt = True
         turn_options()
         done = False
         while not done:
@@ -52,20 +53,13 @@ def turn():
             response = globals.error_message(code) if not done else None
         
         if game.SCENE.enemy.dead:
-            game.PLAYER.reset_ap()
-            game.RUNNING = False
-            globals.type_text(f"You killed the {game.SCENE.enemy.id}!")
-            game.SCENE.end()
-            return None
+            return game.SCENE.end()
         
         if game.PLAYER.can_act:
             globals.type_with_lines()
-    
-    if game.RUNNING:
-        globals.type_with_lines()#shorthand, just prints the '=' signs
-        game.SCENE.turn_order.go()
-        return None
 
+    globals.type_with_lines()#shorthand, just prints the '=' signs
+    game.SCENE.turn_order.go()
     return None
 
 def cancel():
@@ -199,7 +193,7 @@ def item_select() -> None:
             except ValueError:
                 globals.error_message(code)
 
-def use_an_item(item:items.Item | items.Consumable) -> bool:
+def use_an_item(item:"items.Item | items.Consumable") -> bool:
     """Uses an item if the player has the item in their inventory."""
     if item is None:
         globals.error_message(None, "Invalid item selected. Please try again.")

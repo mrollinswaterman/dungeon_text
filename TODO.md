@@ -47,7 +47,8 @@ identical to something that's still on the screen (hint: line 2 of the type func
 - [ ] Add a menu if the player hits "n" initally that lets them enter the overworld, save, or quit the game.
 - [ ] Add a 1/round "Reaction" ability to all objects, can act on the opponents turn to do something (i.e add +5 to Evasion at the cost of -5 on all attack checks on your next turn, interurrpt a spell cast, chase a fleeing enemy, etc) 
 - [ ] Add the ability to "loot" an enemy, taking the items in their inventory.
-- [X] Offer player half the counter's loot for letting an enemy go, else there's no reason to do so 
+- [X] Offer player half the counter's loot for letting an enemy go, else there's no reason to do so
+- [ ] Add specific narration options for Player's weapon type (i.e. "You slash forwards with your ______" for a Slashing weapon)
 
 ## Items
 

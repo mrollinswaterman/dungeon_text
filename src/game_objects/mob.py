@@ -92,9 +92,9 @@ class Mob(game_objects.Game_Object):
 
         def roll_narration(self) -> list[str]:
             text = [
-                f"The {self.id} moves to attack.",
-                f"The {self.id} lunges at you.",
-                f"The {self.id} prepares to strike..."
+                f"{self.header.default} moves to attack.",
+                f"{self.header.default} lunges at you.",
+                f"{self.header.default} prepares to strike..."
             ]
             return text
         
@@ -102,11 +102,11 @@ class Mob(game_objects.Game_Object):
             text = [
                 f"You fail to move before the attack hits you.",
                 f"A hit.",
-                f"The {self.id} hits you.",
+                f"{self.header.default} hits you.",
                 f"Its attack lands.",
                 f"You can't dodge this one.",
                 f"That's going to leave a mark...",
-                f"The {self.id} manages to break your guard."
+                f"{self.header.default} manages to break your guard."
             ]
             return text
         
@@ -114,11 +114,11 @@ class Mob(game_objects.Game_Object):
             text = [
                 f"Its attack goes wide.",
                 f"Luck is on your side this time.",
-                f"The {self.id} fails.",
+                f"{self.header.default} fails.",
                 f"You stave off the attack.",
                 f"The attack flies right by you.",
                 f"You are unscathed.",
-                f"The {self.id} doesn't manage to hit you.",
+                f"{self.header.default} doesn't manage to hit you.",
                 f"You leap out of harm's way."
             ]
             return text

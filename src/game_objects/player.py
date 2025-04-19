@@ -211,6 +211,10 @@ class Player(game_objects.Game_Object):
         return None
 
     #NARRATION
+    def narrate(self, func, param=None):
+        self.target.header.alt = not self.target.header.alt
+        return super().narrate(func, param)
+
     def roll_narration(self, roll):
         roll_text = self.process_roll(roll)
         text = [
@@ -218,10 +222,16 @@ class Player(game_objects.Game_Object):
             f"You charge {self.target.header.default},",
             f"You swing your {self.weapon.id},",
             f"Brandishing your {self.weapon.id}, you prepare to strike...",
+            f"You grip your {self.weapon.id}, and ready yourself to attack...",
         ]
-        for idx, entry in enumerate(text):
-            entry = entry + " " + roll_text
-            text[idx] = entry
+        temp = text
+        for idx, entry in enumerate(temp):
+            if entry in self.prev_narration:
+                text.remove(entry)
+            else:
+                entry = entry + " " + roll_text
+                temp[idx] = entry
+        text = temp
         return text
 
     def hit_narration(self) -> None:

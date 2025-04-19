@@ -1,11 +1,6 @@
-##Required Modules: globals, commands, controllers
-
 import time, random
 import globals
 import game
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    import controllers
 
 SCENE_CHANGE = [
     "You press towards your goal...\n",
@@ -72,7 +67,7 @@ def event_options():
     globals.type_header("Which stat would you like to roll?")
     print(STATS)
 
-def continue_run():
+def continue_run() -> None:
     globals.type_with_lines("Continue? y/n")
     done = False
     while not done:
@@ -84,13 +79,15 @@ def continue_run():
             case "y":
                 done = True
                 next_scene_options()
-                game.SCENE.select_next()
+                return game.SCENE.select_next()
             case "n":
                 done = True
                 print("")
                 exit_the_dungeon()
             case _:
                 globals.error_message(cmd)
+
+    return None
 
 def exit_the_dungeon():
     game.RUNNING = False

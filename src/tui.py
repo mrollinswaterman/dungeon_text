@@ -1,3 +1,4 @@
+import globals
 import game
 import controllers.player_turn as player_turn
 import narrator

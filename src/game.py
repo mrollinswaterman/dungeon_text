@@ -1,7 +1,5 @@
 #All globally required game objects (player, scene, shopkeep, etc) are intialized here
-import sys 
-import compendiums.status_compendium
-import globals
+import sys
 from typing import TYPE_CHECKING, Union, Any
 if TYPE_CHECKING:
     import game_objects
@@ -23,6 +21,7 @@ RUNNING = False
 
 
 def initialize():
+    import globals
     global PLAYER, SHOPKEEP, ARMORY, SCENE
     import game_objects, controllers, compendiums, items
     import tests
@@ -61,6 +60,7 @@ def stop():
 
 def create_commands_dict():
     global COMMANDS
+    import globals
     import controllers.player_turn as player_turn
     import tui
     import narrator

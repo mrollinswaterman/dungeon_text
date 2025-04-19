@@ -6,12 +6,10 @@ import game
 import globals
 import game_objects
 import items
-import effects
 import mechanics
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    import items
-    import mechanics
+    import effects
 
 class Game_Object():
 
@@ -87,7 +85,7 @@ class Game_Object():
         self.reset_ap()
         self.monitor.update() 
 
-    def apply(self, effect:effects.Effect):
+    def apply(self, effect:"effects.Effect"):
         self.monitor.add(effect)
 
     def bonus(self, stat:str) -> int:
@@ -303,10 +301,13 @@ class Game_Object():
 
     #NARRATION
     def narrate(self, func, param=None) -> None:
+        #Flip header each time we narrate
+        self.header.alt = not self.header.alt
         text:list[str] = func() if param is None else func(param)
         if self.prev_narration in text:
             text.remove(self.prev_narration)
         
+        print(text)
         if len(text) <= 0:
             raise ValueError("no valid options in text", func())
         final = random.choice(text)
